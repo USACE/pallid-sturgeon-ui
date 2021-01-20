@@ -1,6 +1,6 @@
-# Getting Started with Create React App
+# Pallid Sturgeon UI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is the React frontend of the DASH website. This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
 
