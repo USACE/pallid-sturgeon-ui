@@ -2,6 +2,7 @@
 
 This is the React frontend of the Pallid Sturgeon website. This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+It is recommended to use node 13.7.0 and npm 6.13.6. Higher or lower versions of node/npm might not work.
 ## Available Scripts
 
 In the project directory, you can run:
