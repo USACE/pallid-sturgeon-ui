@@ -5,7 +5,7 @@ import { ConnectedRouter } from 'connected-react-router';
 import App from './app/App';
 import store, { history } from './app/store/store';
 import reportWebVitals from './reportWebVitals';
-import './index.css';
+import './index.scss';
 
 const rootElement = document.getElementById('root');
 ReactDOM.render(
