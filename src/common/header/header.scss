@@ -1,0 +1,42 @@
+@import '../../style/variables';
+
+.skip-content {
+  text-align: center;
+  position: fixed;
+  top: 0;
+  display: block;
+  width: 100%;
+  z-index: 1045;
+
+  &:focus {
+    outline: 0 !important;
+    text-decoration: none;
+
+    .content-tab {
+      display: block;
+      background-color: $color-primary-dark;
+    }
+
+    p {
+      outline: 5px auto -webkit-focus-ring-color !important;
+      outline: 2px dashed $color-primary-light;
+    }
+  }
+
+  .content-tab {
+    margin: 0 auto;
+    display: none;
+    width: 50%;
+    height: 20px;
+    background-color: rgba(255,255,255,0.4);
+    padding: 15px;
+    border-bottom-left-radius: 1em;
+    border-bottom-right-radius: 1em;
+
+    p {
+      color: $color-white;
+      font-size: 14px;
+      margin-top: -10px;
+    }
+  }
+}
