@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { connect } from 'redux-bundler-react';
 
 import { classArray } from '../../utils';
@@ -7,16 +7,11 @@ import Icon from '../icon';
 import './breadcrumb.scss';
 
 const Breadcrumb = connect(
-  'doAuthLogin',
-  'selectAuthIsLoggedIn',
-  'selectProjectsByRoute',
   'selectPathname',
   ({
-    doAuthLogin,
-    authIsLoggedIn,
-    projectsByRoute: project,
     pathname,
   }) => {
+
 
     const breadcrumbClass = classArray([
       'breadcrumb',

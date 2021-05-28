@@ -6,15 +6,7 @@ import { classArray } from '../../utils';
 import '../../css/accordion.scss';
 
 const Accordion = connect(
-  'doAuthLogin',
-  'selectAuthIsLoggedIn',
-  'selectProjectsByRoute',
-  'selectPathname',
   ({
-    doAuthLogin,
-    authIsLoggedIn,
-    projectsByRoute: project,
-    pathname,
   }) => {
 
     const accordionClass = classArray([

@@ -25,8 +25,8 @@ const buildAlertContent = (alerts = []) => {
   return (
     <>
       {alerts.map((alert, i) => {
-        const { project_name, instrument_name, name, body, read, create_date } = alert;
-        const url = `/${urlify(project_name)}/instruments/${urlify(instrument_name)}`;
+        const { project_name, ps_name, name, body, read, create_date } = alert;
+        const url = `/${urlify(project_name)}/${urlify(ps_name)}`;
         const timeAgo = formatDistance(new Date(create_date), Date.now());
 
         return (
@@ -34,11 +34,11 @@ const buildAlertContent = (alerts = []) => {
             key={i}
             onClick={() => window.location.assign(url)}
             className={`alert-container${read ? '' : ' unread'} pointer`}
-            title={`Go To ${instrument_name}`}
+            title={`Go To ${ps_name}`}
           >
             <span className={`list-group-item flex-column align-items-start${read && ' list-group-item-action'}`}>
               <div className='d-flex w-100 justify-content-between'>
-                <h5 className='mb-3'>{name} - {instrument_name}</h5>
+                <h5 className='mb-3'>{name} - {ps_name}</h5>
                 <small>{timeAgo}</small>
               </div>
               <p className='mb-1'>{body}</p>

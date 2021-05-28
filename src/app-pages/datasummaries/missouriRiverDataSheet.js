@@ -5,8 +5,7 @@ import Select from '../../app-components/select';
 import Button from '../../app-components/button/button';
 
 export default connect(
-  'selectHomeData',
-  ({ homeData }) => (
+  ({  }) => (
     <div>
       <h5>Missouri River Data Sheet</h5>
       <span>Click the "Download Data" link at the bottom left of the report to download the Missouri River Data Sheets for the year selected. The displayed report below only shows a portion of the fields that are included in the downloaded report.</span>
@@ -29,14 +28,6 @@ export default connect(
           </div>
         </div>
         <div className='col-md-2 align-self-end pl-0'>
-          <div className='form-group'>
-            <Button
-              size='small'
-              variant='light'
-              isOutline
-              text='Create New Site'
-            />
-          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Select from '../../../app-components/select';
@@ -10,15 +10,14 @@ import '../dataentry.scss';
 const titlize = str => str ? str.charAt(0).toUpperCase() + str.slice(1) : 'N/A';
 
 const Table = connect(
-  'doModalOpen',
-  'selectProjectsByRoute',
   ({
-    doModalOpen,
-    sitesList,
-    tools,
+
   }) => {
     
     const [tableId, setTableId] = useState('');
+    const [fieldId, setFieldId] = useState('');
+    const [geneticVial, setGeneticVial] = useState('');
+    const [pitTag, setPitTag] = useState('');
 
     const currentYear = (new Date()).getFullYear();
     const years = Array.from(new Array(25), (val, index) => currentYear - index);
@@ -66,15 +65,15 @@ const Table = connect(
           </div>
           <div className='col-sm-2 pl-0'>
             <div className='form-group'>
-              <label><small>Enter Table ID</small></label>
+              <label><small>Enter Field ID</small></label>
               <input
-                value={tableId}
+                value={fieldId}
                 onChange={(e) => {
-                  setTableId(e.target.value);
+                  setFieldId(e.target.value);
                 }}
                 className='form-control'
                 type='text'
-                placeholder='Table ID'
+                placeholder='Field ID'
               />
             </div>
           </div>
@@ -83,15 +82,15 @@ const Table = connect(
           </div>
           <div className='col-sm-2 pl-0'>
             <div className='form-group'>
-              <label><small>Enter Table ID</small></label>
+              <label><small>Enter Genetic Vial #</small></label>
               <input
-                value={tableId}
+                value={geneticVial}
                 onChange={(e) => {
-                  setTableId(e.target.value);
+                  setGeneticVial(e.target.value);
                 }}
                 className='form-control'
                 type='text'
-                placeholder='Table ID'
+                placeholder='Genetic Vial #'
               />
             </div>
           </div>
@@ -100,15 +99,15 @@ const Table = connect(
           </div>
           <div className='col-sm-2 pl-0 pr-0'>
             <div className='form-group'>
-              <label><small>Enter Table ID</small></label>
+              <label><small>Enter Pit Tag</small></label>
               <input
-                value={tableId}
+                value={pitTag}
                 onChange={(e) => {
-                  setTableId(e.target.value);
+                  setPitTag(e.target.value);
                 }}
                 className='form-control'
                 type='text'
-                placeholder='Table ID'
+                placeholder='Pit Tag'
               />
             </div>
           </div>

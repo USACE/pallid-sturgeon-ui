@@ -14,8 +14,9 @@ export const DropdownButton = ({
     style={{
       display: isHidden ? 'none' : 'initial',
     }}
+    isOutline
     variant={variant}
-    className='dropdown-button'
+    className='dropdown-toggle'
     title='Toggle Dropdown'
     text={text}
     handleClick={handleClick}
@@ -61,6 +62,7 @@ export const FilterInput = forwardRef(({
             display: isHidden ? 'none' : 'initial',
           }}
           variant='secondary'
+          isOutline
           title='Clear Input'
           text='&#x2715;'
           handleClick={() => setInputValue('')}

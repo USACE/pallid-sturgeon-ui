@@ -9,15 +9,7 @@ import '../../../css/accordion.scss';
 import '../dataentry.scss';
 
 const Accordion = connect(
-  'doAuthLogin',
-  'selectAuthIsLoggedIn',
-  'selectProjectsByRoute',
-  'selectPathname',
   ({
-    doAuthLogin,
-    authIsLoggedIn,
-    projectsByRoute: project,
-    pathname,
   }) => {
 
     const accordionClass = classArray([

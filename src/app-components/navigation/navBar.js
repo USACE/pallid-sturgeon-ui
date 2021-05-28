@@ -12,12 +12,10 @@ import './navigation.scss';
 const NavBar = connect(
   'doAuthLogin',
   'selectAuthIsLoggedIn',
-  'selectProjectsByRoute',
   'selectPathname',
   ({
     doAuthLogin,
     authIsLoggedIn,
-    projectsByRoute: project,
     pathname,
   }) => {
 

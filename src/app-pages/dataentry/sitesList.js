@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
-import Card from '../../app-components/card';
 import Accordion from './components/accordion';
 import NewSite from './components/newSite';
 
 import './dataentry.scss';
 
 export default connect(
-  'selectProjectsByRoute',
-  'selectInstrumentsItems',
-  'doModalOpen',
   ({
-    doModalOpen,
   }) => {
     const [sitesList, setSitesList] = useState([]);
 

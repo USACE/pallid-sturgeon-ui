@@ -13,11 +13,9 @@ const titlize = str => str ? str.charAt(0).toUpperCase() + str.slice(1) : 'N/A';
 
 const Table = connect(
   'doModalOpen',
-  'selectProjectsByRoute',
   ({
     doModalOpen,
     sitesList,
-    tools,
   }) => {
     const seasonOptions = [...new Set(sitesList.map(site => titlize(site.season)))].map(season => ({ value: season }));
     const initialSeasonOptions = seasonOptions.map(o => o.value);

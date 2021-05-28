@@ -35,7 +35,7 @@ export default forwardRef(({ item, onSave }, ref) => {
   }));
 
   return (
-    <form id='instrument-group-form' onSubmit={handleSave}>
+    <form id='ps-group-form' onSubmit={handleSave}>
       <div className='form-group'>
         <label>Username</label>
         <input

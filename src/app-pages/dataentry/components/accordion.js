@@ -1,24 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
-import { classArray } from '../../../utils';
 import SitesListTable from './sites-list-table';
 import FindDataSheet from './find-data-sheet';
-import Select from '../../../app-components/select';
-import Button from '../../../app-components/button/button';
 
 import '../../../css/accordion.scss';
 
 const Accordion = connect(
-  'doAuthLogin',
-  'selectAuthIsLoggedIn',
-  'selectProjectsByRoute',
-  'selectPathname',
   ({
-    doAuthLogin,
-    authIsLoggedIn,
-    projectsByRoute: project,
-    pathname,
   }) => {
 
     const [sitesList, setSitesList] = useState([]);

@@ -9,42 +9,9 @@ import createAuthBundle from './create-auth-bundle';
 import createJwtApiBundle from './create-jwt-api-bundle';
 import cache from '../cache';
 
-import alertReadBundle from './alert-read-bundle';
-import alertSubscribeBundle from './alert-subscribe-bundle';
-import alertUnreadBundle from './alert-unread-bundle';
-import alertUnsubscribeBundle from './alert-unsubscribe-bundle';
-import batchPlotConfigurationsBundle from './batch-plot-configurations-bundle';
-import batchPlotMapBundle from './batch-plot-map-bundle';
-import chartEditorBundle from './chart-editor-bundle';
-import chartsBundle from './charts-bundle';
-import collectionGroupBundle from './collection-group-bundle';
-import collectionGroupDetailBundle from './collection-group-detail-bundle';
-import domainsBundle from './domains-bundle';
-import exploreChartSyncBundle from './explore-chart-sync-bundle';
-import exploreDataBundle from './explore-data-bundle';
-import exploreMapBundle from './explore-map-bundle';
-import exploreMapInteractionBundle from './explore-map-interaction-bundle';
-import homeDataBundle from './home-data-bundle';
-import instrumentAlertConfigsBundle from './instrument-alert-configs-bundle';
-import instrumentAlertsBundle from './instrument-alerts-bundle';
-import instrumentBundle from './instrument-bundle';
-import instrumentConstantsBundle from './instrument-constants-bundle';
-import instrumentDrawBundle from './instrument-draw-bundle';
-import instrumentMapBundle from './instrument-map-bundle';
-import mapsBundle from './maps-bundle';
 import modalBundle from './modal-bundle';
 import notificationBundle from './notification-bundle';
-import profileAlertsBundle from './profile-alerts-bundle';
-import profileAlertSubscriptionsBundle from './profile-alert-subscriptions-bundle';
-import profileBundle from './profile-bundle';
-import projectMembersBundle from './project-members-bundle';
-import projectionBundle from './projection-bundle';
-import projectsBundle from './projects-bundle';
-import rainfallBundle from './rainfall-bundle';
 import routesBundle from './routes-bundle';
-import timeseriesBundle from './time-series-bundle';
-import timeseriesMeasurementBundle from './time-series-measurements-bundle';
-import uploadBundle from './upload-bundle';
 import usersBundle from './users-bundle';
 
 // Mock Token User
@@ -88,41 +55,8 @@ export default composeBundles(
     cacheFn: cache.set,
   }),
   createUrlBundle(),
-  alertReadBundle,
-  alertSubscribeBundle,
-  alertUnreadBundle,
-  alertUnsubscribeBundle,
-  batchPlotConfigurationsBundle,
-  batchPlotMapBundle,
-  chartEditorBundle,
-  chartsBundle,
-  collectionGroupBundle,
-  collectionGroupDetailBundle,
-  domainsBundle,
-  exploreChartSyncBundle,
-  exploreDataBundle,
-  exploreMapBundle,
-  exploreMapInteractionBundle,
-  homeDataBundle,
-  instrumentAlertConfigsBundle,
-  instrumentAlertsBundle,
-  instrumentBundle,
-  instrumentConstantsBundle,
-  instrumentDrawBundle,
-  instrumentMapBundle,
-  mapsBundle,
   modalBundle,
   notificationBundle,
-  profileAlertsBundle,
-  profileAlertSubscriptionsBundle,
-  profileBundle,
-  projectMembersBundle,
-  projectionBundle,
-  projectsBundle,
-  rainfallBundle,
   routesBundle,
-  timeseriesBundle,
-  timeseriesMeasurementBundle,
-  uploadBundle,
   usersBundle,
 );
