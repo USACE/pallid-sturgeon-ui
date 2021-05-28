@@ -1,0 +1,20 @@
+@import '../../style/variables';
+
+.breadcrumb {
+  margin-bottom: 0rem !important;
+  padding: 0rem 0rem 0.5rem 0rem !important;
+  background-color: #ffffff !important;
+  .breadcrumb-item + .breadcrumb-item::before {
+    content: ">";
+    font-size: 14px;
+  }
+  a {
+    color: #6c757d;
+    font-size: 14px;
+  }
+}
+
+.breadcrumb-item.active {
+  font-size: 14px;
+  padding-top: 0.2rem;
+}

@@ -6,8 +6,3 @@ html, body {
   margin: 0px;
   padding: 0px;
 }
-
-.site-main {
-  min-height: calc(100vh - #{$header-height} - #{$footer-height});
-}
-  

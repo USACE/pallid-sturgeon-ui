@@ -1,9 +1,9 @@
 import React, { Suspense, lazy } from 'react';
 import { Route, Switch } from 'react-router-dom';
 
-const Home = lazy(() => import('pages/home/HomePage'));
-const Login = lazy(() => import('pages/login/LoginPage'));
-const NotFound = lazy(() => import('pages/not-found/404'));
+const Home = lazy(() => import('./../pages/home/HomePage'));
+const Login = lazy(() => import('./../pages/login/LoginPage'));
+const NotFound = lazy(() => import('./../pages/not-found/404'));
 
 const Routes = () => (
   <Suspense fallback={<div />}>
