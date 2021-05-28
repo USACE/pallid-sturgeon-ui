@@ -1,0 +1,9 @@
+@import '../../style/variables';
+
+.nav-tabs {
+  border-bottom: 1px solid #c8cacb !important;
+
+  .nav-link.active {
+    border-color: #c8cacb #c8cacb $color-white !important;
+  }
+}
