@@ -2,10 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'redux-bundler-react';
 import { getNavHelper } from 'internal-nav-helper';
-import getStore from './app-bundles';
-import cache from './cache';
 
 import App from './App';
+import cache from './cache';
+import getStore from './app-bundles';
 import * as serviceWorker from './serviceWorker';
 
 cache.getAll().then((initialData) => {

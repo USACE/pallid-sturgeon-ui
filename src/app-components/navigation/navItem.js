@@ -1,40 +1,78 @@
 import React from 'react';
 import { connect } from 'redux-bundler-react';
-import Icon from '../icon';
 
+import Dropdown from 'app-components/dropdown';
 import { classArray } from '../../utils';
+
+const hrefAsString = href => {
+  const str = href.replace('/', '');
+  const words = str.split('-');
+  const upperWords = words.map(word => word.substring(0, 1).toUpperCase() + word.substring(1));
+  
+  return upperWords.join(' ');
+};
 
 const NavItem = connect(
   'selectPathname',
-  ({ pathname, href, children, hidden }) => {
+  ({ pathname, href, children, icon, className, handler, isHidden }) => {
     const cls = classArray([
       'pointer',
       'nav-item',
-      href.includes(pathname) && 'active',
+      href && href.includes(pathname) && 'active',
+      className,
     ]);
 
-    return !hidden ? (
-      <li className={cls}>
-        {(children === 'Home' || children === 'Map') &&
-          (<a className='nav-link' href={href}>
-            {children}
-          </a>)}
-        {children === 'Logout' &&
-          (<a className='nav-link vl' href={href}>
-            <Icon icon='logout'/>{children}
-          </a>)}
-        {children !== 'Home' && children !== 'Logout' && children !== 'Map' &&
-         (<li class='nav-item dropdown'>
-           <a class='nav-link' href='#' id='navbarDropdownMenuLink' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>
-             {children}
-           </a>
-           <div class='dropdown-menu' aria-labelledby='navbarDropdownMenuLink'>
-             {href.map(function (object, i) {
-               return <a class='dropdown-item' href={object}>{(object.charAt(1).toUpperCase() + object.slice(2)).split(/(?=[A-Z])/).join(' ')}</a>;
-             })}
-           </div>
-         </li>)}
-      </li>
+    const isDropdown = href && href.length > 1;
+
+    const handleClick = (e) => {
+      if (handler && typeof handler === 'function') handler(e);
+    };
+
+    const navClasses = classArray([
+      'nav-link',
+      'm-2',
+    ]);
+
+    const ItemContent = () => (
+      <>
+        {icon}
+        {icon && <>&nbsp;</>}
+        {children}
+      </>
+    );
+
+    return !isHidden ? (
+      handler ? (
+        <li className={cls} onClick={handleClick}>
+          <span className={navClasses}>
+            <ItemContent />
+          </span>
+        </li>
+      ) : (
+        <li className={cls}>
+          {isDropdown ? (
+            <Dropdown.Menu
+              withToggleArrow={false}
+              buttonClasses={['btn-small p-0 nav-dropdown-button']}
+              buttonContent={(
+                <a className={navClasses}>
+                  <ItemContent />
+                </a>
+              )}
+            >
+              {href.map(link => (
+                <Dropdown.Item key={link} href={link} className={link === pathname ? 'active' : ''}>
+                  {hrefAsString(link)}
+                </Dropdown.Item>
+              ))}
+            </Dropdown.Menu>
+          ) : (
+            <a className={navClasses} href={href}>
+              <ItemContent />
+            </a>
+          )}
+        </li>
+      )
     ) : null;
   }
 );

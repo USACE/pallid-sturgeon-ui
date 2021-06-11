@@ -1,0 +1,17 @@
+@import '../../style/variables';
+
+.field-application {
+  background-color: $color-primary-dark;
+  color: $color-white;
+  margin: auto;
+  min-height: 45px;
+  position: absolute;
+  opacity: 0.9;
+  bottom: 0;
+  width: 100%;
+}
+
+.field-application-text {
+  text-align: center;
+  width: 100%;
+}

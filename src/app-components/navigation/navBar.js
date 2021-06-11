@@ -1,13 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { connect } from 'redux-bundler-react';
 
-import Dropdown from '../dropdown';
 import Icon from '../icon';
 import NavItem from './navItem';
-// import RoleFilter from '../role-filter';
 import { classArray } from '../../utils';
 
 import './navigation.scss';
+
+const dataSummaryLinks = [
+  '/missouri-river-data-sheet',
+  '/fish-data-sheet',
+  '/supplemental-data-sheet',
+  '/genetic-card',
+];
+
+const dataEntryLinks = [
+  '/sites-list',
+  '/site-search',
+  '/error-log',
+];
 
 const NavBar = connect(
   'doAuthLogin',
@@ -18,49 +29,41 @@ const NavBar = connect(
     authIsLoggedIn,
     pathname,
   }) => {
-
-
-    const navClass = classArray([
+    const isHome = pathname === '/';
+    const navClasses = classArray([
       'navbar',
       'navbar-expand-lg',
       'navbar-light',
       'fixed-top-banner',
       'bg-white',
+      !isHome && 'seperator',
     ]);
 
     return (
-      <>
-        <nav className={navClass}>
-          <span className='navbar-brand'>
-            <strong>
-              <a href='/' className='text-dark'>
-                Pallid Sturgeon Poulation Assessment
-              </a>
-            </strong>
-          </span>
-          <button
-            className='navbar-toggler'
-            type='button'
-            aria-expanded='false'
-            aria-label='Toggle navigation'
-          >
-            <span className='navbar-toggler-icon' />
-          </button>
-
-          <div className='collapse navbar-collapse'>
-            <ul className='navbar-nav mr-auto' />
-            {authIsLoggedIn && (<ul className='navbar-nav'>
-              <NavItem href={['/']}>Home</NavItem>
-              <NavItem href={['/missouriRiverDataSheet', '/fishDataSheet', '/supplementalDataSheet', '/geneticCard']}>Data Summaries</NavItem>
-              <NavItem href={['/sitesList', '/siteSearch', '/errorLog']}>Data Entry</NavItem>
-              <NavItem href={['/dataUpload']}>Data Upload</NavItem>
-              <NavItem href={['/map']}>Map</NavItem>
-              <NavItem href={['/profile']}>Administration</NavItem>
-              <NavItem href={['/logout']}>Logout</NavItem>
-            </ul>)}
-          </div>
-        </nav>
-      </>
+      <nav className={navClasses}>
+        <div className='navbar-brand'>
+          <a href='/'>
+            Pallid Sturgeon Poulation Assessment
+          </a>
+        </div>
+        <div className='collapse navbar-collapse'>
+          <ul className='navbar-nav ml-auto'>
+            {authIsLoggedIn ? (
+              <>
+                <NavItem href={['/']}>Home</NavItem>
+                <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
+                <NavItem href={dataEntryLinks}>Data Entry</NavItem>
+                <NavItem href={['/data-upload']}>Data Upload</NavItem>
+                <NavItem href={['/map']}>Map</NavItem>
+                {/* <NavItem href={['/profile']}>Administration</NavItem> */}
+                <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
+              </>
+            ) : (
+              <NavItem handler={() => doAuthLogin()}>Login</NavItem>
+            )}
+          </ul>
+        </div>
+      </nav>
     );
   }
 );

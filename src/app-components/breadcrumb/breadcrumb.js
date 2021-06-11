@@ -21,9 +21,9 @@ const Breadcrumb = connect(
       <>
         {pathname != '/' && <div className={breadcrumbClass}>
           <nav aria-label='breadcrumb'>
-            <ol class='breadcrumb'>
-              <li class='breadcrumb-item'><a href='/'><Icon icon='home'/>Home</a></li>
-              <li class='breadcrumb-item active' aria-current='page'>{(pathname.charAt(1).toUpperCase() + pathname.slice(2)).split(/(?=[A-Z])/).join(' ')}</li>
+            <ol className='breadcrumb'>
+              <li className='breadcrumb-item'><a href='/'><Icon icon='home'/>Home</a></li>
+              <li className='breadcrumb-item active' aria-current='page'>{(pathname.charAt(1).toUpperCase() + pathname.slice(2)).split(/(?=[A-Z])/).join(' ')}</li>
             </ol>
           </nav>
         </div>}

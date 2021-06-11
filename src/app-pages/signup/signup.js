@@ -5,21 +5,21 @@ import Card from '../../app-components/card';
 import ProfileForm from '../../app-components/profile-form';
 
 export default connect(
-  'doProfileSave',
+  // 'doProfileSave',
   'doUpdateUrl',
   'selectAuthIsLoggedIn',
-  'selectProfileActive',
+  // 'selectProfileActive',
   ({
-    doProfileSave,
+    // doProfileSave,
     doUpdateUrl,
     authIsLoggedIn: isLoggedIn,
-    profileActive: profile,
+    // profileActive: profile,
   }) => {
     // If user already has a profile or is not logged in,
     // i.e. navigated directly to "/signup", redirect them back to home.
-    if (profile || isLoggedIn) {
-      doUpdateUrl(['/']);
-    }
+    // if (profile || isLoggedIn) {
+    //   doUpdateUrl(['/']);
+    // }
 
     const form = useRef();
     const handleSave = () => {
@@ -55,7 +55,7 @@ export default connect(
                     notifications unless you or an admin subscribe to alerts.
                   </small>
                 </p>
-                <ProfileForm ref={form} onSave={doProfileSave} />
+                {/* <ProfileForm ref={form} onSave={handleSave} /> */}
                 <div className='clearfix'>
                   <div className='float-right'>
                     <a href='/logout'>
@@ -64,7 +64,7 @@ export default connect(
                       </button>
                     </a>
                     <button
-                      onClick={handleSave}
+                      // onClick={doProfileSave}
                       className='btn btn-sm btn-success'
                     >
                       Save and Continue
