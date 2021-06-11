@@ -1,6 +1,8 @@
 import React from 'react';
-import './fieldApplication.scss';
+
 import Button from '../../app-components/button/button';
+
+import './fieldApplication.scss';
 
 const FieldApplication = () => (
   <div className='field-application'>
@@ -13,7 +15,7 @@ const FieldApplication = () => (
         size='small'
         variant='light'
         className='ml-2'
-        text='Download Template .CSV'
+        text='Download v.X.X.X'
       />
     </div>
   </div>

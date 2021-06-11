@@ -12,4 +12,10 @@
     flex-direction: column;
     height: 100%;
   }
+
+  .hero-text {
+    font-size: 56px;
+    -webkit-text-stroke-width: 1px;
+    -webkit-text-stroke-color: black;
+  }
 }
