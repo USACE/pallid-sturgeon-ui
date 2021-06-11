@@ -1,5 +1,17 @@
 @import '../../style/variables';
 
+.navbar-brand {
+  >*{
+    font-weight: 600;
+    color: $color-gray !important;
+
+    &:hover {
+      text-decoration: none !important;
+      color: $color-primary-dark !important;
+    }
+  }
+}
+
 .fixed-top-banner {
   height: 65px;
   left: 0;
@@ -9,8 +21,41 @@
   z-index: 1030;
 }
 
+.nav-dropdown-button {
+  border: 0 !important;
+
+  &:focus,&:active {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+
 .vl {
   border-left: 1px solid;
   border-image: linear-gradient(to bottom, rgba(0,0,0,0) 15%,$color-gray 15%,$color-gray 85%,rgba(0,0,0,0) 85%);
   border-image-slice: 1;
+}
+
+.nav-item {
+  border-bottom: 3px solid rgba(0,0,0,0);
+
+  .nav-link {
+    color: $color-gray !important;
+  }
+
+  &.active {
+    border-bottom: 3px solid $color-primary-dark;
+
+    .nav-link {
+      color: $color-primary-dark !important;
+    }
+  }
+
+  &:hover {
+    border-bottom: 3px solid $color-primary;
+
+    .nav-link {
+      color: $color-primary-dark !important;
+    }
+  }
 }

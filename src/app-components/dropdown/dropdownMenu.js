@@ -5,6 +5,8 @@ import useOutsideEventHandle from '../../customHooks/useOutsideEventHandle';
 import useWindowListener from '../../customHooks/useWindowListener';
 import { classArray } from '../../utils';
 
+import './dropdown.scss';
+
 const DropdownMenu = forwardRef(({
   id = 'dropdown',
   dropdownClasses = [],

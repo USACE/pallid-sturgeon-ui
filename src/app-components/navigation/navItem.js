@@ -33,12 +33,19 @@ const NavItem = connect(
       'm-2',
     ]);
 
+    const ItemContent = () => (
+      <>
+        {icon}
+        {icon && <>&nbsp;</>}
+        {children}
+      </>
+    );
+
     return !isHidden ? (
       handler ? (
         <li className={cls} onClick={handleClick}>
           <span className={navClasses}>
-            {icon}
-            {children}
+            <ItemContent />
           </span>
         </li>
       ) : (
@@ -46,24 +53,22 @@ const NavItem = connect(
           {isDropdown ? (
             <Dropdown.Menu
               withToggleArrow={false}
-              buttonClasses={['p-0']}
+              buttonClasses={['btn-small p-0 nav-dropdown-button']}
               buttonContent={(
                 <a className={navClasses}>
-                  {icon}
-                  {children}
+                  <ItemContent />
                 </a>
               )}
             >
               {href.map(link => (
-                <Dropdown.Item key={link} href={link}>
+                <Dropdown.Item key={link} href={link} className={link === pathname ? 'active' : ''}>
                   {hrefAsString(link)}
                 </Dropdown.Item>
               ))}
             </Dropdown.Menu>
           ) : (
             <a className={navClasses} href={href}>
-              {icon}
-              {children}
+              <ItemContent />
             </a>
           )}
         </li>

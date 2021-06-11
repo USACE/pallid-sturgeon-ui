@@ -55,7 +55,7 @@ export default connect(
                     notifications unless you or an admin subscribe to alerts.
                   </small>
                 </p>
-                {/* <ProfileForm ref={form} onSave={doProfileSave} /> */}
+                {/* <ProfileForm ref={form} onSave={handleSave} /> */}
                 <div className='clearfix'>
                   <div className='float-right'>
                     <a href='/logout'>
@@ -64,7 +64,7 @@ export default connect(
                       </button>
                     </a>
                     <button
-                      onClick={handleSave}
+                      // onClick={doProfileSave}
                       className='btn btn-sm btn-success'
                     >
                       Save and Continue

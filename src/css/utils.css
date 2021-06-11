@@ -452,10 +452,6 @@
   margin-left: auto !important;
 }
 
-.pointer {
-  cursor: pointer;
-}
-
 .overflow-ellipsis {
   white-space: nowrap;
   overflow: hidden;
@@ -474,4 +470,24 @@
 
 .sketch-picker {
   z-index: 99999;
+}
+
+.overflow-visible {
+  overflow: visible !important;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.default-cursor {
+  cursor: default;
+}
+
+.not-allowed {
+  cursor: not-allowed !important;
+}
+
+.no-scroll {
+  overflow: hidden;
 }

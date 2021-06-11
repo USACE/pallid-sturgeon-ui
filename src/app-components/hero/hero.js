@@ -1,5 +1,7 @@
 import React from 'react';
 
+import FieldApplication from '../../common/fieldapplication';
+
 import './hero.scss';
 
 const Hero = () => (
@@ -9,6 +11,7 @@ const Hero = () => (
         Pallid Sturgeon Population Assessment
       </h1>
     </div>
+    <FieldApplication />
   </div>
 );
 

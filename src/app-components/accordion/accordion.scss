@@ -3,34 +3,47 @@
 $border-radius: 5px;
 
 .accordion {
-  border: 1px solid $color-gray-light;
-  border-radius: $border-radius;
-
-  :first-child {
+  .accordion-item:first-child {
     .accordion-heading {
+      border-top: 1px solid $color-gray-light;
       border-top-left-radius: $border-radius;
       border-top-right-radius: $border-radius;
-      border-top: 0;
 
       &:hover {
-        border-top: 1px solid $color-primary-dark;
+        border: 1px solid $color-primary-dark;
       }
     }
   }
 
-  :last-child {
-    .accordion-heading:hover:not(.is-open) {
+  .accordion-item:last-child {
+    .accordion-body {
+      border-bottom: 1px solid $color-gray-light;
       border-bottom-left-radius: $border-radius;
       border-bottom-right-radius: $border-radius;
+    }
+
+    .accordion-heading {
+      border-bottom: 1px solid $color-gray-light;
+      border-bottom-left-radius: $border-radius;
+      border-bottom-right-radius: $border-radius;
+
+      &:hover {
+        border-bottom: 1px solid $color-primary-dark;
+      }
+
+      &.is-open {
+        border-radius: 0;
+      }
     }
   }
 }
 
 .accordion-heading {
   align-content: center;
-  border-top: 1px solid $color-gray-light;
+  border: 1px solid $color-gray-light;
+  border-bottom: 1px solid rgba(0,0,0,0);
   cursor: pointer;
-  height: 52px; 
+  height: 52px;
   justify-content: space-between;
   user-select: none;
   width: 100%;
@@ -55,10 +68,13 @@ $border-radius: 5px;
   }
 
   &:hover {
+    padding-bottom: 1px;
     border: 1px solid $color-primary-dark;
   }
 }
 
 .accordion-body {
+  border-left: 1px solid $color-gray-light;
+  border-right: 1px solid $color-gray-light;
   padding: 10px;
 }

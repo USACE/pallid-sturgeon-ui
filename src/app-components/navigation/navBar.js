@@ -40,11 +40,9 @@ const NavBar = connect(
     return (
       <nav className={navClass}>
         <div className='navbar-brand'>
-          <strong>
-            <a href='/' className='text-dark'>
-              Pallid Sturgeon Poulation Assessment
-            </a>
-          </strong>
+          <a href='/'>
+            Pallid Sturgeon Poulation Assessment
+          </a>
         </div>
         <div className='collapse navbar-collapse'>
           <ul className='navbar-nav ml-auto'>

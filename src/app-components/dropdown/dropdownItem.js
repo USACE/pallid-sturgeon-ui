@@ -11,10 +11,10 @@ const DropdownItem = ({
   <DropdownContext.Consumer>
     {({ closeDropdown }) => (
       href
-        ? <a className={`dropdown-item text-primary ${className}`} href={href} onClick={() => closeDropdown()}>{children}</a>
+        ? <a className={`dropdown-item ${className}`} href={href} onClick={() => closeDropdown()}>{children}</a>
         : (
           <button 
-            className={`dropdown-item text-primary ${className}`}
+            className={`dropdown-item ${className}`}
             onClick={(e) => {
               closeDropdown();
               onClick(e);

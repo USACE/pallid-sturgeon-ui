@@ -1,0 +1,15 @@
+@import '../../style/variables';
+
+.dropdown-item {
+  color: $color-primary-dark !important;
+
+  &:hover {
+    color: $color-white !important;
+    background-color: $color-primary !important;
+  }
+
+  &:focus,&:active,&.active {
+    color: $color-white !important;
+    background-color: $color-primary-dark !important;
+  }
+}

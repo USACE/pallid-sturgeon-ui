@@ -1,8 +1,9 @@
 .hero-container {
-  height: 400px;
+  height: 350px;
   background-image: url('../../img/MRIHome.jpg');
   background-size: cover;
   background-position: top;
+  position: relative;
 
   .hero {
     display: flex;

@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import usePrevious from '../customHooks/usePrevious';
+
+import usePrevious from '../../customHooks/usePrevious';
+
+import './select.scss';
 
 const Option = ({ value, text = '' }) => (
   <option value={value}>{text || value}</option>

@@ -1,10 +1,11 @@
 import React from 'react';
 import { connect } from 'redux-bundler-react';
 
-import { classArray } from '../utils';
+import { classArray } from '../../utils';
+
+import './pageContent.scss';
 
 const hasDevBanner = process.env.REACT_APP_DEVELOPMENT_BANNER;
-const blacklist = ['/', '/help'];
 
 const PageContent = connect(
   'selectPathname',
@@ -13,7 +14,7 @@ const PageContent = connect(
     children,
   }) => {
     const pageClasses = classArray([
-      //blacklist.includes(pathname) ? '' : 'page-margin',
+      'page-content',
       hasDevBanner && 'banner',
     ]);
 

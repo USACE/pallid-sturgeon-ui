@@ -3,16 +3,13 @@ import {
   createCacheBundle,
   createUrlBundle,
 } from 'redux-bundler';
-// Required change from @corpsmap/create-auth-bundle;
 import createAuthBundle from './create-auth-bundle';
-// Required change from @corpsmap/create-jwt-api-bundle;
 import createJwtApiBundle from './create-jwt-api-bundle';
 import cache from '../cache';
 
 import modalBundle from './modal-bundle';
 import notificationBundle from './notification-bundle';
 import routesBundle from './routes-bundle';
-import usersBundle from './users-bundle';
 
 // Mock Token User
 const mockTokenPublic =
@@ -58,5 +55,4 @@ export default composeBundles(
   modalBundle,
   notificationBundle,
   routesBundle,
-  usersBundle,
 );
