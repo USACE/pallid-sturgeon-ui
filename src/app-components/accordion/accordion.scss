@@ -1,0 +1,64 @@
+@import '../../style/variables';
+
+$border-radius: 5px;
+
+.accordion {
+  border: 1px solid $color-gray-light;
+  border-radius: $border-radius;
+
+  :first-child {
+    .accordion-heading {
+      border-top-left-radius: $border-radius;
+      border-top-right-radius: $border-radius;
+      border-top: 0;
+
+      &:hover {
+        border-top: 1px solid $color-primary-dark;
+      }
+    }
+  }
+
+  :last-child {
+    .accordion-heading:hover:not(.is-open) {
+      border-bottom-left-radius: $border-radius;
+      border-bottom-right-radius: $border-radius;
+    }
+  }
+}
+
+.accordion-heading {
+  align-content: center;
+  border-top: 1px solid $color-gray-light;
+  cursor: pointer;
+  height: 52px; 
+  justify-content: space-between;
+  user-select: none;
+  width: 100%;
+
+  > p {
+    display: inline-block;
+    margin-bottom: 0;
+    margin-left: 1rem;
+    margin-top: revert;
+  }
+
+  &.is-open {
+    background: $color-primary-dark;
+
+    > p {
+      color: $color-white !important;
+    }
+
+    > .accordion-icon {
+      color: $color-white;
+    }
+  }
+
+  &:hover {
+    border: 1px solid $color-primary-dark;
+  }
+}
+
+.accordion-body {
+  padding: 10px;
+}

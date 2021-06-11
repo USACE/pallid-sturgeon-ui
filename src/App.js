@@ -10,14 +10,13 @@ import Hero from './app-components/hero';
 import PageContent from './app-components/pageContent';
 import FieldApplication from './app-pages/fieldapplication/fieldApplication';
 
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/js/bootstrap.min.js';
-import './css/index.scss';
+import './css/bootstrap/css/bootstrap.water.min.css';
 import './css/mdi/css/materialdesignicons.min.css';
+import './css/index.scss';
 
 export default connect('selectRoute', ({ route: Route }) => (
-  <div>
-    <NavBar theme='primary' />
+  <>
+    <NavBar />
     <Hero />
     <FieldApplication />
     <div className='container pt-1 mb-5'>
@@ -35,5 +34,5 @@ export default connect('selectRoute', ({ route: Route }) => (
     </div>
     <Modal closeWithEscape />
     <Footer />
-  </div>
+  </>
 ));

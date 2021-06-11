@@ -1,8 +1,8 @@
 import React from 'react';
 import { connect } from 'redux-bundler-react';
 
-import Select from '../../app-components/select';
-import Button from '../../app-components/button/button';
+import Select from 'app-components/select';
+import Button from 'app-components/button/button';
 
 export default connect(
   ({  }) => (
@@ -15,7 +15,7 @@ export default connect(
             <label><small>Select Year</small></label>
             <div className='select'>
               <Select
-                onChange={value => doChartUpdateType(value)}
+                // onChange={value => doChartUpdateType(value)}
                 placeholderText='Select Year'
                 data-size='3'
                 options={[

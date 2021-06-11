@@ -201,10 +201,10 @@ const Table = connect(
                       <td>{site.project}</td>
                       <td>{site.segment}</td>
                       <td >{site.season}</td>
-                      <td class='text-center' style={{ width: '10%' }}>{site.sampleUnit}</td>
-                      <td class='text-center' style={{ width: '12%' }}>{site.sampleUnitType}</td>
-                      <td class='text-center' style={{ width: '10%' }}>{site.bendRN}</td>
-                      <td class='text-center' style={{ width: '12%' }}>{site.bendRiverMile}</td>
+                      <td className='text-center' style={{ width: '10%' }}>{site.sampleUnit}</td>
+                      <td className='text-center' style={{ width: '12%' }}>{site.sampleUnitType}</td>
+                      <td className='text-center' style={{ width: '10%' }}>{site.bendRN}</td>
+                      <td className='text-center' style={{ width: '12%' }}>{site.bendRiverMile}</td>
                     </tr>
                   );
                 }

@@ -11,25 +11,23 @@ import Map from '../app-pages/map/map';
 import Home from '../app-pages/home/home';
 import Logout from '../app-pages/logout';
 import NotFound from '../app-pages/404';
-import Profile from '../app-pages/profile/userProfile';
 import SignUp from '../app-pages/signup/signup';
 
 export default createRouteBundle(
   {
     '': Home,
     '/': Home,
-    '/missouriRiverDataSheet': MissouriRiverDataSheet,
-    '/fishDataSheet': FishDataSheet,
-    '/supplementalDataSheet': SupplementalDataSheet,
-    '/geneticCard': GeneticCard,
-    '/sitesList': SitesList,
-    '/siteSearch': SiteSearch,
-    '/errorLog': ErrorLog,
-    '/dataUpload': DataUpload,
+    '/missouri-river-data-sheet': MissouriRiverDataSheet,
+    '/fish-data-sheet': FishDataSheet,
+    '/supplemental-data-sheet': SupplementalDataSheet,
+    '/genetic-card': GeneticCard,
+    '/sites-list': SitesList,
+    '/site-search': SiteSearch,
+    '/error-log': ErrorLog,
+    '/data-upload': DataUpload,
     '/map': Map,
     '/logout': Logout,
     '/signup': SignUp,
-    '/profile': Profile,
     '*': NotFound,
   }
 );

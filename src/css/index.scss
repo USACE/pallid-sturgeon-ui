@@ -209,16 +209,6 @@ footer.modal-footer {
   z-index: 101;
 }
 
-.favorite {
-  position: absolute;
-  align-items: center;
-  background: transparent;
-  font-size: 20px;
-  top: 5px;
-  right: 0;
-  border: none;
-}
-
 th {
   background-color: $color-gray-dark;
   color: $color-white;
@@ -244,20 +234,6 @@ table.table-bordered > thead > tr > th{
 }
 table.table-bordered > tbody > tr > td{
   border:1px solid $color-gray-light;
-}
-
-.btn-info { 
-  background-color: $color-gray-dark;
-  border-color: $color-gray-dark;
-  width: 20px;
-}
-
-.btn-info:hover, .btn-info:active, .btn-info:focus{
-  color: $color-primary;
-  background-color: $color-gray-dark !important;
-  border-color: $color-gray-dark !important;
-  outline: none !important;
-  box-shadow: none !important;
 }
 
 label {

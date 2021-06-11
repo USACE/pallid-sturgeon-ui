@@ -5,12 +5,10 @@ import { classArray } from '../../../utils';
 import Select from '../../../app-components/select';
 import Button from '../../../app-components/button/button';
 
-import '../../../css/accordion.scss';
 import '../dataentry.scss';
 
 const Accordion = connect(
-  ({
-  }) => {
+  ({ }) => {
 
     const accordionClass = classArray([
       'accordion',
@@ -22,13 +20,12 @@ const Accordion = connect(
     return (
       <>
         <div className={accordionClass}>
-
-          <div id='accordion' class='accordion'>
-            <div class='card mb-0'>
-              <div class='card-header' data-toggle='collapse' href='#collapseNewSite'>
-                <a class='card-title'> Create New Site </a>
+          <div id='accordion' className='accordion'>
+            <div className='card mb-0'>
+              <div className='card-header' data-toggle='collapse' href='#collapseNewSite'>
+                <a className='card-title'> Create New Site </a>
               </div>
-              <div id='collapseNewSite' class='card-body' data-parent='#accordion'>
+              <div id='collapseNewSite' className='card-body' data-parent='#accordion'>
                 <div className='row'>
                   <div className='col-md-2'>
                     <div className='form-group'>

@@ -1,38 +1,11 @@
-import React, { createContext, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
-import useOutsideEventHandle from '../customHooks/useOutsideEventHandle';
-import useWindowListener from '../customHooks/useWindowListener';
-import { classArray } from '../utils';
+import DropdownContext from './dropdownContext';
+import useOutsideEventHandle from '../../customHooks/useOutsideEventHandle';
+import useWindowListener from '../../customHooks/useWindowListener';
+import { classArray } from '../../utils';
 
-const defaultVal = { closeDropdown: () => {}};
-const DropdownContext = createContext(defaultVal);
-
-const Item = ({
-  onClick = () => { },
-  href = null,
-  className = '',
-  children = null,
-}) => (
-  <DropdownContext.Consumer>
-    {({ closeDropdown }) => (
-      href
-        ? <a className={`dropdown-item text-primary ${className}`} href={href} onClick={() => closeDropdown()}>{children}</a>
-        : (
-          <button 
-            className={`dropdown-item text-primary ${className}`}
-            onClick={(e) => {
-              closeDropdown();
-              onClick(e);
-            }}
-          >
-            {children}
-          </button>
-        )
-    )}
-  </DropdownContext.Consumer>
-);
-
-const Menu = forwardRef(({
+const DropdownMenu = forwardRef(({
   id = 'dropdown',
   dropdownClasses = [],
   buttonClasses = [],
@@ -102,9 +75,4 @@ const Menu = forwardRef(({
   );
 });
 
-const Dropdown = {
-  Menu,
-  Item,
-};
-
-export default Dropdown;
+export default DropdownMenu;

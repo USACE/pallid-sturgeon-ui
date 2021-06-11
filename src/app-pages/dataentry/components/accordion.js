@@ -4,12 +4,9 @@ import { connect } from 'redux-bundler-react';
 import SitesListTable from './sites-list-table';
 import FindDataSheet from './find-data-sheet';
 
-import '../../../css/accordion.scss';
-
 const Accordion = connect(
   ({
   }) => {
-
     const [sitesList, setSitesList] = useState([]);
     
     useEffect(() => {
@@ -38,18 +35,18 @@ const Accordion = connect(
     return (
       <>
         <div>
-          <div id='accordion' class='accordion'>
-            <div class='card mb-0'>
-              <div class='card-header' data-toggle='collapse' href='#collapseOne'>
-                <a class='card-title'> Find Data Sheet by ID </a>
+          <div id='accordion' className='accordion'>
+            <div className='card mb-0'>
+              <div className='card-header' data-toggle='collapse' href='#collapseOne'>
+                <a className='card-title'> Find Data Sheet by ID </a>
               </div>
-              <div id='collapseOne' class='card-body' data-parent='#accordion'>
+              <div id='collapseOne' className='card-body' data-parent='#accordion'>
                 <FindDataSheet/>
               </div>
-              <div class='card-header' data-toggle='collapse' data-parent='#accordion' href='#collapseTwo'>
-                <a class='card-title'> Site Search Filter </a>
+              <div className='card-header' data-toggle='collapse' data-parent='#accordion' href='#collapseTwo'>
+                <a className='card-title'> Site Search Filter </a>
               </div>
-              <div id='collapseTwo' class='card-body' data-parent='#accordion'>
+              <div id='collapseTwo' className='card-body' data-parent='#accordion'>
                 <SitesListTable sitesList={sitesList} />
               </div>
             </div>

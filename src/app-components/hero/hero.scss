@@ -1,0 +1,14 @@
+.hero-container {
+  height: 400px;
+  background-image: url('../../img/MRIHome.jpg');
+  background-size: cover;
+  background-position: top;
+
+  .hero {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100%;
+  }
+}
