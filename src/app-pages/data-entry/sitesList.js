@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Accordion from './components/accordion';
-import NewSite from './components/newSite';
+import NewSite from './components/new-site';
 
 import './dataentry.scss';
 
@@ -38,7 +38,7 @@ export default connect(
     }, []);
 
     return (
-      <div>
+      <div className='container-fluid'>
         <NewSite />
         <Accordion />
       </div>

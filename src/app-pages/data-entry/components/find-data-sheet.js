@@ -32,7 +32,7 @@ const Table = connect(
                   <label><small>Select Data Sheet Type</small></label>
                   <div className='select'>
                     <Select
-                      onChange={value => doChartUpdateType(value)}
+                      // onChange={value => doChartUpdateType(value)}
                       placeholderText='Datasheet Type'
                       data-size='3'
                       options={[
@@ -125,7 +125,7 @@ const Table = connect(
             <div className='form-group'>
               <Button
                 size='small'
-                variant='light'
+                variant='dark'
                 isOutline
                 text='Go To Data Sheet'
               />

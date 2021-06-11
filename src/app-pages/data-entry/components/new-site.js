@@ -48,7 +48,7 @@ const Accordion = connect(
                     <div className='form-group'>
                       <Button
                         size='small'
-                        variant='light'
+                        variant='dark'
                         isOutline
                         text='Create New Site'
                       />

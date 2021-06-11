@@ -65,7 +65,7 @@ const Table = connect(
               <label><small>Select Project</small></label>
               <div className='select'>
                 <Select
-                  onChange={value => doChartUpdateType(value)}
+                  // onChange={value => doChartUpdateType(value)}
                   placeholderText='Project'
                   data-size='3'
                   options={[
@@ -82,7 +82,7 @@ const Table = connect(
               <label><small>Select Segment</small></label>
               <div className='select'>
                 <Select
-                  onChange={value => doChartUpdateType(value)}
+                  // onChange={value => doChartUpdateType(value)}
                   placeholderText='Segment'
                   data-size='3'
                   options={[
@@ -101,7 +101,7 @@ const Table = connect(
               <label><small>Select Season</small></label>
               <div className='select'>
                 <Select
-                  onChange={value => doChartUpdateType(value)}
+                  // onChange={value => doChartUpdateType(value)}
                   placeholderText='Season'
                   data-size='3'
                   options={[
@@ -118,7 +118,7 @@ const Table = connect(
               <label><small>Select Bend</small></label>
               <div className='select'>
                 <Select
-                  onChange={value => doChartUpdateType(value)}
+                  // onChange={value => doChartUpdateType(value)}
                   placeholderText='Bend'
                   data-size='3'
                   options={[
@@ -135,7 +135,7 @@ const Table = connect(
             <div className='form-group'>
               <Button
                 size='small'
-                variant='light'
+                variant='dark'
                 isOutline
                 text='Clear Filter'
               />
@@ -158,7 +158,7 @@ const Table = connect(
             size='small'
             isOutline
             icon={<Icon icon='download' />}
-            text='Export To CSV'
+            text='Export as CSV'
             handleClick={handleClick}
           />
           <table className='table table-bordered'>

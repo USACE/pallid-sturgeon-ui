@@ -29,16 +29,18 @@ const NavBar = connect(
     authIsLoggedIn,
     pathname,
   }) => {
-    const navClass = classArray([
+    const isHome = pathname === '/';
+    const navClasses = classArray([
       'navbar',
       'navbar-expand-lg',
       'navbar-light',
       'fixed-top-banner',
       'bg-white',
+      !isHome && 'seperator',
     ]);
 
     return (
-      <nav className={navClass}>
+      <nav className={navClasses}>
         <div className='navbar-brand'>
           <a href='/'>
             Pallid Sturgeon Poulation Assessment
@@ -51,7 +53,7 @@ const NavBar = connect(
                 <NavItem href={['/']}>Home</NavItem>
                 <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
                 <NavItem href={dataEntryLinks}>Data Entry</NavItem>
-                <NavItem href={['/dataUpload']}>Data Upload</NavItem>
+                <NavItem href={['/data-upload']}>Data Upload</NavItem>
                 <NavItem href={['/map']}>Map</NavItem>
                 {/* <NavItem href={['/profile']}>Administration</NavItem> */}
                 <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
@@ -60,7 +62,6 @@ const NavBar = connect(
               <NavItem handler={() => doAuthLogin()}>Login</NavItem>
             )}
           </ul>
-
         </div>
       </nav>
     );

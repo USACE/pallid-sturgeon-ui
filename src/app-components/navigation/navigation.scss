@@ -15,7 +15,7 @@
 .fixed-top-banner {
   height: 65px;
   left: 0;
-  position: fixed !important;
+  position: static !important;
   right: 0;
   top: 0;
   z-index: 1030;
@@ -58,4 +58,9 @@
       color: $color-primary-dark !important;
     }
   }
+}
+
+.navbar.seperator {
+  border-bottom: 1px solid $color-gray-light;
+  margin-bottom: 15px;
 }
