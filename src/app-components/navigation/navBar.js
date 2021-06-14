@@ -20,6 +20,14 @@ const dataEntryLinks = [
   '/error-log',
 ];
 
+const administrationLinks = [
+  '/administation',
+  '/data-query',
+  '/multiple-check-by',
+  '/multiple-record-approval',
+  '/user-access-requests',
+];
+
 const NavBar = connect(
   'doAuthLogin',
   'selectAuthIsLoggedIn',
@@ -55,7 +63,7 @@ const NavBar = connect(
                 <NavItem href={dataEntryLinks}>Data Entry</NavItem>
                 <NavItem href={['/data-upload']}>Data Upload</NavItem>
                 <NavItem href={['/map']}>Map</NavItem>
-                {/* <NavItem href={['/profile']}>Administration</NavItem> */}
+                <NavItem href={administrationLinks}>Administration</NavItem>
                 <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
               </>
             ) : (
