@@ -18,7 +18,7 @@ const Accordion = connect(
             <label><small>Select Year</small></label>
             <div className='select'>
               <Select
-                onChange={value => doChartUpdateType(value)}
+                // onChange={value => doChartUpdateType(value)}
                 placeholderText='Select Year'
                 data-size='3'
                 options={[
