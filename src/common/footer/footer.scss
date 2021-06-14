@@ -2,9 +2,14 @@
 
 .footer {
   background-color: $color-primary-dark;
+  bottom: 0;
   color: $color-white;
-  min-height: $footer-height;
-  position:fixed;
-  bottom:0;
-  width:100%;
+  min-height: 40px;
+  padding-top: 9px;
+  position: fixed;
+  width: 100%;
+
+  p {
+    margin-bottom: 0;
+  }
 }
