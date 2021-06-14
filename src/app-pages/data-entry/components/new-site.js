@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { connect } from 'redux-bundler-react';
 
+import Button from 'app-components/button/button';
+import Select from 'app-components/select';
 import { classArray } from '../../../utils';
-import Select from '../../../app-components/select';
-import Button from '../../../app-components/button/button';
 
 import '../dataentry.scss';
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
-import SitesListTable from './sites-list-table';
 import FindDataSheet from './find-data-sheet';
+import SitesListTable from './sites-list-table';
 
 const Accordion = connect(
   ({

@@ -1,9 +1,8 @@
 import React from 'react';
 import { connect } from 'redux-bundler-react';
 
-import Select from 'app-components/select';
-import Button from 'app-components/button/button';
 import Card from 'app-components/card';
+import Select from 'app-components/select';
 
 export default connect(
   ({  }) => (
