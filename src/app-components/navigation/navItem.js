@@ -16,7 +16,6 @@ const NavItem = connect(
   'selectPathname',
   ({ pathname, href, children, icon, className, handler, isHidden }) => {
     const cls = classArray([
-      'pointer',
       'nav-item',
       href && href.includes(pathname) && 'active',
       className,
