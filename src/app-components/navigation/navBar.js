@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Icon from '../icon';
@@ -37,6 +37,7 @@ const NavBar = connect(
     authIsLoggedIn,
     pathname,
   }) => {
+    const [show, setShow] = useState(false);
     const isHome = pathname === '/';
     const navClasses = classArray([
       'navbar',
@@ -47,6 +48,14 @@ const NavBar = connect(
       !isHome && 'seperator',
     ]);
 
+    const navCollapseClasses = classArray([
+      'collapse',
+      'navbar-collapse',
+      show && 'show',
+    ]);
+
+    const toggleShow = () => setShow(!show);
+
     return (
       <nav className={navClasses}>
         <div className='navbar-brand'>
@@ -54,7 +63,10 @@ const NavBar = connect(
             Pallid Sturgeon Poulation Assessment
           </a>
         </div>
-        <div className='collapse navbar-collapse'>
+        <button className='navbar-toggler' type='button' aria-expanded='false' aria-label='Toggle navigation' onClick={() => toggleShow()}>
+          <span className='navbar-toggler-icon' />
+        </button>
+        <div className={navCollapseClasses}>
           <ul className='navbar-nav ml-auto'>
             {authIsLoggedIn ? (
               <>

@@ -5,7 +5,7 @@
     font-weight: 600;
     color: $color-gray !important;
 
-    &:hover {
+    &:hover,&:focus {
       text-decoration: none !important;
       color: $color-primary-dark !important;
     }
@@ -39,6 +39,7 @@
 .nav-item {
   border-bottom: 3px solid rgba(0,0,0,0);
   cursor: pointer;
+  max-height: 62px;
 
   .nav-link {
     color: $color-gray !important;
@@ -52,7 +53,7 @@
     }
   }
 
-  &:hover {
+  &:hover,&:focus {
     border-bottom: 3px solid $color-primary;
 
     .nav-link {
@@ -64,4 +65,21 @@
 .navbar.seperator {
   border-bottom: 1px solid $color-gray-light;
   margin-bottom: 15px;
+}
+
+@media screen and (max-width: $medium-screen-width) {
+  .navbar-collapse {
+    background: $color-white;
+    box-shadow: 2px 2px 5px $color-gray;
+    z-index: 1000;
+  }
+
+  .nav-dropdown-button {
+    width: 100%;
+    text-align: left !important;
+  }
+
+  .vl {
+    border-left: none;
+  }
 }
