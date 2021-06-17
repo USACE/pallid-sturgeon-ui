@@ -10,6 +10,7 @@ $color-gray-dark:           #454545;
 $color-white:               #ffffff;
 $color-black:               #000000;
 
-// Sizes
-$header-height: 0px;
-$footer-height: 40px;
+// Sizes for media queries
+$small-screen-width:         576px;
+$medium-screen-width:        768px;
+$large-screen-width:         992px;

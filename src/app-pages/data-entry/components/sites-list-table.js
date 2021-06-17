@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
-import Icon from '../../../app-components/icon';
-import Button from '../../../app-components/button';
-import Select from '../../../app-components/select';
-import MultiSelect from '../../../app-components/multi-select/multi-select';
-import Pagination, { handlePageChange } from '../../../app-components/pagination';
+import Button from 'app-components/button';
+import Icon from 'app-components/icon';
+import MultiSelect from 'app-components/multi-select/multi-select';
+import Pagination, { handlePageChange } from 'app-components/pagination';
+import Select from 'app-components/select';
 
 import '../dataentry.scss';
 

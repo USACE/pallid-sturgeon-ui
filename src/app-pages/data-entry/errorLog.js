@@ -5,7 +5,7 @@ import './dataentry.scss';
 
 export default connect(
   ({ }) => (
-    <div className='container-fluid' style={{ paddingLeft: 0, paddingRight: 0 }}>
+    <div className='container-fluid'>
       Error Log
     </div>
   )

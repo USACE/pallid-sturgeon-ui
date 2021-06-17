@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
-import Select from '../../../app-components/select';
-import Button from '../../../app-components/button';
-import Icon from '../../../app-components/icon';
+import Button from 'app-components/button';
+import Icon from 'app-components/icon';
+import Select from 'app-components/select';
 
 import '../dataentry.scss';
 
