@@ -67,6 +67,10 @@
   margin-bottom: 15px;
 }
 
+.nav-link {
+  margin: 0.5rem;
+}
+
 @media screen and (max-width: $medium-screen-width) {
   .navbar-collapse {
     background: $color-white;
@@ -81,5 +85,9 @@
 
   .vl {
     border-left: none;
+  }
+
+  .dropdown {
+    z-index: 1001;
   }
 }

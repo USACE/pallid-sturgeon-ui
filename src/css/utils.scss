@@ -1,0 +1,61 @@
+.overlay {
+  background: white;
+  z-index: 999999;
+}
+
+.overlay-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.row-excluded {
+  background-color: inherit;
+  opacity: 0.2;
+}
+
+.row-dupe {
+  background-color: inherit;
+  color: "red";
+}
+
+.overflow-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.box {
+  background-color: #fff;
+  border-radius: 6px;
+  box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
+    0 0 0 1px rgba(10, 10, 10, 0.02);
+  color: #4a4a4a;
+  display: block;
+  padding: 1.25rem;
+}
+
+.sketch-picker {
+  z-index: 99999;
+}
+
+.overflow-visible {
+  overflow: visible !important;
+}
+
+.pointer {
+  cursor: pointer;
+}
+
+.default-cursor {
+  cursor: default;
+}
+
+.not-allowed {
+  cursor: not-allowed !important;
+}
+
+.no-scroll {
+  overflow: hidden;
+}

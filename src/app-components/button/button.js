@@ -2,6 +2,8 @@ import React from 'react';
 
 import { classArray } from '../../utils';
 
+import '../../css/utils.scss';
+
 /**
  * 
  * @param {string} size - one of `['small', 'large']` to size the button to your needs

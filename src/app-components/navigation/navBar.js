@@ -75,7 +75,7 @@ const NavBar = connect(
                 <NavItem href={dataEntryLinks}>Data Entry</NavItem>
                 <NavItem href={['/data-upload']}>Data Upload</NavItem>
                 <NavItem href={['/map']}>Map</NavItem>
-                <NavItem href={administrationLinks}>Administration</NavItem>
+                <NavItem href={administrationLinks}>Admin</NavItem>
                 <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
               </>
             ) : (
