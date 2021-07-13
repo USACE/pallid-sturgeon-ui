@@ -2,15 +2,7 @@ import React from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Dropdown from 'app-components/dropdown';
-import { classArray } from '../../utils';
-
-const hrefAsString = href => {
-  const str = href.replace('/', '');
-  const words = str.split('-');
-  const upperWords = words.map(word => word.substring(0, 1).toUpperCase() + word.substring(1));
-  
-  return upperWords.join(' ');
-};
+import { classArray, hrefAsString } from 'utils';
 
 const NavItem = connect(
   'selectPathname',

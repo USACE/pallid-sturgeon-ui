@@ -34,3 +34,11 @@ exports.keyAsText = key => {
   const words = key.substring(1).split(/(?=[A-Z])/).join(' ');
   return key.substring(0, 1).toUpperCase() + words;
 };
+
+exports.hrefAsString = href => {
+  const str = href.replace('/', '');
+  const words = str.split('-');
+  const upperWords = words.map(word => word.substring(0, 1).toUpperCase() + word.substring(1));
+  
+  return upperWords.join(' ');
+};

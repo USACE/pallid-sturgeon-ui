@@ -1,12 +1,9 @@
 import React from 'react';
 
 import Icon from '../icon';
+import { hrefAsString } from 'utils';
 
 import './breadcrumb.scss';
-
-const stringifyPathname = pathname => (
-  pathname.charAt(1).toUpperCase() + pathname.slice(2).split(/(?=[A-Z])/).join(' ')
-);
 
 const Breadcrumb = ({
   home = true,
@@ -24,7 +21,7 @@ const Breadcrumb = ({
           </li>
         )}
         <li className='breadcrumb-item active' aria-current='page'>
-          {stringifyPathname(pathname)}
+          {hrefAsString(pathname)}
         </li>
       </ol>
     </nav>
