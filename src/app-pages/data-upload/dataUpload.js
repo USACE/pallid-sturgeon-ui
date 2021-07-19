@@ -3,6 +3,7 @@ import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
+import DragInput from 'app-components/drag-input';
 import FileDetails from './fileDetails';
 import Select from 'app-components/select';
 import UploadButton from 'app-components/upload-button';
@@ -77,12 +78,13 @@ export default connect(
                         <p>{isRequired ? '* ' : ''}{keyAsText(key)}:</p>
                       </div>
                       <div className='col-10'>
-                        <UploadButton
+                        <DragInput onChange={file => setFile(key, file)} />
+                        {/* <UploadButton
                           icon={fileDetails ? 'file-replace-outline' : undefined}
                           text={fileDetails ? 'Change File' : 'Choose File'}
                           handleChange={file => setFile(key, file)}
                         />
-                        <FileDetails file={fileDetails} />
+                        <FileDetails file={fileDetails} /> */}
                       </div>
                     </div>
                   );
