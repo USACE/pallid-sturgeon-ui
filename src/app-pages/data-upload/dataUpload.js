@@ -4,7 +4,6 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import DragInput from 'app-components/drag-input';
-import FileDetails from './fileDetails';
 import Select from 'app-components/select';
 import UploadButton from 'app-components/upload-button';
 import { keyAsText } from 'utils';
@@ -70,21 +69,14 @@ export default connect(
                 <p>Upload files to each of the required fields denoted by an asterisk (*):</p>
                 {fileKeys.map(key => {
                   const isRequired = getIsRequired(key, version);
-                  const fileDetails = files[key];
 
                   return (
                     <div key={key} className='row'>
-                      <div className='col-2'>
+                      <div className='col-2 pt-2'>
                         <p>{isRequired ? '* ' : ''}{keyAsText(key)}:</p>
                       </div>
                       <div className='col-10'>
                         <DragInput onChange={file => setFile(key, file)} />
-                        {/* <UploadButton
-                          icon={fileDetails ? 'file-replace-outline' : undefined}
-                          text={fileDetails ? 'Change File' : 'Choose File'}
-                          handleChange={file => setFile(key, file)}
-                        />
-                        <FileDetails file={fileDetails} /> */}
                       </div>
                     </div>
                   );
