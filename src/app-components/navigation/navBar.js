@@ -8,24 +8,28 @@ import { classArray } from '../../utils';
 import './navigation.scss';
 
 const dataSummaryLinks = [
-  '/missouri-river-data-sheet',
-  '/fish-data-sheet',
-  '/supplemental-data-sheet',
-  '/genetic-card',
+  '/data-sheet',
+  '/genetics-card-summary',
+  '/report-summmaries',
+  '/priority-fish',
+  '/last-location',
+  '/tag-replacement',
 ];
 
 const dataEntryLinks = [
   '/sites-list',
   '/site-search',
-  '/error-log',
 ];
 
 const administrationLinks = [
-  '/administation',
   '/data-query',
   '/multiple-check-by',
   '/multiple-record-approval',
   '/user-access-requests',
+];
+
+const utilityLinks = [
+  '/error-log',
 ];
 
 const NavBar = connect(
@@ -74,7 +78,7 @@ const NavBar = connect(
                 <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
                 <NavItem href={dataEntryLinks}>Data Entry</NavItem>
                 <NavItem href={['/data-upload']}>Data Upload</NavItem>
-                <NavItem href={['/map']}>Map</NavItem>
+                <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
                 <NavItem href={administrationLinks}>Admin</NavItem>
                 <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
               </>

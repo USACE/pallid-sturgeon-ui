@@ -7,13 +7,10 @@ import Select from 'app-components/select';
 
 import '../dataentry.scss';
 
-const titlize = str => str ? str.charAt(0).toUpperCase() + str.slice(1) : 'N/A';
-
 const Table = connect(
   ({
 
   }) => {
-    
     const [tableId, setTableId] = useState('');
     const [fieldId, setFieldId] = useState('');
     const [geneticVial, setGeneticVial] = useState('');

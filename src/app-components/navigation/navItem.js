@@ -6,14 +6,14 @@ import { classArray, hrefAsString } from 'utils';
 
 const NavItem = connect(
   'selectPathname',
-  ({ pathname, href, children, icon, className, handler, isHidden }) => {
+  ({ pathname, href, children, icon, className, handler, isHidden, asDropdown }) => {
     const cls = classArray([
       'nav-item',
       href && href.includes(pathname) && 'active',
       className,
     ]);
 
-    const isDropdown = href && href.length > 1;
+    const isDropdown = asDropdown || (href && href.length > 1);
 
     const handleClick = (e) => {
       if (handler && typeof handler === 'function') handler(e);

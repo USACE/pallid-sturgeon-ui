@@ -13,6 +13,7 @@ const PageContent = connect(
   ({ pathname, children }) => {
     const pageClasses = classArray([
       hasDevBanner && 'banner',
+      'page-content',
     ]);
 
     const hasBreadcrumb = pathname != '/';
