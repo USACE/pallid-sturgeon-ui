@@ -21,7 +21,7 @@ export default createRouteBundle(
     '/data-upload': DataUpload,
     '/error-log': ErrorLog,
     '/data-sheet': DataSheet,
-    '/genetic-card': GeneticCard,
+    '/genetics-card-summary': GeneticCard,
     '/logout': Logout,
     '/map': Map,
     '/missouri-river-data-sheet': MissouriRiverDataSheet,

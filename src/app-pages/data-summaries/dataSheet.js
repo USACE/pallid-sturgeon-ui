@@ -162,7 +162,7 @@ export default connect(
               ]}
             />
             <Pagination
-              itemCount={143}
+              itemCount={0}
               className='mt-2'
               handlePageChange={() => {}}
             />
