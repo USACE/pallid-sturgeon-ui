@@ -73,7 +73,9 @@ export default connect(
                   return (
                     <div key={key} className='row'>
                       <div className='col-2 pt-2'>
-                        <p>{isRequired ? '* ' : ''}{keyAsText(key)}:</p>
+                        <p className='pt-1'>
+                          {isRequired ? '* ' : ''}{keyAsText(key)}:
+                        </p>
                       </div>
                       <div className='col-10'>
                         <DragInput onChange={file => setFile(key, file)} />

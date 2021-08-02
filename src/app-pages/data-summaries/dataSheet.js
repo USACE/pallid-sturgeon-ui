@@ -41,9 +41,10 @@ export default connect(
           <Card.Body>
             <div className='row'>
               <div className='col-md-3 col-xs-12'>
-                <label>Select Year:</label>
+                <label>Year:</label>
                 <Select
                   showPlaceholderWhileValid
+                  placeholderText='Select a Year...'
                   className='d-block mt-1 mb-2'
                   onChange={val => setYearFilter(val)}
                   value={yearFilter}
@@ -55,9 +56,10 @@ export default connect(
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
-                <label>Select Project:</label>
+                <label>Project:</label>
                 <Select
                   showPlaceholderWhileValid
+                  placeholderText='Select a Project...'
                   className='d-block mt-1 mb-2'
                   onChange={val => setProjectFilter(val)}
                   value={projectFilter}
@@ -75,7 +77,7 @@ export default connect(
                 />
               </div>
             </div>
-            <div className='row'>
+            <div className='row mt-1'>
               <div className='col-md-2 col-xs-4'>
                 <label>Season:</label>
                 <Select
