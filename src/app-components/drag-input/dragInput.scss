@@ -2,8 +2,9 @@
 
 .dropzone {
   border: 1px dashed $color-gray-light;
+  border-radius: 5px;
   cursor: pointer;
-  padding: 10px 5px;
+  padding: 10px;
   flex-grow: 6;
 
   &.active {
