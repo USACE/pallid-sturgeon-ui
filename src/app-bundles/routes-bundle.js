@@ -1,8 +1,8 @@
 import { createRouteBundle } from 'redux-bundler';
 
+import DataSheet from '../app-pages/data-summaries/dataSheet';
 import DataUpload from '../app-pages/data-upload/dataUpload';
 import ErrorLog from '../app-pages/data-entry/errorLog';
-import FishDataSheet from '../app-pages/data-summaries/fishDataSheet';
 import GeneticCard from '../app-pages/data-summaries/geneticCard';
 import Home from '../app-pages/home/home';
 import Logout from '../app-pages/logout';
@@ -20,8 +20,8 @@ export default createRouteBundle(
     '/': Home,
     '/data-upload': DataUpload,
     '/error-log': ErrorLog,
-    '/fish-data-sheet': FishDataSheet,
-    '/genetic-card': GeneticCard,
+    '/data-sheet': DataSheet,
+    '/genetics-card-summary': GeneticCard,
     '/logout': Logout,
     '/map': Map,
     '/missouri-river-data-sheet': MissouriRiverDataSheet,

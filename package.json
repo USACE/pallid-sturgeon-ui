@@ -7,6 +7,8 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
+    "ag-grid-community": "^25.3.0",
+    "ag-grid-react": "^25.3.0",
     "date-fns": "^2.16.1",
     "internal-nav-helper": "^3.1.0",
     "lodash.debounce": "^4.0.8",

@@ -3,8 +3,6 @@ import { connect } from 'redux-bundler-react';
 
 import Modal from 'app-components/modal';
 import NavBar from 'app-components/navigation';
-// import User from 'app-components/user/user';
-// import Breadcrumb from 'app-components/breadcrumb/breadcrumb';
 import Footer from './common/footer';
 import PageContent from 'app-components/page-content';
 

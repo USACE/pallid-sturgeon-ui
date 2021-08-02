@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 
 import Select from '../select';
 import { determinePagesToShow, createPage } from './helper';
+import { classArray } from 'utils';
 
 import './pagination.scss';
 
@@ -9,10 +10,17 @@ const Pagination = ({
   itemCount = 0,
   handlePageChange = () => {},
   defaultItemsPerPage = '10',
+  className = ''
 }) => {
   const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
   const [currentPage, setCurrentPage] = useState(0);
   const [pageCount, setPageCount] = useState(Math.ceil(itemCount / itemsPerPage));
+  const classes = classArray([
+    'd-flex',
+    'justify-content-between',
+    'noselect',
+    className,
+  ]);
 
   // If user changes items or items per page, go back to page 0 to avoid Array Out of Bounds error and redetermine page count
   useEffect(() => {
@@ -35,19 +43,19 @@ const Pagination = ({
 
   return (
     itemCount > 10 && (
-      <div className='d-flex justify-content-between noselect pointer'>
+      <div className={classes}>
         <Select
           title='Page Size'
-          className='pagination-select'
+          className='pagination-select pointer'
           defaultOption={defaultItemsPerPage}
           onChange={val => setItemsPerPage(val)}
           options={[
             { value: '10' },
-            { value: '20' },
-            { value: '30' },
+            { value: '25' },
+            { value: '50' },
           ]}
         />
-        <ul className='pagination'>
+        <ul className='pagination pointer'>
           <li className='page-item' onClick={pageDown}>
             <a className='page-link' aria-label={'Go to previous page'}>
               «
