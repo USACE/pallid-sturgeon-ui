@@ -10,10 +10,10 @@ on:
       - develop
 jobs:
   build:
-    # env:
-    #   PUBLIC_URL: https://develop-water.rsgis.dev
+    env:
+    PUBLIC_URL: https://develop-pallid-sturgeon.rsgis.dev
+    REACT_APP_API_URL: https://develop-pallid-sturgeon-api.rsgis.dev
     #   REACT_APP_SHOW_LOGIN: no
-    #   REACT_APP_CUMULUS_API_URL: https://develop-cumulus-api.rsgis.dev
     #   REACT_APP_SHARED_API_URL: https://develop-shared-api.rsgis.dev
     #   REACT_APP_WATER_API_URL: https://develop-water-api.rsgis.dev
     runs-on: ubuntu-latest
