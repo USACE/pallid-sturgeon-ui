@@ -6,7 +6,7 @@ export default createRestBundle({
   staleAfter: 0,
   persist: false,
   routeParam: '',
-  getTemplate: '/version',
+  getTemplate: '/psapi/version',
   putTemplate: '',
   postTemplate: '',
   deleteTemplate: '',
