@@ -1,23 +1,40 @@
-const uploadBundle = {
+import createRestBundle from './create-rest-bundle';
+
+export default createRestBundle({
   name: 'upload',
-  doUploadSend: () => async ({ dispatch, store, apiPost }) => {
-    const postUrl = '';
+  uid: 'id',
+  staleAfter: 0,
+  persist: false,
+  routeParam: '',
+  getTemplate: '/psapi/version',
+  putTemplate: '',
+  postTemplate: '',
+  deleteTemplate: '',
+  fetchActions: [],
+  urlParamSelectors: [],
+  forceFetchActions: [],
+});
 
-    apiPost(`${postUrl}`, (err, body) => {
-      if (err) {
-        console.error(err.message);
-        store.doNotificationFire({
-          message: err
-            ? `${err.name}: ${err.Detail}`
-            : 'An unexpected error occured. Please try again later.',
-          level: 'error',
-          autoDismiss: 0,
-        });
-      } else {
-        console.log('success handler...');
-      }
-    });
-  }
-};
+// const uploadBundle = {
+//   name: 'upload',
+//   doUploadSend: () => async ({ dispatch, store, apiGet }) => {
+//     const postUrl = '/version';
 
-export default uploadBundle;
+//     apiGet(`${postUrl}`, (err, body) => {
+//       if (err) {
+//         console.error(err.message);
+//         store.doNotificationFire({
+//           message: err
+//             ? `${err.name}: ${err.Detail}`
+//             : 'An unexpected error occured. Please try again later.',
+//           level: 'error',
+//           autoDismiss: 0,
+//         });
+//       } else {
+//         console.log('success handler...');
+//       }
+//     });
+//   }
+// };
+
+// export default uploadBundle;

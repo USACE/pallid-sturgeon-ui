@@ -10,6 +10,7 @@ import cache from '../cache';
 import modalBundle from './modal-bundle';
 import notificationBundle from './notification-bundle';
 import routesBundle from './routes-bundle';
+import uploadBundle from './upload-bundle';
 
 // Mock Token User
 const mockTokenPublic =
@@ -29,10 +30,7 @@ export default composeBundles(
     token: process.env.NODE_ENV === 'development' ? mockTokenApplicationAdmin : null,
   }),
   createJwtApiBundle({
-    root:
-      process.env.NODE_ENV === 'development'
-        ? 'http://localhost:80'
-        : process.env.REACT_APP_API_URL,
+    root: process.env.REACT_APP_API_URL,
     tokenSelector: 'selectAuthTokenRaw',
     unless: {
       // GET requests do not include token unless path starts with /my_ or includes /members/
@@ -55,4 +53,5 @@ export default composeBundles(
   modalBundle,
   notificationBundle,
   routesBundle,
+  uploadBundle,
 );
