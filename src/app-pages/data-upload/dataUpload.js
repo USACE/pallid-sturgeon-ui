@@ -16,7 +16,10 @@ const requiredFiles = {
 const getIsRequired = (key, version) => requiredFiles[version].includes(key);
 
 export default connect(
-  ({ }) => {
+  'doUploadFetch',
+  ({
+    doUploadFetch,
+  }) => {
     const [version, setVersion] = useState(null);
     const [files, setFiles] = useState({
       'siteFile': null,
@@ -62,6 +65,14 @@ export default connect(
                 { value: '3.7.1' },
                 { value: '4.0.4' },
               ]}
+            />
+            <Button
+              isOutline
+              size='small'
+              className='mt-2'
+              variant='secondary'
+              text='Test Version API'
+              handleClick={() => doUploadFetch()}
             />
             {version && (
               <>
