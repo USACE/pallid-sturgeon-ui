@@ -112,7 +112,11 @@ const createJwtApiBundle = (opts) => {
         tokenSelector: config.tokenSelector,
       };
 
-      return (state = initialData) => state;
+      return (state = initialData, { type, payload}) => {
+        if (process.env.NODE_ENV === 'development') console.log(type, payload);
+        
+        return state;
+      };
     },
 
     [selectRoot]: (state) => state[config.name].root,

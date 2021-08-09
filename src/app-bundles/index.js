@@ -11,6 +11,7 @@ import modalBundle from './modal-bundle';
 import notificationBundle from './notification-bundle';
 import routesBundle from './routes-bundle';
 import uploadBundle from './upload-bundle';
+import datasheetPageBundle from './datasheet-page-bundle';
 
 // Mock Token User
 const mockTokenPublic =
@@ -50,6 +51,7 @@ export default composeBundles(
     cacheFn: cache.set,
   }),
   createUrlBundle(),
+  datasheetPageBundle,
   modalBundle,
   notificationBundle,
   routesBundle,

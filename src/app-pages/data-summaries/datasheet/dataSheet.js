@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
@@ -14,10 +14,17 @@ import ProcedureTable from './tables/procedureTable';
 import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 
-import './data-summary.scss';
+import { createProjectOptions, createSeasonOptions } from './datasheetHelpers';
+
+import '../data-summary.scss';
 
 export default connect(
-  ({  }) => {
+  'doDatasheetLoadData',
+  'selectDatasheetItemsObject',
+  ({
+    doDatasheetLoadData,
+    datasheetItemsObject,
+  }) => {
     const [yearFilter, setYearFilter] = useState('');
     const [monthFilter, setMonthFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
@@ -33,6 +40,14 @@ export default connect(
       setSeasonFilter('');
       setSpeciesFilter('');
     };
+
+    useEffect(() => {
+      doDatasheetLoadData();
+    }, []);
+
+    useEffect(() => {
+      console.log('test datasheetItemsObject:', datasheetItemsObject);
+    }, [datasheetItemsObject]);
 
     return (
       <div className='container-fluid'>
@@ -63,7 +78,7 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={val => setProjectFilter(val)}
                   value={projectFilter}
-                  options={[]}
+                  options={createProjectOptions(datasheetItemsObject)}
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
@@ -85,7 +100,7 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={val => setSeasonFilter(val)}
                   value={seasonFilter}
-                  options={[]}
+                  options={createSeasonOptions(datasheetItemsObject)}
                 />
               </div>
               <div className='col-md-2 col-xs-4'>
