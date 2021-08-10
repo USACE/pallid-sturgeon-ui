@@ -3,8 +3,8 @@ import { classArray } from '../../utils';
 
 import './tab.scss';
 
-const TabItem = ({ tab, changeTab, index, isActive, isDisabled }) => {
-  const { title, isHidden, paddingSmall } = tab;
+const TabItem = ({ tab, changeTab, index, isActive }) => {
+  const { title, isHidden, isDisabled, paddingSmall } = tab;
 
   const spanClasses = classArray([
     'nav-link',
@@ -16,6 +16,7 @@ const TabItem = ({ tab, changeTab, index, isActive, isDisabled }) => {
   const liClasses = classArray([
     'nav-item',
     'pointer',
+    isDisabled && 'not-allowed',
     isHidden && 'd-none',
   ]);
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
@@ -7,17 +7,26 @@ import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
 import TabContainer from 'app-components/tab';
 
-import DSSearchReportTable from './tables/dsSearchReportTable';
 import FishTable from './tables/fishTable';
 import MissouriRiverTable from './tables/missouriRiverTable';
 import ProcedureTable from './tables/procedureTable';
 import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 
-import './data-summary.scss';
+import { createProjectOptions, createSeasonOptions } from './datasheetHelpers';
+
+import '../data-summary.scss';
 
 export default connect(
-  ({  }) => {
+  'doDatasheetFetch',
+  'doDatasheetLoadData',
+  'selectDatasheetItemsObject',
+  ({
+    doDatasheetFetch,
+    doDatasheetLoadData,
+    datasheetItemsObject,
+  }) => {
+    const [currentTab, setCurrentTab] = useState(0);
     const [yearFilter, setYearFilter] = useState('');
     const [monthFilter, setMonthFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
@@ -33,6 +42,23 @@ export default connect(
       setSeasonFilter('');
       setSpeciesFilter('');
     };
+
+    const fetchDatasheet = () => {
+      doDatasheetFetch(currentTab, {
+        year: yearFilter,
+        month: monthFilter,
+        project: projectFilter,
+        season: seasonFilter,
+      });
+    };
+
+    useEffect(() => {
+      doDatasheetLoadData();
+    }, []);
+
+    useEffect(() => {
+      console.log('test datasheetItemsObject:', datasheetItemsObject);
+    }, [datasheetItemsObject]);
 
     return (
       <div className='container-fluid'>
@@ -63,12 +89,13 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={val => setProjectFilter(val)}
                   value={projectFilter}
-                  options={[]}
+                  options={createProjectOptions(datasheetItemsObject)}
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
                 <label>Approval:</label>
                 <Select
+                  isDisabled
                   showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setApprovalFilter(val)}
@@ -85,12 +112,13 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={val => setSeasonFilter(val)}
                   value={seasonFilter}
-                  options={[]}
+                  options={createSeasonOptions(datasheetItemsObject)}
                 />
               </div>
               <div className='col-md-2 col-xs-4'>
                 <label>Species:</label>
                 <Select
+                  isDisabled
                   showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setSpeciesFilter(val)}
@@ -139,6 +167,7 @@ export default connect(
                 size='small'
                 className='mr-2'
                 text='Apply Filters'
+                handleClick={() => fetchDatasheet()}
               />
               <Button
                 isOutline
@@ -158,10 +187,10 @@ export default connect(
                 { title: 'Missouri River', content: <MissouriRiverTable /> },
                 { title: 'Fish', content: <FishTable /> },
                 { title: 'Supplemental', content: <SupplementalTable /> },
-                { title: 'DS Search Report', content: <DSSearchReportTable /> },
-                { title: 'Telemetry', content: <TelemetryTable /> },
-                { title: 'Procedure', content: <ProcedureTable /> },
+                { title: 'Telemetry', content: <TelemetryTable />, isDisabled: true },
+                { title: 'Procedure', content: <ProcedureTable />, isDisabled: true },
               ]}
+              onTabChange={(_str, ind) => setCurrentTab(ind)}
             />
             <Pagination
               itemCount={0}

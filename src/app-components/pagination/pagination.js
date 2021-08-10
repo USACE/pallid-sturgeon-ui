@@ -8,7 +8,7 @@ import './pagination.scss';
 
 const Pagination = ({
   itemCount = 0,
-  handlePageChange = () => {},
+  handlePageChange = (_pageNumber, _itemsPerPage) => {},
   defaultItemsPerPage = '10',
   className = ''
 }) => {
@@ -51,7 +51,7 @@ const Pagination = ({
           onChange={val => setItemsPerPage(val)}
           options={[
             { value: '10' },
-            { value: '25' },
+            { value: '20' },
             { value: '50' },
           ]}
         />

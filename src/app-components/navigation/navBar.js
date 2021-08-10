@@ -10,7 +10,7 @@ import './navigation.scss';
 const dataSummaryLinks = [
   '/data-sheet',
   '/genetics-card-summary',
-  '/report-summmaries',
+  '/search-reports',
   '/priority-fish',
   '/last-location',
   '/tag-replacement',

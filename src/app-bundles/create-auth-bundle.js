@@ -98,7 +98,7 @@ const createAuthBundle = (opts) => {
       if (isExpired) {
         store.doAuthLogout();
       } else {
-        window.setTimeout(store.doAuthVerifyToken, config.verifyInterval);
+        // window.setTimeout(store.doAuthVerifyToken, config.verifyInterval);
       }
     },
 
