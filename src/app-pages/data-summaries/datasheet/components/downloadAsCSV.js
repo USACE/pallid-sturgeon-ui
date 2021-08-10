@@ -1,25 +1,32 @@
 import React from 'react';
+import { CSVLink } from 'react-csv';
 
-import Button from 'app-components/button';
 import Icon from 'app-components/icon';
+import { classArray } from 'utils';
 
 const DownloadAsCSV = ({
-  content = null,
+  content = [],
+  className = '',
 }) => {
-  const downloadCSV = () => {
-    console.log('download as .csv: ', content);
-  };
+  const classes = classArray([
+    'mb-3',
+    'mt-1',
+    'float-right',
+    'btn',
+    'btn-sm',
+    'btn-outline-info',
+    className,
+  ]);
 
   return (
-    <Button
-      isOutline
-      size='small'
-      variant='info'
-      className='mb-3'
-      text='Export as CSV'
-      icon={<Icon icon='download' />}
-      handleClick={downloadCSV}
-    />
+    <CSVLink
+      className={classes}
+      filename={`search-results-${new Date().toISOString()}.csv`}
+      data={content}
+    >
+      <Icon icon='download' className='mr-1' />
+      Export as CSV
+    </CSVLink>
   );
 };
 

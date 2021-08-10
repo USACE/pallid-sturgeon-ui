@@ -11,6 +11,7 @@ import NotFound from '../app-pages/404';
 import SignUp from '../app-pages/signup/signup';
 import SiteSearch from '../app-pages/data-entry/siteSearch';
 import SitesList from '../app-pages/data-entry/sitesList';
+import SearchReports from 'app-pages/data-summaries/search-reports';
 
 export default createRouteBundle(
   {
@@ -20,6 +21,7 @@ export default createRouteBundle(
     '/error-log': ErrorLog,
     '/data-sheet': DataSheet,
     '/genetics-card-summary': GeneticCard,
+    '/search-reports': SearchReports,
     '/logout': Logout,
     '/map': Map,
     '/signup': SignUp,

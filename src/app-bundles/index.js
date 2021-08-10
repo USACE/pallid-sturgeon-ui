@@ -7,11 +7,12 @@ import createAuthBundle from './create-auth-bundle';
 import createJwtApiBundle from './create-jwt-api-bundle';
 import cache from '../cache';
 
-import modalBundle from './modal-bundle';
-import notificationBundle from './notification-bundle';
-import routesBundle from './routes-bundle';
-import uploadBundle from './upload-bundle';
 import datasheetPageBundle from './datasheet-page-bundle';
+import notificationBundle from './notification-bundle';
+import modalBundle from './modal-bundle';
+import routesBundle from './routes-bundle';
+import searchReportsPageBundle from './search-reports-page-bundle';
+import uploadBundle from './upload-bundle';
 
 // Mock Token User
 const mockTokenPublic =
@@ -55,5 +56,6 @@ export default composeBundles(
   modalBundle,
   notificationBundle,
   routesBundle,
+  searchReportsPageBundle,
   uploadBundle,
 );

@@ -7,7 +7,6 @@ import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
 import TabContainer from 'app-components/tab';
 
-import DSSearchReportTable from './tables/dsSearchReportTable';
 import FishTable from './tables/fishTable';
 import MissouriRiverTable from './tables/missouriRiverTable';
 import ProcedureTable from './tables/procedureTable';
@@ -173,7 +172,6 @@ export default connect(
                 { title: 'Missouri River', content: <MissouriRiverTable /> },
                 { title: 'Fish', content: <FishTable /> },
                 { title: 'Supplemental', content: <SupplementalTable /> },
-                { title: 'DS Search Report', content: <DSSearchReportTable /> },
                 { title: 'Telemetry', content: <TelemetryTable /> },
                 { title: 'Procedure', content: <ProcedureTable /> },
               ]}
