@@ -37,7 +37,7 @@ export default createRestBundle({
       });
     },
 
-    doDatasheetFetch: (tab, filters) => ({ dispatch, store, apiGet }) => {
+    doDatasheetFetch: (tab, filters) => ({ dispatch, apiGet }) => {
       dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
       const uris = [
         '/missouriDataSummary',
@@ -45,7 +45,11 @@ export default createRestBundle({
         '/suppDataSummary',
       ];
 
-      const url = `/psapi${uris[tab]}`;
+      const queryKeys = Object.keys(filters).filter(key => filters[key]);
+      const strings = queryKeys.map(key => `${key}=${filters[key]}`);
+      const query = `?${strings.join('&')}`;
+
+      const url = `/psapi${uris[tab]}${query}`;
 
       apiGet(url, (_err, body) => {
         dispatch({
