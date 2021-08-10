@@ -18,12 +18,15 @@ import { createProjectOptions, createSeasonOptions } from './datasheetHelpers';
 import '../data-summary.scss';
 
 export default connect(
+  'doDatasheetFetch',
   'doDatasheetLoadData',
   'selectDatasheetItemsObject',
   ({
+    doDatasheetFetch,
     doDatasheetLoadData,
     datasheetItemsObject,
   }) => {
+    const [currentTab, setCurrentTab] = useState(0);
     const [yearFilter, setYearFilter] = useState('');
     const [monthFilter, setMonthFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
@@ -38,6 +41,15 @@ export default connect(
       setApprovalFilter('');
       setSeasonFilter('');
       setSpeciesFilter('');
+    };
+
+    const fetchDatasheet = () => {
+      doDatasheetFetch(currentTab, {
+        year: yearFilter,
+        month: monthFilter,
+        project: projectFilter,
+        season: seasonFilter,
+      });
     };
 
     useEffect(() => {
@@ -83,6 +95,7 @@ export default connect(
               <div className='col-md-3 col-xs-12'>
                 <label>Approval:</label>
                 <Select
+                  isDisabled
                   showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setApprovalFilter(val)}
@@ -105,6 +118,7 @@ export default connect(
               <div className='col-md-2 col-xs-4'>
                 <label>Species:</label>
                 <Select
+                  isDisabled
                   showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setSpeciesFilter(val)}
@@ -153,6 +167,7 @@ export default connect(
                 size='small'
                 className='mr-2'
                 text='Apply Filters'
+                handleClick={() => fetchDatasheet()}
               />
               <Button
                 isOutline
@@ -172,9 +187,10 @@ export default connect(
                 { title: 'Missouri River', content: <MissouriRiverTable /> },
                 { title: 'Fish', content: <FishTable /> },
                 { title: 'Supplemental', content: <SupplementalTable /> },
-                { title: 'Telemetry', content: <TelemetryTable /> },
-                { title: 'Procedure', content: <ProcedureTable /> },
+                { title: 'Telemetry', content: <TelemetryTable />, isDisabled: true },
+                { title: 'Procedure', content: <ProcedureTable />, isDisabled: true },
               ]}
+              onTabChange={(_str, ind) => setCurrentTab(ind)}
             />
             <Pagination
               itemCount={0}

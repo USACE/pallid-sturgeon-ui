@@ -29,8 +29,6 @@ export default createRestBundle({
       const url = '/psapi/seasons';
 
       apiGet(url, (_err, body) => {
-        console.log('test body: ', body);
-
         dispatch({
           type: 'DATASHEETS_UPDATED_SEASONS',
           payload: body,
@@ -38,14 +36,35 @@ export default createRestBundle({
         dispatch({ type: 'DATASHEET_FETCH_SEASONS_FINISHED' });
       });
     },
+
+    doDatasheetFetch: (tab, filters) => ({ dispatch, store, apiGet }) => {
+      dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
+      const uris = [
+        '/missouriDataSummary',
+        '/fishDataSummary',
+        '/suppDataSummary',
+      ];
+
+      const url = `/psapi${uris[tab]}`;
+
+      apiGet(url, (_err, body) => {
+        dispatch({
+          type: 'DATASHEETS_UPDATED_DATA',
+          payload: body,
+        });
+        dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
+      });
+    },
   },
 
   reduceFurther: (state, { type, payload }) => {
     switch (type) {
       case 'DATASHEETS_UPDATED_PROJECTS':
-        return Object.assign({}, state, { projects: payload });
+        return { ...state, projects: payload };
       case 'DATASHEETS_UPDATED_SEASONS':
-        return Object.assign({}, state, { seasons: payload });
+        return { ...state, seasons: payload };
+      case 'DATASHEETS_UPDATED_DATA':
+        return { ...state, data: payload };
       default:
         return state;
     }

@@ -19,7 +19,7 @@ const TabContainer = ({
   tabs = [],
   tabListClass = '',
   contentClass = '',
-  onTabChange = () => {},
+  onTabChange = (_title, _index) => {},
   theme = 'default',
   defaultTab = 0,
   changeTabDelay = 0,
@@ -50,7 +50,7 @@ const TabContainer = ({
             index={i}
             changeTab={changeTab}
             isActive={tabIndex === i}
-            isDisabled={isDisabled} />
+          />
         ))}
       </ul>
       <section className={`section mt-3 ${contentClass}`}>

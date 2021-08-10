@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { classArray } from 'utils';
 
 import usePrevious from '../../customHooks/usePrevious';
 
@@ -43,6 +44,12 @@ const Select = ({
   const placeholderOption = <Option value='' text={placeholderText} />;
   const showPlaceholder = showPlaceholderOption && (showPlaceholderWhileValid || !currentOption);
 
+  const classes = classArray([
+    'custom-select',
+    isDisabled && 'not-allowed',
+    className,
+  ]);
+
   const handleChange = e => setCurrentOption(e.target.value);
 
   /** Allow user to manually override internal currentOption state if value changes but internal state does not. */
@@ -62,7 +69,7 @@ const Select = ({
   return (
     <select
       {...customProps}
-      className={`custom-select ${className}`}
+      className={classes}
       onChange={(e) => handleChange(e)}
       title={title}
       value={currentOption}

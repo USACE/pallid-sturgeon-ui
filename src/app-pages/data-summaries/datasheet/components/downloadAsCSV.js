@@ -11,7 +11,6 @@ const DownloadAsCSV = ({
   const classes = classArray([
     'mb-3',
     'mt-1',
-    'float-right',
     'btn',
     'btn-sm',
     'btn-outline-info',
