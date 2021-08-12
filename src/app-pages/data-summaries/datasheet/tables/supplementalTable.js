@@ -2,11 +2,12 @@ import React from 'react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import DownloadAsCSV from '../components/downloadAsCSV';
+import Pagination from 'app-components/pagination/pagination';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-const SupplementalTable = ({ rowData = [] }) => (
+const SupplementalTable = ({ rowData = [], itemCount = 0 }) => (
   <>
     <DownloadAsCSV />
     <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
@@ -27,6 +28,11 @@ const SupplementalTable = ({ rowData = [] }) => (
         <AgGridColumn field='checkedby' />
       </AgGridReact>
     </div>
+    <Pagination
+      className='mt-2'
+      defaultItemsPerPage={20}
+      itemCount={itemCount}
+    />
   </>
 );
 

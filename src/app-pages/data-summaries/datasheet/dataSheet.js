@@ -5,9 +5,11 @@ import Button from 'app-components/button';
 import Card from 'app-components/card';
 import Select from 'app-components/select';
 import TabContainer from 'app-components/tab';
-import TableContainer from './components/tableContainer';
 
+import FishTable from './tables/fishTable';
+import MissouriRiverTable from './tables/missouriRiverTable';
 import ProcedureTable from './tables/procedureTable';
+import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 
 import { createDropdownOptions } from './datasheetHelpers';
@@ -31,7 +33,8 @@ export default connect(
     const [seasonFilter, setSeasonFilter] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
 
-    const { projects = [], seasons = [] } = datasheetItemsObject;
+    const { projects = [], seasons = [], data = {} } = datasheetItemsObject;
+    const { missouriRiverData = {}, fishData = {}, suppData = {} } = data;
 
     const clearAllFilters = () => {
       setYearFilter('');
@@ -179,9 +182,31 @@ export default connect(
           <Card.Body>
             <TabContainer
               tabs={[
-                { title: 'Missouri River', content: <TableContainer tab='missouriRiver' /> },
-                { title: 'Fish', content: <TableContainer tab='fish' /> },
-                { title: 'Supplemental', content: <TableContainer tab='supplemental' /> },
+                {
+                  title: 'Missouri River',
+                  content: (
+                    <MissouriRiverTable
+                      rowData={missouriRiverData.items}
+                      itemCount={missouriRiverData.totalCount}
+                    />
+                  ),
+                }, {
+                  title: 'Fish',
+                  content: (
+                    <FishTable
+                      rowData={fishData.items}
+                      itemCount={fishData.totalCount}
+                    />
+                  ),
+                }, {
+                  title: 'Supplemental',
+                  content: (
+                    <SupplementalTable
+                      rowData={suppData.items}
+                      itemCount={suppData.totalCount}
+                    />
+                  ),
+                },
                 { title: 'Telemetry', content: <TelemetryTable />, isDisabled: true },
                 { title: 'Procedure', content: <ProcedureTable />, isDisabled: true },
               ]}
