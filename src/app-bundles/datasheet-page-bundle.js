@@ -39,22 +39,28 @@ export default createRestBundle({
 
     doDatasheetFetch: (tab, filters) => ({ dispatch, apiGet }) => {
       dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
-      const uris = [
-        '/missouriDataSummary',
-        '/fishDataSummary',
-        '/suppDataSummary',
-      ];
 
+      const uris = {
+        missouriRiverData: '/missouriDataSummary',
+        fishData: '/fishDataSummary',
+        suppData: '/suppDataSummary',
+      };
+
+      const uriKeys = Object.keys(uris);
+      const uriValues = Object.values(uris);
       const queryKeys = Object.keys(filters).filter(key => filters[key]);
       const strings = queryKeys.map(key => `${key}=${filters[key]}`);
-      const query = `?${strings.join('&')}`;
+      const query = `?${strings.join('&')}&officeCode=MO`;
 
-      const url = `/psapi${uris[tab]}${query}`;
+      const url = `/psapi${uriValues[tab]}${query}`;
 
       apiGet(url, (_err, body) => {
         dispatch({
           type: 'DATASHEETS_UPDATED_DATA',
-          payload: body,
+          payload: {
+            key: uriKeys[tab],
+            data: body,
+          }
         });
         dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
       });
@@ -68,7 +74,13 @@ export default createRestBundle({
       case 'DATASHEETS_UPDATED_SEASONS':
         return { ...state, seasons: payload };
       case 'DATASHEETS_UPDATED_DATA':
-        return { ...state, data: payload };
+        return {
+          ...state,
+          data: {
+            ...state.data,
+            [payload.key]: payload.data,
+          }
+        };
       default:
         return state;
     }
