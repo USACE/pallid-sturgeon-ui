@@ -35,9 +35,6 @@ const SearchReports = connect(
       }
     }, [pageNumber, itemsPerPage]);
 
-    // console.log('test searchReportsData', searchReportsData);
-    // console.log('test searchReportsTotalResults', searchReportsTotalResults);
-
     return (
       <Card className='m-3'>
         <Card.Header text='Search Reports' />
@@ -47,7 +44,7 @@ const SearchReports = connect(
               <SearchInput />
             </div>
             <div className='col-3'>
-              <DownloadAsCSV className='float-right' content={searchReportsData} />
+              <DownloadAsCSV className='float-right' content={searchReportsData} filePrefix='search-reports' />
             </div>
           </div>
           <DSSearchReportTable rowData={searchReportsData} />
