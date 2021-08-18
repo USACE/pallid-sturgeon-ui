@@ -7,15 +7,15 @@ import Pagination from 'app-components/pagination/pagination';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-const FishTable = ({ rowData = [], itemCount = 0 }) => (
+const FishTable = ({ rowData = [], itemCount = 0, handleChange = () => {} }) => (
   <>
     <DownloadAsCSV content={rowData} filePrefix='fish-data' />
     <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
       <AgGridReact rowData={rowData}>
-        <AgGridColumn field='uniqueID' sortable />
-        <AgGridColumn field='fishId' sortable />
+        <AgGridColumn field='uniqueID' sortable unSortIcon />
+        <AgGridColumn field='fishId' sortable unSortIcon />
         <AgGridColumn field='year' />
-        <AgGridColumn field='fieldOffice' sortable />
+        <AgGridColumn field='fieldOffice' sortable unSortIcon />
         <AgGridColumn field='project' />
         <AgGridColumn field='segment' />
         <AgGridColumn field='season' />
@@ -32,6 +32,7 @@ const FishTable = ({ rowData = [], itemCount = 0 }) => (
       className='mt-2'
       defaultItemsPerPage={20}
       itemCount={itemCount}
+      handlePageChange={(pageNumber, pageSize) => handleChange(pageNumber, pageSize)}
     />
   </>
 );

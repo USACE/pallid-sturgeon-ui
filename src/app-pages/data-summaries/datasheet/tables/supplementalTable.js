@@ -2,22 +2,21 @@ import React from 'react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import DownloadAsCSV from '../components/downloadAsCSV';
-import Pagination from 'app-components/pagination/pagination';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-const SupplementalTable = ({ rowData = [], itemCount = 0 }) => (
+const SupplementalTable = ({ rowData = [] }) => (
   <>
     <DownloadAsCSV content={rowData} filePrefix='supplemental-data' />
     <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
       <AgGridReact rowData={rowData}>
         <AgGridColumn field='fishCode' />
-        <AgGridColumn field='fishId' sortable />
-        <AgGridColumn field='uniqueID' sortable />
+        <AgGridColumn field='fishId' sortable unSortIcon />
+        <AgGridColumn field='uniqueID' sortable unSortIcon />
         <AgGridColumn field='year' />
-        <AgGridColumn field='suppId' sortable />
-        <AgGridColumn field='fieldOffice' sortable />
+        <AgGridColumn field='suppId' sortable unSortIcon />
+        <AgGridColumn field='fieldOffice' sortable unSortIcon />
         <AgGridColumn field='project' />
         <AgGridColumn field='segment' />
         <AgGridColumn field='season' />
@@ -28,11 +27,6 @@ const SupplementalTable = ({ rowData = [], itemCount = 0 }) => (
         <AgGridColumn field='checkedby' />
       </AgGridReact>
     </div>
-    <Pagination
-      className='mt-2'
-      defaultItemsPerPage={20}
-      itemCount={itemCount}
-    />
   </>
 );
 

@@ -3,6 +3,7 @@ import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
+import Pagination from 'app-components/pagination/pagination';
 import Select from 'app-components/select';
 import TabContainer from 'app-components/tab';
 
@@ -13,6 +14,7 @@ import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 
 import { createDropdownOptions } from './datasheetHelpers';
+import usePrevious from 'customHooks/usePrevious';
 
 import '../data-summary.scss';
 
@@ -33,8 +35,14 @@ export default connect(
     const [seasonFilter, setSeasonFilter] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
 
+    const [pageNumber, setPageNumber] = useState(0);
+    const [itemsPerPage, setItemsPerPage] = useState(20);
+    const prevPageNumber = usePrevious(pageNumber);
+    const prevItemsPerPage = usePrevious(itemsPerPage);
+
     const { projects = [], seasons = [], data = {} } = datasheetItemsObject;
     const { missouriRiverData = {}, fishData = {}, suppData = {} } = data;
+    const tabs = ['missouriRiverData', 'fishData',  'suppData'];
 
     const clearAllFilters = () => {
       setYearFilter('');
@@ -45,14 +53,27 @@ export default connect(
       setSpeciesFilter('');
     };
 
-    const fetchDatasheet = () => {
+    const fetchDatasheet = (page = 0, size = 20) => {
       doDatasheetFetch(currentTab, {
         year: yearFilter,
         month: monthFilter,
         project: projectFilter,
         season: seasonFilter,
+        page,
+        size,
       });
     };
+
+    const updatePagination = (pageNumber, itemsPerPage) => {
+      setPageNumber(pageNumber);
+      setItemsPerPage(itemsPerPage);
+    };
+
+    useEffect(() => {
+      if (pageNumber !== prevPageNumber || itemsPerPage !== prevItemsPerPage) {
+        fetchDatasheet(pageNumber, itemsPerPage);
+      }
+    }, [pageNumber, itemsPerPage, fetchDatasheet]);
 
     useEffect(() => {
       doDatasheetLoadData();
@@ -184,33 +205,24 @@ export default connect(
               tabs={[
                 {
                   title: 'Missouri River',
-                  content: (
-                    <MissouriRiverTable
-                      rowData={missouriRiverData.items}
-                      itemCount={missouriRiverData.totalCount}
-                    />
-                  ),
+                  content: <MissouriRiverTable rowData={missouriRiverData.items} />,
                 }, {
                   title: 'Fish',
-                  content: (
-                    <FishTable
-                      rowData={fishData.items}
-                      itemCount={fishData.totalCount}
-                    />
-                  ),
+                  content: <FishTable rowData={fishData.items} />,
                 }, {
                   title: 'Supplemental',
-                  content: (
-                    <SupplementalTable
-                      rowData={suppData.items}
-                      itemCount={suppData.totalCount}
-                    />
-                  ),
+                  content: <SupplementalTable rowData={suppData.items}/>,
                 },
                 { title: 'Telemetry', content: <TelemetryTable />, isDisabled: true },
                 { title: 'Procedure', content: <ProcedureTable />, isDisabled: true },
               ]}
               onTabChange={(_str, ind) => setCurrentTab(ind)}
+            />
+            <Pagination
+              className='mt-2'
+              defaultItemsPerPage={20}
+              itemCount={(data[tabs[currentTab]] || {}).totalCount}
+              handlePageChange={updatePagination}
             />
           </Card.Body>
         </Card>
