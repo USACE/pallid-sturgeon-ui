@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
-import Pagination from 'app-components/pagination';
+import Pagination from 'app-components/pagination/pagination';
 import Select from 'app-components/select';
 import TabContainer from 'app-components/tab';
 
@@ -13,7 +13,8 @@ import ProcedureTable from './tables/procedureTable';
 import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 
-import { createProjectOptions, createSeasonOptions } from './datasheetHelpers';
+import { createDropdownOptions } from './datasheetHelpers';
+import usePrevious from 'customHooks/usePrevious';
 
 import '../data-summary.scss';
 
@@ -34,6 +35,15 @@ export default connect(
     const [seasonFilter, setSeasonFilter] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
 
+    const [pageNumber, setPageNumber] = useState(0);
+    const [itemsPerPage, setItemsPerPage] = useState(20);
+    const prevPageNumber = usePrevious(pageNumber);
+    const prevItemsPerPage = usePrevious(itemsPerPage);
+
+    const { projects = [], seasons = [], data = {} } = datasheetItemsObject;
+    const { missouriRiverData = {}, fishData = {}, suppData = {} } = data;
+    const tabs = ['missouriRiverData', 'fishData',  'suppData'];
+
     const clearAllFilters = () => {
       setYearFilter('');
       setMonthFilter('');
@@ -43,22 +53,31 @@ export default connect(
       setSpeciesFilter('');
     };
 
-    const fetchDatasheet = () => {
+    const fetchDatasheet = (page = 0, size = 20) => {
       doDatasheetFetch(currentTab, {
         year: yearFilter,
         month: monthFilter,
         project: projectFilter,
         season: seasonFilter,
+        page,
+        size,
       });
     };
+
+    const updatePagination = (pageNumber, itemsPerPage) => {
+      setPageNumber(pageNumber);
+      setItemsPerPage(itemsPerPage);
+    };
+
+    useEffect(() => {
+      if (pageNumber !== prevPageNumber || itemsPerPage !== prevItemsPerPage) {
+        fetchDatasheet(pageNumber, itemsPerPage);
+      }
+    }, [pageNumber, itemsPerPage, fetchDatasheet]);
 
     useEffect(() => {
       doDatasheetLoadData();
     }, []);
-
-    useEffect(() => {
-      console.log('test datasheetItemsObject:', datasheetItemsObject);
-    }, [datasheetItemsObject]);
 
     return (
       <div className='container-fluid'>
@@ -89,7 +108,7 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={val => setProjectFilter(val)}
                   value={projectFilter}
-                  options={createProjectOptions(datasheetItemsObject)}
+                  options={createDropdownOptions(projects)}
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
@@ -112,7 +131,7 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={val => setSeasonFilter(val)}
                   value={seasonFilter}
-                  options={createSeasonOptions(datasheetItemsObject)}
+                  options={createDropdownOptions(seasons)}
                 />
               </div>
               <div className='col-md-2 col-xs-4'>
@@ -135,18 +154,18 @@ export default connect(
                   onChange={val => setMonthFilter(val)}
                   value={monthFilter}
                   options={[
-                    { value: 'January' },
-                    { value: 'February' },
-                    { value: 'March' },
-                    { value: 'April' },
-                    { value: 'May' },
-                    { value: 'June' },
-                    { value: 'July' },
-                    { value: 'August' },
-                    { value: 'September' },
-                    { value: 'October' },
-                    { value: 'November' },
-                    { value: 'December' },
+                    { value: 1, text: 'January' },
+                    { value: 2, text: 'February' },
+                    { value: 3, text: 'March' },
+                    { value: 4, text: 'April' },
+                    { value: 5, text: 'May' },
+                    { value: 6, text: 'June' },
+                    { value: 7, text: 'July' },
+                    { value: 8, text: 'August' },
+                    { value: 9, text: 'September' },
+                    { value: 10, text: 'October' },
+                    { value: 11, text: 'November' },
+                    { value: 12, text: 'December' },
                   ]}
                 />
               </div>
@@ -184,18 +203,26 @@ export default connect(
           <Card.Body>
             <TabContainer
               tabs={[
-                { title: 'Missouri River', content: <MissouriRiverTable /> },
-                { title: 'Fish', content: <FishTable /> },
-                { title: 'Supplemental', content: <SupplementalTable /> },
+                {
+                  title: 'Missouri River',
+                  content: <MissouriRiverTable rowData={missouriRiverData.items} />,
+                }, {
+                  title: 'Fish',
+                  content: <FishTable rowData={fishData.items} />,
+                }, {
+                  title: 'Supplemental',
+                  content: <SupplementalTable rowData={suppData.items}/>,
+                },
                 { title: 'Telemetry', content: <TelemetryTable />, isDisabled: true },
                 { title: 'Procedure', content: <ProcedureTable />, isDisabled: true },
               ]}
               onTabChange={(_str, ind) => setCurrentTab(ind)}
             />
             <Pagination
-              itemCount={0}
               className='mt-2'
-              handlePageChange={() => {}}
+              defaultItemsPerPage={20}
+              itemCount={(data[tabs[currentTab]] || {}).totalCount}
+              handlePageChange={updatePagination}
             />
           </Card.Body>
         </Card>

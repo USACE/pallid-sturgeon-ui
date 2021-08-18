@@ -12,7 +12,7 @@ const TelemetryTable = () => (
     <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
       <AgGridReact rowData={[]}>
         <AgGridColumn field='Bend' />
-        <AgGridColumn field='Conductivity' sortable />
+        <AgGridColumn field='Conductivity' sortable unSortIcon />
         <AgGridColumn field='Radio Tag Number' />
         <AgGridColumn field='Frequency' />
         <AgGridColumn field='Capture Time' />

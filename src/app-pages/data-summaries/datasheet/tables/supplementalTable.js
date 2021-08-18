@@ -6,25 +6,25 @@ import DownloadAsCSV from '../components/downloadAsCSV';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-const SupplementalTable = () => (
+const SupplementalTable = ({ rowData = [] }) => (
   <>
-    <DownloadAsCSV />
+    <DownloadAsCSV content={rowData} filePrefix='supplemental-data' />
     <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
-      <AgGridReact rowData={[]}>
-        <AgGridColumn field='Fish Code' />
-        <AgGridColumn field='Fish ID' sortable />
-        <AgGridColumn field='Unique ID' sortable />
-        <AgGridColumn field='Year' />
-        <AgGridColumn field='Supp ID' sortable />
-        <AgGridColumn field='Field Office' sortable />
-        <AgGridColumn field='Project' />
-        <AgGridColumn field='Segment' />
-        <AgGridColumn field='Season' />
-        <AgGridColumn field='Bend' />
-        <AgGridColumn field='Bend R/N' />
-        <AgGridColumn field='Bend River Mile' />
-        <AgGridColumn field='Hatchery Origin' />
-        <AgGridColumn field='Checkby' />
+      <AgGridReact rowData={rowData}>
+        <AgGridColumn field='fishCode' />
+        <AgGridColumn field='fishId' sortable unSortIcon />
+        <AgGridColumn field='uniqueID' sortable unSortIcon />
+        <AgGridColumn field='year' />
+        <AgGridColumn field='suppId' sortable unSortIcon />
+        <AgGridColumn field='fieldOffice' sortable unSortIcon />
+        <AgGridColumn field='project' />
+        <AgGridColumn field='segment' />
+        <AgGridColumn field='season' />
+        <AgGridColumn field='bend' />
+        <AgGridColumn field='bendrn' headerName='Bend R/N' />
+        <AgGridColumn field='bendRiverMile' />
+        <AgGridColumn field='hatcheryOrigin' />
+        <AgGridColumn field='checkedby' />
       </AgGridReact>
     </div>
   </>

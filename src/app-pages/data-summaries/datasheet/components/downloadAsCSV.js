@@ -7,6 +7,7 @@ import { classArray } from 'utils';
 const DownloadAsCSV = ({
   content = [],
   className = '',
+  filePrefix = ''
 }) => {
   const classes = classArray([
     'mb-3',
@@ -20,7 +21,7 @@ const DownloadAsCSV = ({
   return (
     <CSVLink
       className={classes}
-      filename={`search-results-${new Date().toISOString()}.csv`}
+      filename={`${filePrefix}-${new Date().toISOString()}.csv`}
       data={content}
     >
       <Icon icon='download' className='mr-1' />

@@ -38,12 +38,12 @@ export default {
     store.doSearchReportsFetch();
   },
 
-  doSearchReportsFetch: (pageNumber = null, numberPerPage = null) => ({ dispatch, store, apiGet }) => {
+  doSearchReportsFetch: (pageNumber = null, numberPerPage = null, searchString = '') => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'SEARCH_REPORTS_FETCH_START' });
     const page = pageNumber !== null ? pageNumber : store.selectSearchReportsPageNumber();
     const size = numberPerPage !== null ? numberPerPage : store.selectSearchReportsResultsPerPage();
 
-    const url = `/psapi/searchDataSummary?page=${page}&size=${size}`;
+    const url = `/psapi/searchDataSummary?page=${page}&size=${size}&filter=${searchString}`;
 
     apiGet(url, (err, body) => {
       if (!err) {

@@ -9,7 +9,6 @@ import Logout from '../app-pages/logout';
 import Map from '../app-pages/map/map';
 import NotFound from '../app-pages/404';
 import SignUp from '../app-pages/signup/signup';
-import SiteSearch from '../app-pages/data-entry/siteSearch';
 import SitesList from '../app-pages/data-entry/sitesList';
 import SearchReports from 'app-pages/data-summaries/search-reports';
 
@@ -25,7 +24,6 @@ export default createRouteBundle(
     '/logout': Logout,
     '/map': Map,
     '/signup': SignUp,
-    '/site-search': SiteSearch,
     '/sites-list': SitesList,
     '*': NotFound,
   }
