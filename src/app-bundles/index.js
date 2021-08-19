@@ -13,6 +13,7 @@ import modalBundle from './modal-bundle';
 import routesBundle from './routes-bundle';
 import searchReportsPageBundle from './search-reports-page-bundle';
 import uploadBundle from './upload-bundle';
+import authBundle from './auth-bundle';
 
 // Mock Token User
 const mockTokenPublic =
@@ -58,4 +59,5 @@ export default composeBundles(
   routesBundle,
   searchReportsPageBundle,
   uploadBundle,
+  authBundle,
 );

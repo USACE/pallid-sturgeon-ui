@@ -33,12 +33,12 @@ const utilityLinks = [
 ];
 
 const NavBar = connect(
-  'doAuthLogin',
-  'selectAuthIsLoggedIn',
+  'doAuthenticate',
+  'selectAuthLoggedIn',
   'selectPathname',
   ({
-    doAuthLogin,
-    authIsLoggedIn,
+    doAuthenticate,
+    authLoggedIn,
     pathname,
   }) => {
     const [show, setShow] = useState(false);
@@ -72,7 +72,7 @@ const NavBar = connect(
         </button>
         <div className={navCollapseClasses}>
           <ul className='navbar-nav ml-auto'>
-            {authIsLoggedIn ? (
+            {authLoggedIn ? (
               <>
                 <NavItem href={['/']}>Home</NavItem>
                 <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
@@ -83,7 +83,7 @@ const NavBar = connect(
                 <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
               </>
             ) : (
-              <NavItem handler={() => doAuthLogin()}>Login</NavItem>
+              <NavItem handler={() => doAuthenticate()}>Login</NavItem>
             )}
           </ul>
         </div>
