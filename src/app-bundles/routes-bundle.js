@@ -1,21 +1,22 @@
 import { createRouteBundle } from 'redux-bundler';
 
+import DataEntry from '../app-pages/data-entry';
 import DataSheet from '../app-pages/data-summaries/datasheet/dataSheet';
 import DataUpload from '../app-pages/data-upload/dataUpload';
-import ErrorLog from '../app-pages/data-entry/errorLog';
+import ErrorLog from '../app-pages/utilities/errorLog';
 import GeneticCard from '../app-pages/data-summaries/geneticCard';
 import Home from '../app-pages/home/home';
 import Logout from '../app-pages/logout';
 import Map from '../app-pages/map/map';
 import NotFound from '../app-pages/404';
 import SignUp from '../app-pages/signup/signup';
-import SitesList from '../app-pages/data-entry/sitesList';
 import SearchReports from 'app-pages/data-summaries/search-reports';
 
 export default createRouteBundle(
   {
     '': Home,
     '/': Home,
+    '/data-entry': DataEntry,
     '/data-upload': DataUpload,
     '/error-log': ErrorLog,
     '/data-sheet': DataSheet,
@@ -24,7 +25,6 @@ export default createRouteBundle(
     '/logout': Logout,
     '/map': Map,
     '/signup': SignUp,
-    '/sites-list': SitesList,
     '*': NotFound,
   }
 );

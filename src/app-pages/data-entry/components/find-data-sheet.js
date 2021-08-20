@@ -7,126 +7,109 @@ import Select from 'app-components/select';
 
 import '../dataentry.scss';
 
-const Table = connect(
+const FindDataSheet = connect(
   ({
 
   }) => {
+    const [pitTag, setPitTag] = useState('');
     const [tableId, setTableId] = useState('');
     const [fieldId, setFieldId] = useState('');
     const [geneticVial, setGeneticVial] = useState('');
-    const [pitTag, setPitTag] = useState('');
+    const [dataSheetType, setDataSheetType] = useState('');
 
-    const currentYear = (new Date()).getFullYear();
-    const years = Array.from(new Array(25), (val, index) => currentYear - index);
-    
     return (
       <>
         <div className='row d-flex flex-row'>
-          <div className='col-sm-4'>
+          <div className='col-md-4 col-sm-12'>
             <div className='row'>
               <div className='col-md-6'>
                 <div className='form-group'>
                   <label><small>Select Data Sheet Type</small></label>
                   <div className='select'>
                     <Select
-                      // onChange={value => doChartUpdateType(value)}
-                      placeholderText='Datasheet Type'
-                      data-size='3'
+                      onChange={value => setDataSheetType(value)}
+                      value={dataSheetType}
+                      placeholderText='Datasheet Type...'
                       options={[
-                        { value: '2021', text: '2021' },
-                        { value: '2020', text: '2020' },
-                        { value: '2019', text: '2019' },
+                        { value: 'missouriRiver', text: 'Missouri River' },
+                        { value: 'fish', text: 'Fish' },
+                        { value: 'supplemental', text: 'Supplemental' },
+                        { value: 'telemetry', text: 'Telemetry' },
+                        { value: 'procedures', text: 'Procedures' },
+                        { value: 'searchEffort', text: 'Search Effort' },
                       ]}
                     />
                   </div>
                 </div>
               </div>
-              <div className='col-md-6 pl-0'>
+              <div className='col-md-6'>
                 <div className='form-group'>
                   <label><small>Enter Table ID</small></label>
                   <input
-                    value={tableId}
-                    onChange={(e) => {
-                      setTableId(e.target.value);
-                    }}
-                    className='form-control'
                     type='text'
-                    placeholder='Table ID'
+                    className='form-control'
+                    placeholder='Table ID...'
+                    value={tableId}
+                    onChange={e => setTableId(e.target.value)}
                   />
                 </div>
               </div>
             </div>
           </div>
-          <div className='col-sm-0.5 pt-4 pl-2 pr-3'>
-            <span>OR</span>
-          </div>
-          <div className='col-sm-2 pl-0'>
+          <span className='pt-4 mr-1'>OR</span>
+          <div className='col-md-2 col-sm-4'>
             <div className='form-group'>
               <label><small>Enter Field ID</small></label>
               <input
-                value={fieldId}
-                onChange={(e) => {
-                  setFieldId(e.target.value);
-                }}
-                className='form-control'
                 type='text'
-                placeholder='Field ID'
+                className='form-control'
+                placeholder='Field ID...'
+                value={fieldId}
+                onChange={e => setFieldId(e.target.value)}
               />
             </div>
           </div>
-          <div className='col-sm-0.5 pt-4 pl-2 pr-3'>
-            <span>OR</span>
-          </div>
-          <div className='col-sm-2 pl-0'>
+          <span className='pt-4 mr-1'>OR</span>
+          <div className='col-md-2 col-sm-4'>
             <div className='form-group'>
               <label><small>Enter Genetic Vial #</small></label>
               <input
-                value={geneticVial}
-                onChange={(e) => {
-                  setGeneticVial(e.target.value);
-                }}
-                className='form-control'
                 type='text'
-                placeholder='Genetic Vial #'
+                className='form-control'
+                placeholder='Genetic Vial #...'
+                value={geneticVial}
+                onChange={e => setGeneticVial(e.target.value)}
               />
             </div>
           </div>
-          <div className='col-sm-0.5 pt-4 pl-2 pr-3'>
-            <span>OR</span>
-          </div>
-          <div className='col-sm-2 pl-0 pr-0'>
+          <span className='pt-4 mr-1'>OR</span>
+          <div className='col-md-2 col-sm-4'>
             <div className='form-group'>
               <label><small>Enter Pit Tag</small></label>
               <input
-                value={pitTag}
-                onChange={(e) => {
-                  setPitTag(e.target.value);
-                }}
-                className='form-control'
                 type='text'
-                placeholder='Pit Tag'
+                className='form-control'
+                placeholder='Pit Tag...'
+                value={pitTag}
+                onChange={e => setPitTag(e.target.value)}
               />
             </div>
           </div>
         </div>
         <div className='row'>
-          <div className='col-md-10 pl-3'>
-            <div className='block_container'>
-              <div className='info-message'><Icon icon='help-circle' /></div>
-              <div className='info-message'>Enter the ID for the type of data sheet selected (Missouri River -MD_ID, Fish - F_ID, Supplemental
-              -F_ID. For Supplemental data sheet, choices also include Genetics Nial # or Pit Tag.
-              </div>
-            </div>
+          <div className='col-12 align-self-start mb-3'>
+            <span className='info-message'><Icon icon='help-circle' /></span>
+            <span className='info-message ml-2'>Enter the ID for the type of data sheet selected (Missouri River -MD_ID, Fish - F_ID, Supplemental
+            -F_ID. For Supplemental data sheet, choices also include Genetics Nial # or Pit Tag.
+            </span>
           </div>
-          <div className='col-md-2 align-self-end pl-1'>
-            <div className='form-group'>
-              <Button
-                size='small'
-                variant='dark'
-                isOutline
-                text='Go To Data Sheet'
-              />
-            </div>
+          <div className='col-md-2 align-self-end'>
+            <Button
+              isOutline
+              size='small'
+              variant='dark'
+              text='Go To Data Sheet'
+            />
           </div>
         </div>
       </>
@@ -134,4 +117,4 @@ const Table = connect(
   }
 );
 
-export default Table;
+export default FindDataSheet;

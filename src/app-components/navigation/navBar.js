@@ -16,11 +16,6 @@ const dataSummaryLinks = [
   '/tag-replacement',
 ];
 
-const dataEntryLinks = [
-  '/sites-list',
-  '/site-search',
-];
-
 const administrationLinks = [
   '/data-query',
   '/multiple-check-by',
@@ -72,19 +67,19 @@ const NavBar = connect(
         </button>
         <div className={navCollapseClasses}>
           <ul className='navbar-nav ml-auto'>
-            {authIsLoggedIn ? (
-              <>
-                <NavItem href={['/']}>Home</NavItem>
-                <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
-                <NavItem href={dataEntryLinks}>Data Entry</NavItem>
-                <NavItem href={['/data-upload']}>Data Upload</NavItem>
-                <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
-                <NavItem href={administrationLinks}>Admin</NavItem>
-                <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
-              </>
-            ) : (
+            {/* {authIsLoggedIn ? ( */}
+            <>
+              <NavItem href={['/']}>Home</NavItem>
+              <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
+              <NavItem href={['/data-entry']}>Data Entry</NavItem>
+              <NavItem href={['/data-upload']}>Data Upload</NavItem>
+              <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
+              <NavItem href={administrationLinks}>Admin</NavItem>
+              <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
+            </>
+            {/* ) : (
               <NavItem handler={() => doAuthLogin()}>Login</NavItem>
-            )}
+            )} */}
           </ul>
         </div>
       </nav>
