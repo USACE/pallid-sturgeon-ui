@@ -25,6 +25,7 @@ const FilterSelect = ({
   placeholder = 'Filter...',
   hasClearButton = false,
   onChange = null,
+  value = '',
   className,
   ...customProps
 }) => {
@@ -52,6 +53,15 @@ const FilterSelect = ({
       setFilteredList(items);
     }
   }, [items, previousItems]);
+
+  useEffect(() => {
+    const item = filteredList.find(e => e.value === value);
+    if (item && item.text !== inputVal) {
+      setInputVal(item.text);
+    } else if (!value) {
+      setInputVal('');
+    }
+  }, [value]);
 
   return (
     <Dropdown.Menu

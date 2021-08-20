@@ -29,6 +29,13 @@ const SitesListTable = connect(
     const [segmentFilter, setSegmentFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
 
+    const clearFilters = () => {
+      setBendFilter('');
+      setSeasonFilter('');
+      setSegmentFilter('');
+      setProjectFilter('');
+    };
+
     return (
       <>
         <div className='row'>
@@ -48,6 +55,7 @@ const SitesListTable = connect(
               <label><small>Select Segment</small></label>
               <FilterSelect
                 onChange={(_list, _input, value) => setSegmentFilter(value)}
+                value={segmentFilter}
                 placeholder='Segment...'
                 items={createDropdownOptions(segments)}
               />
@@ -71,6 +79,7 @@ const SitesListTable = connect(
               <label><small>Select Bend</small></label>
               <FilterSelect
                 onChange={(_list, _input, value) => setBendFilter(value)}
+                value={bendFilter}
                 placeholder='Bend...'
                 items={createBendsDropdownOptions(bends)}
               />
@@ -82,6 +91,7 @@ const SitesListTable = connect(
               size='small'
               variant='dark'
               text='Clear Filters'
+              handleClick={clearFilters}
             />
           </div>
         </div>
@@ -109,7 +119,7 @@ const SitesListTable = connect(
           </div>
           <Pagination
             itemCount={0}
-            handlePageChange={(newPage, pageSize) => console.log(newPage, pageSize)}
+            handlePageChange={(newPage, pageSize) => {}}
           />
         </div>
       </>
