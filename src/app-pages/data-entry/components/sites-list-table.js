@@ -5,6 +5,7 @@ import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 
 import Button from 'app-components/button';
 import DownloadAsCSV from 'app-pages/data-summaries/datasheet/components/downloadAsCSV';
+import FilterSelect from 'app-components/filter-select';
 import Icon from 'app-components/icon';
 import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
@@ -31,7 +32,7 @@ const SitesListTable = connect(
     return (
       <>
         <div className='row'>
-          <div className='col-md-3'>
+          <div className='col-md-4'>
             <div className='form-group'>
               <label><small>Select Project</small></label>
               <Select
@@ -42,20 +43,19 @@ const SitesListTable = connect(
               />
             </div>
           </div>
-          <div className='col-md-3 pl-0'>
+          <div className='col-md-4 pl-0'>
             <div className='form-group'>
               <label><small>Select Segment</small></label>
-              <Select
-                onChange={value => setSegmentFilter(value)}
-                value={segmentFilter}
-                placeholderText='Segment...'
-                options={createDropdownOptions(segments)}
+              <FilterSelect
+                onChange={(_list, _input, value) => setSegmentFilter(value)}
+                placeholder='Segment...'
+                items={createDropdownOptions(segments)}
               />
             </div>
           </div>
         </div>
         <div className='row'>
-          <div className='col-md-3'>
+          <div className='col-md-4'>
             <div className='form-group'>
               <label><small>Select Season</small></label>
               <Select
@@ -66,14 +66,13 @@ const SitesListTable = connect(
               />
             </div>
           </div>
-          <div className='col-md-3 pl-0'>
+          <div className='col-md-4 pl-0'>
             <div className='form-group'>
               <label><small>Select Bend</small></label>
-              <Select
-                onChange={value => setBendFilter(value)}
-                value={bendFilter}
-                placeholderText='Bend...'
-                options={createBendsDropdownOptions(bends)}
+              <FilterSelect
+                onChange={(_list, _input, value) => setBendFilter(value)}
+                placeholder='Bend...'
+                items={createBendsDropdownOptions(bends)}
               />
             </div>
           </div>
