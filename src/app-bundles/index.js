@@ -7,6 +7,7 @@ import createAuthBundle from './create-auth-bundle';
 import createJwtApiBundle from './create-jwt-api-bundle';
 import cache from '../cache';
 
+import dataEntryBundle from './data-entry-bundle';
 import datasheetPageBundle from './datasheet-page-bundle';
 import notificationBundle from './notification-bundle';
 import modalBundle from './modal-bundle';
@@ -52,6 +53,7 @@ export default composeBundles(
     cacheFn: cache.set,
   }),
   createUrlBundle(),
+  dataEntryBundle,
   datasheetPageBundle,
   modalBundle,
   notificationBundle,

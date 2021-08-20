@@ -8,6 +8,7 @@ import DownloadAsCSV from 'app-pages/data-summaries/datasheet/components/downloa
 import Icon from 'app-components/icon';
 import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
+import { createDropdownOptions, createBendsDropdownOptions } from '../helpers';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -15,9 +16,13 @@ import '../dataentry.scss';
 
 const SitesListTable = connect(
   'doModalOpen',
+  'selectDatasheetItemsObject',
   ({
     doModalOpen,
+    datasheetItemsObject,
   }) => {
+    const { projects = [], seasons = [], bends = [], segments = [] } = datasheetItemsObject;
+
     const [bendFilter, setBendFilter] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
     const [segmentFilter, setSegmentFilter] = useState('');
@@ -33,7 +38,7 @@ const SitesListTable = connect(
                 onChange={value => setProjectFilter(value)}
                 value={projectFilter}
                 placeholderText='Project...'
-                options={[]}
+                options={createDropdownOptions(projects)}
               />
             </div>
           </div>
@@ -44,7 +49,7 @@ const SitesListTable = connect(
                 onChange={value => setSegmentFilter(value)}
                 value={segmentFilter}
                 placeholderText='Segment...'
-                options={[]}
+                options={createDropdownOptions(segments)}
               />
             </div>
           </div>
@@ -57,7 +62,7 @@ const SitesListTable = connect(
                 onChange={value => setSeasonFilter(value)}
                 value={seasonFilter}
                 placeholderText='Season...'
-                options={[]}
+                options={createDropdownOptions(seasons)}
               />
             </div>
           </div>
@@ -68,7 +73,7 @@ const SitesListTable = connect(
                 onChange={value => setBendFilter(value)}
                 value={bendFilter}
                 placeholderText='Bend...'
-                options={[]}
+                options={createBendsDropdownOptions(bends)}
               />
             </div>
           </div>

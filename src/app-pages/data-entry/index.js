@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from 'app-components/card';
@@ -9,8 +9,13 @@ import SitesListTable from './components/sites-list-table';
 import './dataentry.scss';
 
 export default connect(
-  ({ }) => {
-    const [sitesList, setSitesList] = useState([]);
+  'doDataEntryLoadData',
+  ({
+    doDataEntryLoadData,
+  }) => {
+    useEffect(() => {
+      doDataEntryLoadData();
+    }, []);
 
     return (
       <div className='container-fluid'>
@@ -29,7 +34,7 @@ export default connect(
         <Card>
           <Card.Header text='Site Search Filter' />
           <Card.Body>
-            <SitesListTable sitesList={sitesList} />
+            <SitesListTable />
           </Card.Body>
         </Card>
       </div>

@@ -37,6 +37,34 @@ export default createRestBundle({
       });
     },
 
+    doDatasheetSegmentsFetch: () => ({ dispatch, apiGet }) => {
+      dispatch({ type: 'DATASHEET_FETCH_SEGMENTS_START' });
+
+      const url = '/psapi/segments';
+
+      apiGet(url, (_err, body) => {
+        dispatch({
+          type: 'DATASHEETS_UPDATED_SEGMENTS',
+          payload: body,
+        });
+        dispatch({ type: 'DATASHEET_FETCH_SEGMENTS_FINISHED' });
+      });
+    },
+
+    doDatasheetBendsFetch: () => ({ dispatch, apiGet }) => {
+      dispatch({ type: 'DATASHEET_FETCH_BENDS_START' });
+
+      const url = '/psapi/bends';
+
+      apiGet(url, (_err, body) => {
+        dispatch({
+          type: 'DATASHEETS_UPDATED_BENDS',
+          payload: body,
+        });
+        dispatch({ type: 'DATASHEET_FETCH_BENDS_FINISHED' });
+      });
+    },
+
     doDatasheetFetch: (tab, filters) => ({ dispatch, apiGet }) => {
       dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
 
@@ -73,6 +101,10 @@ export default createRestBundle({
         return { ...state, projects: payload };
       case 'DATASHEETS_UPDATED_SEASONS':
         return { ...state, seasons: payload };
+      case 'DATASHEETS_UPDATED_SEGMENTS':
+        return { ...state, segments: payload };
+      case 'DATASHEETS_UPDATED_BENDS':
+        return { ...state, bends: payload };
       case 'DATASHEETS_UPDATED_DATA':
         return {
           ...state,
