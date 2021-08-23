@@ -111,7 +111,7 @@ export default connect('selectUserAccessRequests', 'doFetchUserAccessRequests', 
                         user.roleId = val;
                         handleRoleUpdate(user.id);
                       }}
-                      placeholderText='Select Role'
+                      placeholderText='Select Role...'
                       data-size='3'
                       options={roles.data.map(opt => ({
                         text: opt.description,
@@ -125,7 +125,7 @@ export default connect('selectUserAccessRequests', 'doFetchUserAccessRequests', 
                         user.officeId = val;
                         handleOfficeUpdate(user.id);
                       }}
-                      placeholderText='Office'
+                      placeholderText='Select Office...'
                       data-size='3'
                       options={fieldOffices.data.map(opt => ({
                         text: opt.code,
