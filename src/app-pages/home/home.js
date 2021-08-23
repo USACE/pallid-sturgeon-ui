@@ -2,9 +2,13 @@ import React from 'react';
 
 import Accordion from 'app-components/accordion';
 import Hero from 'app-components/hero';
+import RoleFilter from 'app-components/role-filter';
+import RoleRequestSentMessage from 'app-components/role-request-sent';
 
 const Home = () => (
-  <>
+  <RoleFilter
+    allowRoles={['ADMINISTRATOR']}
+    alt={RoleRequestSentMessage}>
     <Hero />
     <div className='container pt-4'>
       <Accordion.List>
@@ -19,7 +23,7 @@ const Home = () => (
         </Accordion.Item>
       </Accordion.List>
     </div>
-  </>
+  </RoleFilter>
 );
 
 export default Home;

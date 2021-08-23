@@ -11,6 +11,7 @@ import NotFound from '../app-pages/404';
 import SignUp from '../app-pages/signup/signup';
 import SiteSearch from '../app-pages/data-entry/siteSearch';
 import SitesList from '../app-pages/data-entry/sitesList';
+import UserList from '../app-pages/admin/userList';
 import SearchReports from 'app-pages/data-summaries/search-reports';
 
 export default createRouteBundle(
@@ -27,6 +28,7 @@ export default createRouteBundle(
     '/signup': SignUp,
     '/site-search': SiteSearch,
     '/sites-list': SitesList,
+    '/user-access-requests': UserList,
     '*': NotFound,
   }
 );

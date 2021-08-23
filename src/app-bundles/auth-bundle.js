@@ -80,22 +80,44 @@ export default {
     });
   },
 
-  doAuthUpdate: (accessToken) => ({ dispatch, store }) => {
+  doAuthUpdate: (accessToken) => ({ dispatch, apiGetWithToken }) => {
     const authInfo = accessToken ? JSON.parse(atob(accessToken.split('.')[1])) : null;
-    dispatch({
-      type: 'UPDATE_AUTH',
-      payload: {
-        token: accessToken,
-        authData: {
-          roles: authInfo ? authInfo.roles : [],
-          fullName: authInfo ? authInfo.name : '',
-          userId: authInfo ? Number(authInfo.sub) : '',
-          name: authInfo && authInfo.name ? authInfo.name.split('.')[0] : '',
-          exp: authInfo ? authInfo.exp : ''
+
+    if (authInfo) {
+      const url = `/psapi/userRoleOffice/${authInfo.email}`;
+
+      apiGetWithToken(url, accessToken, (_err, body) => {
+        dispatch({
+          type: 'UPDATE_AUTH',
+          payload: {
+            token: accessToken,
+            authData: {
+              role: body,
+              fullName: authInfo ? authInfo.name : '',
+              userId: authInfo ? Number(authInfo.sub) : '',
+              name: authInfo && authInfo.name ? authInfo.name.split('.')[0] : '',
+              exp: authInfo ? authInfo.exp : ''
+            },
+            loading: false,
+          },
+        });
+      });
+    } else {
+      dispatch({
+        type: 'UPDATE_AUTH',
+        payload: {
+          token: null,
+          authData: {
+            role: {},
+            fullName: null,
+            userId: null,
+            name: null,
+            exp: null
+          },
+          loading: false,
         },
-        loading: false,
-      },
-    });
+      });
+    }
   },
 
   selectAuth: state => state.auth,
@@ -105,6 +127,8 @@ export default {
   selectAuthToken: state => state.auth.token,
 
   selectAuthData: state => state.auth.authData,
+
+  selectUserRole: state => state.auth.authData.role,
 
   selectInitOptions: state => state.auth.initOptions,
 };
