@@ -18,6 +18,8 @@ const getDisplay = elem => {
  * @param {string} placeholder - a string to be displayed in the input field when it is empty
  * @param {boolean} hasClearButton - whether or not there should be a button to clear the input field, default `false`
  * @param {Function} onChange - callback function that supplies the consumer with the filtered list, current input value, value of element if input matches an element
+ * @param {Function} handleInputChange - callback function that supplies the consumer with the current input value to handle the input from a parent component, only use in conjuction with `value`
+ * @param {string} value - the displayed value of the input field, used in conjunction with `handleInputChange`
  * @param {string} className - a string of custom class(es) to be applied to the dropdown container
  */
 const FilterSelect = ({
