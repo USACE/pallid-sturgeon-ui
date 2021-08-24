@@ -4,22 +4,26 @@ import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
 import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 
 import Button from 'app-components/button';
-import DownloadAsCSV from 'app-pages/data-summaries/datasheet/components/downloadAsCSV';
+import DownloadAsCSV from 'app-components/downloadAsCSV';
 import FilterSelect from 'app-components/filter-select';
 import Icon from 'app-components/icon';
 import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
-import { createDropdownOptions, createBendsDropdownOptions } from '../helpers';
+import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
-import '../dataentry.scss';
+import '../../dataentry.scss';
 
 const SitesListTable = connect(
   'doModalOpen',
+  'selectDataEntryRowData',
+  'selectDataEntryRowCount',
   'selectDatasheetItemsObject',
   ({
     doModalOpen,
+    dataEntryRowData,
+    dataEntryRowCount,
     datasheetItemsObject,
   }) => {
     const { projects = [], seasons = [], bends = [], segments = [] } = datasheetItemsObject;
@@ -103,9 +107,9 @@ const SitesListTable = connect(
           </div>
         </div>
         <div className='pt-3'>
-          <DownloadAsCSV filePrefix='site-table' content={[]} />
+          <DownloadAsCSV filePrefix='site-table' content={dataEntryRowData} />
           <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
-            <AgGridReact rowData={[]}>
+            <AgGridReact rowData={dataEntryRowData}>
               <AgGridColumn field='edit' />
               <AgGridColumn field='fieldOffice' />
               <AgGridColumn field='project' />
@@ -118,7 +122,7 @@ const SitesListTable = connect(
             </AgGridReact>
           </div>
           <Pagination
-            itemCount={0}
+            itemCount={dataEntryRowCount}
             handlePageChange={(newPage, pageSize) => {}}
           />
         </div>

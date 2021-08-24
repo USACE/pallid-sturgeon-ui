@@ -13,8 +13,8 @@ import ProcedureTable from './tables/procedureTable';
 import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 
-import { createDropdownOptions } from './datasheetHelpers';
 import usePrevious from 'customHooks/usePrevious';
+import { createDropdownOptions } from './datasheetHelpers';
 
 import '../data-summary.scss';
 

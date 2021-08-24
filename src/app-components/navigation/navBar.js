@@ -23,6 +23,11 @@ const administrationLinks = [
   '/user-access-requests',
 ];
 
+const dataEntryLinks = [
+  '/sites-list',
+  '/data-entry',
+];
+
 const utilityLinks = [
   '/error-log',
 ];
@@ -71,7 +76,7 @@ const NavBar = connect(
             <>
               <NavItem href={['/']}>Home</NavItem>
               <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
-              <NavItem href={['/data-entry']}>Data Entry</NavItem>
+              <NavItem href={dataEntryLinks}>Data Entry</NavItem>
               <NavItem href={['/data-upload']}>Data Upload</NavItem>
               <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
               <NavItem href={administrationLinks}>Admin</NavItem>

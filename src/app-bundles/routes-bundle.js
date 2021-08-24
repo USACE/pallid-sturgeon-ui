@@ -1,6 +1,7 @@
 import { createRouteBundle } from 'redux-bundler';
 
-import DataEntry from '../app-pages/data-entry';
+import SitesList from '../app-pages/data-entry/sites-list';
+import DataEntry from '../app-pages/data-entry/datasheets';
 import DataSheet from '../app-pages/data-summaries/datasheet/dataSheet';
 import DataUpload from '../app-pages/data-upload/dataUpload';
 import ErrorLog from '../app-pages/utilities/errorLog';
@@ -22,6 +23,7 @@ export default createRouteBundle(
     '/data-sheet': DataSheet,
     '/genetics-card-summary': GeneticCard,
     '/search-reports': SearchReports,
+    '/sites-list': SitesList,
     '/logout': Logout,
     '/map': Map,
     '/signup': SignUp,

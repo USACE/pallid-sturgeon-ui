@@ -4,7 +4,7 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button/button';
 import Select from 'app-components/select';
 
-import '../dataentry.scss';
+import '../../dataentry.scss';
 
 const NewSite = connect(
   ({ }) => {
@@ -30,7 +30,7 @@ const NewSite = connect(
             isOutline
             isDisabled={!year}
             size='small'
-            variant='dark'
+            variant='success'
             text='Create New Site'
           />
         </div>

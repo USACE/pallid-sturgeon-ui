@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from 'app-components/card';
-import FindDataSheet from './components/find-data-sheet';
 import NewSite from './components/new-site';
 import SitesListTable from './components/sites-list-table';
 
-import './dataentry.scss';
+import '../dataentry.scss';
 
 export default connect(
   'doDataEntryLoadData',
@@ -23,12 +22,6 @@ export default connect(
           <Card.Header text='Create New Site' />
           <Card.Body>
             <NewSite />
-          </Card.Body>
-        </Card>
-        <Card className='mb-3'>
-          <Card.Header text='Find Data Sheet by ID' />
-          <Card.Body>
-            <FindDataSheet/>
           </Card.Body>
         </Card>
         <Card>

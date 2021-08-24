@@ -9,8 +9,8 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const MissouriRiverTable = ({ rowData = [], itemCount = 0, handleChange = () => {} }) => (
   <>
-    <DownloadAsCSV content={rowData} filePrefix='missouri-river-data' />
-    <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
+    <DownloadAsCSV content={rowData} filePrefix='missouri-river-datasheets' />
+    <div className='ag-theme-balham' style={{ width: '100%', height: '400px' }}>
       <AgGridReact rowData={rowData}>
         <AgGridColumn field='year' />
         <AgGridColumn field='fieldOffice' sortable unSortIcon />

@@ -1,7 +1,7 @@
 import React from 'react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
-import DownloadAsCSV from '../components/downloadAsCSV';
+import DownloadAsCSV from 'app-components/downloadAsCSV';
 import Pagination from 'app-components/pagination/pagination';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';

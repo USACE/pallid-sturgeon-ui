@@ -1,21 +1,55 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 import Select from 'app-components/select';
 
-import '../dataentry.scss';
+import '../../dataentry.scss';
 
 const FindDataSheet = connect(
+  'doFetchMoRiverDataEntry',
+  'doFetchSupplementalDataEntry',
+  'doFetchFishDataEntry',
   ({
-
+    doFetchMoRiverDataEntry,
+    doFetchSupplementalDataEntry,
+    doFetchFishDataEntry,
   }) => {
     const [pitTag, setPitTag] = useState('');
     const [tableId, setTableId] = useState('');
     const [fieldId, setFieldId] = useState('');
-    const [geneticVial, setGeneticVial] = useState('');
+    const [geneticsVial, setGeneticsVial] = useState('');
     const [dataSheetType, setDataSheetType] = useState('');
+
+    const isSupplemental = dataSheetType === 'supplemental';
+    const isSearchDisabled = !(dataSheetType && (
+      tableId || fieldId || geneticsVial || pitTag
+    ));
+
+    const findDataSheet = () => {
+      const params = {
+        pitTag,
+        tableId,
+        fieldId,
+        geneticsVial,
+      };
+
+      switch(dataSheetType) {
+        case 'fish':
+          doFetchFishDataEntry(params);
+          break;
+        case 'supplemental':
+          doFetchSupplementalDataEntry(params);
+          break;
+        case 'missouriRiver':
+          doFetchMoRiverDataEntry(params);
+          break;
+        default:
+          console.log('select a datasheet type');
+          break;
+      }
+    };
 
     return (
       <>
@@ -74,11 +108,12 @@ const FindDataSheet = connect(
             <div className='form-group'>
               <label><small>Enter Genetic Vial #</small></label>
               <input
+                disabled={!isSupplemental}
                 type='text'
                 className='form-control'
                 placeholder='Genetic Vial #...'
-                value={geneticVial}
-                onChange={e => setGeneticVial(e.target.value)}
+                value={geneticsVial}
+                onChange={e => setGeneticsVial(e.target.value)}
               />
             </div>
           </div>
@@ -87,6 +122,7 @@ const FindDataSheet = connect(
             <div className='form-group'>
               <label><small>Enter Pit Tag</small></label>
               <input
+                disabled={!isSupplemental}
                 type='text'
                 className='form-control'
                 placeholder='Pit Tag...'
@@ -98,17 +134,20 @@ const FindDataSheet = connect(
         </div>
         <div className='row'>
           <div className='col-12 align-self-start mb-3'>
-            <span className='info-message'><Icon icon='help-circle' /></span>
+            <Icon icon='help-circle' />
             <span className='info-message ml-2'>Enter the ID for the type of data sheet selected (Missouri River -MD_ID, Fish - F_ID, Supplemental
-            -F_ID. For Supplemental data sheet, choices also include Genetics Nial # or Pit Tag.
-            </span>
+            -F_ID.</span>
+            <br />
+            <span className='ml-4'>For Supplemental data sheet, choices also include Genetics Vial # or Pit Tag.</span>
           </div>
           <div className='col-md-2 align-self-end'>
             <Button
               isOutline
+              isDisabled={isSearchDisabled}
               size='small'
-              variant='dark'
-              text='Go To Data Sheet'
+              variant='info'
+              text='Find Data Sheet'
+              handleClick={() => findDataSheet()}
             />
           </div>
         </div>
