@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from 'app-components/card';
-import DownloadAsCSV from '../datasheet/components/downloadAsCSV';
-import DSSearchReportTable from './components/dsSearchReportTable';
+import DownloadAsCSV from 'app-components/downloadAsCSV';
 import Pagination from 'app-components/pagination';
-import SearchInput from './components/searchInput';
 import usePrevious from 'customHooks/usePrevious';
+
+import DSSearchReportTable from './components/dsSearchReportTable';
+import SearchInput from './components/searchInput';
 
 const SearchReports = connect(
   'doSearchReportsFetch',

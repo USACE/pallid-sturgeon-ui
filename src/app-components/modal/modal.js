@@ -23,7 +23,6 @@ const Modal = connect(
     ]);
 
     const closeModalWithEscape = useCallback((e) => {
-      console.log(e.keyCode);
       if (e.keyCode === 27) doModalClose();
     }, [doModalClose]);
 

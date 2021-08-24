@@ -13,8 +13,8 @@ import ProcedureTable from './tables/procedureTable';
 import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 
-import { createDropdownOptions } from './datasheetHelpers';
 import usePrevious from 'customHooks/usePrevious';
+import { createDropdownOptions } from './datasheetHelpers';
 
 import '../data-summary.scss';
 
@@ -86,7 +86,7 @@ export default connect(
           <Card.Body>
             <div className='row'>
               <div className='col-md-3 col-xs-12'>
-                <label>Year:</label>
+                <label><small>Select Year</small></label>
                 <Select
                   showPlaceholderWhileValid
                   placeholderText='Select a Year...'
@@ -101,7 +101,7 @@ export default connect(
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
-                <label>Project:</label>
+                <label><small>Select Project</small></label>
                 <Select
                   showPlaceholderWhileValid
                   placeholderText='Select a Project...'
@@ -112,7 +112,7 @@ export default connect(
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
-                <label>Approval:</label>
+                <label><small>Approval</small></label>
                 <Select
                   isDisabled
                   showPlaceholderWhileValid
@@ -125,7 +125,7 @@ export default connect(
             </div>
             <div className='row mt-1'>
               <div className='col-md-2 col-xs-4'>
-                <label>Season:</label>
+                <label><small>Select Season</small></label>
                 <Select
                   showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
@@ -135,7 +135,7 @@ export default connect(
                 />
               </div>
               <div className='col-md-2 col-xs-4'>
-                <label>Species:</label>
+                <label><small>Select Species</small></label>
                 <Select
                   isDisabled
                   showPlaceholderWhileValid
@@ -146,7 +146,7 @@ export default connect(
                 />
               </div>
               <div className='col-md-2 col-xs-4'>
-                <label>Month:</label>
+                <label><small>Select Month</small></label>
                 <Select
                   showPlaceholderWhileValid
                   placeholderText='Select a Month...'
@@ -170,9 +170,9 @@ export default connect(
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
-                <label>
-                  Date Range (From - To):
-                </label>
+                <label><small>
+                  Date Range (From - To)
+                </small></label>
                 <br />
                 <input type='date' className='form-control mt-1 mr-2 date-input' />
                 -

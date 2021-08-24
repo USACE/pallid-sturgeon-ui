@@ -42,3 +42,13 @@ exports.hrefAsString = href => {
   
   return upperWords.join(' ');
 };
+
+exports.queryFromObject = (obj = {}) => {
+  const keys = Object.keys(obj);
+
+  if (!keys.length) return '';
+
+  const finalKeys = keys.filter(key => !!obj[key]);
+
+  return `?${finalKeys.map(key => `${key}=${obj[key]}`).join('&')}`;
+};
