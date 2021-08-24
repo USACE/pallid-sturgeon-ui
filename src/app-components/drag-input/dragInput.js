@@ -17,7 +17,7 @@ const DragInput = ({
     getRootProps,
     getInputProps,
   } = useDropzone({
-    accept: 'text/csv',
+    accept: '.csv, text/csv, application/vnd.ms-excel, application/csv, text/x-csv, application/x-csv, text/comma-separated-values, text/x-comma-separated-values',
   });
 
   useEffect(() => {
@@ -26,7 +26,7 @@ const DragInput = ({
     } else {
       setCurrentFile(acceptedFiles[0]);
     }
-  }, [acceptedFiles]);
+  }, [acceptedFiles, setCurrentFile]);
 
   useEffect(() => {
     onChange(currentFile);
