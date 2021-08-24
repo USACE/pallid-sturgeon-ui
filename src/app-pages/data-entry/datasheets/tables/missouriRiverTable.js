@@ -12,20 +12,15 @@ const MissouriRiverTable = ({ rowData = [], itemCount = 0, handleChange = () => 
     <DownloadAsCSV content={rowData} filePrefix='missouri-river-datasheets' />
     <div className='ag-theme-balham' style={{ width: '100%', height: '400px' }}>
       <AgGridReact rowData={rowData}>
-        <AgGridColumn field='year' />
-        <AgGridColumn field='fieldOffice' sortable unSortIcon />
-        <AgGridColumn field='project' />
-        <AgGridColumn field='segment' />
+        <AgGridColumn field='edit' />
+        <AgGridColumn field='mrId' />
+        <AgGridColumn field='siteId' />
         <AgGridColumn field='season' />
-        <AgGridColumn field='bend' />
-        <AgGridColumn field='bendrn' headerName='Bend R/N' />
-        <AgGridColumn field='bendRiverMile' />
-        <AgGridColumn field='subsample' />
-        <AgGridColumn field='pass' />
-        <AgGridColumn field='uniqueID' sortable unSortIcon />
-        <AgGridColumn field='setDate' sortable unSortIcon />
-        <AgGridColumn field='conductivity' sortable unSortIcon />
-        <AgGridColumn field='checkedby' sortable unSortIcon />
+        <AgGridColumn field='gear' />
+        <AgGridColumn field='gearType' />
+        <AgGridColumn field='recorder' />
+        <AgGridColumn field='setdate' headerName='Set Date' />
+        <AgGridColumn field='fieldOffice' />
       </AgGridReact>
     </div>
     <Pagination

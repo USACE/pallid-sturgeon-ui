@@ -5,28 +5,30 @@ import FishTable from '../tables/fishTable';
 import MissouriRiverTable from '../tables/missouriRiverTable';
 import SupplementalTable from '../tables/supplementalTable';
 
-const ActiveTable = ({ type }) => (
+const ActiveTable = ({ type, data }) => (
   <>
     {type === 'missouriRiver' && (
-      <MissouriRiverTable />
+      <MissouriRiverTable rowData={data} />
     )}
     {type === 'supplemental' && (
-      <SupplementalTable />
+      <SupplementalTable rowData={data} />
     )}
     {type === 'fish' && (
-      <FishTable />
+      <FishTable rowData={data} />
     )}
   </>
 );
 
 const DataSheetResults = connect(
+  'selectDataEntryRowData',
   'selectDataEntryActiveType',
   ({
+    dataEntryRowData,
     dataEntryActiveType,
   }) => (
     <div>
       {dataEntryActiveType ? (
-        <ActiveTable type={dataEntryActiveType} />
+        <ActiveTable type={dataEntryActiveType} data={dataEntryRowData} />
       ) : (
         <span>
           Search for data sheets using the above criteria to display the results here.
