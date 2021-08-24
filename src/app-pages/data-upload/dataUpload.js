@@ -5,7 +5,6 @@ import Button from 'app-components/button';
 import Card from 'app-components/card';
 import DragInput from 'app-components/drag-input';
 import Select from 'app-components/select';
-import UploadButton from 'app-components/upload-button';
 import { keyAsText } from 'utils';
 
 const requiredFiles = {
@@ -65,14 +64,6 @@ export default connect(
                 { value: '3.7.1' },
                 { value: '4.0.4' },
               ]}
-            />
-            <Button
-              isOutline
-              size='small'
-              className='mt-2'
-              variant='secondary'
-              text='Test Version API'
-              handleClick={() => doUploadFetch()}
             />
             {version && (
               <>

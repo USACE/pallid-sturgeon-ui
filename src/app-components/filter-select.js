@@ -25,6 +25,7 @@ const FilterSelect = ({
   placeholder = 'Filter...',
   hasClearButton = false,
   onChange = null,
+  handleInputChange = null,
   value = '',
   className,
   ...customProps
@@ -52,16 +53,7 @@ const FilterSelect = ({
     if (!isEqual(items, previousItems)) {
       setFilteredList(items);
     }
-  }, [items, previousItems]);
-
-  useEffect(() => {
-    const item = filteredList.find(e => e.value === value);
-    if (item && item.text !== inputVal) {
-      setInputVal(item.text);
-    } else if (!value) {
-      setInputVal('');
-    }
-  }, [value]);
+  }, [items, previousItems, setFilteredList]);
 
   return (
     <Dropdown.Menu
@@ -71,8 +63,15 @@ const FilterSelect = ({
           <input
             className='form-control'
             placeholder={placeholder}
-            onChange={(e) => setInputVal(e.target.value)}
-            value={inputVal}
+            onChange={(e) => {
+              if (!!handleInputChange) {
+                handleInputChange(e.target.value);
+                setInputVal(e.target.value);
+              } else {
+                setInputVal(e.target.value);
+              }
+            }}
+            value={!!handleInputChange ? value : inputVal}
           />
           {hasClearButton && (
             <div className='input-group-append'>

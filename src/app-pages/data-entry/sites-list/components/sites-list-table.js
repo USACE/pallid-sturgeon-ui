@@ -17,13 +17,9 @@ import '../../dataentry.scss';
 
 const SitesListTable = connect(
   'doModalOpen',
-  'selectDataEntryRowData',
-  'selectDataEntryRowCount',
   'selectDatasheetItemsObject',
   ({
     doModalOpen,
-    dataEntryRowData,
-    dataEntryRowCount,
     datasheetItemsObject,
   }) => {
     const { projects = [], seasons = [], bends = [], segments = [] } = datasheetItemsObject;
@@ -58,7 +54,7 @@ const SitesListTable = connect(
             <div className='form-group'>
               <label><small>Select Segment</small></label>
               <FilterSelect
-                onChange={(_list, _input, value) => setSegmentFilter(value)}
+                handleInputChange={value => setSegmentFilter(value)}
                 value={segmentFilter}
                 placeholder='Segment...'
                 items={createDropdownOptions(segments)}
@@ -82,7 +78,7 @@ const SitesListTable = connect(
             <div className='form-group'>
               <label><small>Select Bend</small></label>
               <FilterSelect
-                onChange={(_list, _input, value) => setBendFilter(value)}
+                handleInputChange={value => setBendFilter(value)}
                 value={bendFilter}
                 placeholder='Bend...'
                 items={createBendsDropdownOptions(bends)}
@@ -107,9 +103,9 @@ const SitesListTable = connect(
           </div>
         </div>
         <div className='pt-3'>
-          <DownloadAsCSV filePrefix='site-table' content={dataEntryRowData} />
+          <DownloadAsCSV filePrefix='site-table' content={[]} />
           <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
-            <AgGridReact rowData={dataEntryRowData}>
+            <AgGridReact rowData={[]}>
               <AgGridColumn field='edit' />
               <AgGridColumn field='fieldOffice' />
               <AgGridColumn field='project' />
@@ -122,7 +118,7 @@ const SitesListTable = connect(
             </AgGridReact>
           </div>
           <Pagination
-            itemCount={dataEntryRowCount}
+            itemCount={0}
             handlePageChange={(newPage, pageSize) => {}}
           />
         </div>

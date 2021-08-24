@@ -2,6 +2,7 @@ import React from 'react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import DownloadAsCSV from 'app-components/downloadAsCSV';
+import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import Pagination from 'app-components/pagination/pagination';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
@@ -11,8 +12,14 @@ const FishTable = ({ rowData = [], itemCount = 0, handleChange = () => {} }) => 
   <>
     <DownloadAsCSV content={rowData} filePrefix='fish-datasheets' />
     <div className='ag-theme-balham' style={{ width: '100%', height: '400px' }}>
-      <AgGridReact rowData={rowData}>
-        <AgGridColumn field='edit' />
+      <AgGridReact
+        rowHeight={35}
+        rowData={rowData}
+        frameworkComponents={{
+          editCellRenderer: EditCellRenderer,
+        }}
+      >
+        <AgGridColumn field='edit' cellRenderer='editCellRenderer' width={75} />
         <AgGridColumn field='fid' />
         <AgGridColumn field='mrId' />
         <AgGridColumn field='uniqueID' />

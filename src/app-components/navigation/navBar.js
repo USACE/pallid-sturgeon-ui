@@ -25,7 +25,7 @@ const administrationLinks = [
 
 const dataEntryLinks = [
   '/sites-list',
-  '/data-entry',
+  '/find-data-sheet',
 ];
 
 const utilityLinks = [

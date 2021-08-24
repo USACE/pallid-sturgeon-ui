@@ -17,7 +17,7 @@ export default createRouteBundle(
   {
     '': Home,
     '/': Home,
-    '/data-entry': DataEntry,
+    '/find-data-sheet': DataEntry,
     '/data-upload': DataUpload,
     '/error-log': ErrorLog,
     '/data-sheet': DataSheet,
