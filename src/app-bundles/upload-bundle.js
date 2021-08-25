@@ -1,40 +1,38 @@
-import createRestBundle from './create-rest-bundle';
-
-export default createRestBundle({
+export default {
   name: 'upload',
-  uid: 'id',
-  staleAfter: 0,
-  persist: false,
-  routeParam: '',
-  getTemplate: '/psapi/version',
-  putTemplate: '',
-  postTemplate: '',
-  deleteTemplate: '',
-  fetchActions: [],
-  urlParamSelectors: [],
-  forceFetchActions: [],
-});
+  getReducer: () => {},
 
-// const uploadBundle = {
-//   name: 'upload',
-//   doUploadSend: () => async ({ dispatch, store, apiGet }) => {
-//     const postUrl = '/version';
+  doUploadAllFiles: (params) => ({ dispatch, apiPost }) => {
+    const { files, version, recorder } = params;
+    const {
+      siteFile          = null,
+      searchEffortFile  = null,
+      telemetryFishFile = null,
+      missouriRiverFile = null,
+      fishFile          = null,
+      supplementalFile  = null,
+      proceduresFile    = null,
+    } = files;
 
-//     apiGet(`${postUrl}`, (err, body) => {
-//       if (err) {
-//         console.error(err.message);
-//         store.doNotificationFire({
-//           message: err
-//             ? `${err.name}: ${err.Detail}`
-//             : 'An unexpected error occured. Please try again later.',
-//           level: 'error',
-//           autoDismiss: 0,
-//         });
-//       } else {
-//         console.log('success handler...');
-//       }
-//     });
-//   }
-// };
+    dispatch({ type: 'UPLOAD_FILES_START' });
 
-// export default uploadBundle;
+    const url = '/psapi/upload';
+    const payload = {
+      ...siteFile           && { siteUpload:          siteFile },
+      ...searchEffortFile   && { searchUpload:        searchEffortFile },
+      ...telemetryFishFile  && { telemetryUpload:     telemetryFishFile },
+      ...missouriRiverFile  && { moriverUpload:       missouriRiverFile },
+      ...fishFile           && { fishUpload:          fishFile },
+      ...supplementalFile   && { supplementalUpload:  supplementalFile },
+      ...proceduresFile     && { procedureUpload:     proceduresFile },
+    };
+
+    apiPost(url, payload, (err, _body) => {
+      if (!err) {
+        dispatch({ type: 'SEARCH_REPORTS_FETCH_FINISHED' });
+      } else {
+        dispatch({ type: 'UPLOAD_FILES_ERROR', payload: err });
+      }
+    });
+  },
+};
