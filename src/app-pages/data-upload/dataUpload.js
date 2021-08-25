@@ -87,7 +87,7 @@ export default connect(
       if (!submitIsDisabled() && isReady) {
         doUploadAllFiles({ files: csvData, version, recorder });
       }      
-    }, [csvData, files, fileKeys, version, submitIsDisabled, doUploadAllFiles]);
+    }, [csvData, files, fileKeys, version, recorder, submitIsDisabled, doUploadAllFiles]);
 
     return (
       <div className='container-fluid'>
