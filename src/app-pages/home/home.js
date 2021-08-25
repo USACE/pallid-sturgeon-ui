@@ -8,7 +8,7 @@ import RoleRequestSentMessage from 'app-components/role-request-sent';
 const Home = () => (
   <RoleFilter
     allowRoles={['ADMINISTRATOR']}
-    alt={RoleRequestSentMessage}>
+    alt={() => <RoleRequestSentMessage className='p-2' />}>
     <Hero />
     <div className='container pt-4'>
       <Accordion.List>
