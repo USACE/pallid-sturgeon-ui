@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { connect } from 'redux-bundler-react';
+import Papa from 'papaparse';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
@@ -7,18 +8,14 @@ import DragInput from 'app-components/drag-input';
 import Select from 'app-components/select';
 import { keyAsText } from 'utils';
 
-const requiredFiles = {
-  '4.0.4': ['siteFile', 'searchEffortFile', 'telemetryFishFile', 'missouriRiverFile', 'fishFile', 'supplementalFile', 'proceduresFile'],
-  '3.7.1': ['siteFile', 'missouriRiverFile', 'fishFile', 'supplementalFile'],
-};
-
-const getIsRequired = (key, version) => requiredFiles[version].includes(key);
+import { getIsRequired, reduceCsvState,  formatAsNumber, formatJsonKey } from './helper';
 
 export default connect(
-  'doUploadFetch',
+  'doUploadAllFiles',
   ({
-    doUploadFetch,
+    doUploadAllFiles,
   }) => {
+    const [recorder, setRecorder] = useState('');
     const [version, setVersion] = useState(null);
     const [files, setFiles] = useState({
       'siteFile': null,
@@ -29,6 +26,18 @@ export default connect(
       'supplementalFile': null,
       'proceduresFile': null,
     });
+    const [csvData, dispatch] = useReducer(
+      reduceCsvState,
+      {
+        'siteFile': null,
+        'searchEffortFile': null,
+        'telemetryFishFile': null,
+        'missouriRiverFile': null,
+        'fishFile': null,
+        'supplementalFile': null,
+        'proceduresFile': null,
+      }
+    );
 
     const fileKeys = Object.keys(files);
 
@@ -51,20 +60,60 @@ export default connect(
       return isDisabled;
     };
 
+    const uploadAllFiles = () => {
+      fileKeys.forEach(key => {
+        if (files[key]) {
+          Papa.parse(files[key], {
+            complete: result => dispatch({ type: 'update', key, data: result.data }),
+            transformHeader: formatJsonKey,
+            transform: formatAsNumber,
+            skipEmptyLines: true,
+            header: true,
+          });
+        }
+      });
+    };
+
+    useEffect(() => {
+      let isReady = true;
+
+      fileKeys.forEach(key => {
+        if ((files[key] && csvData[key]) || (!files[key] && !csvData[key])) { }
+        else if ((files[key] && !csvData[key]) || (!files[key] && csvData[key])) {
+          isReady = false;
+        }
+      });
+
+      if (!submitIsDisabled() && isReady) {
+        doUploadAllFiles({ files: csvData, version, recorder });
+      }      
+    }, [csvData, files, fileKeys, version, recorder, submitIsDisabled, doUploadAllFiles]);
+
     return (
       <div className='container-fluid'>
         <Card>
           <Card.Header text='File Upload' />
           <Card.Body>
             Select the version of the Field App used to generate your datasheets.
-            <Select
-              className='w-25 d-block mt-2'
-              onChange={value => setVersion(value)}
-              options={[
-                { value: '3.7.1' },
-                { value: '4.0.4' },
-              ]}
-            />
+            <div className='mt-2'>
+              <Select
+                className='w-25 d-inline-block mb-1 mr-4'
+                onChange={value => setVersion(value)}
+                options={[
+                  { value: '3.7.1' },
+                  { value: '4.0.4' },
+                ]}
+              />
+              <label><small>Recorder:</small></label>
+              <input
+                type='text'
+                placeholder='Initials...'
+                className='form-control d-inline-block ml-2'
+                style={{ width: '75px'}}
+                value={recorder}
+                onChange={e => setRecorder(e.target.value)}
+              />
+            </div>
             {version && (
               <>
                 <hr />
@@ -90,7 +139,7 @@ export default connect(
                   isOutline
                   variant='info'
                   text='Submit Files'
-                  handleClick={() => {}}
+                  handleClick={() => uploadAllFiles()}
                   isDisabled={submitIsDisabled()}
                 />
               </>
