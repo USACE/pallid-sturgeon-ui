@@ -32,6 +32,7 @@ const NewSite = connect(
             size='small'
             variant='success'
             text='Create New Site'
+            href='/sites-list/create-new-site'
           />
         </div>
       </div>

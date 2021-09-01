@@ -84,7 +84,7 @@ export default connect(
         }
       });
 
-      if (!submitIsDisabled() && isReady) {
+      if (!submitIsDisabled() && isReady && version) {
         doUploadAllFiles({ files: csvData, version, recorder });
       }      
     }, [csvData, files, fileKeys, version, recorder, submitIsDisabled, doUploadAllFiles]);
@@ -100,7 +100,7 @@ export default connect(
                 className='w-25 d-inline-block mb-1 mr-4'
                 onChange={value => setVersion(value)}
                 options={[
-                  { value: '3.7.1' },
+                  // { value: '3.7.1' },
                   { value: '4.0.4' },
                 ]}
               />
@@ -109,7 +109,7 @@ export default connect(
                 type='text'
                 placeholder='Initials...'
                 className='form-control d-inline-block ml-2'
-                style={{ width: '75px'}}
+                style={{ width: '75px' }}
                 value={recorder}
                 onChange={e => setRecorder(e.target.value)}
               />

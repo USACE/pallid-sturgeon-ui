@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
 import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
@@ -16,10 +16,8 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import '../../dataentry.scss';
 
 const SitesListTable = connect(
-  'doModalOpen',
   'selectDatasheetItemsObject',
   ({
-    doModalOpen,
     datasheetItemsObject,
   }) => {
     const { projects = [], seasons = [], bends = [], segments = [] } = datasheetItemsObject;
@@ -28,12 +26,17 @@ const SitesListTable = connect(
     const [seasonFilter, setSeasonFilter] = useState('');
     const [segmentFilter, setSegmentFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
+    const segRef = useRef();
+    const bendRef = useRef();
 
     const clearFilters = () => {
       setBendFilter('');
       setSeasonFilter('');
       setSegmentFilter('');
       setProjectFilter('');
+
+      segRef.current.clear();
+      bendRef.current.clear();
     };
 
     return (
@@ -54,6 +57,7 @@ const SitesListTable = connect(
             <div className='form-group'>
               <label><small>Select Segment</small></label>
               <FilterSelect
+                ref={segRef}
                 handleInputChange={value => setSegmentFilter(value)}
                 value={segmentFilter}
                 placeholder='Segment...'
@@ -78,6 +82,7 @@ const SitesListTable = connect(
             <div className='form-group'>
               <label><small>Select Bend</small></label>
               <FilterSelect
+                ref={bendRef}
                 handleInputChange={value => setBendFilter(value)}
                 value={bendFilter}
                 placeholder='Bend...'

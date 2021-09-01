@@ -12,6 +12,7 @@ import Map from '../app-pages/map/map';
 import NotFound from '../app-pages/404';
 import SignUp from '../app-pages/signup/signup';
 import SearchReports from 'app-pages/data-summaries/search-reports';
+import CreateNewSite from 'app-pages/data-entry/sites-list/pages/create-new-site';
 
 export default createRouteBundle(
   {
@@ -24,6 +25,7 @@ export default createRouteBundle(
     '/genetics-card-summary': GeneticCard,
     '/search-reports': SearchReports,
     '/sites-list': SitesList,
+    '/sites-list/create-new-site': CreateNewSite,
     '/logout': Logout,
     '/map': Map,
     '/signup': SignUp,

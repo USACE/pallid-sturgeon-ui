@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
 import isEqual from 'lodash.isequal';
 
 import Dropdown from './dropdown';
@@ -31,11 +31,23 @@ const FilterSelect = ({
   value = '',
   className,
   ...customProps
-}) => {
+}, ref) => {
   const [filteredList, setFilteredList] = useState(items);
   const [inputVal, setInputVal] = useState('');
   const previousVal = usePrevious(inputVal);
   const previousItems = usePrevious(items);
+  const inputRef = useRef();
+
+  const handleChange = val => {
+    if (!!handleInputChange) {
+      handleInputChange(val);
+    }
+    setInputVal(val);
+  };
+
+  useImperativeHandle(ref, () => ({
+    clear: () => setInputVal(''),
+  }));
 
   useEffect(() => {
     if (inputVal !== previousVal) {
@@ -63,16 +75,10 @@ const FilterSelect = ({
       customContent={(
         <div className='input-group' {...customProps}>
           <input
+            ref={inputRef}
             className='form-control'
             placeholder={placeholder}
-            onChange={(e) => {
-              if (!!handleInputChange) {
-                handleInputChange(e.target.value);
-                setInputVal(e.target.value);
-              } else {
-                setInputVal(e.target.value);
-              }
-            }}
+            onChange={e => handleChange(e.target.value)}
             value={!!handleInputChange ? value : inputVal}
           />
           {hasClearButton && (
@@ -92,10 +98,10 @@ const FilterSelect = ({
       {filteredList.length ? filteredList.map(elem => {
         const display = getDisplay(elem);
 
-        return <Dropdown.Item key={display} onClick={() => setInputVal(display)}>{display}</Dropdown.Item>;
+        return <Dropdown.Item key={display} onClick={() => handleChange(display)}>{display}</Dropdown.Item>;
       }) : <Dropdown.Item key='No items' onClick={() => {}}>No Items Match Your Search</Dropdown.Item>}
     </Dropdown.Menu>
   );
 };
 
-export default FilterSelect;
+export default forwardRef(FilterSelect);
