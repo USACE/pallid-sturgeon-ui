@@ -10,6 +10,7 @@ import Icon from 'app-components/icon';
 import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
 import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
+import { dropdownYearsToNow } from 'utils';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -22,6 +23,7 @@ const SitesListTable = connect(
   }) => {
     const { projects = [], seasons = [], bends = [], segments = [] } = datasheetItemsObject;
 
+    const [yearFilter, setYearFilter] = useState('');
     const [bendFilter, setBendFilter] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
     const [segmentFilter, setSegmentFilter] = useState('');
@@ -42,6 +44,23 @@ const SitesListTable = connect(
     return (
       <>
         <div className='row'>
+          <div className='col-2'>
+            <Select
+              label='Year'
+              placeholderText='Select year...'
+              onChange={value => setYearFilter(value)}
+              value={yearFilter}
+              options={dropdownYearsToNow()}
+            />
+          </div>
+        </div>
+        <div className='row mt-3'>
+          <div className='col-md-12 pl-3'>
+            <span className='info-message mr-1'><Icon icon='help-circle' /></span>
+            <span className='info-message'>Select a year to populate the table and begin your search.</span>
+          </div>
+        </div>
+        <div className='row mt-3'>
           <div className='col-md-4'>
             <div className='form-group'>
               <Select
@@ -103,8 +122,7 @@ const SitesListTable = connect(
         <div className='row'>
           <div className='col-md-12 pl-3'>
             <span className='info-message mr-1'><Icon icon='help-circle' /></span>
-            <span className='info-message'>Please make selections from the drop down lists to go to the Missouri River data sheets associated with your selection.
-            </span>
+            <span className='info-message'>Make selections from the drop down lists to go to the Missouri River data sheets associated with your selection.</span>
           </div>
         </div>
         <div className='pt-3'>
