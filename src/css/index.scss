@@ -83,12 +83,36 @@ table.table-bordered > tbody > tr > td{
 
 label {
   display: inline;
+  user-select: none;
 }
 
-.form-control {
-  border: 2px solid $color-primary !important;
+textarea.form-control {
+  color: $color-primary-dark !important;
+  border: 1px solid $color-primary !important;
   border-radius: .3rem !important;
-  height:33px;
+  font-size: 0.9rem;
+  padding: 0.4rem;
+
+  &.is-invalid {
+    border: 1px solid $color-error !important;
+  }
+}
+
+input.form-control {
+  color: $color-primary-dark !important;
+  height: 33px;
   padding: 0rem .4rem;
   font-size: 0.9rem;
+  border: 1px solid $color-primary !important;
+  border-radius: .3rem !important;
+  overflow-x: hidden !important;
+  text-overflow: ellipsis !important;
+
+  &.is-invalid {
+    border: 1px solid $color-error !important;
+  }
+}
+
+input[disabled] {
+  cursor: not-allowed;
 }

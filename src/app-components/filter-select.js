@@ -5,6 +5,7 @@ import isEqual from 'lodash.isequal';
 import Dropdown from './dropdown';
 import Icon from './icon';
 import usePrevious from '../customHooks/usePrevious';
+import { classArray } from 'utils';
 
 const getDisplay = elem => {
   const { value, text } = elem;
@@ -15,21 +16,25 @@ const getDisplay = elem => {
  * A component that provides the ability for a user to filter a dropdown list via an input field.
  * 
  * @param {Array} items - a list of items to populate the dropdown list with. Each item must be an object with the shape: `{value: '', text: ''}`
+ * @param {string} label Adds a label tag with the text provided.
  * @param {string} placeholder - a string to be displayed in the input field when it is empty
  * @param {boolean} hasClearButton - whether or not there should be a button to clear the input field, default `false`
  * @param {Function} onChange - callback function that supplies the consumer with the filtered list, current input value, value of element if input matches an element
  * @param {Function} handleInputChange - callback function that supplies the consumer with the current input value to handle the input from a parent component, only use in conjuction with `value`
  * @param {string} value - the displayed value of the input field, used in conjunction with `handleInputChange`
- * @param {string} className - a string of custom class(es) to be applied to the dropdown container
+ * @param {string} className - a string of custom class(es) to be applied to the `<Dropdown />` container
+ * @param {string} labelClassName - a string of custom class(es) to be applied to the `<label />` element
  */
 const FilterSelect = ({
   items,
   placeholder = 'Filter...',
+  label = '',
   hasClearButton = false,
   onChange = null,
   handleInputChange = null,
   value = '',
   className,
+  labelClassName,
   ...customProps
 }, ref) => {
   const [filteredList, setFilteredList] = useState(items);
@@ -37,6 +42,11 @@ const FilterSelect = ({
   const previousVal = usePrevious(inputVal);
   const previousItems = usePrevious(items);
   const inputRef = useRef();
+
+  const dropdownClasses = classArray([
+    label && 'mt-1',
+    className,
+  ]);
 
   const handleChange = val => {
     if (!!handleInputChange) {
@@ -70,37 +80,42 @@ const FilterSelect = ({
   }, [items, previousItems, setFilteredList]);
 
   return (
-    <Dropdown.Menu
-      dropdownClasses={[className]}
-      customContent={(
-        <div className='input-group' {...customProps}>
-          <input
-            ref={inputRef}
-            className='form-control'
-            placeholder={placeholder}
-            onChange={e => handleChange(e.target.value)}
-            value={!!handleInputChange ? value : inputVal}
-          />
-          {hasClearButton && (
-            <div className='input-group-append'>
-              <span
-                title='Clear Filter'
-                className='input-group-text pointer'
-                onClick={() => setInputVal('')}
-              >
-                <Icon icon='close' />
-              </span>
-            </div>
-          )}
-        </div>
+    <>
+      {label && (
+        <label className={labelClassName}><small>{label}</small></label>
       )}
-    >
-      {filteredList.length ? filteredList.map(elem => {
-        const display = getDisplay(elem);
+      <Dropdown.Menu
+        dropdownClass={dropdownClasses}
+        customContent={(
+          <div className='input-group' {...customProps}>
+            <input
+              ref={inputRef}
+              className='form-control'
+              placeholder={placeholder}
+              onChange={e => handleChange(e.target.value)}
+              value={!!handleInputChange ? value : inputVal}
+            />
+            {hasClearButton && (
+              <div className='input-group-append'>
+                <span
+                  title='Clear Filter'
+                  className='input-group-text pointer'
+                  onClick={() => setInputVal('')}
+                >
+                  <Icon icon='close' />
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      >
+        {filteredList.length ? filteredList.map(elem => {
+          const display = getDisplay(elem);
 
-        return <Dropdown.Item key={display} onClick={() => handleChange(display)}>{display}</Dropdown.Item>;
-      }) : <Dropdown.Item key='No items' onClick={() => {}}>No Items Match Your Search</Dropdown.Item>}
-    </Dropdown.Menu>
+          return <Dropdown.Item key={display} onClick={() => handleChange(display)}>{display}</Dropdown.Item>;
+        }) : <Dropdown.Item key='No items' onClick={() => {}}>No Items Match Your Search</Dropdown.Item>}
+      </Dropdown.Menu>
+    </>
   );
 };
 

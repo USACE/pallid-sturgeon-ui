@@ -96,8 +96,8 @@ const MultiSelect = ({
           />
         </>
       )}
-      dropdownClasses={[className]}
-      menuClasses={[menuClasses]}
+      dropdownClass={className}
+      menuClass={menuClasses}
       closeOnSelect={false}
       onToggle={isOpen => setIsDropdownOpen(isOpen)}
       containerRefs={[inputRef]}

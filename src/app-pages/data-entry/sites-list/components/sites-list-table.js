@@ -44,20 +44,20 @@ const SitesListTable = connect(
         <div className='row'>
           <div className='col-md-4'>
             <div className='form-group'>
-              <label><small>Select Project</small></label>
               <Select
+                label='Select Project'
+                placeholderText='Project...'
                 onChange={value => setProjectFilter(value)}
                 value={projectFilter}
-                placeholderText='Project...'
                 options={createDropdownOptions(projects)}
               />
             </div>
           </div>
           <div className='col-md-4 pl-0'>
             <div className='form-group'>
-              <label><small>Select Segment</small></label>
               <FilterSelect
                 ref={segRef}
+                label='Select Segment'
                 handleInputChange={value => setSegmentFilter(value)}
                 value={segmentFilter}
                 placeholder='Segment...'
@@ -69,20 +69,20 @@ const SitesListTable = connect(
         <div className='row'>
           <div className='col-md-4'>
             <div className='form-group'>
-              <label><small>Select Season</small></label>
               <Select
+                label='Select Season'
+                placeholderText='Season...'
                 onChange={value => setSeasonFilter(value)}
                 value={seasonFilter}
-                placeholderText='Season...'
                 options={createDropdownOptions(seasons)}
               />
             </div>
           </div>
           <div className='col-md-4 pl-0'>
             <div className='form-group'>
-              <label><small>Select Bend</small></label>
               <FilterSelect
                 ref={bendRef}
+                label='Select Bend'
                 handleInputChange={value => setBendFilter(value)}
                 value={bendFilter}
                 placeholder='Bend...'

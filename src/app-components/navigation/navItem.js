@@ -6,10 +6,10 @@ import { classArray, hrefAsString } from 'utils';
 
 const NavItem = connect(
   'selectPathname',
-  ({ pathname, href, children, icon, className, handler, isHidden, asDropdown }) => {
+  ({ pathname, href, children, icon, className, handler, isHidden, asDropdown, inlcudedLinks = [] }) => {
     const cls = classArray([
       'nav-item',
-      href && href.includes(pathname) && 'active',
+      href && (href.includes(pathname) || inlcudedLinks.includes(pathname)) && 'active',
       className,
     ]);
 
@@ -39,8 +39,8 @@ const NavItem = connect(
           {isDropdown ? (
             <Dropdown.Menu
               withToggleArrow={false}
-              menuClasses={['dropdown-menu-right']}
-              buttonClasses={['btn-small p-0 nav-dropdown-button']}
+              menuClass='dropdown-menu-right'
+              buttonClass='btn-small p-0 nav-dropdown-button'
               buttonContent={(
                 <a className='nav-link'>
                   <ItemContent />

@@ -1,11 +1,28 @@
 @import '../../style/variables';
 
 .custom-select {
-  border: 2px solid $color-primary !important;
-  background-color: $color-primary-light !important;
+  border: 1px solid $color-primary !important;
   border-radius: .3rem !important;
-  height:33px;
-  padding: 0rem .4rem;
+  color: $color-primary-dark !important;
+  height: 33px;
+  padding: 0 20px 0 8px;
   font-size: 0.9rem;
-  background-image: url("data:image/svg+xml,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><path d='m0,6l12,12l12,-12l-24,0z'/><path fill='none' d='m0,0l24,0l0,24l-24,0l0,-24z'/></svg>");;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  background-image: url("data:image/svg+xml,<svg width='24' height='24' xmlns='http://www.w3.org/2000/svg'><path d='m0,6l12,12l12,-12l-24,0z'/><path fill='none' d='m0,0l24,0l0,24l-24,0l0,-24z'/></svg>");
+}
+
+.custom-select.is-invalid {
+  border: 1px solid $color-error !important;
+}
+
+.custom-select.placeholder {
+  color: #7b8a8b !important;
+}
+
+.custom-select {
+  option {
+    background: $color-white;
+    color: $color-primary-dark;
+  }
 }

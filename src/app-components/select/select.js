@@ -14,18 +14,21 @@ const Option = ({ value, text = '' }) => (
  * callback for consumers to track the selected option if needed (not required to use the component).
  * 
  * @param {string} title The title of the select element, read by screen readers and provides text on hover.
+ * @param {string} label Adds a label tag with the text provided.
  * @param {function} onChange A function that is executed when the value of the select changes, `option.value` is provided as a parameter.
  * @param {boolean} showPlaceholderOption Whether or not the placeholder option is shown. Defaulted to `true`.
  * @param {boolean} showPlaceholderWhileValid Whether or not the placeholder option is shown if a value is selected. Defaulted to `false`.
  * @param {string} defaultOption Set to specify an option that should be selected by default, use the `option.value` property.
  * @param {string} placeholderText Provide custom text to display in the placeholder option.
  * @param {string} className Classes to provide to the `<select>` element.
+ * @param {string} labelClassName Classes to provide to the `<label>` element.
  * @param {array} options A list of options `{ value: string, text: string }` or `{ value: string }` provided within the select element.
  * @param {string} value The value the `<select>` should set. Should only be set if you have a use case to override the internal state. Not needed for the component to function.
  * @param {boolean} isDisabled Whether or not the select is disabled and should apply the correct styles. Defaulted to `false`.
  */
 const Select = ({
   title = '',
+  label = '',
   onChange = () => {},
   showPlaceholderOption = true,
   showPlaceholderWhileValid = false,
@@ -33,6 +36,7 @@ const Select = ({
   value = '',
   placeholderText = 'Select an option...',
   className = '',
+  labelClassName = '',
   options = [],
   isDisabled = false,
   ...customProps
@@ -46,7 +50,9 @@ const Select = ({
 
   const classes = classArray([
     'custom-select',
+    label && 'mt-1',
     isDisabled && 'not-allowed',
+    currentOption === '' && 'placeholder',
     className,
   ]);
 
@@ -67,17 +73,22 @@ const Select = ({
   }, [currentOption, onChange]);
 
   return (
-    <select
-      {...customProps}
-      className={classes}
-      onChange={(e) => handleChange(e)}
-      title={title}
-      value={currentOption}
-      disabled={isDisabled}
-    >
-      {showPlaceholder && placeholderOption}
-      {options.map(option => <Option value={option.value} text={option.text} key={option.value} />)}
-    </select>
+    <>
+      {label && (
+        <label className={labelClassName}><small>{label}</small></label>
+      )}
+      <select
+        {...customProps}
+        className={classes}
+        onChange={(e) => handleChange(e)}
+        title={title || label || ''}
+        value={currentOption}
+        disabled={isDisabled}
+      >
+        {showPlaceholder && placeholderOption}
+        {options.map(option => <Option value={option.value} text={option.text} key={option.value} />)}
+      </select>
+    </>
   );
 };
 

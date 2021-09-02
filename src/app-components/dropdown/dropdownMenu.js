@@ -9,9 +9,9 @@ import './dropdown.scss';
 
 const DropdownMenu = forwardRef(({
   id = 'dropdown',
-  dropdownClasses = [],
-  buttonClasses = [],
-  menuClasses = [],
+  dropdownClass = '',
+  buttonClass = '',
+  menuClass = '',
   withToggleArrow = true,
   closeOnSelect = true,
   buttonContent = null,
@@ -25,9 +25,9 @@ const DropdownMenu = forwardRef(({
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef(null);
 
-  const dropdownClass = classArray(['dropdown', ...dropdownClasses]);
-  const buttonClass = classArray(['btn', withToggleArrow && 'dropdown-toggle', ...buttonClasses]);
-  const menuClass = classArray(['dropdown-menu', isOpen && 'show', ...menuClasses]);
+  const dropdownClasses = classArray(['dropdown', dropdownClass]);
+  const buttonClasses = classArray(['btn', withToggleArrow && 'dropdown-toggle', buttonClass]);
+  const menuClasses = classArray(['dropdown-menu', isOpen && 'show', menuClass]);
 
   useImperativeHandle(ref, () => ({
     openDropdown: () => setIsOpen(true),
@@ -60,16 +60,16 @@ const DropdownMenu = forwardRef(({
 
   return (
     <DropdownContext.Provider value={{ closeDropdown: () => closeOnSelect ? setIsOpen(false) : () => {} }}>
-      <div className={dropdownClass} id={id}>
+      <div className={dropdownClasses} id={id}>
         {customContent
           ? React.cloneElement(customContent, commonProps)
           : (
-            <button className={buttonClass} id={`${id}MenuButton`} title='Toggle Dropdown' {...commonProps}>
+            <button className={buttonClasses} id={`${id}MenuButton`} title='Toggle Dropdown' {...commonProps}>
               {buttonContent}
             </button>
           )
         }
-        <div className={menuClass} aria-labelledby={`${id}MenuButton`} ref={menuRef} style={{ maxHeight: '400px', overflow: 'auto' }}>
+        <div className={menuClasses} aria-labelledby={`${id}MenuButton`} ref={menuRef} style={{ maxHeight: '400px', overflow: 'auto' }}>
           {children}
         </div>
       </div>

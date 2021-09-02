@@ -15,6 +15,7 @@ import TelemetryTable from './tables/telemetryTable';
 
 import usePrevious from 'customHooks/usePrevious';
 import { createDropdownOptions } from './datasheetHelpers';
+import { dropdownYearsToNow } from 'utils';
 
 import '../data-summary.scss';
 
@@ -93,11 +94,7 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={val => setYearFilter(val)}
                   value={yearFilter}
-                  options={[
-                    { value: '2021' },
-                    { value: '2020' },
-                    { value: '2019' }
-                  ]}
+                  options={dropdownYearsToNow()}
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
