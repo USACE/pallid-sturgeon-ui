@@ -1,3 +1,5 @@
+import { queryFromObject } from '../utils';
+
 export default {
   name: 'sites',
   getReducer: () => {
@@ -28,6 +30,7 @@ export default {
     };
   },
 
+  selectSitesAll: state => state.sites,
   selectSitesResultsPerPage: state => state.sites.resultsPerPage,
   selectSitesPageNumber: state => state.sites.pageNumber,
   selectSitesData: state => state.sites.data,
@@ -38,12 +41,13 @@ export default {
     store.doSitesFetch();
   },
 
-  doSitesFetch: (pageNumber = null, numberPerPage = null) => ({ dispatch, store, apiGet }) => {
+  doSitesFetch: (params) => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'SITES_FETCH_START' });
-    const page = pageNumber !== null ? pageNumber : store.selectSitesPageNumber();
-    const size = numberPerPage !== null ? numberPerPage : store.selectSitesResultsPerPage();
+    const page = store.selectSitesPageNumber(); //pageNumber !== null ? pageNumber : 
+    const size = store.selectSitesResultsPerPage(); //numberPerPage !== null ? numberPerPage : 
 
-    const url = `/psapi/sites?page=${page}&size=${size}`;
+    const query = queryFromObject(params);
+    const url = `/psapi/siteDataEntry${query}`;
 
     apiGet(url, (err, body) => {
       if (!err) {

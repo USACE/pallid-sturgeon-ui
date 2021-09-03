@@ -19,6 +19,7 @@ const getDisplay = elem => {
  * @param {string} label Adds a label tag with the text provided.
  * @param {string} placeholder - a string to be displayed in the input field when it is empty
  * @param {boolean} hasClearButton - whether or not there should be a button to clear the input field, default `false`
+ * @param {boolean} isDisabled - whether or not the element is disabled, default `false`
  * @param {Function} onChange - callback function that supplies the consumer with the filtered list, current input value, value of element if input matches an element
  * @param {Function} handleInputChange - callback function that supplies the consumer with the current input value to handle the input from a parent component, only use in conjuction with `value`
  * @param {string} value - the displayed value of the input field, used in conjunction with `handleInputChange`
@@ -30,6 +31,7 @@ const FilterSelect = ({
   placeholder = 'Filter...',
   label = '',
   hasClearButton = false,
+  isDisabled = false,
   onChange = null,
   handleInputChange = null,
   value = '',
@@ -89,6 +91,7 @@ const FilterSelect = ({
         customContent={(
           <div className='input-group' {...customProps}>
             <input
+              disabled={isDisabled}
               ref={inputRef}
               className='form-control'
               placeholder={placeholder}

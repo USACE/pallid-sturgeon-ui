@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
@@ -12,8 +12,10 @@ import { dropdownYearsToNow } from 'utils';
 import '../../dataentry.scss';
 
 const SitesList = connect(
+  'doSitesFetch',
   'selectDatasheetItemsObject',
   ({
+    doSitesFetch,
     datasheetItemsObject,
   }) => {
     const { projects = [], seasons = [], bends = [], segments = [] } = datasheetItemsObject;
@@ -35,6 +37,20 @@ const SitesList = connect(
       segRef.current.clear();
       bendRef.current.clear();
     };
+
+    useEffect(() => {
+      if (yearFilter) {
+        const params = {
+          year: yearFilter,
+          bendrn: bendFilter,
+          seasonCode: seasonFilter,
+          segmentCode: segmentFilter,
+          projectCode: projectFilter,
+        };
+
+        doSitesFetch(params);
+      }
+    }, [yearFilter, bendFilter, seasonFilter, segmentFilter, projectFilter, doSitesFetch]);
 
     return (
       <>
@@ -59,6 +75,8 @@ const SitesList = connect(
           <div className='col-md-4'>
             <div className='form-group'>
               <Select
+                isDisabled={!yearFilter}
+                showPlaceholderWhileValid
                 label='Select Project'
                 placeholderText='Project...'
                 onChange={value => setProjectFilter(value)}
@@ -71,6 +89,7 @@ const SitesList = connect(
             <div className='form-group'>
               <FilterSelect
                 ref={segRef}
+                isDisabled={!yearFilter}
                 label='Select Segment'
                 handleInputChange={value => setSegmentFilter(value)}
                 value={segmentFilter}
@@ -84,6 +103,8 @@ const SitesList = connect(
           <div className='col-md-4'>
             <div className='form-group'>
               <Select
+                isDisabled={!yearFilter}
+                showPlaceholderWhileValid
                 label='Select Season'
                 placeholderText='Season...'
                 onChange={value => setSeasonFilter(value)}
@@ -96,6 +117,7 @@ const SitesList = connect(
             <div className='form-group'>
               <FilterSelect
                 ref={bendRef}
+                isDisabled={!yearFilter}
                 label='Select Bend'
                 handleInputChange={value => setBendFilter(value)}
                 value={bendFilter}
