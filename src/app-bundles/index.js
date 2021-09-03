@@ -13,6 +13,7 @@ import notificationBundle from './notification-bundle';
 import modalBundle from './modal-bundle';
 import routesBundle from './routes-bundle';
 import searchReportsPageBundle from './search-reports-page-bundle';
+import sitesBundle from './sites-bundle';
 import uploadBundle from './upload-bundle';
 
 // Mock Token User
@@ -59,5 +60,6 @@ export default composeBundles(
   notificationBundle,
   routesBundle,
   searchReportsPageBundle,
+  sitesBundle,
   uploadBundle,
 );

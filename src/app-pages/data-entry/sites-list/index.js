@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 
 import Card from 'app-components/card';
 import NewSite from './components/new-site';
-import SitesListTable from './components/sites-list-table';
+import SitesList from './components/sites-list';
 
 import '../dataentry.scss';
 
@@ -27,7 +27,7 @@ export default connect(
         <Card>
           <Card.Header text='Site Search Filter' />
           <Card.Body>
-            <SitesListTable />
+            <SitesList />
           </Card.Body>
         </Card>
       </div>
