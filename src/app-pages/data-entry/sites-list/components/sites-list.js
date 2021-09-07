@@ -4,8 +4,10 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button';
 import FilterSelect from 'app-components/filter-select';
 import Icon from 'app-components/icon';
+import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
 import SitesListTable from './sites-list-table';
+import usePrevious from 'customHooks/usePrevious';
 import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 import { dropdownYearsToNow } from 'utils';
 
@@ -14,16 +16,24 @@ import '../../dataentry.scss';
 const SitesList = connect(
   'doSitesFetch',
   'selectDomains',
+  'selectSitesTotalResults',
   ({
     doSitesFetch,
     domains,
+    sitesTotalResults,
   }) => {
     const { projects, seasons, bends, segments } = domains;
+    const [pageNumber, setPageNumber] = useState(0);
+    const [itemsPerPage, setItemsPerPage] = useState(20);
+    const prevPageNumber = usePrevious(pageNumber);
+    const prevItemsPerPage = usePrevious(itemsPerPage);
 
     const [yearFilter, setYearFilter] = useState('');
     const [bendFilter, setBendFilter] = useState('');
+    const [bendValue, setBendValue] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
     const [segmentFilter, setSegmentFilter] = useState('');
+    const [segmentValue, setSegmentValue] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
     const segRef = useRef();
     const bendRef = useRef();
@@ -38,19 +48,26 @@ const SitesList = connect(
       bendRef.current.clear();
     };
 
-    useEffect(() => {
-      if (yearFilter) {
-        const params = {
-          year: yearFilter,
-          bendrn: bendFilter,
-          seasonCode: seasonFilter,
-          segmentCode: segmentFilter,
-          projectCode: projectFilter,
-        };
+    const updatePagination = (pageNumber, itemsPerPage) => {
+      setPageNumber(pageNumber);
+      setItemsPerPage(itemsPerPage);
+    };
 
+    const params = {
+      year: yearFilter,
+      bendrn: bendValue,
+      seasonCode: seasonFilter,
+      segmentCode: segmentValue,
+      projectCode: projectFilter,
+      page: pageNumber,
+      size: itemsPerPage,
+    };
+
+    useEffect(() => {
+      if (yearFilter || prevItemsPerPage !== itemsPerPage || prevPageNumber !== pageNumber) {
         doSitesFetch(params);
       }
-    }, [yearFilter, bendFilter, seasonFilter, segmentFilter, projectFilter, doSitesFetch]);
+    }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter, itemsPerPage, pageNumber, prevPageNumber, prevItemsPerPage, doSitesFetch]);
 
     return (
       <>
@@ -62,6 +79,16 @@ const SitesList = connect(
               onChange={value => setYearFilter(value)}
               value={yearFilter}
               options={dropdownYearsToNow()}
+            />
+          </div>
+          <div className='col-2 offset-8'>
+            <Button
+              isOutline
+              size='small'
+              variant='success'
+              text='Create New Site'
+              className='mt-3 float-right'
+              href='/sites-list/create-new-site'
             />
           </div>
         </div>
@@ -92,6 +119,7 @@ const SitesList = connect(
                 isDisabled={!yearFilter}
                 label='Select Segment'
                 handleInputChange={value => setSegmentFilter(value)}
+                onChange={(_, __, val) => setSegmentValue(val)}
                 value={segmentFilter}
                 placeholder='Segment...'
                 items={createDropdownOptions(segments)}
@@ -120,6 +148,7 @@ const SitesList = connect(
                 isDisabled={!yearFilter}
                 label='Select Bend'
                 handleInputChange={value => setBendFilter(value)}
+                onChange={(_, __, val) => setBendValue(val)}
                 value={bendFilter}
                 placeholder='Bend...'
                 items={createBendsDropdownOptions(bends)}
@@ -143,6 +172,12 @@ const SitesList = connect(
           </div>
         </div>
         <SitesListTable />
+        <Pagination
+          className='mt-3'
+          itemCount={sitesTotalResults}
+          defaultItemsPerPage={20}
+          handlePageChange={(newPage, pageSize) => updatePagination(newPage, pageSize)}
+        />
       </>
     );
   }

@@ -5,8 +5,6 @@ export default {
   getReducer: () => {
     const initialData = {
       totalResults: 0,
-      resultsPerPage: 20,
-      pageNumber: 0,
       data: [],
     };
 
@@ -31,8 +29,6 @@ export default {
   },
 
   selectSitesAll: state => state.sites,
-  selectSitesResultsPerPage: state => state.sites.resultsPerPage,
-  selectSitesPageNumber: state => state.sites.pageNumber,
   selectSitesData: state => state.sites.data,
   selectSitesTotalResults: state => state.sites.totalResults,
 
@@ -41,11 +37,8 @@ export default {
     store.doSitesFetch();
   },
 
-  doSitesFetch: (params) => ({ dispatch, store, apiGet }) => {
+  doSitesFetch: (params) => ({ dispatch, apiGet }) => {
     dispatch({ type: 'SITES_FETCH_START' });
-    const page = store.selectSitesPageNumber(); //pageNumber !== null ? pageNumber : 
-    const size = store.selectSitesResultsPerPage(); //numberPerPage !== null ? numberPerPage : 
-
     const query = queryFromObject(params);
     const url = `/psapi/siteDataEntry${query}`;
 

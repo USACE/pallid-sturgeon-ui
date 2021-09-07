@@ -47,11 +47,22 @@ const NavItem = connect(
                 </a>
               )}
             >
-              {href.map(link => (
-                <Dropdown.Item key={link} href={link} className={link === pathname ? 'active' : ''}>
-                  {hrefAsString(link)}
-                </Dropdown.Item>
-              ))}
+              {href.map(link => {
+                if (typeof link === 'string') {
+                  return (
+                    <Dropdown.Item key={link} href={link} className={link === pathname ? 'active' : ''}>
+                      {hrefAsString(link)}
+                    </Dropdown.Item>
+                  );
+                } else {
+                  const { text, uri } = link;
+                  return (
+                    <Dropdown.Item key={text} href={uri} className={uri === pathname ? 'active' : ''}>
+                      {text}
+                    </Dropdown.Item>
+                  );
+                }
+              })}
             </Dropdown.Menu>
           ) : (
             <a className='nav-link' href={href}>

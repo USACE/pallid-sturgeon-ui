@@ -18,12 +18,6 @@ export default connect(
 
     return (
       <div className='container-fluid'>
-        <Card className='mb-3'>
-          <Card.Header text='Create New Site' />
-          <Card.Body>
-            <NewSite />
-          </Card.Body>
-        </Card>
         <Card>
           <Card.Header text='Site Search Filter' />
           <Card.Body>
