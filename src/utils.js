@@ -52,3 +52,11 @@ exports.queryFromObject = (obj = {}) => {
 
   return `?${finalKeys.map(key => `${key}=${obj[key]}`).join('&')}`;
 };
+
+exports.dropdownYearsToNow = () => {
+  const thisYear = new Date().getFullYear();
+
+  return [...new Array(thisYear - 2018)].map((_, i) => ({
+    value: thisYear - i,
+  }));
+};

@@ -15,16 +15,19 @@ import TelemetryTable from './tables/telemetryTable';
 
 import usePrevious from 'customHooks/usePrevious';
 import { createDropdownOptions } from './datasheetHelpers';
+import { dropdownYearsToNow } from 'utils';
 
 import '../data-summary.scss';
 
 export default connect(
   'doDatasheetFetch',
   'doDatasheetLoadData',
+  'selectDomains',
   'selectDatasheetItemsObject',
   ({
     doDatasheetFetch,
     doDatasheetLoadData,
+    domains,
     datasheetItemsObject,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
@@ -40,7 +43,8 @@ export default connect(
     const prevPageNumber = usePrevious(pageNumber);
     const prevItemsPerPage = usePrevious(itemsPerPage);
 
-    const { projects = [], seasons = [], data = {} } = datasheetItemsObject;
+    const { projects, seasons } = domains;
+    const { data = {} } = datasheetItemsObject;
     const { missouriRiverData = {}, fishData = {}, suppData = {} } = data;
     const tabs = ['missouriRiverData', 'fishData',  'suppData'];
 
@@ -93,11 +97,7 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={val => setYearFilter(val)}
                   value={yearFilter}
-                  options={[
-                    { value: '2021' },
-                    { value: '2020' },
-                    { value: '2019' }
-                  ]}
+                  options={dropdownYearsToNow()}
                 />
               </div>
               <div className='col-md-6 col-xs-12'>

@@ -24,6 +24,10 @@ const administrationLinks = [
 ];
 
 const dataEntryLinks = [
+  {
+    uri: '/sites-list/create-new-site',
+    text: 'Create New Site',
+  },
   '/sites-list',
   '/find-data-sheet',
 ];
@@ -76,7 +80,15 @@ const NavBar = connect(
             <>
               <NavItem href={['/']}>Home</NavItem>
               <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
-              <NavItem href={dataEntryLinks}>Data Entry</NavItem>
+              <NavItem
+                href={dataEntryLinks}
+                inlcudedLinks={[
+                  '/sites-list/create-new-site',
+                  '/sites-list/edit-site',
+                ]}
+              >
+                Data Entry
+              </NavItem>
               <NavItem href={['/data-upload']}>Data Upload</NavItem>
               <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
               <NavItem href={administrationLinks}>Admin</NavItem>

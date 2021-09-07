@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 
 import Card from 'app-components/card';
 import NewSite from './components/new-site';
-import SitesListTable from './components/sites-list-table';
+import SitesList from './components/sites-list';
 
 import '../dataentry.scss';
 
@@ -18,16 +18,10 @@ export default connect(
 
     return (
       <div className='container-fluid'>
-        <Card className='mb-3'>
-          <Card.Header text='Create New Site' />
-          <Card.Body>
-            <NewSite />
-          </Card.Body>
-        </Card>
         <Card>
           <Card.Header text='Site Search Filter' />
           <Card.Body>
-            <SitesListTable />
+            <SitesList />
           </Card.Body>
         </Card>
       </div>
