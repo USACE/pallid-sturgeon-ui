@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 
 import Icon from '../icon';
 import NavItem from './navItem';
-import { classArray } from '../../utils';
+import { classArray } from 'utils';
 
 import './navigation.scss';
 

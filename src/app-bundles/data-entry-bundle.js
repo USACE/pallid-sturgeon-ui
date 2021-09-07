@@ -1,4 +1,4 @@
-import { queryFromObject } from '../utils';
+import { queryFromObject } from 'utils';
 
 export default {
   name: 'dataEntry',
