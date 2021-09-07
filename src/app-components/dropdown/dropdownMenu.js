@@ -3,7 +3,7 @@ import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } f
 import DropdownContext from './dropdownContext';
 import useOutsideEventHandle from '../../customHooks/useOutsideEventHandle';
 import useWindowListener from '../../customHooks/useWindowListener';
-import { classArray } from '../../utils';
+import { classArray } from 'utils';
 
 import './dropdown.scss';
 
