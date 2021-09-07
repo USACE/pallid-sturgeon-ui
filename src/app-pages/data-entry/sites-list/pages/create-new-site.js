@@ -10,18 +10,19 @@ import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers
 import { dropdownYearsToNow } from 'utils';
 
 const CreateNewSite = connect(
+  'doPostNewSite',
   'doDataEntryLoadData',
-  'selectDatasheetItemsObject',
+  'selectDomains',
   ({
+    doPostNewSite,
     doDataEntryLoadData,
-    datasheetItemsObject,
+    domains,
   }) => {
-    const { projects = [], seasons = [], bends = [], segments = [] } = datasheetItemsObject;
+    const { projects, seasons, bends, segments } = domains;
 
     const [year, setYear] = useState('');
     const [fieldOffice, setFieldOffice] = useState('');
     const [recorder, setRecorder] = useState('');
-    const [isComplete, setIsComplete] = useState(false);
     const [project, setProject] = useState('');
     const [segment, setSegment] = useState('');
     const [sampleUnitType, setSampleUnitType] = useState('');
@@ -33,16 +34,32 @@ const CreateNewSite = connect(
       doDataEntryLoadData();
     }, [doDataEntryLoadData]);
 
+    const createNewSite = () => {
+      const payload = {
+        siteYear: Number(year),
+        fieldOffice,
+        project,
+        segment: String(segment),
+        season,
+        sampleUnitTypeCode: sampleUnitType,
+        bendrn: String(bend),
+        editInitials: recorder,
+        comments,
+      };
+
+      doPostNewSite(payload);
+    };
+
     return (
-      <div className='container-fluid'>
+      <div className='container-fluid w-75'>
         <Card>
           <Card.Header text='Create New Site' />
           <Card.Body>
             <div className='row'>
-              <div className='col-3'>
+              <div className='col-2'>
                 <Select
                   label='Year'
-                  placeholder='Select year...'
+                  placeholderText='Select year...'
                   onChange={val => setYear(val)}
                   options={dropdownYearsToNow()}
                 />
@@ -50,12 +67,12 @@ const CreateNewSite = connect(
               <div className='col-3'>
                 <Select
                   label='Field Office'
-                  placeholder='Select field office...'
+                  placeholderText='Select field office...'
                   onChange={val => setFieldOffice(val)}
                   options={createDropdownOptions([])}
                 />
               </div>
-              <div className='col-3'>
+              <div className='col-2'>
                 <label><small>Recorder</small></label>
                 <input
                   type='text'
@@ -65,18 +82,9 @@ const CreateNewSite = connect(
                   value={recorder}
                 />
               </div>
-              <div className='col-3'>
-                <label><small>Complete?</small></label>
-                <input
-                  type='checkbox'
-                  className='form-control mt-2'
-                  style={{ height: '18px', width: '18px' }}
-                  onChange={e => setIsComplete(e.target.value)}
-                />
-              </div>
             </div>
             <div className='row mt-3'>
-              <div className='col-4'>
+              <div className='col-3'>
                 <Select
                   label='Project'
                   placeholderText='Select project...'
@@ -84,7 +92,7 @@ const CreateNewSite = connect(
                   options={createDropdownOptions(projects)}
                 />
               </div>
-              <div className='col-4'>
+              <div className='col-3'>
                 <Select
                   label='Season'
                   placeholderText='Select season...'
@@ -92,7 +100,7 @@ const CreateNewSite = connect(
                   options={createDropdownOptions(seasons)}
                 />
               </div>
-              <div className='col-4'>
+              <div className='col-3'>
                 <Select
                   label='Sample Unit Type'
                   placeholderText='Select sample unit type...'
@@ -143,7 +151,7 @@ const CreateNewSite = connect(
                 className='ml-2'
                 variant='success'
                 text='Create'
-                handleClick={() => alert('create site!')}
+                handleClick={() => createNewSite()}
               />
             </div>
           </Card.Body>

@@ -18,6 +18,7 @@ export default {
 
     const url = '/psapi/upload';
     const payload = {
+      editInitials: recorder,
       ...siteFile           && { siteUpload:          siteFile },
       ...searchEffortFile   && { searchUpload:        searchEffortFile },
       ...telemetryFishFile  && { telemetryUpload:     telemetryFishFile },

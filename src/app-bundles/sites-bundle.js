@@ -61,4 +61,33 @@ export default {
       }
     });
   },
+
+  doPostNewSite: (payload) => ({ dispatch, apiPost }) => {
+    dispatch({ type: 'SITES_POST_START' });
+
+    const url = '/psapi/siteDataEntry';
+
+    apiPost(url, payload, (err, _body) => {
+      if (!err) {
+        dispatch({ type: 'SITES_POST_FINISHED' });
+      } else {
+        dispatch({ type: 'SITES_POST_ERROR', payload: err });
+      }
+    });
+  },
+
+  doUpdateSite: () => ({ dispatch, apiPut }) => {
+    dispatch({ type: 'SITES_UPDATE_START' });
+
+    const url = '/psapi/siteDataEntry';
+    const payload = {};
+
+    apiPut(url, payload, (err, _body) => {
+      if (!err) {
+        dispatch({ type: 'SITES_UPDATE_FINISHED' });
+      } else {
+        dispatch({ type: 'SITES_UPDATE_ERROR', payload: err });
+      }
+    });
+  },
 };

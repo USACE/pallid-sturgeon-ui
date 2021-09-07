@@ -90,7 +90,7 @@ export default connect(
     }, [csvData, files, fileKeys, version, recorder, submitIsDisabled, doUploadAllFiles]);
 
     return (
-      <div className='container-fluid'>
+      <div className='container-fluid w-75'>
         <Card>
           <Card.Header text='File Upload' />
           <Card.Body>

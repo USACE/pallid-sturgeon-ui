@@ -30,10 +30,10 @@ export default {
 
   doDataEntryLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_DATA_ENTRY_INIT_DATA' });
-    store.doDatasheetProjectsFetch();
-    store.doDatasheetSeasonsFetch();
-    store.doDatasheetSegmentsFetch();
-    store.doDatasheetBendsFetch();
+    store.doDomainProjectsFetch();
+    store.doDomainSeasonsFetch();
+    store.doDomainSegmentsFetch();
+    store.doDomainBendsFetch();
   },
 
   doFetchMoRiverDataEntry: (params) => ({ dispatch, apiGet }) => {

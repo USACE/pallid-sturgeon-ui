@@ -22,10 +22,12 @@ import '../data-summary.scss';
 export default connect(
   'doDatasheetFetch',
   'doDatasheetLoadData',
+  'selectDomains',
   'selectDatasheetItemsObject',
   ({
     doDatasheetFetch,
     doDatasheetLoadData,
+    domains,
     datasheetItemsObject,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
@@ -41,7 +43,8 @@ export default connect(
     const prevPageNumber = usePrevious(pageNumber);
     const prevItemsPerPage = usePrevious(itemsPerPage);
 
-    const { projects = [], seasons = [], data = {} } = datasheetItemsObject;
+    const { projects, seasons } = domains;
+    const { data = {} } = datasheetItemsObject;
     const { missouriRiverData = {}, fishData = {}, suppData = {} } = data;
     const tabs = ['missouriRiverData', 'fishData',  'suppData'];
 

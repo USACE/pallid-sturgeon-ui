@@ -13,12 +13,12 @@ import '../../dataentry.scss';
 
 const SitesList = connect(
   'doSitesFetch',
-  'selectDatasheetItemsObject',
+  'selectDomains',
   ({
     doSitesFetch,
-    datasheetItemsObject,
+    domains,
   }) => {
-    const { projects = [], seasons = [], bends = [], segments = [] } = datasheetItemsObject;
+    const { projects, seasons, bends, segments } = domains;
 
     const [yearFilter, setYearFilter] = useState('');
     const [bendFilter, setBendFilter] = useState('');
