@@ -37,6 +37,17 @@ export default {
     store.doSitesFetch();
   },
 
+  doNewSiteLoadData: () => ({ dispatch, store }) => {
+    dispatch({ type: 'LOADING_NEW_SITE_INIT_DATA' });
+
+    store.doDomainProjectsFetch();
+    store.doDomainSeasonsFetch();
+    store.doDomainSegmentsFetch();
+    store.doDomainBendsFetch();
+    store.doDomainFieldOfficesFetch();
+    store.doDomainSampleUnitTypesFetch();
+  },
+
   doSitesFetch: (params) => ({ dispatch, apiGet }) => {
     dispatch({ type: 'SITES_FETCH_START' });
     const query = queryFromObject(params);

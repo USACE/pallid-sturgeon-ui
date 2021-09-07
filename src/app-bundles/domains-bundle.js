@@ -8,6 +8,7 @@ export default {
       segments: [],
       bends: [],
       fieldOffices: [],
+      sampleUnitTypes: [],
     };
 
     return (state = initialData, { type, payload }) => {
@@ -22,6 +23,8 @@ export default {
           return { ...state, bends: payload };
         case 'DOMAIN_UPDATED_FIELD_OFFICES':
           return { ...state, fieldOffices: payload };
+        case 'DOMAIN_UPDATED_SAMPLE_UNIT_TYPES':
+          return { ... state, sampleUnitTypes: payload };
         default:
           return state;
       }
@@ -34,6 +37,7 @@ export default {
   selectDomainsSegments: state => state.domains.segments,
   selectDomainsBends: state => state.domains.bends,
   selectDomainsFieldOffices: state => state.domains.fieldOffices,
+  selectDomainsSampleUnitTypes: state => state.domains.sampleUnitTypes,
 
   doDomainProjectsFetch: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_PROJECTS_START' });
@@ -102,6 +106,20 @@ export default {
         payload: body,
       });
       dispatch({ type: 'DOMAIN_FETCH_FIELD_OFFICES_FINISHED' });
+    });
+  },
+
+  doDomainSampleUnitTypesFetch: () => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_SAMPLE_UNIT_TYPES_START' });
+
+    const url = '/psapi/sampleUnitTypes';
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_SAMPLE_UNIT_TYPES',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_SAMPLE_UNIT_TYPES_FINISHED' });
     });
   },
 };

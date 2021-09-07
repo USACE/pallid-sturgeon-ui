@@ -11,14 +11,14 @@ import { dropdownYearsToNow } from 'utils';
 
 const CreateNewSite = connect(
   'doPostNewSite',
-  'doDataEntryLoadData',
+  'doNewSiteLoadData',
   'selectDomains',
   ({
     doPostNewSite,
-    doDataEntryLoadData,
+    doNewSiteLoadData,
     domains,
   }) => {
-    const { projects, seasons, bends, segments } = domains;
+    const { projects, seasons, bends, segments, fieldOffices, sampleUnitTypes } = domains;
 
     const [year, setYear] = useState('');
     const [fieldOffice, setFieldOffice] = useState('');
@@ -31,8 +31,8 @@ const CreateNewSite = connect(
     const [comments, setComments] = useState('');
 
     useEffect(() => {
-      doDataEntryLoadData();
-    }, [doDataEntryLoadData]);
+      doNewSiteLoadData();
+    }, [doNewSiteLoadData]);
 
     const createNewSite = () => {
       const payload = {
@@ -69,7 +69,7 @@ const CreateNewSite = connect(
                   label='Field Office'
                   placeholderText='Select field office...'
                   onChange={val => setFieldOffice(val)}
-                  options={createDropdownOptions([])}
+                  options={createDropdownOptions(fieldOffices)}
                 />
               </div>
               <div className='col-2'>
@@ -105,7 +105,7 @@ const CreateNewSite = connect(
                   label='Sample Unit Type'
                   placeholderText='Select sample unit type...'
                   onChange={value => setSampleUnitType(value)}
-                  options={createDropdownOptions([])}
+                  options={createDropdownOptions(sampleUnitTypes)}
                 />
               </div>
             </div>
