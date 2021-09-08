@@ -30,17 +30,19 @@ const SitesList = connect(
 
     const [yearFilter, setYearFilter] = useState('');
     const [bendFilter, setBendFilter] = useState('');
-    const [bendValue, setBendValue] = useState('');
+    const [bendValue, setBendValue] = useState(null);
     const [seasonFilter, setSeasonFilter] = useState('');
     const [segmentFilter, setSegmentFilter] = useState('');
-    const [segmentValue, setSegmentValue] = useState('');
+    const [segmentValue, setSegmentValue] = useState(null);
     const [projectFilter, setProjectFilter] = useState('');
     const segRef = useRef();
     const bendRef = useRef();
 
     const clearFilters = () => {
       setBendFilter('');
+      setBendValue('');
       setSeasonFilter('');
+      setSegmentValue('');
       setSegmentFilter('');
       setProjectFilter('');
 
@@ -53,18 +55,22 @@ const SitesList = connect(
       setItemsPerPage(itemsPerPage);
     };
 
-    const params = {
-      year: yearFilter,
-      bendrn: bendValue,
-      seasonCode: seasonFilter,
-      segmentCode: segmentValue,
-      projectCode: projectFilter,
-      page: pageNumber,
-      size: itemsPerPage,
-    };
+    useEffect(() => {
+      clearFilters();
+    }, [yearFilter, clearFilters]);
 
     useEffect(() => {
       if (yearFilter || prevItemsPerPage !== itemsPerPage || prevPageNumber !== pageNumber) {
+        const params = {
+          year: yearFilter,
+          bendrn: bendValue,
+          seasonCode: seasonFilter,
+          segmentCode: segmentValue,
+          projectCode: projectFilter,
+          page: pageNumber,
+          size: itemsPerPage,
+        };
+
         doSitesFetch(params);
       }
     }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter, itemsPerPage, pageNumber, prevPageNumber, prevItemsPerPage, doSitesFetch]);
