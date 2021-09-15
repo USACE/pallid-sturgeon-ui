@@ -4,8 +4,6 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
-import DownloadAsCSV from 'app-components/downloadAsCSV';
-import Pagination from 'app-components/pagination';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -15,8 +13,6 @@ const MissouriRiverTable = connect(
   ({
     doFetchAllMissouriData,
     rowData = [],
-    itemCount = 0,
-    handleChange = () => {}
   }) => (
     <>
       <Button
@@ -45,12 +41,6 @@ const MissouriRiverTable = connect(
           <AgGridColumn field='checkedby' sortable unSortIcon />
         </AgGridReact>
       </div>
-      <Pagination
-        className='mt-2'
-        defaultItemsPerPage={20}
-        itemCount={itemCount}
-        handlePageChange={(pageNumber, pageSize) => handleChange(pageNumber, pageSize)}
-      />
     </>
   )
 );

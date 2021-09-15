@@ -50,10 +50,6 @@ const SitesList = connect(
     };
 
     useEffect(() => {
-      clearFilters();
-    }, [yearFilter, clearFilters]);
-
-    useEffect(() => {
       const params = {
         year: yearFilter,
         bendrn: bendValue,

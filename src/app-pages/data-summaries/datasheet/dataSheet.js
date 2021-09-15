@@ -13,7 +13,6 @@ import ProcedureTable from './tables/procedureTable';
 import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 
-import usePrevious from 'customHooks/usePrevious';
 import { createDropdownOptions } from './datasheetHelpers';
 import { dropdownYearsToNow } from 'utils';
 
@@ -22,13 +21,17 @@ import '../data-summary.scss';
 export default connect(
   'doDatasheetFetch',
   'doDatasheetLoadData',
+  'doSetDatasheetPagination',
+  'doUpdateDatasheetParams',
   'selectDomains',
-  'selectDatasheetItemsObject',
+  'selectDatasheetData',
   ({
     doDatasheetFetch,
     doDatasheetLoadData,
+    doSetDatasheetPagination,
+    doUpdateDatasheetParams,
     domains,
-    datasheetItemsObject,
+    datasheetData,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
     const [yearFilter, setYearFilter] = useState('');
@@ -38,14 +41,8 @@ export default connect(
     const [seasonFilter, setSeasonFilter] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
 
-    const [pageNumber, setPageNumber] = useState(0);
-    const [itemsPerPage, setItemsPerPage] = useState(20);
-    const prevPageNumber = usePrevious(pageNumber);
-    const prevItemsPerPage = usePrevious(itemsPerPage);
-
     const { projects, seasons } = domains;
-    const { data = {} } = datasheetItemsObject;
-    const { missouriRiverData = {}, fishData = {}, suppData = {} } = data;
+    const { missouriRiverData = {}, fishData = {}, suppData = {} } = datasheetData;
     const tabs = ['missouriRiverData', 'fishData',  'suppData'];
 
     const clearAllFilters = () => {
@@ -57,31 +54,19 @@ export default connect(
       setSpeciesFilter('');
     };
 
-    const fetchDatasheet = (page = 0, size = 20) => {
-      doDatasheetFetch(currentTab, {
+    useEffect(() => {
+      doUpdateDatasheetParams({
+        tab: currentTab,
         year: yearFilter,
         month: monthFilter,
         project: projectFilter,
         season: seasonFilter,
-        page,
-        size,
       });
-    };
-
-    const updatePagination = (pageNumber, itemsPerPage) => {
-      setPageNumber(pageNumber);
-      setItemsPerPage(itemsPerPage);
-    };
-
-    useEffect(() => {
-      if (pageNumber !== prevPageNumber || itemsPerPage !== prevItemsPerPage) {
-        fetchDatasheet(pageNumber, itemsPerPage);
-      }
-    }, [pageNumber, itemsPerPage, fetchDatasheet]);
+    }, [yearFilter, monthFilter, projectFilter, seasonFilter, currentTab, doUpdateDatasheetParams]);
 
     useEffect(() => {
       doDatasheetLoadData();
-    }, []);
+    }, [doDatasheetLoadData]);
 
     return (
       <div className='container-fluid'>
@@ -174,9 +159,9 @@ export default connect(
                   Date Range (From - To)
                 </small></label>
                 <br />
-                <input type='date' className='form-control mt-1 mr-2 date-input' />
+                <input disabled type='date' className='form-control mt-1 mr-2 date-input' />
                 -
-                <input type='date' className='form-control mt-1 ml-2 date-input' />
+                <input disabled type='date' className='form-control mt-1 ml-2 date-input' />
               </div>
             </div>
             <div className='mt-2'>
@@ -186,7 +171,7 @@ export default connect(
                 size='small'
                 className='mr-2'
                 text='Apply Filters'
-                handleClick={() => fetchDatasheet()}
+                handleClick={() => doDatasheetFetch()}
               />
               <Button
                 isOutline
@@ -220,9 +205,8 @@ export default connect(
             />
             <Pagination
               className='mt-2'
-              defaultItemsPerPage={20}
-              itemCount={(data[tabs[currentTab]] || {}).totalCount}
-              handlePageChange={updatePagination}
+              itemCount={(datasheetData[tabs[currentTab]] || {}).totalCount}
+              handlePageChange={(pageNumber, pageSize) => doSetDatasheetPagination({ pageSize, pageNumber })}
             />
           </Card.Body>
         </Card>
