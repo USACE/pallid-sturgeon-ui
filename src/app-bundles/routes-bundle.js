@@ -4,6 +4,7 @@ import SitesList from '../app-pages/data-entry/sites-list';
 import DataEntry from '../app-pages/data-entry/datasheets';
 import DataSheet from '../app-pages/data-summaries/datasheet/dataSheet';
 import DataUpload from '../app-pages/data-upload/dataUpload';
+import EditDataSheet from 'app-pages/data-entry/edit-data-sheet/editDataSheet';
 import ErrorLog from '../app-pages/utilities/errorLog';
 import GeneticCard from '../app-pages/data-summaries/geneticCard';
 import Home from '../app-pages/home/home';
@@ -22,6 +23,7 @@ export default createRouteBundle(
     '/data-upload': DataUpload,
     '/error-log': ErrorLog,
     '/data-sheet': DataSheet,
+    '/edit-data-sheet': EditDataSheet,
     '/genetics-card-summary': GeneticCard,
     '/search-reports': SearchReports,
     '/sites-list': SitesList,

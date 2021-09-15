@@ -7,40 +7,41 @@ import Icon from 'app-components/icon';
 import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
 import SitesListTable from './sites-list-table';
-import usePrevious from 'customHooks/usePrevious';
 import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 import { dropdownYearsToNow } from 'utils';
 
 import '../../dataentry.scss';
 
 const SitesList = connect(
-  'doSitesFetch',
+  'doUpdateSiteParams',
+  'doSetSitesPagination',
   'selectDomains',
   'selectSitesTotalResults',
   ({
-    doSitesFetch,
+    doUpdateSiteParams,
+    doSetSitesPagination,
     domains,
     sitesTotalResults,
   }) => {
     const { projects, seasons, bends, segments } = domains;
-    const [pageNumber, setPageNumber] = useState(0);
-    const [itemsPerPage, setItemsPerPage] = useState(20);
-    const prevPageNumber = usePrevious(pageNumber);
-    const prevItemsPerPage = usePrevious(itemsPerPage);
 
     const [yearFilter, setYearFilter] = useState('');
-    const [bendFilter, setBendFilter] = useState('');
-    const [bendValue, setBendValue] = useState('');
-    const [seasonFilter, setSeasonFilter] = useState('');
-    const [segmentFilter, setSegmentFilter] = useState('');
-    const [segmentValue, setSegmentValue] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
-    const segRef = useRef();
+    const [seasonFilter, setSeasonFilter] = useState('');
+
+    const [bendFilter, setBendFilter] = useState('');
+    const [bendValue, setBendValue] = useState(null);
     const bendRef = useRef();
+
+    const [segmentFilter, setSegmentFilter] = useState('');
+    const [segmentValue, setSegmentValue] = useState(null);
+    const segRef = useRef();
 
     const clearFilters = () => {
       setBendFilter('');
+      setBendValue(null);
       setSeasonFilter('');
+      setSegmentValue(null);
       setSegmentFilter('');
       setProjectFilter('');
 
@@ -48,26 +49,17 @@ const SitesList = connect(
       bendRef.current.clear();
     };
 
-    const updatePagination = (pageNumber, itemsPerPage) => {
-      setPageNumber(pageNumber);
-      setItemsPerPage(itemsPerPage);
-    };
-
-    const params = {
-      year: yearFilter,
-      bendrn: bendValue,
-      seasonCode: seasonFilter,
-      segmentCode: segmentValue,
-      projectCode: projectFilter,
-      page: pageNumber,
-      size: itemsPerPage,
-    };
-
     useEffect(() => {
-      if (yearFilter || prevItemsPerPage !== itemsPerPage || prevPageNumber !== pageNumber) {
-        doSitesFetch(params);
-      }
-    }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter, itemsPerPage, pageNumber, prevPageNumber, prevItemsPerPage, doSitesFetch]);
+      const params = {
+        year: yearFilter,
+        bendrn: bendValue,
+        seasonCode: seasonFilter,
+        segmentCode: segmentValue,
+        projectCode: projectFilter,
+      };
+
+      doUpdateSiteParams(params);
+    }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter]);
 
     return (
       <>
@@ -171,12 +163,12 @@ const SitesList = connect(
             <span className='info-message'>Make selections from the drop down lists to go to the Missouri River data sheets associated with your selection.</span>
           </div>
         </div>
-        <SitesListTable />
+        <SitesListTable domains={domains} />
         <Pagination
           className='mt-3'
           itemCount={sitesTotalResults}
           defaultItemsPerPage={20}
-          handlePageChange={(newPage, pageSize) => updatePagination(newPage, pageSize)}
+          handlePageChange={(pageNumber, pageSize) => doSetSitesPagination({ pageNumber, pageSize })}
         />
       </>
     );

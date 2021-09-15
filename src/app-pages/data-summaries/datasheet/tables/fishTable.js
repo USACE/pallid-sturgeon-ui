@@ -2,12 +2,11 @@ import React from 'react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import DownloadAsCSV from 'app-components/downloadAsCSV';
-import Pagination from 'app-components/pagination/pagination';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-const FishTable = ({ rowData = [], itemCount = 0, handleChange = () => {} }) => (
+const FishTable = ({ rowData = [] }) => (
   <>
     <DownloadAsCSV content={rowData} filePrefix='fish-data' />
     <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
@@ -28,12 +27,6 @@ const FishTable = ({ rowData = [], itemCount = 0, handleChange = () => {} }) => 
         <AgGridColumn field='checkedby' />
       </AgGridReact>
     </div>
-    <Pagination
-      className='mt-2'
-      defaultItemsPerPage={20}
-      itemCount={itemCount}
-      handlePageChange={(pageNumber, pageSize) => handleChange(pageNumber, pageSize)}
-    />
   </>
 );
 

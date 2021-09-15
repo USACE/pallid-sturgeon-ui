@@ -116,3 +116,7 @@ input.form-control {
 input[disabled] {
   cursor: not-allowed;
 }
+
+.ag-theme-balham .ag-cell-inline-editing {
+  height: 100% !important;
+}

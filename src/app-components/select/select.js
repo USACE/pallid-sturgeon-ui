@@ -80,7 +80,7 @@ const Select = ({
       <select
         {...customProps}
         className={classes}
-        onChange={(e) => handleChange(e)}
+        onChange={handleChange}
         title={title || label || ''}
         value={currentOption}
         disabled={isDisabled}
