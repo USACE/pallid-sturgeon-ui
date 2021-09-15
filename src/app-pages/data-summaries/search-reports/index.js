@@ -12,11 +12,13 @@ const SearchReports = connect(
   'doSetFilter',
   'doSetSearchReportsPagination',
   'selectSearchReportsData',
+  'selectSearchReportsFilter',
   'selectSearchReportsTotalResults',
   ({
     doSetFilter,
     doSetSearchReportsPagination,
     searchReportsData,
+    searchReportsFilter,
     searchReportsTotalResults,
   }) => (
     <Card className='m-3'>
@@ -30,7 +32,7 @@ const SearchReports = connect(
             <DownloadAsCSV className='float-right' content={searchReportsData} filePrefix='search-reports' />
           </div>
         </div>
-        {filter && (<p><i>Showing reports that contain: </i><b>{filter}</b></p>)}
+        {searchReportsFilter && (<p><i>Showing reports that contain: </i><b>{searchReportsFilter}</b></p>)}
         <DSSearchReportTable rowData={searchReportsData} />
         <Pagination
           className='mt-3'
