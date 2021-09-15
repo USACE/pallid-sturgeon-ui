@@ -7,17 +7,25 @@ export default {
   name: 'sites',
   getReducer: () => {
     const initialData = {
+      pageSize: 20,
+      pageNumber: 0,
       totalResults: 0,
       data: [],
+      params: {},
     };
 
     return (state = initialData, { type, payload }) => {
       switch (type) {
-        case 'SITES_UPDATE_PAGINATION':
+        case 'UPDATE_SITE_PARAMS':
+          return {
+            ...state,
+            params: payload,
+          };
+        case 'SET_SITES_PAGINATION':
           return {
             ...state,
             pageNumber: payload.pageNumber,
-            resultsPerPage: payload.resultsPerPage,
+            pageSize: payload.pageSize,
           };
         case 'SITES_UPDATED_ITEMS':
           return {
@@ -33,7 +41,10 @@ export default {
 
   selectSitesAll: state => state.sites,
   selectSitesData: state => state.sites.data,
+  selectSitesParams: state => state.sites.params,
   selectSitesTotalResults: state => state.sites.totalResults,
+  selectSitesPageSize: state => state.sites.pageSize,
+  selectSitesPageNumber: state => state.sites.pageNumber,
 
   doSitesLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_SITES_INIT_DATA' });
@@ -51,9 +62,17 @@ export default {
     store.doDomainSampleUnitTypesFetch();
   },
 
-  doSitesFetch: (params) => ({ dispatch, apiGet }) => {
+  doSitesFetch: () => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'SITES_FETCH_START' });
-    const query = queryFromObject(params);
+    const params = store.selectSitesParams();
+    const pageSize = store.selectSitesPageSize();
+    const pageNumber = store.selectSitesPageNumber();
+
+    const query = queryFromObject({
+      ...params,
+      size: pageSize,
+      page: pageNumber,
+    });
     const url = `/psapi/siteDataEntry${query}`;
 
     apiGet(url, (err, body) => {
@@ -105,5 +124,15 @@ export default {
         tError(toastId, 'Failed to save changes. Please try again.');
       }
     });
+  },
+
+  doSetSitesPagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
+    dispatch({ type: 'SET_SITES_PAGINATION', payload: { pageSize, pageNumber }});
+    store.doSitesFetch();
+  },
+
+  doUpdateSiteParams: (params) => ({ dispatch, store }) => {
+    dispatch({ type: 'UPDATE_SITE_PARAMS', payload: params });
+    store.doSitesFetch();
   },
 };

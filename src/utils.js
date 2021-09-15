@@ -48,7 +48,7 @@ export const queryFromObject = (obj = {}) => {
 
   if (!keys.length) return '';
 
-  const finalKeys = keys.filter(key => !!obj[key]);
+  const finalKeys = keys.filter(key => !!obj[key] || isNumeric(obj[key]));
 
   return `?${finalKeys.map(key => `${key}=${obj[key]}`).join('&')}`;
 };
