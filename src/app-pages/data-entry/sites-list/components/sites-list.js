@@ -177,7 +177,7 @@ const SitesList = connect(
             <span className='info-message'>Make selections from the drop down lists to go to the Missouri River data sheets associated with your selection.</span>
           </div>
         </div>
-        <SitesListTable />
+        <SitesListTable domains={domains} />
         <Pagination
           className='mt-3'
           itemCount={sitesTotalResults}
