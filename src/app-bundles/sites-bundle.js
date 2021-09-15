@@ -1,5 +1,8 @@
 import { queryFromObject } from 'utils';
 
+import { toast } from 'react-toastify';
+import { tSuccess, tError } from 'common/toast/toastHelper';
+
 export default {
   name: 'sites',
   getReducer: () => {
@@ -66,31 +69,40 @@ export default {
     });
   },
 
-  doPostNewSite: (payload) => ({ dispatch, apiPost }) => {
+  doPostNewSite: (payload) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'SITES_POST_START' });
+    const toastId = toast.loading('Saving new site...');
 
     const url = '/psapi/siteDataEntry';
 
     apiPost(url, payload, (err, _body) => {
       if (!err) {
         dispatch({ type: 'SITES_POST_FINISHED' });
+        tSuccess(toastId, 'New site created!');
+        store.doUpdateUrl('/sites-list');
       } else {
         dispatch({ type: 'SITES_POST_ERROR', payload: err });
+        tError(toastId, 'Failed to create site. Please try again.');
       }
     });
   },
 
-  doUpdateSite: () => ({ dispatch, apiPut }) => {
+  doUpdateSite: (siteData) => ({ dispatch, apiPut }) => {
     dispatch({ type: 'SITES_UPDATE_START' });
+    const toastId = toast.loading('Saving site data...');
+
+    const { siteId, siteFid, siteYear, fieldOffice, project, segment, season, sampleUnitTypeCode, bendrn, editInitials, comments, ...rest} = siteData;
 
     const url = '/psapi/siteDataEntry';
-    const payload = {};
+    const payload = { siteId, siteFid, siteYear, fieldOffice, project, segment, season, sampleUnitTypeCode, bendrn, editInitials, comments };
 
     apiPut(url, payload, (err, _body) => {
       if (!err) {
         dispatch({ type: 'SITES_UPDATE_FINISHED' });
+        tSuccess(toastId, 'Changes successfully saved!');
       } else {
         dispatch({ type: 'SITES_UPDATE_ERROR', payload: err });
+        tError(toastId, 'Failed to save changes. Please try again.');
       }
     });
   },

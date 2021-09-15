@@ -15,8 +15,10 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const SitesListTable = connect(
+  'doUpdateSite',
   'selectSitesData',
   ({
+    doUpdateSite,
     sitesData,
     domains,
   }) => {
@@ -35,6 +37,7 @@ const SitesListTable = connect(
             }}
             rowData={sitesData}
             editType='fullRow'
+            onRowValueChanged={({ data }) => doUpdateSite(data)}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
               fieldOfficeEditor: FieldOfficeEditor,
