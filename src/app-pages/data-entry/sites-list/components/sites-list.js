@@ -39,9 +39,9 @@ const SitesList = connect(
 
     const clearFilters = () => {
       setBendFilter('');
-      setBendValue('');
+      setBendValue(null);
       setSeasonFilter('');
-      setSegmentValue('');
+      setSegmentValue(null);
       setSegmentFilter('');
       setProjectFilter('');
 

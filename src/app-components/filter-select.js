@@ -71,7 +71,13 @@ const FilterSelect = ({
 
       setFilteredList(newSet);
 
-      if (onChange) onChange(newSet, inputVal, (items.find(e => e.text === inputVal) || {}).value);
+      if (onChange) {
+        onChange(
+          newSet,
+          inputVal,
+          inputVal ? (items.find(e => e.text === inputVal) || {}).value : ''
+        );
+      }
     }
   }, [inputVal, previousVal, items, onChange, setFilteredList]);
 
