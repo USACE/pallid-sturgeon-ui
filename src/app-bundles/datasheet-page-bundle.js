@@ -1,5 +1,8 @@
 import createRestBundle from './create-rest-bundle';
 
+import { toast } from 'react-toastify';
+import { tSuccess, tError } from 'common/toast/toastHelper';
+
 export default createRestBundle({
   name: 'datasheet',
   addons: {
@@ -35,6 +38,16 @@ export default createRestBundle({
           }
         });
         dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
+      });
+    },
+
+    doFetchAllMissouriData: () => ({ dispatch, store, apiGet }) => {
+      dispatch({ type: 'DATASHEET_ALL_MISSOURI_FETCH_START' });
+
+      const uri = '/missouriFullDataSummary';
+
+      apiGet(uri, (_err, body) => {
+        console.log('response :', body);
       });
     },
   },
