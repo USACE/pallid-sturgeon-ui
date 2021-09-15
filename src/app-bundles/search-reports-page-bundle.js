@@ -48,10 +48,11 @@ export default {
     store.doSearchReportsFetch();
   },
 
-  doSearchReportsFetch: (filter = '') => ({ dispatch, store, apiGet }) => {
+  doSearchReportsFetch: () => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'SEARCH_REPORTS_FETCH_START' });
     const page = store.selectSearchReportsPageNumber();
     const size = store.selectSearchReportsPageSize();
+    const filter = store.selectSearchReportsFilter();
 
     const query = queryFromObject({ page, size, filter });
 
