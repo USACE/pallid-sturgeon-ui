@@ -9,7 +9,7 @@ export default {
     dispatch({ type: 'UPLOAD_FILES_START' });
     const toastId = toast.loading('Uploading files, please wait...');
 
-    const { files, data, version, recorder } = params;
+    const { files, data, recorder } = params;
     const {
       siteFile          = null,
       searchEffortFile  = null,
