@@ -12,7 +12,7 @@ const calcPageCount = (count, itemsPerPage) => itemsPerPage === 0 ? 1 : Math.cei
 const Pagination = ({
   itemCount = 0,
   handlePageChange = (_pageNumber, _itemsPerPage) => {},
-  defaultItemsPerPage = '10',
+  defaultItemsPerPage = '20',
   className = ''
 }) => {
   const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
