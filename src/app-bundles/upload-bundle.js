@@ -20,8 +20,6 @@ export default {
       proceduresFile    = null,
     } = data;
 
-    console.log('test files: ', files);
-
     const url = '/psapi/upload';
     const payload = {
       editInitials: recorder,
