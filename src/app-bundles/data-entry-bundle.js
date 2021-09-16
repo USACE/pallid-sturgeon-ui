@@ -27,8 +27,8 @@ export default {
   },
 
   selectDataEntry: state => state.dataEntry,
-  selectDataEntryRowData: state => state.dataEntry.data,
-  selectDataEntryRowCount: state => state.dataEntry.totalCount,
+  selectDataEntryData: state => state.dataEntry.data.length ? state.dataEntry.data[0] : {},
+  selectDataEntryTotalCount: state => state.dataEntry.totalCount,
   selectDataEntryActiveType: state => state.dataEntry.activeType,
 
   doDataEntryLoadData: () => ({ dispatch, store }) => {
@@ -57,11 +57,11 @@ export default {
           },
         });
 
-        if (store.selectDataEntryRowCount() === 0) {
+        if (store.selectDataEntryTotalCount() === 0) {
           tError(toastId, 'No datasheets found. Please try again.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
-          store.doUpdateUrl('/edit-data-sheet');
+          store.doUpdateUrl('/find-data-sheet/edit-data-sheet');
         }
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_FINISHED' });
       } else {
@@ -88,11 +88,11 @@ export default {
           },
         });
 
-        if (store.selectDataEntryRowCount() === 0) {
+        if (store.selectDataEntryTotalCount() === 0) {
           tError(toastId, 'No datasheets found. Please try again.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
-          store.doUpdateUrl('/edit-data-sheet');
+          store.doUpdateUrl('/find-data-sheet/edit-data-sheet');
         }
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_FINISHED' });
       } else {
@@ -118,16 +118,33 @@ export default {
           },
         });
 
-        if (store.selectDataEntryRowCount() === 0) {
+        if (store.selectDataEntryTotalCount() === 0) {
           tError(toastId, 'No datasheets found. Please try again.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
-          store.doUpdateUrl('/edit-data-sheet');
+          store.doUpdateUrl('/find-data-sheet/edit-data-sheet');
         }
         dispatch({ type: 'FISH_DATA_ENTRY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for datasheet. Please try again.');
+      }      
+    });
+  },
+
+  doUpdateMoRiverDataEntry: (formData) => ({ dispatch, apiPut }) => {
+    dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
+    const toastId = toast.loading('Saving datasheet...');
+
+    const url = '/psapi/moriverDataEntry';
+
+    apiPut(url, formData, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, 'Datasheet successfully updated!');
+        dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
+      } else {
+        dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
+        tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
       }      
     });
   },
