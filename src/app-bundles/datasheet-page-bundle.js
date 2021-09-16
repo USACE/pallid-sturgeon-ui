@@ -54,7 +54,7 @@ export default {
     store.doDomainSeasonsFetch();
   },
 
-  doDatasheetFetch: (tab) => ({ dispatch, apiGet }) => {
+  doDatasheetFetch: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
 
     const uris = {
@@ -90,15 +90,37 @@ export default {
     });
   },
 
-  doFetchAllMissouriData: () => ({ dispatch, store, apiGet }) => {
+  doFetchAllDatasheet: (filePrefix) => ({ dispatch, apiFetch }) => {
     dispatch({ type: 'DATASHEET_ALL_MISSOURI_FETCH_START' });
 
-    const uri = '/missouriFullDataSummary';
+    const uris = {
+      missouriRiverData: '/missouriFullDataSummary',
+      fishData: '/fishFullDataSummary',
+      suppData: '/suppFullDataSummary',
+    };
 
-    // @TODO - getting 404
-    apiGet(uri, (_err, body) => {
-      console.log('response :', body);
+    const uriKeys = Object.keys(uris);
+    const uriValues = Object.values(uris);
+    const { tab, ...params } = store.selectDatasheetParams();
+
+    const query = queryFromObject({
+      ...params,
+      officeCode: 'MO',
     });
+
+    const url = `/psapi${uriValues[tab]}${query}`;
+
+    apiFetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filePrefix}-${new Date().toISOString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
   },
 
   doSetDatasheetPagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {

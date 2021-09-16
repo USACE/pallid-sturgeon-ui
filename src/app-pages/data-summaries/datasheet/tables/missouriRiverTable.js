@@ -9,9 +9,9 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const MissouriRiverTable = connect(
-  'doFetchAllMissouriData',
+  'doFetchAllDatasheet',
   ({
-    doFetchAllMissouriData,
+    doFetchAllDatasheet,
     rowData = [],
   }) => (
     <>
@@ -21,7 +21,7 @@ const MissouriRiverTable = connect(
         variant='info'
         text='Export as CSV'
         icon={<Icon icon='download' />}
-        handleClick={() => doFetchAllMissouriData()}
+        handleClick={() => doFetchAllDatasheet('missouri-river-datasheet')}
       />
       <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
         <AgGridReact rowData={rowData}>

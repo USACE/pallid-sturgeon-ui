@@ -9,7 +9,7 @@ export default {
     dispatch({ type: 'UPLOAD_FILES_START' });
     const toastId = toast.loading('Uploading files, please wait...');
 
-    const { files, version, recorder } = params;
+    const { files, data, version, recorder } = params;
     const {
       siteFile          = null,
       searchEffortFile  = null,
@@ -18,18 +18,18 @@ export default {
       fishFile          = null,
       supplementalFile  = null,
       proceduresFile    = null,
-    } = files;
+    } = data;
 
     const url = '/psapi/upload';
     const payload = {
       editInitials: recorder,
-      ...siteFile           && { siteUpload:          siteFile },
-      ...searchEffortFile   && { searchUpload:        searchEffortFile },
-      ...telemetryFishFile  && { telemetryUpload:     telemetryFishFile },
-      ...missouriRiverFile  && { moriverUpload:       missouriRiverFile },
-      ...fishFile           && { fishUpload:          fishFile },
-      ...supplementalFile   && { supplementalUpload:  supplementalFile },
-      ...proceduresFile     && { procedureUpload:     proceduresFile },
+      ...siteFile           && { siteUpload:          { uploadFilename: files.siteFile.name,          items: siteFile }},
+      ...searchEffortFile   && { searchUpload:        { uploadFilename: files.searchEffortFile.name,  items: searchEffortFile }},
+      ...telemetryFishFile  && { telemetryUpload:     { uploadFilename: files.telemetryFishFile.name, items: telemetryFishFile }},
+      ...missouriRiverFile  && { moriverUpload:       { uploadFilename: files.missouriRiverFile.name, items: missouriRiverFile }},
+      ...fishFile           && { fishUpload:          { uploadFilename: files.fishFile.name,          items: fishFile }},
+      ...supplementalFile   && { supplementalUpload:  { uploadFilename: files.supplementalFile.name,  items: supplementalFile }},
+      ...proceduresFile     && { procedureUpload:     { uploadFilename: files.proceduresFile.name,    items: proceduresFile }},
     };
 
     apiPost(url, payload, (err, _body) => {

@@ -46,13 +46,25 @@ export default connect(
         ...files,
         [key]: file,
       });
+
+      if (file) {
+        Papa.parse(file, {
+          complete: result => dispatch({ type: 'update', key, data: result.data }),
+          transformHeader: formatJsonKey,
+          transform: formatAsNumber,
+          skipEmptyLines: true,
+          header: true,
+        });
+      } else {
+        dispatch({ type: 'update', key, data: null });
+      }
     };
 
     const submitIsDisabled = () => {
       let isDisabled = false;
 
       fileKeys.forEach(key => {
-        if (getIsRequired(key, version)) {
+        if (getIsRequired(key, files)) {
           if (!files[key]) isDisabled = true;
         }
       });
@@ -61,33 +73,8 @@ export default connect(
     };
 
     const uploadAllFiles = () => {
-      fileKeys.forEach(key => {
-        if (files[key]) {
-          Papa.parse(files[key], {
-            complete: result => dispatch({ type: 'update', key, data: result.data }),
-            transformHeader: formatJsonKey,
-            transform: formatAsNumber,
-            skipEmptyLines: true,
-            header: true,
-          });
-        }
-      });
+      doUploadAllFiles({ files, data: csvData, version, recorder });
     };
-
-    useEffect(() => {
-      let isReady = true;
-
-      fileKeys.forEach(key => {
-        if ((files[key] && csvData[key]) || (!files[key] && !csvData[key])) { }
-        else if ((files[key] && !csvData[key]) || (!files[key] && csvData[key])) {
-          isReady = false;
-        }
-      });
-
-      if (!submitIsDisabled() && isReady && version) {
-        doUploadAllFiles({ files: csvData, version, recorder });
-      }      
-    }, [csvData, files, fileKeys, version, recorder, submitIsDisabled, doUploadAllFiles]);
 
     return (
       <div className='container-fluid w-75'>
@@ -119,7 +106,7 @@ export default connect(
                 <hr />
                 <p>Upload files to each of the required fields denoted by an asterisk (*):</p>
                 {fileKeys.map(key => {
-                  const isRequired = getIsRequired(key, version);
+                  const isRequired = getIsRequired(key, files);
 
                   return (
                     <div key={key} className='row'>

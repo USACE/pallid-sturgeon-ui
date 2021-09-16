@@ -1,11 +1,22 @@
 import { isNumeric } from 'utils';
 
-export const requiredFiles = {
-  '4.0.4': ['siteFile', 'searchEffortFile', 'telemetryFishFile', 'missouriRiverFile', 'fishFile', 'supplementalFile', 'proceduresFile'],
-  '3.7.1': ['siteFile', 'missouriRiverFile', 'fishFile', 'supplementalFile'],
+export const getIsRequired = (key, files) => {
+  switch(key) {
+    case 'searchEffortFile':
+      return !!files['telemetryFishFile'];
+    case 'missouriRiverFile':
+      return !!files['fishFile'];
+    case 'fishFile':
+      return !!files['supplemental'];
+    case 'supplementalFile':
+      return !!files['proceduresFile'];
+    case 'proceduresFile':
+    case 'telemetryFishFile':
+    case 'siteFile':
+    default:
+      return false;
+  }
 };
-
-export const getIsRequired = (key, version) => version ? requiredFiles[version].includes(key) : false;
 
 export const reduceCsvState = (state, action) => {
   switch (action.type) {
