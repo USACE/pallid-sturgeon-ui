@@ -7,11 +7,14 @@ import createAuthBundle from './create-auth-bundle';
 import createJwtApiBundle from './create-jwt-api-bundle';
 import cache from '../cache';
 
+import dataEntryBundle from './data-entry-bundle';
 import datasheetPageBundle from './datasheet-page-bundle';
+import domainsBundle from './domains-bundle';
 import notificationBundle from './notification-bundle';
 import modalBundle from './modal-bundle';
 import routesBundle from './routes-bundle';
 import searchReportsPageBundle from './search-reports-page-bundle';
+import sitesBundle from './sites-bundle';
 import uploadBundle from './upload-bundle';
 import authBundle from './auth-bundle';
 import userAccessRequestBundle from './users-access-request-bundle';
@@ -39,11 +42,14 @@ export default composeBundles(
     cacheFn: cache.set,
   }),
   createUrlBundle(),
+  dataEntryBundle,
   datasheetPageBundle,
+  domainsBundle,
   modalBundle,
   notificationBundle,
   routesBundle,
   searchReportsPageBundle,
+  sitesBundle,
   uploadBundle,
   authBundle,
   userAccessRequestBundle,

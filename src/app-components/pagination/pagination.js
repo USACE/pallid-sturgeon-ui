@@ -1,20 +1,27 @@
 import React, { useEffect, useState } from 'react';
 
 import Select from '../select';
+import usePrevious from 'customHooks/usePrevious';
 import { determinePagesToShow, createPage } from './helper';
 import { classArray } from 'utils';
 
 import './pagination.scss';
 
+const calcPageCount = (count, itemsPerPage) => itemsPerPage === 0 ? 1 : Math.ceil(count / itemsPerPage);
+
 const Pagination = ({
   itemCount = 0,
   handlePageChange = (_pageNumber, _itemsPerPage) => {},
-  defaultItemsPerPage = '10',
+  defaultItemsPerPage = '20',
   className = ''
 }) => {
   const [itemsPerPage, setItemsPerPage] = useState(defaultItemsPerPage);
   const [currentPage, setCurrentPage] = useState(0);
-  const [pageCount, setPageCount] = useState(Math.ceil(itemCount / itemsPerPage));
+  const prevCurrentPage = usePrevious(currentPage);
+  const prevItemsPerPage = usePrevious(itemsPerPage);
+
+  const pageCount = calcPageCount(itemCount, itemsPerPage);
+
   const classes = classArray([
     'd-flex',
     'justify-content-between',
@@ -22,16 +29,15 @@ const Pagination = ({
     className,
   ]);
 
-  // If user changes items or items per page, go back to page 0 to avoid Array Out of Bounds error and redetermine page count
   useEffect(() => {
-    setCurrentPage(0);
-    setPageCount(Math.ceil(itemCount / itemsPerPage));
-  }, [itemsPerPage, itemCount, setPageCount, setCurrentPage]);
-
-  // Execute callback when page changes
-  useEffect(() => {
-    handlePageChange(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage, handlePageChange]);
+    if ((prevCurrentPage !== currentPage) || (prevItemsPerPage !== itemsPerPage)) {
+      if (currentPage >= pageCount) {
+        setCurrentPage(0);
+      } else {
+        handlePageChange(currentPage, itemsPerPage);
+      }
+    }
+  }, [currentPage, itemsPerPage, prevItemsPerPage, prevCurrentPage, pageCount, setCurrentPage, handlePageChange]);
 
   const pageDown = () => {
     if (currentPage > 0) setCurrentPage(currentPage - 1);

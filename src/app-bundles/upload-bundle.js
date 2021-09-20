@@ -1,40 +1,45 @@
-import createRestBundle from './create-rest-bundle';
+import { toast } from 'react-toastify';
+import { tSuccess, tError } from 'common/toast/toastHelper';
 
-export default createRestBundle({
+export default {
   name: 'upload',
-  uid: 'id',
-  staleAfter: 0,
-  persist: false,
-  routeParam: '',
-  getTemplate: '/psapi/version',
-  putTemplate: '',
-  postTemplate: '',
-  deleteTemplate: '',
-  fetchActions: [],
-  urlParamSelectors: [],
-  forceFetchActions: [],
-});
+  getReducer: () => {},
 
-// const uploadBundle = {
-//   name: 'upload',
-//   doUploadSend: () => async ({ dispatch, store, apiGet }) => {
-//     const postUrl = '/version';
+  doUploadAllFiles: (params) => ({ dispatch, apiPost }) => {
+    dispatch({ type: 'UPLOAD_FILES_START' });
+    const toastId = toast.loading('Uploading files, please wait...');
 
-//     apiGet(`${postUrl}`, (err, body) => {
-//       if (err) {
-//         console.error(err.message);
-//         store.doNotificationFire({
-//           message: err
-//             ? `${err.name}: ${err.Detail}`
-//             : 'An unexpected error occured. Please try again later.',
-//           level: 'error',
-//           autoDismiss: 0,
-//         });
-//       } else {
-//         console.log('success handler...');
-//       }
-//     });
-//   }
-// };
+    const { files, data, recorder } = params;
+    const {
+      siteFile          = null,
+      searchEffortFile  = null,
+      telemetryFishFile = null,
+      missouriRiverFile = null,
+      fishFile          = null,
+      supplementalFile  = null,
+      proceduresFile    = null,
+    } = data;
 
-// export default uploadBundle;
+    const url = '/psapi/upload';
+    const payload = {
+      editInitials: recorder,
+      ...siteFile           && { siteUpload:          { uploadFilename: files.siteFile.name,          items: siteFile }},
+      ...searchEffortFile   && { searchUpload:        { uploadFilename: files.searchEffortFile.name,  items: searchEffortFile }},
+      ...telemetryFishFile  && { telemetryUpload:     { uploadFilename: files.telemetryFishFile.name, items: telemetryFishFile }},
+      ...missouriRiverFile  && { moriverUpload:       { uploadFilename: files.missouriRiverFile.name, items: missouriRiverFile }},
+      ...fishFile           && { fishUpload:          { uploadFilename: files.fishFile.name,          items: fishFile }},
+      ...supplementalFile   && { supplementalUpload:  { uploadFilename: files.supplementalFile.name,  items: supplementalFile }},
+      ...proceduresFile     && { procedureUpload:     { uploadFilename: files.proceduresFile.name,    items: proceduresFile }},
+    };
+
+    apiPost(url, payload, (err, _body) => {
+      if (!err) {
+        dispatch({ type: 'UPLOAD_FILES_FINISHED' });
+        tSuccess(toastId, 'Successfully uploaded all files!');
+      } else {
+        dispatch({ type: 'UPLOAD_FILES_ERROR', payload: err });
+        tError(toastId, 'Failed to upload files. Please verify file formats and try again.');
+      }
+    });
+  },
+};

@@ -1,76 +1,134 @@
-import createRestBundle from './create-rest-bundle';
+import { queryFromObject } from 'utils';
 
-export default createRestBundle({
+import { toast } from 'react-toastify';
+import { tSuccess, tError } from 'common/toast/toastHelper';
+
+export default {
   name: 'datasheet',
-  addons: {
-    doDatasheetLoadData: () => ({ dispatch, store }) => {
-      dispatch({ type: 'LOADING_DATASHEET_INIT_DATA' });
-      store.doDatasheetProjectsFetch();
-      store.doDatasheetSeasonsFetch();
-    },
+  getReducer: () => {
+    const initialData = {
+      pageSize: 20,
+      pageNumber: 0,
+      totalResults: 0,
+      params: {},
+      data: {},
+    };
 
-    doDatasheetProjectsFetch: () => ({ dispatch, apiGet }) => {
-      dispatch({ type: 'DATASHEET_FETCH_PROJECTS_START' });
-
-      const url = '/psapi/projects';
-
-      apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DATASHEETS_UPDATED_PROJECTS',
-          payload: body,
-        });
-        dispatch({ type: 'DATASHEET_FETCH_PROJECTS_FINISHED' });
-      });
-    },
-
-    doDatasheetSeasonsFetch: () => ({ dispatch, apiGet }) => {
-      dispatch({ type: 'DATASHEET_FETCH_SEASONS_START' });
-
-      const url = '/psapi/seasons';
-
-      apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DATASHEETS_UPDATED_SEASONS',
-          payload: body,
-        });
-        dispatch({ type: 'DATASHEET_FETCH_SEASONS_FINISHED' });
-      });
-    },
-
-    doDatasheetFetch: (tab, filters) => ({ dispatch, apiGet }) => {
-      dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
-      const uris = [
-        '/missouriDataSummary',
-        '/fishDataSummary',
-        '/suppDataSummary',
-      ];
-
-      const queryKeys = Object.keys(filters).filter(key => filters[key]);
-      const strings = queryKeys.map(key => `${key}=${filters[key]}`);
-      const query = `?${strings.join('&')}`;
-
-      const url = `/psapi${uris[tab]}${query}`;
-
-      apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DATASHEETS_UPDATED_DATA',
-          payload: body,
-        });
-        dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
-      });
-    },
+    return (state = initialData, { type, payload }) => {
+      switch (type) {
+        case 'UPDATE_DATASHEET_PARAMS':
+          return {
+            ...state,
+            params: payload,
+          };
+        case 'SET_DATASHEET_PAGINATION':
+          return {
+            ...state,
+            pageSize: payload.pageSize,
+            pageNumber: payload.pageNumber,
+          };
+        case 'DATASHEETS_UPDATED_DATA':
+          return {
+            ...state,
+            data: {
+              ...state.data,
+              [payload.key]: payload.data,
+            }
+          };
+        default:
+          return state;
+      }
+    };
   },
 
-  reduceFurther: (state, { type, payload }) => {
-    switch (type) {
-      case 'DATASHEETS_UPDATED_PROJECTS':
-        return { ...state, projects: payload };
-      case 'DATASHEETS_UPDATED_SEASONS':
-        return { ...state, seasons: payload };
-      case 'DATASHEETS_UPDATED_DATA':
-        return { ...state, data: payload };
-      default:
-        return state;
-    }
+  selectDatasheet: state => state.datasheet,
+  selectDatasheetPageSize: state => state.datasheet.pageSize,
+  selectDatasheetPageNumber: state => state.datasheet.pageNumber,
+  selectDatasheetTotalResults: state => state.datasheet.totalResults,
+  selectDatasheetParams: state => state.datasheet.params,
+  selectDatasheetData: state => state.datasheet.data,
+
+  doDatasheetLoadData: () => ({ dispatch, store }) => {
+    dispatch({ type: 'LOADING_DATASHEET_INIT_DATA' });
+    store.doDomainProjectsFetch();
+    store.doDomainSeasonsFetch();
   },
-});
+
+  doDatasheetFetch: () => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
+
+    const uris = {
+      missouriRiverData: '/missouriDataSummary',
+      fishData: '/fishDataSummary',
+      suppData: '/suppDataSummary',
+    };
+
+    const uriKeys = Object.keys(uris);
+    const uriValues = Object.values(uris);
+    const { tab, ...params } = store.selectDatasheetParams();
+    const size = store.selectDatasheetPageSize();
+    const number = store.selectDatasheetPageNumber();
+
+    const query = queryFromObject({
+      ...params,
+      officeCode: 'MO',
+      size,
+      number,
+    });
+
+    const url = `/psapi${uriValues[tab]}${query}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DATASHEETS_UPDATED_DATA',
+        payload: {
+          key: uriKeys[tab],
+          data: body,
+        }
+      });
+      dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
+    });
+  },
+
+  doFetchAllDatasheet: (filePrefix) => ({ dispatch, apiFetch }) => {
+    dispatch({ type: 'DATASHEET_ALL_MISSOURI_FETCH_START' });
+
+    const uris = {
+      missouriRiverData: '/missouriFullDataSummary',
+      fishData: '/fishFullDataSummary',
+      suppData: '/suppFullDataSummary',
+    };
+
+    const uriKeys = Object.keys(uris);
+    const uriValues = Object.values(uris);
+    const { tab, ...params } = store.selectDatasheetParams();
+
+    const query = queryFromObject({
+      ...params,
+      officeCode: 'MO',
+    });
+
+    const url = `/psapi${uriValues[tab]}${query}`;
+
+    apiFetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filePrefix}-${new Date().toISOString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+  },
+
+  doSetDatasheetPagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
+    dispatch({ type: 'SET_DATASHEET_PAGINATION', payload: { pageSize, pageNumber }});
+    store.doDatasheetFetch();
+  },
+
+  doUpdateDatasheetParams: (params) => ({ dispatch, store }) => {
+    dispatch({ type: 'UPDATE_DATASHEET_PARAMS', payload: params });
+  },
+};

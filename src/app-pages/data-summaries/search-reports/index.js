@@ -1,42 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from 'app-components/card';
-import DSSearchReportTable from './components/dsSearchReportTable';
+import DownloadAsCSV from 'app-components/downloadAsCSV';
 import Pagination from 'app-components/pagination';
+
+import DSSearchReportTable from './components/dsSearchReportTable';
 import SearchInput from './components/searchInput';
-import DownloadAsCSV from '../datasheet/components/downloadAsCSV';
-import usePrevious from 'customHooks/usePrevious';
 
 const SearchReports = connect(
-  'doSearchReportsFetch',
+  'doSetFilter',
   'doSearchReportsLoadData',
+  'doSetSearchReportsPagination',
   'selectSearchReportsData',
+  'selectSearchReportsFilter',
   'selectSearchReportsTotalResults',
   ({
-    doSearchReportsFetch,
+    doSetFilter,
     doSearchReportsLoadData,
+    doSetSearchReportsPagination,
     searchReportsData,
+    searchReportsFilter,
     searchReportsTotalResults,
   }) => {
-    const [pageNumber, setPageNumber] = useState(0);
-    const [itemsPerPage, setItemsPerPage] = useState(20);
-    const prevPageNumber = usePrevious(pageNumber);
-    const prevItemsPerPage = usePrevious(itemsPerPage);
-
-    const updatePagination = (pageNumber, itemsPerPage) => {
-      setPageNumber(pageNumber);
-      setItemsPerPage(itemsPerPage);
-    };
-
     useEffect(() => {
-      if (pageNumber !== prevPageNumber || itemsPerPage !== prevItemsPerPage) {
-        doSearchReportsFetch(pageNumber, itemsPerPage);
-      }
-    }, [pageNumber, itemsPerPage]);
-
-    // console.log('test searchReportsData', searchReportsData);
-    // console.log('test searchReportsTotalResults', searchReportsTotalResults);
+      doSearchReportsLoadData();
+    }, [doSearchReportsLoadData]);
 
     return (
       <Card className='m-3'>
@@ -44,18 +33,19 @@ const SearchReports = connect(
         <Card.Body>
           <div className='row'>
             <div className='col-9'>
-              <SearchInput />
+              <SearchInput handleSearch={filter => doSetFilter(filter)} />
             </div>
             <div className='col-3'>
-              <DownloadAsCSV className='float-right' content={searchReportsData} />
+              <DownloadAsCSV className='float-right' content={searchReportsData} filePrefix='search-reports' />
             </div>
           </div>
+          {searchReportsFilter && (<p><i>Showing reports that contain: </i><b>{searchReportsFilter}</b></p>)}
           <DSSearchReportTable rowData={searchReportsData} />
           <Pagination
             className='mt-3'
             itemCount={searchReportsTotalResults}
             defaultItemsPerPage={20}
-            handlePageChange={(pageNumber, itemsPerPage) => updatePagination(pageNumber, itemsPerPage)}
+            handlePageChange={(pageNumber, pageSize) => doSetSearchReportsPagination({ pageNumber, pageSize })}
           />
         </Card.Body>
       </Card>

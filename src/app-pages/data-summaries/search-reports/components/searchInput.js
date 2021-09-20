@@ -6,7 +6,7 @@ import Icon from 'app-components/icon';
 const SearchInput = ({
   placeholder = 'Enter Search Text...',
   handleChange = () => {},
-  handleSearch = () => {},
+  handleSearch = (_filterString) => {},
 }) => {
   const [input, setInput] = useState('');
 
@@ -15,29 +15,34 @@ const SearchInput = ({
     setInput(val);
   };
 
+  const searchOnEnter = e => {
+    if (e.keyCode === 13) handleSearch(input);
+  };
+
   useEffect(() => {
     handleChange(input);
   }, [input]);
 
   return (
     <div className='input-group'>
-      <label className='sr-only' >Search Input</label>
+      <label className='sr-only'>Search Input</label>
       <input
-        disabled
-        type='text'
-        className='form-control'
+        className='form-control input-group-prepend-input'
         placeholder={placeholder}
         onChange={onChange}
         value={input}
+        onKeyDown={searchOnEnter}
       />
-      <Button
-        isOutline
-        isDisabled
-        size='small'
-        variant='info'
-        title='Search Reports'
-        icon={<Icon icon='magnify' />}
-      />
+      <div className='input-group-append'>
+        <Button
+          isOutline
+          size='small'
+          variant='info'
+          title='Search Reports'
+          icon={<Icon icon='magnify' />}
+          handleClick={() => handleSearch(input)}
+        />
+      </div>
     </div>
 
   );

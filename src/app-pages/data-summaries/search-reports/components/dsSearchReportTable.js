@@ -1,7 +1,7 @@
 import React from 'react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
-import DownloadAsCSV from '../../datasheet/components/downloadAsCSV';
+import DownloadAsCSV from 'app-components/downloadAsCSV';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -32,23 +32,22 @@ const DSSearchReportTable = ({
   <>
     <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
       <AgGridReact rowData={rowData}>
-        {/* <AgGridColumn field='link' sortable /> */}
-        <AgGridColumn field='seId' sortable />
-        <AgGridColumn field='searchDate' sortable />
-        <AgGridColumn field='recorder' sortable />
-        <AgGridColumn field='searchTypeCode' sortable />
-        <AgGridColumn field='startTime' sortable />
-        <AgGridColumn field='startLatitude' sortable />
-        <AgGridColumn field='startLongitude' sortable />
-        <AgGridColumn field='stopTime' sortable />
-        <AgGridColumn field='stopLatitude' sortable />
-        <AgGridColumn field='stopLongitude' sortable />
-        <AgGridColumn field='seFid' sortable />
-        <AgGridColumn field='dsId' sortable />
-        {/* <AgGridColumn field='Site ID' sortable /> */}
-        <AgGridColumn field='siteFid' sortable />
-        <AgGridColumn field='temp' sortable />
-        <AgGridColumn field='conductivity' sortable />
+        {/* <AgGridColumn field='link' sortable unSortIcon /> */}
+        <AgGridColumn field='seId' sortable unSortIcon />
+        <AgGridColumn field='searchDate' sortable unSortIcon />
+        <AgGridColumn field='recorder' sortable unSortIcon />
+        <AgGridColumn field='searchTypeCode' sortable unSortIcon />
+        <AgGridColumn field='startTime' sortable unSortIcon />
+        <AgGridColumn field='startLatitude' sortable unSortIcon />
+        <AgGridColumn field='startLongitude' sortable unSortIcon />
+        <AgGridColumn field='stopTime' sortable unSortIcon />
+        <AgGridColumn field='stopLatitude' sortable unSortIcon />
+        <AgGridColumn field='stopLongitude' sortable unSortIcon />
+        <AgGridColumn field='seFid' sortable unSortIcon />
+        <AgGridColumn field='dsId' sortable unSortIcon />
+        <AgGridColumn field='siteFid' sortable unSortIcon />
+        <AgGridColumn field='temp' sortable unSortIcon />
+        <AgGridColumn field='conductivity' sortable unSortIcon />
       </AgGridReact>
     </div>
   </>

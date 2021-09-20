@@ -1,14 +1,11 @@
 import React from 'react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
-import DownloadAsCSV from '../components/downloadAsCSV';
-
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const ProcedureTable = () => (
   <>
-    <DownloadAsCSV />
     <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
       <AgGridReact rowData={[]}>
         <AgGridColumn field='Last Updated' />

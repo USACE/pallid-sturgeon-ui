@@ -1,10 +1,10 @@
-exports.classnames = (opts) => Object.keys(opts)
+export const classnames = (opts) => Object.keys(opts)
   .map((key) => !!opts[key] ? key : '')
   .join(' ');
 
-exports.classArray = (arr) => arr.filter(e => e).join(' ');
+export const classArray = (arr) => arr.filter(e => e).join(' ');
 
-exports.formatBytes = (bytes) => {
+export const formatBytes = (bytes) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   if (bytes === 0) return 'n/a';
   const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)), 10);
@@ -12,7 +12,7 @@ exports.formatBytes = (bytes) => {
   return `${(bytes / 1024 ** i).toFixed(1)} ${sizes[i]}`;
 };
 
-exports.isNumeric = str => {
+export const isNumeric = str => {
   if (typeof str != 'string') return false; // only process strings
   return !isNaN(str) &&                     // use type coercion to parse the entirety of the string (`parseFloat` alone does not do this)...
          !isNaN(parseFloat(str));           // ...and ensure strings of whitespace fail
@@ -25,20 +25,38 @@ exports.isNumeric = str => {
  * @param {number} value - Checked to determine which string to return;
  * @returns The single or plural string provided based on the value.
  */
-exports.pluralize = (single, plural, value) => {
+export const pluralize = (single, plural, value) => {
   if (value === 1) return single;
   return plural;
 };
 
-exports.keyAsText = key => {
+export const keyAsText = key => {
   const words = key.substring(1).split(/(?=[A-Z])/).join(' ');
   return key.substring(0, 1).toUpperCase() + words;
 };
 
-exports.hrefAsString = href => {
+export const hrefAsString = href => {
   const str = href.replace('/', '');
   const words = str.split('-');
   const upperWords = words.map(word => word.substring(0, 1).toUpperCase() + word.substring(1));
   
   return upperWords.join(' ');
+};
+
+export const queryFromObject = (obj = {}) => {
+  const keys = Object.keys(obj);
+
+  if (!keys.length) return '';
+
+  const finalKeys = keys.filter(key => !!obj[key] || isNumeric(obj[key]));
+
+  return `?${finalKeys.map(key => `${key}=${obj[key]}`).join('&')}`;
+};
+
+export const dropdownYearsToNow = () => {
+  const thisYear = new Date().getFullYear();
+
+  return [...new Array(thisYear - 2018)].map((_, i) => ({
+    value: thisYear - i,
+  }));
 };

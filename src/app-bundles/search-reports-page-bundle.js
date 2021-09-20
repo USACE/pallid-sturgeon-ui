@@ -1,20 +1,28 @@
+import { queryFromObject } from 'utils';
+
 export default {
   name: 'searchReports',
   getReducer: () => {
     const initialData = {
-      totalResults: 0,
-      resultsPerPage: 20,
-      pageNumber: 0,
       data: [],
+      filter: '',
+      totalResults: 0,
+      pageSize: 20,
+      pageNumber: 0,
     };
 
     return (state = initialData, { type, payload }) => {
       switch (type) {
-        case 'SEARCH_REPORTS_UPDATE_PAGINATION':
+        case 'SET_SEARCH_REPORTS_FILTER':
+          return {
+            ...state,
+            filter: payload,
+          };
+        case 'SET_SEARCH_REPORTS_PAGINATION':
           return {
             ...state,
             pageNumber: payload.pageNumber,
-            resultsPerPage: payload.resultsPerPage,
+            pageSize: payload.pageSize,
           };
         case 'SEARCH_REPORTS_UPDATED_ITEMS':
           return {
@@ -28,9 +36,11 @@ export default {
     };
   },
 
-  selectSearchReportsResultsPerPage: state => state.searchReports.resultsPerPage,
-  selectSearchReportsPageNumber: state => state.searchReports.pageNumber,
+  selectSearchReports: state => state.searchReports,
   selectSearchReportsData: state => state.searchReports.data,
+  selectSearchReportsFilter: state => state.searchReports.filter,
+  selectSearchReportsPageSize: state => state.searchReports.pageSize,
+  selectSearchReportsPageNumber: state => state.searchReports.pageNumber,
   selectSearchReportsTotalResults: state => state.searchReports.totalResults,
 
   doSearchReportsLoadData: () => ({ dispatch, store }) => {
@@ -38,12 +48,15 @@ export default {
     store.doSearchReportsFetch();
   },
 
-  doSearchReportsFetch: (pageNumber = null, numberPerPage = null) => ({ dispatch, store, apiGet }) => {
+  doSearchReportsFetch: () => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'SEARCH_REPORTS_FETCH_START' });
-    const page = pageNumber !== null ? pageNumber : store.selectSearchReportsPageNumber();
-    const size = numberPerPage !== null ? numberPerPage : store.selectSearchReportsResultsPerPage();
+    const page = store.selectSearchReportsPageNumber();
+    const size = store.selectSearchReportsPageSize();
+    const filter = store.selectSearchReportsFilter();
 
-    const url = `/psapi/searchDataSummary?page=${page}&size=${size}`;
+    const query = queryFromObject({ page, size, filter });
+
+    const url = `/psapi/searchDataSummary${query}`;
 
     apiGet(url, (err, body) => {
       if (!err) {
@@ -56,5 +69,15 @@ export default {
         dispatch({ type: 'SEARCH_REPORTS_FETCH_ERROR', payload: err });
       }
     });
+  },
+
+  doSetFilter: (filter = '') => ({ dispatch, store }) => {
+    dispatch({ type: 'SET_SEARCH_REPORTS_FILTER', payload: filter});
+    store.doSearchReportsFetch();
+  },
+
+  doSetSearchReportsPagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
+    dispatch({ type: 'SET_SEARCH_REPORTS_PAGINATION', payload: { pageSize, pageNumber }});
+    store.doSearchReportsFetch();
   },
 };

@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { formatBytes } from '../../utils';
+import { formatBytes } from 'utils';
 
 const FileDetails = ({ file }) => {
   const { name, lastModified, size } = file || {};

@@ -3,3 +3,8 @@
   display: inline-block;
   width: calc(50% - 12px);
 }
+
+.input-group-prepend-input {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}

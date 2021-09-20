@@ -1,25 +1,8 @@
-export const createProjectOptions = state => {
-  const { projects } = state;
+export const createDropdownOptions = data => {
+  if (!data) return [];
 
-  if (!projects) return [];
-
-  return projects.map(project => {
-    const { code, description } = project;
-
-    return {
-      value: code,
-      text: description,
-    };
-  });
-};
-
-export const createSeasonOptions = state => {
-  const { seasons } = state;
-
-  if (!seasons) return [];
-
-  return seasons.map(season => {
-    const { code, description } = season;
+  return data.map(d => {
+    const { code, description } = d;
 
     return {
       value: code,

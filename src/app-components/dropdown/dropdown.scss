@@ -2,6 +2,8 @@
 
 .dropdown-item {
   color: $color-primary-dark !important;
+  font-size: 15px;
+  padding: 0;
 
   &:hover {
     color: $color-white !important;

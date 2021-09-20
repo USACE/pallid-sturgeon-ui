@@ -5,7 +5,6 @@ import Icon from '../icon';
 import NavItem from './navItem';
 import { classArray } from '../../utils';
 import RoleFilter from 'app-components/role-filter';
-
 import './navigation.scss';
 
 const dataSummaryLinks = [
@@ -17,16 +16,20 @@ const dataSummaryLinks = [
   '/tag-replacement',
 ];
 
-const dataEntryLinks = [
-  '/sites-list',
-  '/site-search',
-];
-
 const administrationLinks = [
   '/data-query',
   '/multiple-check-by',
   '/multiple-record-approval',
   '/user-access-requests',
+];
+
+const dataEntryLinks = [
+  {
+    uri: '/sites-list/create-new-site',
+    text: 'Create New Site',
+  },
+  '/sites-list',
+  '/find-data-sheet',
 ];
 
 const utilityLinks = [
@@ -78,9 +81,17 @@ const NavBar = connect(
                 allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}>
                 <NavItem href={['/']}>Home</NavItem>
                 <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
-                <NavItem href={dataEntryLinks}>Data Entry</NavItem>
-                <NavItem href={['/data-upload']}>Data Upload</NavItem>
-                <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
+              <NavItem
+                href={dataEntryLinks}
+                inlcudedLinks={[
+                  '/sites-list/create-new-site',
+                  '/sites-list/edit-site',
+                ]}
+              >
+                Data Entry
+              </NavItem>
+              <NavItem href={['/data-upload']}>Data Upload</NavItem>
+              <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
                 <RoleFilter
                   allowRoles={['ADMINISTRATOR']}>
                   <NavItem href={administrationLinks}>Admin</NavItem>

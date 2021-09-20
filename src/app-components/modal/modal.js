@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
-import { classArray } from '../../utils';
+import { classArray } from 'utils';
 
 const Modal = connect(
   'doModalClose',
@@ -23,7 +23,6 @@ const Modal = connect(
     ]);
 
     const closeModalWithEscape = useCallback((e) => {
-      console.log(e.keyCode);
       if (e.keyCode === 27) doModalClose();
     }, [doModalClose]);
 
