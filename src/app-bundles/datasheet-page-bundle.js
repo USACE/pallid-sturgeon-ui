@@ -1,8 +1,5 @@
 import { queryFromObject } from 'utils';
 
-import { toast } from 'react-toastify';
-import { tSuccess, tError } from 'common/toast/toastHelper';
-
 export default {
   name: 'datasheet',
   getReducer: () => {
@@ -71,7 +68,6 @@ export default {
 
     const query = queryFromObject({
       ...params,
-      officeCode: 'MO',
       size,
       number,
     });
@@ -103,10 +99,7 @@ export default {
     const uriValues = Object.values(uris);
     const { tab, ...params } = store.selectDatasheetParams();
 
-    const query = queryFromObject({
-      ...params,
-      officeCode: 'MO',
-    });
+    const query = queryFromObject(...params);
 
     const url = `/psapi${uriValues[tab]}${query}`;
 

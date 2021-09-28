@@ -129,3 +129,68 @@ export const gearCodeOptions = [
   { value: 'TTLC2' },
   { value: 'XHN' },
 ];
+
+export const macroOptions = [
+  { value: 'BRAD' },
+  { value: 'CHXO' },
+  { value: 'CONF' },
+  { value: 'DEND' },
+  { value: 'DRNG' },
+  { value: 'DTWT' },
+  { value: 'FDPN' },
+  { value: 'FTBW' },
+  { value: 'ISB' },
+  { value: 'OSB' },
+  { value: 'SCCL' },
+  { value: 'SCCS' },
+  { value: 'SCN' },
+  { value: 'TRIB' },
+  { value: 'TRML' },
+  { value: 'TRMS' },
+  { value: 'WILD' },
+];
+
+export const mesoOptions = [
+  { value: 'BARS' },
+  { value: 'CHNB' },
+  { value: 'DTWT' },
+  { value: 'FMCD' },
+  { value: 'ITIP' },
+  { value: 'OTHE' },
+  { value: 'POOL' },
+  { value: 'TLWG' },
+];
+
+export const microStructureOptions = [
+  { text: 'Bank Line', value:	7 },
+  { text: 'Channel Sand Bar', value: 6 },
+  { text: 'Chevron', value:	5 },
+  { text: 'Chute', value:	8 },
+  { text: 'Highly Engineered', value:	9 },
+  { text: 'Kicker Dike', value:	3 },
+  { text: 'L Dike', value:	1 },
+  { text: 'Rootless', value:	4 },
+  { text: 'Wing Dike', value:	2 },
+  { text: 'Not Described', value:	0 },
+];
+
+export const setSite_3Options = [
+  { text: 'UNKNOWN', value:	0 },
+  { text: 'BRIDGE PILINGS', value: 1 },
+  { text: 'CARS', value: 2 },
+  { text: 'PILINGS', value:	3 },
+  { text: 'SNAGS', value:	4 },
+  { text: 'CREEK MOUTH', value:	5 },
+  { text: 'SUB HERB VEG', value: 6 },
+  { text: 'SUB WOODY VEG', value:	7 },
+  { text: 'LOG PILE', value: 8 },
+  { text: 'OTHER', value:	9 },
+];
+
+export const u7Options = [
+  { value: 'BS', text: 'Broodstock' },
+  { value: 'CP', text: 'Capture Probability' },
+  { value: 'EB', text: 'Experimental Bait' },
+  { value: 'FP', text: 'Floodplain' },
+  { value: 'SE', text: 'Transmitter Seeding' },
+];
