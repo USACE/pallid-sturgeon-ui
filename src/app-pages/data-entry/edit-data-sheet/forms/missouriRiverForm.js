@@ -108,10 +108,10 @@ const MissouriRiverForm = connect(
       width,
     } = formData;
 
-    useEffect(() => {
-      console.log('test dataEntryData:', dataEntryData);
-      console.log('test formData:', formData);
-    }, [dataEntryData, formData]);
+    // useEffect(() => {
+    //   console.log('test dataEntryData:', dataEntryData);
+    //   console.log('test formData:', formData);
+    // }, [dataEntryData, formData]);
   
     return (
       <>
@@ -717,7 +717,7 @@ const MissouriRiverForm = connect(
               </div>
               <div className='col-7'>
                 <div className='row'>
-                  <div className='col-2'>
+                  <div className='col-2 text-right mt-1'>
                     <label><small>Cobble</small></label>
                   </div>
                   <div className='col-4'>
@@ -726,15 +726,14 @@ const MissouriRiverForm = connect(
                       defaultOption={defaultCobble || ''}
                       onChange={value => dispatch({ type: 'update', field: 'cobble', value })}
                       options={[
-                        { value: 'BS', text: 'Broodstock' },
-                        { value: 'CP', text: 'Capture Probability' },
-                        { value: 'EB', text: 'Experimental Bait' },
-                        { value: 'FP', text: 'Floodplain' },
-                        { value: 'SE', text: 'Transmitter Seeding' },
+                        { value: 0, text: 'None' },
+                        { value: 1, text: 'Incidental' },
+                        { value: 2, text: 'Dominant' },
+                        { value: 3, text: 'Ubiquitous' },
                       ]}
                     />
                   </div>
-                  <div className='col-2'>
+                  <div className='col-2 text-right mt-1'>
                     <label><small>Silt (%)</small></label>
                   </div>
                   <div className='col-4'>
@@ -749,7 +748,7 @@ const MissouriRiverForm = connect(
                   </div>
                 </div>
                 <div className='row mt-2'>
-                  <div className='col-2'>
+                  <div className='col-2 text-right mt-1'>
                     <label><small>Organic</small></label>
                   </div>
                   <div className='col-4'>
@@ -758,15 +757,14 @@ const MissouriRiverForm = connect(
                       defaultOption={defaultOrganic || ''}
                       onChange={value => dispatch({ type: 'update', field: 'organic', value })}
                       options={[
-                        { value: 'BS', text: 'Broodstock' },
-                        { value: 'CP', text: 'Capture Probability' },
-                        { value: 'EB', text: 'Experimental Bait' },
-                        { value: 'FP', text: 'Floodplain' },
-                        { value: 'SE', text: 'Transmitter Seeding' },
+                        { value: 0, text: 'None' },
+                        { value: 1, text: 'Incidental' },
+                        { value: 2, text: 'Dominant' },
+                        { value: 3, text: 'Ubiquitous' },
                       ]}
                     />
                   </div>
-                  <div className='col-2'>
+                  <div className='col-2 text-right mt-1'>
                     <label><small>Sand (%)</small></label>
                   </div>
                   <div className='col-4'>
@@ -781,7 +779,7 @@ const MissouriRiverForm = connect(
                   </div>
                 </div>
                 <div className='row mt-2'>
-                  <div className='col-2'>
+                  <div className='col-2 text-right mt-1'>
                     <label><small>Water Velocity</small></label>
                   </div>
                   <div className='col-4'>
@@ -789,10 +787,17 @@ const MissouriRiverForm = connect(
                       showPlaceholderWhileValid
                       defaultOption={defaultWatervel || ''}
                       onChange={value => dispatch({ type: 'update', field: 'watervel', value })}
-                      options={[]}
+                      options={[
+                        { value: 0, text: 'Not reliable' },
+                        { value: 1, text: 'Eddy' },
+                        { value: 2, text: '0 - 0.3 m/s' },
+                        { value: 3, text: '0.3 - 0.6 m/s' },
+                        { value: 4, text: '0.6 - 0.9 m/s' },
+                        { value: 5, text: '> 0.9 m/s' },
+                      ]}
                     />
                   </div>
-                  <div className='col-2'>
+                  <div className='col-2 text-right mt-1'>
                     <label><small>Gravel (%)</small></label>
                   </div>
                   <div className='col-4'>
