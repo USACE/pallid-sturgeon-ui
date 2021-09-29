@@ -4,7 +4,7 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import Select from 'app-components/select';
-import { gearCodeOptions, macroOptions, mesoOptions, microStructureOptions, setSite_3Options, u7Options } from './helper';
+import { gearCodeOptions, macroOptions, mesoOptions, microStructureOptions, setSite_1_2Options, setSite_3Options, u7Options } from './helper';
 
 const reduceFormState = (state, action) => {
   switch (action.type) {
@@ -29,33 +29,38 @@ const MissouriRiverForm = connect(
     const {
       bendRiverMile, // *
       bendrn, // *
+      cobble: defaultCobble = '',
       fieldOffice,
-      gearCode: defaultGearCode,
-      gearType: defaultGearType,
-      macro: defaultMacro,
-      meso: defaultMeso,
-      microStructure: defaultMicroStructure,
+      gearCode: defaultGearCode = '',
+      gearType: defaultGearType = '',
+      habitatrn: defaultHabitatrn = '',
+      macro: defaultMacro = '',
+      meso: defaultMeso = '',
+      microStructure: defaultMicroStructure = '',
       mrFid,
       mrId,
+      organic: defaultOrganic = '',
       project,
       sampleUnit, // *
       sampleUnitType, // *
       season,
       segment,
-      setSite_1: defaultSetSite_1,
-      setSite_2: defaultSetSite_2,
-      setSite_3: defaultSetSite_3,
-      structureFlow: defaultStructureFlow,
-      structureMod: defaultStructureMod,
-      subsampleROrN: defaultSubsampleROrN,
-      u6: defaultU6,
-      u7: defaultU7,
+      setSite_1: defaultSetSite_1 = '',
+      setSite_2: defaultSetSite_2 = '',
+      setSite_3: defaultSetSite_3 = '',
+      structureFlow: defaultStructureFlow = '',
+      structureMod: defaultStructureMod = '',
+      subsampleROrN: defaultSubsampleROrN = '',
+      u6: defaultU6 = '',
+      u7: defaultU7 = '',
+      watervel: defaultWatervel = '',
       year, // *
     } = dataEntryData;
 
     const [formData, dispatch] = useReducer(reduceFormState, dataEntryData);
 
     const {
+      comments,
       conductivity,
       depth1,
       depth2,
@@ -63,40 +68,43 @@ const MissouriRiverForm = connect(
       discharge,
       distance,
       do: doValue,
-      gearCode,
-      gearType,
-      macro,
-      meso,
+      editInitials,
+      gravel,
       micro,
-      microStructure,
       netrivermile,
+      noTurbidity,
+      noVelocity,
       recorder,
       riverstage,
+      sand,
       setdate,
-      setSite_1,
-      setSite_2,
-      setSite_3,
+      silt,
       startLatitude,
       startLongitude,
       startTime,
       stopLatitude,
       stopLongitude,
       stopTime,
-      structureFlow,
-      structureMod,
       structurenumber,
       subsample,
       subsamplepass,
-      subsampleROrN,
       temp,
+      turbidity,
       u1,
       u2,
       u3,
       u4,
       u5,
-      u6,
-      u7,
       usgs,
+      velocity02or06_1,
+      velocity02or06_2,
+      velocity02or06_3,
+      velocity08_1,
+      velocity08_2,
+      velocity08_3,
+      velocitybot1,
+      velocitybot2,
+      velocitybot3,
       width,
     } = formData;
 
@@ -188,7 +196,7 @@ const MissouriRiverForm = connect(
                   title='Subsample Field'
                   placeholder='Enter Subsample...'
                   className='form-control mt-1'
-                  value={subsample}
+                  value={subsample || ''}
                   onChange={e => dispatch({ type: 'update', field: 'subsample', value: e.target.value })}
                 />
               </div>
@@ -199,14 +207,15 @@ const MissouriRiverForm = connect(
                   title='Subsample Pass Field'
                   placeholder='Enter Pass...'
                   className='form-control mt-1'
-                  value={subsamplepass}
+                  value={subsamplepass || ''}
                   onChange={e => dispatch({ type: 'update', field: 'subsamplepass', value: e.target.value })}
                 />
               </div>
               <div className='col-2'>
                 <Select
                   label='R/N'
-                  defaultOption={defaultSubsampleROrN}
+                  showPlaceholderWhileValid
+                  defaultOption={defaultSubsampleROrN || ''}
                   onChange={value => dispatch({ type: 'update', field: 'subsampleROrN', value })}
                   options={[
                     { value: 'R' },
@@ -217,7 +226,8 @@ const MissouriRiverForm = connect(
               <div className='col-2'>
                 <Select
                   label='Gear Type'
-                  defaultOption={defaultGearType}
+                  showPlaceholderWhileValid
+                  defaultOption={defaultGearType || ''}
                   onChange={value => dispatch({ type: 'update', field: 'gearType', value })}
                   options={[
                     { value: 'E' },
@@ -229,7 +239,8 @@ const MissouriRiverForm = connect(
               <div className='col-2'>
                 <Select
                   label='Gear Code'
-                  defaultOption={defaultGearCode}
+                  showPlaceholderWhileValid
+                  defaultOption={defaultGearCode || ''}
                   onChange={value => dispatch({ type: 'update', field: 'gearCode', value })}
                   options={gearCodeOptions}
                 />
@@ -241,19 +252,20 @@ const MissouriRiverForm = connect(
                   title='Recorder Field'
                   placeholder='Enter Initials...'
                   className='form-control mt-1'
-                  value={recorder}
+                  value={recorder || ''}
                   onChange={e => dispatch({ type: 'update', field: 'recorder', value: e.target.value })}
                 />
               </div>
             </div>
 
-            <div className='row mt-4'>
+            <div className='row mt-5'>
               <div className='col-4 pb-3' style={{ borderRight: '1px solid lightgray' }}>
                 <div className='row'>
                   <div className='col-6'>
                     <Select
                       label='Macro'
-                      defaultOption={defaultMacro}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultMacro || ''}
                       onChange={value => dispatch({ type: 'update', field: 'macro', value })}
                       options={macroOptions}
                     />
@@ -261,7 +273,8 @@ const MissouriRiverForm = connect(
                   <div className='col-6'>
                     <Select
                       label='Meso'
-                      defaultOption={defaultMeso}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultMeso || ''}
                       onChange={value => dispatch({ type: 'update', field: 'meso', value })}
                       options={mesoOptions}
                     />
@@ -276,7 +289,7 @@ const MissouriRiverForm = connect(
                       placeholder='Enter Temp...'
                       step={0.1}
                       className='form-control mt-1'
-                      value={temp}
+                      value={temp || ''}
                       onChange={e => dispatch({ type: 'update', field: 'temp', value: e.target.value })}
                     />
                   </div>
@@ -288,7 +301,7 @@ const MissouriRiverForm = connect(
                       title='Width Field'
                       placeholder='Enter Width...'
                       className='form-control mt-1'
-                      value={width}
+                      value={width || ''}
                       onChange={e => dispatch({ type: 'update', field: 'width', value: e.target.value })}
                     />
                   </div>
@@ -303,14 +316,15 @@ const MissouriRiverForm = connect(
                       title='Micro Field'
                       placeholder='Enter Micro...'
                       className='form-control mt-1'
-                      value={micro}
+                      value={micro || ''}
                       onChange={e => dispatch({ type: 'update', field: 'micro', value: e.target.value })}
                     />
                   </div>
                   <div className='col-3'>
                     <Select
                       label='Micro Structure'
-                      defaultOption={defaultMicroStructure}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultMicroStructure || ''}
                       onChange={value => dispatch({ type: 'update', field: 'microStructure', value })}
                       options={microStructureOptions}
                     />
@@ -319,7 +333,8 @@ const MissouriRiverForm = connect(
                     <Select
                       isDisabled
                       label='Structure Flow'
-                      defaultOption={defaultStructureFlow}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultStructureFlow || ''}
                       onChange={value => dispatch({ type: 'update', field: 'structureFlow', value })}
                       options={[]}
                     />
@@ -328,7 +343,8 @@ const MissouriRiverForm = connect(
                     <Select
                       isDisabled
                       label='Structure Mod'
-                      defaultOption={defaultStructureMod}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultStructureMod || ''}
                       onChange={value => dispatch({ type: 'update', field: 'structureMod', value })}
                       options={[]}
                     />
@@ -338,23 +354,26 @@ const MissouriRiverForm = connect(
                   <div className='col-3 offset-3'>
                     <Select
                       label='Set Site 1'
-                      defaultOption={defaultSetSite_1}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultSetSite_1 || ''}
                       onChange={value => dispatch({ type: 'update', field: 'setSite_1', value })}
-                      options={[]}
+                      options={setSite_1_2Options}
                     />
                   </div>
                   <div className='col-3'>
                     <Select
                       label='Set Site 2'
-                      defaultOption={defaultSetSite_2}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultSetSite_2 || ''}
                       onChange={value => dispatch({ type: 'update', field: 'setSite_2', value })}
-                      options={[]}
+                      options={setSite_1_2Options}
                     />
                   </div>
                   <div className='col-3'>
                     <Select
                       label='Set Site 3'
-                      defaultOption={defaultSetSite_3}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultSetSite_3 || ''}
                       onChange={value => dispatch({ type: 'update', field: 'setSite_3', value })}
                       options={setSite_3Options}
                     />
@@ -363,7 +382,7 @@ const MissouriRiverForm = connect(
               </div>
             </div>
 
-            <div className='row mt-4'>
+            <div className='row mt-5'>
               <div className='col-5 pb-3' style={{ borderRight: '1px solid lightgray' }}>
                 <div className='row'>
                   <div className='col-4'>
@@ -373,7 +392,7 @@ const MissouriRiverForm = connect(
                       title='Start Time Field'
                       placeholder='Enter Start Time...'
                       className='form-control mt-1'
-                      value={startTime}
+                      value={startTime || ''}
                       onChange={e => dispatch({ type: 'update', field: 'startTime', value: e.target.value })}
                     />
                   </div>
@@ -384,7 +403,7 @@ const MissouriRiverForm = connect(
                       title='Start Latitude Field'
                       placeholder='Enter Start Latitude...'
                       className='form-control mt-1'
-                      value={startLatitude}
+                      value={startLatitude || ''}
                       onChange={e => dispatch({ type: 'update', field: 'startLatitude', value: e.target.value })}
                     />
                   </div>
@@ -395,7 +414,7 @@ const MissouriRiverForm = connect(
                       title='Start Longitude Field'
                       placeholder='Enter Start Longitude...'
                       className='form-control mt-1'
-                      value={startLongitude}
+                      value={startLongitude || ''}
                       onChange={e => dispatch({ type: 'update', field: 'startLongitude', value: e.target.value })}
                     />
                   </div>
@@ -415,7 +434,7 @@ const MissouriRiverForm = connect(
                       title='Distance Field'
                       placeholder='Enter Distance...'
                       className='form-control mt-1'
-                      value={distance}
+                      value={distance || ''}
                       onChange={e => dispatch({ type: 'update', field: 'distance', value: e.target.value })}
                     />
                   </div>
@@ -426,7 +445,7 @@ const MissouriRiverForm = connect(
                       placeholder='Enter Depth (1)...'
                       className='form-control mt-1'
                       step={0.1}
-                      value={depth1}
+                      value={depth1 || ''}
                       onChange={e => dispatch({ type: 'update', field: 'depth1', value: e.target.value })}
                     />
                   </div>
@@ -437,7 +456,7 @@ const MissouriRiverForm = connect(
                       placeholder='Enter Depth (2)...'
                       className='form-control mt-1'
                       step={0.1}
-                      value={depth2}
+                      value={depth2 || ''}
                       onChange={e => dispatch({ type: 'update', field: 'depth2', value: e.target.value })}
                     />
                   </div>
@@ -448,7 +467,7 @@ const MissouriRiverForm = connect(
                       placeholder='Enter Depth (3)...'
                       className='form-control mt-1'
                       step={0.1}
-                      value={depth3}
+                      value={depth3 || ''}
                       onChange={e => dispatch({ type: 'update', field: 'depth3', value: e.target.value })}
                     />
                   </div>
@@ -462,7 +481,7 @@ const MissouriRiverForm = connect(
                       title='Stop Time Field'
                       placeholder='Enter Stop Time...'
                       className='form-control mt-1'
-                      value={stopTime}
+                      value={stopTime || ''}
                       onChange={e => dispatch({ type: 'update', field: 'stopTime', value: e.target.value })}
                     />
                   </div>
@@ -474,7 +493,7 @@ const MissouriRiverForm = connect(
                       title='Stop Latitude Field'
                       placeholder='Enter Stop Latitude...'
                       className='form-control mt-1'
-                      value={stopLatitude}
+                      value={stopLatitude || ''}
                       onChange={e => dispatch({ type: 'update', field: 'stopLatitude', value: e.target.value })}
                     />
                   </div>
@@ -486,7 +505,7 @@ const MissouriRiverForm = connect(
                       title='Stop Longitude Field'
                       placeholder='Enter Stop Longitude...'
                       className='form-control mt-1'
-                      value={stopLongitude}
+                      value={stopLongitude || ''}
                       onChange={e => dispatch({ type: 'update', field: 'stopLongitude', value: e.target.value })}
                     />
                   </div>
@@ -501,7 +520,7 @@ const MissouriRiverForm = connect(
                       title='U1 Field'
                       placeholder='U1...'
                       className='form-control mt-1'
-                      value={u1}
+                      value={u1 || ''}
                       onChange={e => dispatch({ type: 'update', field: 'u1', value: e.target.value })}
                     />
                   </div>
@@ -512,7 +531,7 @@ const MissouriRiverForm = connect(
                       title='U2 Field'
                       placeholder='U2...'
                       className='form-control mt-1'
-                      value={u2}
+                      value={u2 || ''}
                       onChange={e => dispatch({ type: 'update', field: 'u2', value: e.target.value })}
                     />
                   </div>
@@ -523,7 +542,7 @@ const MissouriRiverForm = connect(
                       title='U3 Field'
                       placeholder='U3...'
                       className='form-control mt-1'
-                      value={u3}
+                      value={u3 || ''}
                       onChange={e => dispatch({ type: 'update', field: 'u3', value: e.target.value })}
                     />
                   </div>
@@ -534,7 +553,7 @@ const MissouriRiverForm = connect(
                       title='U4 Field'
                       placeholder='U4...'
                       className='form-control mt-1'
-                      value={u4}
+                      value={u4 || ''}
                       onChange={e => dispatch({ type: 'update', field: 'u4', value: e.target.value })}
                     />
                   </div>
@@ -545,14 +564,15 @@ const MissouriRiverForm = connect(
                       title='U5 Field'
                       placeholder='U5...'
                       className='form-control mt-1'
-                      value={u5}
+                      value={u5 || ''}
                       onChange={e => dispatch({ type: 'update', field: 'u5', value: e.target.value })}
                     />
                   </div>
                   <div className='col-2 mr-2'>
                     <Select
                       label='U6'
-                      defaultOption={defaultU6}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultU6 || ''}
                       onChange={value => dispatch({ type: 'update', field: 'u6', value })}
                       options={[
                         { value: 'MNCF' },
@@ -563,7 +583,8 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <Select
                       label='U7'
-                      defaultOption={defaultU7}
+                      showPlaceholderWhileValid
+                      defaultOption={defaultU7 || ''}
                       onChange={value => dispatch({ type: 'update', field: 'u7', value })}
                       options={u7Options}
                     />
@@ -577,7 +598,7 @@ const MissouriRiverForm = connect(
                       title='Structure Number Field'
                       placeholder='Enter Structure Number...'
                       className='form-control mt-1'
-                      value={structurenumber}
+                      value={structurenumber || ''}
                       onChange={e => dispatch({ type: 'update', field: 'structurenumber', value: e.target.value })}
                     />
                   </div>
@@ -588,7 +609,7 @@ const MissouriRiverForm = connect(
                       title='Net River Mile Field'
                       placeholder='Enter Net River Mile...'
                       className='form-control mt-1'
-                      value={netrivermile}
+                      value={netrivermile || ''}
                       onChange={e => dispatch({ type: 'update', field: 'netrivermile', value: e.target.value })}
                     />
                   </div>
@@ -599,7 +620,7 @@ const MissouriRiverForm = connect(
                       title='Conductivity Field'
                       placeholder='Enter Conductivity...'
                       className='form-control mt-1'
-                      value={conductivity}
+                      value={conductivity || ''}
                       onChange={e => dispatch({ type: 'update', field: 'conductivity', value: e.target.value })}
                     />
                   </div>
@@ -610,7 +631,7 @@ const MissouriRiverForm = connect(
                       title='D.O. Field'
                       placeholder='Enter D.O...'
                       className='form-control mt-1'
-                      value={doValue}
+                      value={doValue || ''}
                       onChange={e => dispatch({ type: 'update', field: 'do', value: e.target.value })}
                     />
                   </div>
@@ -623,7 +644,7 @@ const MissouriRiverForm = connect(
                       title='USGS Gauge Code Field'
                       placeholder='Enter USGS Gauge Code...'
                       className='form-control mt-1'
-                      value={usgs}
+                      value={usgs || ''}
                       onChange={e => dispatch({ type: 'update', field: 'usgs', value: e.target.value })}
                     />
                   </div>
@@ -634,7 +655,7 @@ const MissouriRiverForm = connect(
                       title='River Stage Field'
                       placeholder='Enter River Stage...'
                       className='form-control mt-1'
-                      value={riverstage}
+                      value={riverstage || ''}
                       onChange={e => dispatch({ type: 'update', field: 'riverstage', value: e.target.value })}
                     />
                   </div>
@@ -645,8 +666,292 @@ const MissouriRiverForm = connect(
                       title='Discharge Field'
                       placeholder='Enter Discharge...'
                       className='form-control mt-1'
-                      value={discharge}
+                      value={discharge || ''}
                       onChange={e => dispatch({ type: 'update', field: 'discharge', value: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className='row mt-5'>
+              <div className='col-5'>
+                <div className='row'>
+                  <div className='col-5'>
+                    <Select
+                      showPlaceholderWhileValid
+                      label='Habitat R/N'
+                      defaultOption={defaultHabitatrn || ''}
+                      onChange={value => dispatch({ type: 'update', field: 'habitatrn', value })}
+                      options={[
+                        { value: 'R', text: 'Random' },
+                        { value: 'N', text: 'Non-random' },
+                      ]}
+                    />
+                  </div>
+                  <div className='col-3'>
+                    <label><small>Turbidity</small></label>
+                    <input
+                      disabled
+                      type='text'
+                      title='Turbidity Field'
+                      placeholder='Enter Turbidity...'
+                      className='form-control mt-1'
+                      value={turbidity || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'turbidity', value: e.target.value })}
+                    />
+                  </div>
+                  <div className='col-4 text-center'>
+                    <label><small>No Turbidity</small></label>
+                    <input
+                      type='checkbox'
+                      title='No Turbidity Field'
+                      className='form-control mt-1'
+                      style={{ height: '15px', width: '15px', margin: 'auto' }}
+                      checked={!!noTurbidity}
+                      onClick={() => dispatch({ type: 'update', field: 'noTurbidity', value: !noTurbidity })}
+                      onChange={() => {}}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className='col-7'>
+                <div className='row'>
+                  <div className='col-2'>
+                    <label><small>Cobble</small></label>
+                  </div>
+                  <div className='col-4'>
+                    <Select
+                      showPlaceholderWhileValid
+                      defaultOption={defaultCobble || ''}
+                      onChange={value => dispatch({ type: 'update', field: 'cobble', value })}
+                      options={[
+                        { value: 'BS', text: 'Broodstock' },
+                        { value: 'CP', text: 'Capture Probability' },
+                        { value: 'EB', text: 'Experimental Bait' },
+                        { value: 'FP', text: 'Floodplain' },
+                        { value: 'SE', text: 'Transmitter Seeding' },
+                      ]}
+                    />
+                  </div>
+                  <div className='col-2'>
+                    <label><small>Silt (%)</small></label>
+                  </div>
+                  <div className='col-4'>
+                    <input
+                      type='number'
+                      title='Silt Percentage Field'
+                      placeholder='Enter Silt (%)...'
+                      className='form-control mt-1'
+                      value={silt || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'silt', value: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className='row mt-2'>
+                  <div className='col-2'>
+                    <label><small>Organic</small></label>
+                  </div>
+                  <div className='col-4'>
+                    <Select
+                      showPlaceholderWhileValid
+                      defaultOption={defaultOrganic || ''}
+                      onChange={value => dispatch({ type: 'update', field: 'organic', value })}
+                      options={[
+                        { value: 'BS', text: 'Broodstock' },
+                        { value: 'CP', text: 'Capture Probability' },
+                        { value: 'EB', text: 'Experimental Bait' },
+                        { value: 'FP', text: 'Floodplain' },
+                        { value: 'SE', text: 'Transmitter Seeding' },
+                      ]}
+                    />
+                  </div>
+                  <div className='col-2'>
+                    <label><small>Sand (%)</small></label>
+                  </div>
+                  <div className='col-4'>
+                    <input
+                      type='number'
+                      title='Sand Percentage Field'
+                      placeholder='Enter Sand (%)...'
+                      className='form-control mt-1'
+                      value={sand || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'sand', value: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className='row mt-2'>
+                  <div className='col-2'>
+                    <label><small>Water Velocity</small></label>
+                  </div>
+                  <div className='col-4'>
+                    <Select
+                      showPlaceholderWhileValid
+                      defaultOption={defaultWatervel || ''}
+                      onChange={value => dispatch({ type: 'update', field: 'watervel', value })}
+                      options={[]}
+                    />
+                  </div>
+                  <div className='col-2'>
+                    <label><small>Gravel (%)</small></label>
+                  </div>
+                  <div className='col-4'>
+                    <input
+                      type='number'
+                      title='Gravel Percentage Field'
+                      placeholder='Enter Gravel (%)...'
+                      className='form-control mt-1'
+                      value={gravel || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'gravel', value: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className='row mt-5'>
+              <div className='col-5'>
+                <div className='row'>
+                  <div className='col-4'>
+                    <label><small>Velocity 1 (bot)</small></label>
+                    <input
+                      disabled
+                      type='text'
+                      title='Velocity 1 (bot) Field'
+                      placeholder='Enter Velocity (bot)...'
+                      className='form-control mt-1'
+                      value={velocitybot1 || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'velocitybot1', value: e.target.value })}
+                    />
+                  </div>
+                  <div className='col-4'>
+                    <label><small>Velocity 1 (0.8 or 0.5)</small></label>
+                    <input
+                      disabled
+                      type='text'
+                      title='Velocity 1 (0.8 or 0.5) Field'
+                      placeholder='Enter Velocity (0.8 or 0.5)...'
+                      className='form-control mt-1'
+                      value={velocity08_1 || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'velocity08_1', value: e.target.value })}
+                    />
+                  </div>
+                  <div className='col-4'>
+                    <label><small>Velocity 1 (0.2 or 0.6)</small></label>
+                    <input
+                      disabled
+                      type='text'
+                      title='Velocity 1 (0.2 or 0.6) Field'
+                      placeholder='Enter Velocity (0.2 or 0.6)...'
+                      className='form-control mt-1'
+                      value={velocity02or06_1 || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'velocity02or06_1', value: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className='row mt-2'>
+                  <div className='col-4'>
+                    <label><small>Velocity 2 (bot)</small></label>
+                    <input
+                      type='text'
+                      title='Velocity 2 (bot) Field'
+                      placeholder='Enter Velocity (bot)...'
+                      className='form-control mt-1'
+                      value={velocitybot2 || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'velocitybot2', value: e.target.value })}
+                    />
+                  </div>
+                  <div className='col-4'>
+                    <label><small>Velocity 2 (0.8 or 0.5)</small></label>
+                    <input
+                      type='text'
+                      title='Velocity 2 (0.8 or 0.5) Field'
+                      placeholder='Enter Velocity (0.8 or 0.5)...'
+                      className='form-control mt-1'
+                      value={velocity08_2 || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'velocity08_2', value: e.target.value })}
+                    />
+                  </div>
+                  <div className='col-4'>
+                    <label><small>Velocity 2 (0.2 or 0.6)</small></label>
+                    <input
+                      type='text'
+                      title='Velocity 2 (0.2 or 0.6) Field'
+                      placeholder='Enter Velocity (0.2 or 0.6)...'
+                      className='form-control mt-1'
+                      value={velocity02or06_2 || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'velocity02or06_2', value: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className='row mt-2'>
+                  <div className='col-4'>
+                    <label><small>Velocity 3 (bot)</small></label>
+                    <input
+                      type='text'
+                      title='Velocity 3 (bot) Field'
+                      placeholder='Enter Velocity (bot)...'
+                      className='form-control mt-1'
+                      value={velocitybot3 || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'velocitybot3', value: e.target.value })}
+                    />
+                  </div>
+                  <div className='col-4'>
+                    <label><small>Velocity 3 (0.8)</small></label>
+                    <input
+                      type='text'
+                      title='Velocity 3 (0.8) Field'
+                      placeholder='Enter Velocity (0.8)...'
+                      className='form-control mt-1'
+                      value={velocity08_3 || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'velocity08_3', value: e.target.value })}
+                    />
+                  </div>
+                  <div className='col-4'>
+                    <label><small>Velocity 3 (0.2 or 0.6)</small></label>
+                    <input
+                      type='text'
+                      title='Velocity 3 (0.2 or 0.6) Field'
+                      placeholder='Enter Velocity (0.2 or 0.6)...'
+                      className='form-control mt-1'
+                      value={velocity02or06_3 || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'velocity02or06_3', value: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className='col-2 text-center'>
+                <label><small>No Velocities</small></label>
+                <input
+                  type='checkbox'
+                  title='No Velocties Field'
+                  className='form-control mt-1'
+                  style={{ height: '15px', width: '15px', margin: 'auto' }}
+                  checked={!!noVelocity}
+                  onClick={() => dispatch({ type: 'update', field: 'noVelocity', value: !noVelocity })}
+                  onChange={() => {}}
+                />
+              </div>
+              <div className='col-5'>
+                <label><small>Comments</small></label>
+                <textarea
+                  className='form-control mt-1'
+                  rows={5}
+                  value={comments || ''}
+                  onChange={e => dispatch({ type: 'update', field: 'comments', value: e.target.value })}
+                />
+                <div className='row mt-2'>
+                  <div className='col-9 pt-1 text-right'>
+                    <label><small>Edit Initials</small></label>
+                  </div>
+                  <div className='col-3'>
+                    <input
+                      type='text'
+                      title='Edit Initials Field'
+                      placeholder='Initials...'
+                      className='form-control mt-1'
+                      value={editInitials || ''}
+                      onChange={e => dispatch({ type: 'update', field: 'editInitials', value: e.target.value })}
                     />
                   </div>
                 </div>
