@@ -16,6 +16,7 @@ import routesBundle from './routes-bundle';
 import searchReportsPageBundle from './search-reports-page-bundle';
 import sitesBundle from './sites-bundle';
 import uploadBundle from './upload-bundle';
+import homeDataBundle from './home-data-bundle';
 
 // Mock Token User
 const mockTokenPublic =
@@ -58,6 +59,7 @@ export default composeBundles(
   dataEntryBundle,
   datasheetPageBundle,
   domainsBundle,
+  homeDataBundle,
   modalBundle,
   notificationBundle,
   routesBundle,

@@ -135,10 +135,10 @@ const FindDataSheet = connect(
         <div className='row'>
           <div className='col-12 align-self-start mb-3'>
             <Icon icon='help-circle' />
-            <span className='info-message ml-2'>Enter the ID for the type of data sheet selected (Missouri River -MD_ID, Fish - F_ID, Supplemental
+            <span className='info-message ml-2'>Enter the ID for the type of datasheet selected (Missouri River -MR_ID, Fish - F_ID, Supplemental
             -F_ID.</span>
             <br />
-            <span className='ml-4'>For Supplemental data sheet, choices also include Genetics Vial # or Pit Tag.</span>
+            <span className='ml-4'>For Supplemental datasheet, choices also include Genetics Vial # or Pit Tag.</span>
           </div>
           <div className='col-md-2 align-self-end'>
             <Button

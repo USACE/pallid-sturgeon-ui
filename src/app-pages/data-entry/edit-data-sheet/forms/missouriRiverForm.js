@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useReducer } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
@@ -18,6 +18,8 @@ const reduceFormState = (state, action) => {
   }
 };
 
+// 11847 for testing
+
 const MissouriRiverForm = connect(
   'doUpdateMoRiverDataEntry',
   'selectDataEntryData',
@@ -25,7 +27,6 @@ const MissouriRiverForm = connect(
     doUpdateMoRiverDataEntry,
     dataEntryData,
   }) => {
-    // @TODO: Missing some of these fields in the api response... Dee can you check tables for marked fields (*)?
     const {
       bendRiverMile, // *
       bendrn, // *

@@ -1,0 +1,202 @@
+import { queryFromObject } from 'utils';
+
+const homeDataBundle = {
+  name: 'home',
+
+  getReducer: () => {
+    const initialData = {
+      errorLog: {
+        data: [],
+      },
+      usgNoVialNumbers: {
+        data: [],
+      },
+      unapprovedDataSheets: {
+        data: [],
+        totalResults: 0,
+        pageSize: 20,
+        pageNumber: 0,
+      },
+      uncheckedDataSheets: {
+        data: [],
+        totalResults: 0,
+        pageSize: 20,
+        pageNumber: 0,
+      },
+    };
+
+    return (state = initialData, { type, payload }) => {
+      switch (type) {
+        case 'SET_ERROR_LOG_DATA':
+          return {
+            ...state,
+            errorLog: {
+              ...state.errorLog,
+              data: payload,
+            },
+          };
+        case 'SET_USG_NO_VIAL_NUMBERS_DATA':
+          return {
+            ...state,
+            usgNoVialNumbers: {
+              ...state.usgNoVialNumbers,
+              data: payload,
+            },
+          };
+        case 'SET_UNAPROVED_DATA_DATA':
+          return {
+            ...state,
+            unapprovedDataSheets: {
+              ...state.unapprovedDataSheets,
+              data: payload,
+            },
+          };
+        case 'UPDATE_UNAPROVED_DATA_STATE':
+          return {
+            ...state,
+            unapprovedDataSheets: {
+              ...state.unapprovedDataSheets,
+              ...payload,
+            },
+          };
+        case 'SET_UNCHECKED_DATA_DATA':
+          return {
+            ...state,
+            uncheckedDataSheets: {
+              ...state.uncheckedDataSheets,
+              data: payload.items,
+              totalResults: payload.totalCount,
+            },
+          };
+        case 'UPDATE_UNCHECKED_DATA_STATE':
+          return {
+            ...state,
+            uncheckedDataSheets: {
+              ...state.uncheckedDataSheets,
+              ...payload,
+            },
+          };
+        default:
+          return state;
+      }
+    };
+  },
+
+  selectHome: state => state.home,
+  selectErrorLog: state => state.home.errorLog,
+  selectUsgNoVialNumbers: state => state.home.usgNoVialNumbers,
+  selectUnapprovedDataSheets: state => state.home.unapprovedDataSheets,
+  selectUncheckedDataSheets: state => state.home.uncheckedDataSheets,
+
+  doHomeFetch: () => ({ dispatch, store }) => {
+    dispatch({ type: 'FETCHING_HOME_DATA '});
+    store.doFetchErrorLog();
+    store.doFetchUsgNoVialNumbers();
+    store.doFetchUnapprovedData();
+    store.doFetchUncheckedData();
+  },
+
+  doFetchErrorLog: () => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'FETCH_ERROR_LOG_START' });
+
+    const url = '/psapi/errorCount';
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'SET_ERROR_LOG_DATA',
+          payload: body,
+        });
+        dispatch({ type: 'FETCH_ERROR_LOG_FINISH' });
+      } else {
+        dispatch({ type: 'FETCH_ERROR_LOG_ERROR' });
+      }
+    });
+  },
+
+  doFetchUsgNoVialNumbers: () => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'FETCH_USG_NO_VIAL_NUMBERS_START' });
+
+    const url = '/psapi/usgNoVialNumbers';
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'SET_USG_NO_VIAL_NUMBERS_DATA',
+          payload: body,
+        });
+        dispatch({ type: 'FETCH_USG_NO_VIAL_NUMBERS_FINISHED' });
+      } else {
+        dispatch({ type: 'FETCH_USG_NO_VIAL_NUMBERS_ERROR' });
+      }
+    });
+  },
+
+  doFetchUnapprovedData: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'FETCH_UNAPPROVED_DATA_START' });
+
+    const params = store.selectUnapprovedDataSheets();
+    const { pageSize, pageNumber} = params;
+
+    const query = queryFromObject({
+      size: pageSize,
+      page: pageNumber,
+    });
+
+    const url = `/psapi/unapprovedDataSheets${query}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'SET_UNAPPROVED_DATA_DATA',
+          payload: body,
+        });
+        dispatch({ type: 'FETCH_UNAPPROVED_DATA_FINISH' });
+      } else {
+        dispatch({ type: 'FETCH_UNAPPROVED_DATA_ERROR' });
+      }
+    });
+  },
+
+  doFetchUncheckedData: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'FETCH_UNCHECKED_DATA_START' });
+    const params = store.selectUncheckedDataSheets();
+    const { pageSize, pageNumber} = params;
+
+    const query = queryFromObject({
+      size: pageSize,
+      page: pageNumber,
+    });
+
+    const url = `/psapi/uncheckedDataSheets${query}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'SET_UNCHECKED_DATA_DATA',
+          payload: body,
+        });
+        dispatch({ type: 'FETCH_UNCHECKED_DATA_FINISH' });
+      } else {
+        dispatch({ type: 'FETCH_UNCHECKED_DATA_ERROR' });
+      }
+    });
+  },
+
+  doUpdateUncheckedData: (payload) => ({ dispatch, store }) => {
+    dispatch({ type: 'UPDATE_UNCHECKED_DATA_STATE', payload });
+    store.doFetchUncheckedData();
+  },
+
+  /*
+    e.GET(urlContext+"/errorCount", PallidSturgeonH.GetErrorCount)
+    e.GET(urlContext+"/usgNoVialNumbers", PallidSturgeonH.GetUsgNoVialNumbers)
+    e.GET(urlContext+"/unapprovedDataSheets", PallidSturgeonH.GetUnapprovedDataSheets)
+    e.GET(urlContext+"/uncheckedDataSheets", PallidSturgeonH.GetUncheckedDataSheets)
+    e.GET(urlContext+"/downloadInfo", PallidSturgeonH.GetDownloadInfo)
+    e.GET(urlContext+"/downloadZip", PallidSturgeonH.GetDownloadZip)
+  */
+  
+};
+
+export default homeDataBundle;
