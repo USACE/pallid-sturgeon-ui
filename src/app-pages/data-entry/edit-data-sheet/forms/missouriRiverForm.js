@@ -31,6 +31,7 @@ const MissouriRiverForm = connect(
       bendRiverMile, // *
       bendrn, // *
       cobble: defaultCobble = '',
+      complete: defaultComplete,
       fieldOffice,
       gearCode: defaultGearCode = '',
       gearType: defaultGearType = '',
@@ -61,7 +62,9 @@ const MissouriRiverForm = connect(
     const [formData, dispatch] = useReducer(reduceFormState, dataEntryData);
 
     const {
+      checkby,
       comments,
+      complete,
       conductivity,
       depth1,
       depth2,
@@ -75,6 +78,7 @@ const MissouriRiverForm = connect(
       netrivermile,
       noTurbidity,
       noVelocity,
+      qc,
       recorder,
       riverstage,
       sand,
@@ -109,10 +113,7 @@ const MissouriRiverForm = connect(
       width,
     } = formData;
 
-    // useEffect(() => {
-    //   console.log('test dataEntryData:', dataEntryData);
-    //   console.log('test formData:', formData);
-    // }, [dataEntryData, formData]);
+    const formComplete = !!defaultComplete;
   
     return (
       <>
@@ -174,6 +175,65 @@ const MissouriRiverForm = connect(
             </div>
           </Card.Body>
         </Card>
+        {/* Approval */}
+        <Card className='mt-3'>
+          <Card.Body>
+            <div className='row'>
+              <div className='col-3' style={{ borderRight: '1px solid lightgray' }}>
+                <div className='row'>
+                  <div className='col-4 pl-4'>
+                    <label><small>Checked By</small></label>
+                    <div>{checkby || '--'}</div>
+                  </div>
+                  <div className='col-4 text-center'>
+                    <label><small>Approved?</small></label>
+                    <input
+                      disabled={formComplete}
+                      type='checkbox'
+                      title='No Turbidity Field'
+                      className='form-control mt-1'
+                      style={{ height: '15px', width: '15px', margin: 'auto' }}
+                      checked={!!complete}
+                      onClick={() => dispatch({ type: 'update', field: 'complete', value: !!complete ? '' : '1' })}
+                      onChange={() => {}}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className='col-1'>
+                <label><small>QC</small></label>
+                <input
+                  disabled={formComplete}
+                  type='text'
+                  title='No Turbidity Field'
+                  className='form-control mt-1'
+                  value={qc}
+                  onChange={e => dispatch({ type: 'update', field: 'qc', value: e.target.value })}
+                />
+              </div>
+              <div className='col-2 offset-6'>
+                <div className='float-right pt-4'>
+                  <Button
+                    isOutline
+                    size='small'
+                    className='mr-2'
+                    variant='secondary'
+                    text='Cancel'
+                    href='/find-data-sheet'
+                  />
+                  {!formComplete && (
+                    <Button
+                      size='small'
+                      variant='success'
+                      text='Save'
+                      handleClick={() => doUpdateMoRiverDataEntry(formData)}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </Card.Body>
+        </Card>
         {/* Form Fields */}
         <Card className='mt-3'>
           <Card.Header text='Missouri River Data Sheet Form' />
@@ -182,6 +242,7 @@ const MissouriRiverForm = connect(
               <div className='col-2'>
                 <label><small>Setdate</small></label>
                 <input
+                  disabled={formComplete}
                   type='date'
                   title='Date Field'
                   placeholder='Enter Date...'
@@ -193,6 +254,7 @@ const MissouriRiverForm = connect(
               <div className='col-1'>
                 <label><small>Subsample</small></label>
                 <input
+                  disabled={formComplete}
                   type='number'
                   title='Subsample Field'
                   placeholder='Enter Subsample...'
@@ -204,6 +266,7 @@ const MissouriRiverForm = connect(
               <div className='col-1'>
                 <label><small>Pass</small></label>
                 <input
+                  disabled={formComplete}
                   type='number'
                   title='Subsample Pass Field'
                   placeholder='Enter Pass...'
@@ -214,6 +277,7 @@ const MissouriRiverForm = connect(
               </div>
               <div className='col-2'>
                 <Select
+                  isDisabled={formComplete}
                   label='R/N'
                   showPlaceholderWhileValid
                   defaultOption={defaultSubsampleROrN || ''}
@@ -226,6 +290,7 @@ const MissouriRiverForm = connect(
               </div>
               <div className='col-2'>
                 <Select
+                  isDisabled={formComplete}
                   label='Gear Type'
                   showPlaceholderWhileValid
                   defaultOption={defaultGearType || ''}
@@ -239,6 +304,7 @@ const MissouriRiverForm = connect(
               </div>
               <div className='col-2'>
                 <Select
+                  isDisabled={formComplete}
                   label='Gear Code'
                   showPlaceholderWhileValid
                   defaultOption={defaultGearCode || ''}
@@ -249,6 +315,7 @@ const MissouriRiverForm = connect(
               <div className='col-1'>
                 <label><small>Recorder</small></label>
                 <input
+                  disabled={formComplete}
                   type='text'
                   title='Recorder Field'
                   placeholder='Enter Initials...'
@@ -264,6 +331,7 @@ const MissouriRiverForm = connect(
                 <div className='row'>
                   <div className='col-6'>
                     <Select
+                      isDisabled={formComplete}
                       label='Macro'
                       showPlaceholderWhileValid
                       defaultOption={defaultMacro || ''}
@@ -273,6 +341,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-6'>
                     <Select
+                      isDisabled={formComplete}
                       label='Meso'
                       showPlaceholderWhileValid
                       defaultOption={defaultMeso || ''}
@@ -285,6 +354,7 @@ const MissouriRiverForm = connect(
                   <div className='col-6'>
                     <label><small>Temp (c)</small></label>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Temperature Field'
                       placeholder='Enter Temp...'
@@ -297,7 +367,7 @@ const MissouriRiverForm = connect(
                   <div className='col-6'>
                     <label><small>Width</small></label>
                     <input
-                      disabled
+                      disabled={formComplete}
                       type='text'
                       title='Width Field'
                       placeholder='Enter Width...'
@@ -313,6 +383,7 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <label><small>Micro</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Micro Field'
                       placeholder='Enter Micro...'
@@ -323,6 +394,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <Select
+                      isDisabled={formComplete}
                       label='Micro Structure'
                       showPlaceholderWhileValid
                       defaultOption={defaultMicroStructure || ''}
@@ -332,7 +404,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <Select
-                      isDisabled
+                      isDisabled={formComplete}
                       label='Structure Flow'
                       showPlaceholderWhileValid
                       defaultOption={defaultStructureFlow || ''}
@@ -342,7 +414,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <Select
-                      isDisabled
+                      isDisabled={formComplete}
                       label='Structure Mod'
                       showPlaceholderWhileValid
                       defaultOption={defaultStructureMod || ''}
@@ -354,6 +426,7 @@ const MissouriRiverForm = connect(
                 <div className='row mt-2'>
                   <div className='col-3 offset-3'>
                     <Select
+                      isDisabled={formComplete}
                       label='Set Site 1'
                       showPlaceholderWhileValid
                       defaultOption={defaultSetSite_1 || ''}
@@ -363,6 +436,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <Select
+                      isDisabled={formComplete}
                       label='Set Site 2'
                       showPlaceholderWhileValid
                       defaultOption={defaultSetSite_2 || ''}
@@ -372,6 +446,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <Select
+                      isDisabled={formComplete}
                       label='Set Site 3'
                       showPlaceholderWhileValid
                       defaultOption={defaultSetSite_3 || ''}
@@ -389,6 +464,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Start Time</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Start Time Field'
                       placeholder='Enter Start Time...'
@@ -400,6 +476,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Start Latitude</small></label>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Start Latitude Field'
                       placeholder='Enter Start Latitude...'
@@ -411,6 +488,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Start Longitude</small></label>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Start Longitude Field'
                       placeholder='Enter Start Longitude...'
@@ -431,6 +509,7 @@ const MissouriRiverForm = connect(
                 <div className='row'>
                   <div className='col-3'>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Distance Field'
                       placeholder='Enter Distance...'
@@ -441,6 +520,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Depth (1) Field'
                       placeholder='Enter Depth (1)...'
@@ -452,6 +532,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Depth (2) Field'
                       placeholder='Enter Depth (2)...'
@@ -463,6 +544,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Depth (3) Field'
                       placeholder='Enter Depth (3)...'
@@ -477,7 +559,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Stop Time</small></label>
                     <input
-                      disabled
+                      disabled={formComplete}
                       type='text'
                       title='Stop Time Field'
                       placeholder='Enter Stop Time...'
@@ -489,7 +571,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Stop Latitude</small></label>
                     <input
-                      disabled
+                      disabled={formComplete}
                       type='number'
                       title='Stop Latitude Field'
                       placeholder='Enter Stop Latitude...'
@@ -501,7 +583,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Stop Longitude</small></label>
                     <input
-                      disabled
+                      disabled={formComplete}
                       type='number'
                       title='Stop Longitude Field'
                       placeholder='Enter Stop Longitude...'
@@ -517,6 +599,7 @@ const MissouriRiverForm = connect(
                   <div className='col-1 mr-2'>
                     <label><small>U1</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='U1 Field'
                       placeholder='U1...'
@@ -528,6 +611,7 @@ const MissouriRiverForm = connect(
                   <div className='col-1 mr-2'>
                     <label><small>U2</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='U2 Field'
                       placeholder='U2...'
@@ -539,6 +623,7 @@ const MissouriRiverForm = connect(
                   <div className='col-1 mr-2'>
                     <label><small>U3</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='U3 Field'
                       placeholder='U3...'
@@ -550,6 +635,7 @@ const MissouriRiverForm = connect(
                   <div className='col-1 mr-2'>
                     <label><small>U4</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='U4 Field'
                       placeholder='U4...'
@@ -561,6 +647,7 @@ const MissouriRiverForm = connect(
                   <div className='col-2 mr-2'>
                     <label><small>U5</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='U5 Field'
                       placeholder='U5...'
@@ -571,6 +658,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-2 mr-2'>
                     <Select
+                      isDisabled={formComplete}
                       label='U6'
                       showPlaceholderWhileValid
                       defaultOption={defaultU6 || ''}
@@ -583,6 +671,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <Select
+                      isDisabled={formComplete}
                       label='U7'
                       showPlaceholderWhileValid
                       defaultOption={defaultU7 || ''}
@@ -595,6 +684,7 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <label><small>Structure Number</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Structure Number Field'
                       placeholder='Enter Structure Number...'
@@ -606,6 +696,7 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <label><small>Net River Mile</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Net River Mile Field'
                       placeholder='Enter Net River Mile...'
@@ -617,6 +708,7 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <label><small>Conductivity</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Conductivity Field'
                       placeholder='Enter Conductivity...'
@@ -628,6 +720,7 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <label><small>D.O.</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='D.O. Field'
                       placeholder='Enter D.O...'
@@ -641,6 +734,7 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <label><small>USGS Gauge Code</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='USGS Gauge Code Field'
                       placeholder='Enter USGS Gauge Code...'
@@ -652,6 +746,7 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <label><small>River Stage</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='River Stage Field'
                       placeholder='Enter River Stage...'
@@ -663,6 +758,7 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <label><small>Discharge</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Discharge Field'
                       placeholder='Enter Discharge...'
@@ -680,6 +776,7 @@ const MissouriRiverForm = connect(
                 <div className='row'>
                   <div className='col-5'>
                     <Select
+                      isDisabled={formComplete}
                       showPlaceholderWhileValid
                       label='Habitat R/N'
                       defaultOption={defaultHabitatrn || ''}
@@ -693,7 +790,7 @@ const MissouriRiverForm = connect(
                   <div className='col-3'>
                     <label><small>Turbidity</small></label>
                     <input
-                      disabled
+                      disabled={formComplete}
                       type='text'
                       title='Turbidity Field'
                       placeholder='Enter Turbidity...'
@@ -705,6 +802,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4 text-center'>
                     <label><small>No Turbidity</small></label>
                     <input
+                      disabled={formComplete}
                       type='checkbox'
                       title='No Turbidity Field'
                       className='form-control mt-1'
@@ -723,6 +821,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-4'>
                     <Select
+                      isDisabled={formComplete}
                       showPlaceholderWhileValid
                       defaultOption={defaultCobble || ''}
                       onChange={value => dispatch({ type: 'update', field: 'cobble', value })}
@@ -739,6 +838,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-4'>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Silt Percentage Field'
                       placeholder='Enter Silt (%)...'
@@ -754,6 +854,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-4'>
                     <Select
+                      isDisabled={formComplete}
                       showPlaceholderWhileValid
                       defaultOption={defaultOrganic || ''}
                       onChange={value => dispatch({ type: 'update', field: 'organic', value })}
@@ -770,6 +871,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-4'>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Sand Percentage Field'
                       placeholder='Enter Sand (%)...'
@@ -785,6 +887,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-4'>
                     <Select
+                      isDisabled={formComplete}
                       showPlaceholderWhileValid
                       defaultOption={defaultWatervel || ''}
                       onChange={value => dispatch({ type: 'update', field: 'watervel', value })}
@@ -803,6 +906,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-4'>
                     <input
+                      disabled={formComplete}
                       type='number'
                       title='Gravel Percentage Field'
                       placeholder='Enter Gravel (%)...'
@@ -821,7 +925,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Velocity 1 (bot)</small></label>
                     <input
-                      disabled
+                      disabled={formComplete}
                       type='text'
                       title='Velocity 1 (bot) Field'
                       placeholder='Enter Velocity (bot)...'
@@ -833,7 +937,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Velocity 1 (0.8 or 0.5)</small></label>
                     <input
-                      disabled
+                      disabled={formComplete}
                       type='text'
                       title='Velocity 1 (0.8 or 0.5) Field'
                       placeholder='Enter Velocity (0.8 or 0.5)...'
@@ -845,7 +949,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Velocity 1 (0.2 or 0.6)</small></label>
                     <input
-                      disabled
+                      disabled={formComplete}
                       type='text'
                       title='Velocity 1 (0.2 or 0.6) Field'
                       placeholder='Enter Velocity (0.2 or 0.6)...'
@@ -859,6 +963,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Velocity 2 (bot)</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Velocity 2 (bot) Field'
                       placeholder='Enter Velocity (bot)...'
@@ -870,6 +975,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Velocity 2 (0.8 or 0.5)</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Velocity 2 (0.8 or 0.5) Field'
                       placeholder='Enter Velocity (0.8 or 0.5)...'
@@ -881,6 +987,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Velocity 2 (0.2 or 0.6)</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Velocity 2 (0.2 or 0.6) Field'
                       placeholder='Enter Velocity (0.2 or 0.6)...'
@@ -894,6 +1001,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Velocity 3 (bot)</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Velocity 3 (bot) Field'
                       placeholder='Enter Velocity (bot)...'
@@ -905,6 +1013,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Velocity 3 (0.8)</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Velocity 3 (0.8) Field'
                       placeholder='Enter Velocity (0.8)...'
@@ -916,6 +1025,7 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <label><small>Velocity 3 (0.2 or 0.6)</small></label>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Velocity 3 (0.2 or 0.6) Field'
                       placeholder='Enter Velocity (0.2 or 0.6)...'
@@ -929,6 +1039,7 @@ const MissouriRiverForm = connect(
               <div className='col-2 text-center'>
                 <label><small>No Velocities</small></label>
                 <input
+                  disabled={formComplete}
                   type='checkbox'
                   title='No Velocties Field'
                   className='form-control mt-1'
@@ -941,6 +1052,7 @@ const MissouriRiverForm = connect(
               <div className='col-5'>
                 <label><small>Comments</small></label>
                 <textarea
+                  disabled={formComplete}
                   className='form-control mt-1'
                   rows={5}
                   value={comments || ''}
@@ -952,6 +1064,7 @@ const MissouriRiverForm = connect(
                   </div>
                   <div className='col-3'>
                     <input
+                      disabled={formComplete}
                       type='text'
                       title='Edit Initials Field'
                       placeholder='Initials...'
@@ -975,12 +1088,14 @@ const MissouriRiverForm = connect(
                     text='Cancel'
                     href='/find-data-sheet'
                   />
-                  <Button
-                    size='small'
-                    variant='success'
-                    text='Save'
-                    handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                  />
+                  {!formComplete && (
+                    <Button
+                      size='small'
+                      variant='success'
+                      text='Save'
+                      handleClick={() => doUpdateMoRiverDataEntry(formData)}
+                    />
+                  )}
                 </div>
               </div>
             </div>

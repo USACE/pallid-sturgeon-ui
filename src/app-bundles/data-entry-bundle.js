@@ -9,10 +9,18 @@ export default {
       data: [],
       totalCount: 0,
       activeType: '',
+      lastParams: {},
     };
 
     return (state = initialData, { type, payload }) => {
       switch (type) {
+        case 'MO_RIVER_DATA_ENTRY_FETCH_START':
+        case 'SUPPLEMENTAL_DATA_ENTRY_FETCH_START':
+        case 'FISH_DATA_ENTRY_FETCH_START':
+          return {
+            ...state,
+            lastParams: payload,
+          };
         case 'DATA_ENTRY_UPDATED_DATA':
           return {
             ...state,
@@ -30,6 +38,7 @@ export default {
   selectDataEntryData: state => state.dataEntry.data.length ? state.dataEntry.data[0] : {},
   selectDataEntryTotalCount: state => state.dataEntry.totalCount,
   selectDataEntryActiveType: state => state.dataEntry.activeType,
+  selectDataEntryLastParams: state => state.dataEntry.lastParams,
 
   doDataEntryLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_DATA_ENTRY_INIT_DATA' });
@@ -41,9 +50,9 @@ export default {
     store.doDomainSampleUnitTypesFetch();
   },
 
-  doFetchMoRiverDataEntry: (params) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_START' });
-    const toastId = toast.loading('Finding datasheet...');
+  doFetchMoRiverDataEntry: (params, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_START', payload: params });
+    const toastId = ignoreToast ? null : toast.loading('Finding datasheet...');
 
     const url = `/psapi/moriverDataEntry${queryFromObject(params)}`;
 
@@ -57,23 +66,27 @@ export default {
           },
         });
 
-        if (store.selectDataEntryTotalCount() === 0) {
+        if (store.selectDataEntryTotalCount() === 0 && !ignoreToast) {
           tError(toastId, 'No datasheets found. Please try again.');
         } else {
-          tSuccess(toastId, 'Datasheet found!');
+          if (!ignoreToast) {
+            tSuccess(toastId, 'Datasheet found!');
+          }
           store.doUpdateUrl('/find-data-sheet/edit-data-sheet');
         }
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_ERROR', payload: err });
-        tError(toastId, 'Error searching for datasheet. Please try again.');
+        if (!ignoreToast) {
+          tError(toastId, 'Error searching for datasheet. Please try again.');
+        }
       }
 
     });
   },
 
   doFetchSupplementalDataEntry: (params) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_START' });
+    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = toast.loading('Finding datasheet...');
 
     const url = `/psapi/supplementalDataEntry${queryFromObject(params)}`;
@@ -103,7 +116,7 @@ export default {
   },
 
   doFetchFishDataEntry: (params) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'FISH_DATA_ENTRY_FETCH_START' });
+    dispatch({ type: 'FISH_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = toast.loading('Finding datasheet...');
 
     const url = `/psapi/fishDataEntry${queryFromObject(params)}`;
@@ -132,9 +145,10 @@ export default {
     });
   },
 
-  doUpdateMoRiverDataEntry: (formData) => ({ dispatch, apiPut }) => {
+  doUpdateMoRiverDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
+    const params = store.selectDataEntryLastParams();
 
     const url = '/psapi/moriverDataEntry';
 
@@ -142,6 +156,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
+        store.doFetchMoRiverDataEntry(params, true);
       } else {
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');

@@ -5,6 +5,7 @@ const homeDataBundle = {
 
   getReducer: () => {
     const initialData = {
+      downloadInfo: {},
       errorLog: {
         data: [],
       },
@@ -27,6 +28,11 @@ const homeDataBundle = {
 
     return (state = initialData, { type, payload }) => {
       switch (type) {
+        case 'SET_DOWNLOAD_INFO_DATA': 
+          return {
+            ...state,
+            downloadInfo: payload,
+          };
         case 'SET_ERROR_LOG_DATA':
           return {
             ...state,
@@ -83,6 +89,7 @@ const homeDataBundle = {
   },
 
   selectHome: state => state.home,
+  selectDownloadInfo: state => state.downloadInfo,
   selectErrorLog: state => state.home.errorLog,
   selectUsgNoVialNumbers: state => state.home.usgNoVialNumbers,
   selectUnapprovedDataSheets: state => state.home.unapprovedDataSheets,
@@ -90,10 +97,29 @@ const homeDataBundle = {
 
   doHomeFetch: () => ({ dispatch, store }) => {
     dispatch({ type: 'FETCHING_HOME_DATA '});
+    store.doFetchDownloadInfo();
     store.doFetchErrorLog();
     store.doFetchUsgNoVialNumbers();
     store.doFetchUnapprovedData();
     store.doFetchUncheckedData();
+  },
+
+  doFetchDownloadInfo: () => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'FETCH_DOWNLOAD_INFO_START' });
+
+    const url = '/psapi/downloadInfo?id=1';
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'SET_DOWNLOAD_INFO_DATA',
+          payload: body,
+        });
+        dispatch({ type: 'FETCH_DOWNLOAD_INFO_FINISH' });
+      } else {
+        dispatch({ type: 'FETCH_DOWNLOAD_INFO_ERROR' });
+      }
+    });
   },
 
   doFetchErrorLog: () => ({ dispatch, apiGet }) => {
