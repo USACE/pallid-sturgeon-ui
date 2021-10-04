@@ -38,8 +38,6 @@ const processResponse = response => (
         'status': response.status,
         'json': {},
       });
-    } else if (response.status === 401) {
-      store[doAuthLogout]();
     } else {
       response.json()
         .then(json => func({
@@ -164,20 +162,6 @@ const createJwtApiBundle = (opts) => {
           commonFetch(root, path, options, callback);
         },
 
-        apiGetWithToken: (path, token, callback) => {
-          const { root, unless } = getCommonItems();
-          const options = {
-            method: 'GET',
-          };
-          if (!shouldSkipToken(options.method, path, unless)) {
-            if (!token) return null;
-            else {
-              options.headers = { ...defaultHeaders(token) };
-            }
-          }
-          commonFetch(root, path, options, callback);
-        },
-        
         apiPut: (path, payload, callback) => {
           const { root, unless, tokenSelector } = getCommonItems();
           const options = {
