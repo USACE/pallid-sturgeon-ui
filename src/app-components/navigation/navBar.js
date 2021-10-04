@@ -4,7 +4,7 @@ import { connect } from 'redux-bundler-react';
 import Icon from '../icon';
 import NavItem from './navItem';
 import { classArray } from 'utils';
-import RoleFilter from 'app-components/role-filter';
+
 import './navigation.scss';
 
 const dataSummaryLinks = [
@@ -37,12 +37,12 @@ const utilityLinks = [
 ];
 
 const NavBar = connect(
-  'doAuthenticate',
-  'selectAuthLoggedIn',
+  'doAuthLogin',
+  'selectAuthIsLoggedIn',
   'selectPathname',
   ({
-    doAuthenticate,
-    authLoggedIn,
+    doAuthLogin,
+    authIsLoggedIn,
     pathname,
   }) => {
     const [show, setShow] = useState(false);
@@ -76,31 +76,27 @@ const NavBar = connect(
         </button>
         <div className={navCollapseClasses}>
           <ul className='navbar-nav ml-auto'>
-            {authLoggedIn ? (
-              <RoleFilter
-                allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}>
-                <NavItem href={['/']}>Home</NavItem>
-                <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
-                <NavItem
-                  href={dataEntryLinks}
-                  inlcudedLinks={[
-                    '/sites-list/create-new-site',
-                    '/sites-list/edit-site',
-                  ]}
-                >
-                  Data Entry
-                </NavItem>
-                <NavItem href={['/data-upload']}>Data Upload</NavItem>
-                <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
-                <RoleFilter
-                  allowRoles={['ADMINISTRATOR']}>
-                  <NavItem href={administrationLinks}>Admin</NavItem>
-                </RoleFilter>
-                <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
-              </RoleFilter>
-            ) : (
-              <NavItem handler={() => doAuthenticate()}>Login</NavItem>
-            )}
+            {/* {authIsLoggedIn ? ( */}
+            <>
+              <NavItem href={['/']}>Home</NavItem>
+              <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
+              <NavItem
+                href={dataEntryLinks}
+                inlcudedLinks={[
+                  '/sites-list/create-new-site',
+                  '/sites-list/edit-site',
+                ]}
+              >
+                Data Entry
+              </NavItem>
+              <NavItem href={['/data-upload']}>Data Upload</NavItem>
+              <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
+              <NavItem href={administrationLinks}>Admin</NavItem>
+              <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
+            </>
+            {/* ) : (
+              <NavItem handler={() => doAuthLogin()}>Login</NavItem>
+            )} */}
           </ul>
         </div>
       </nav>
