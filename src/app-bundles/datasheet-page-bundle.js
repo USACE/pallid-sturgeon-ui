@@ -71,7 +71,6 @@ export default {
 
     const query = queryFromObject({
       ...params,
-      officeCode: 'MO',
       size,
       number,
     });
@@ -105,7 +104,6 @@ export default {
 
     const query = queryFromObject({
       ...params,
-      officeCode: 'MO',
     });
 
     const url = `/psapi${uriValues[tab]}${query}`;
