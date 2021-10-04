@@ -68,7 +68,7 @@ const NavBar = connect(
       <nav className={navClasses}>
         <div className='navbar-brand'>
           <a href='/'>
-            Pallid Sturgeon Poulation Assessment
+            Pallid Sturgeon Population Assessment
           </a>
         </div>
         <button className='navbar-toggler' type='button' aria-expanded='false' aria-label='Toggle navigation' onClick={() => toggleShow()}>
