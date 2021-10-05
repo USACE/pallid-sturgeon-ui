@@ -1,3 +1,5 @@
+import { toast } from 'react-toastify';
+import { tSuccess, tError } from 'common/toast/toastHelper';
 import { queryFromObject } from 'utils';
 
 const homeDataBundle = {
@@ -5,7 +7,10 @@ const homeDataBundle = {
 
   getReducer: () => {
     const initialData = {
-      downloadInfo: {},
+      downloadInfo: {
+        versionData: {},
+        zipData: null,
+      },
       errorLog: {
         data: [],
       },
@@ -28,10 +33,21 @@ const homeDataBundle = {
 
     return (state = initialData, { type, payload }) => {
       switch (type) {
-        case 'SET_DOWNLOAD_INFO_DATA': 
+        case 'SET_DOWNLOAD_INFO_VERSION_DATA': 
           return {
             ...state,
-            downloadInfo: payload,
+            downloadInfo: {
+              ...state.downloadInfo,
+              versionData: payload,
+            }
+          };
+        case 'SET_DOWNLOAD_INFO_ZIP_DATA': 
+          return {
+            ...state,
+            downloadInfo: {
+              ...state.downloadInfo,
+              zipData: payload,
+            }
           };
         case 'SET_ERROR_LOG_DATA':
           return {
@@ -89,7 +105,7 @@ const homeDataBundle = {
   },
 
   selectHome: state => state.home,
-  selectDownloadInfo: state => state.downloadInfo,
+  selectDownloadInfoVersionInfo: state => state.home.downloadInfo.versionData,
   selectErrorLog: state => state.home.errorLog,
   selectUsgNoVialNumbers: state => state.home.usgNoVialNumbers,
   selectUnapprovedDataSheets: state => state.home.unapprovedDataSheets,
@@ -107,12 +123,12 @@ const homeDataBundle = {
   doFetchDownloadInfo: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'FETCH_DOWNLOAD_INFO_START' });
 
-    const url = '/psapi/downloadInfo?id=1';
+    const url = '/psapi/downloadInfo?id=54';
 
     apiGet(url, (err, body) => {
       if (!err) {
         dispatch({
-          type: 'SET_DOWNLOAD_INFO_DATA',
+          type: 'SET_DOWNLOAD_INFO_VERSION_DATA',
           payload: body,
         });
         dispatch({ type: 'FETCH_DOWNLOAD_INFO_FINISH' });
@@ -120,6 +136,31 @@ const homeDataBundle = {
         dispatch({ type: 'FETCH_DOWNLOAD_INFO_ERROR' });
       }
     });
+  },
+
+  doFetchDownloadZip: () => ({ dispatch, store, apiFetch }) => {
+    dispatch({ type: 'FETCH_DOWNLOAD_ZIP_START' });
+    const toastId = toast.loading('Preparing .zip files...');
+
+    const { name } = store.selectDownloadInfoVersionInfo();
+
+    const url = '/psapi/downloadZip?id=54';
+
+    apiFetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        tSuccess(toastId, 'File ready for download.');
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch(_e => {
+        tError(toastId, 'Failed to retrieve Field Application download.');
+      });
   },
 
   doFetchErrorLog: () => ({ dispatch, apiGet }) => {

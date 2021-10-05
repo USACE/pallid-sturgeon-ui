@@ -10,7 +10,10 @@ const EditDataSheet = connect(
   ({
     dataEntry,
   }) => {
-    const { activeType } = dataEntry;
+    const { activeType, lastParams } = dataEntry;
+
+    console.log('test activeType: ', activeType);
+    console.log('test lastParams: ', lastParams);
 
     const getForm = () => {
       switch(activeType) {

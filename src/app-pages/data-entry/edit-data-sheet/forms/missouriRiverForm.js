@@ -22,9 +22,11 @@ const reduceFormState = (state, action) => {
 
 const MissouriRiverForm = connect(
   'doUpdateMoRiverDataEntry',
+  'doUpdateUrl',
   'selectDataEntryData',
   ({
     doUpdateMoRiverDataEntry,
+    doUpdateUrl,
     dataEntryData,
   }) => {
     const {
@@ -117,7 +119,22 @@ const MissouriRiverForm = connect(
   
     return (
       <>
-        <h4>Missouri River Data Sheets - Edit Data</h4>
+        <div className='row'>
+          <div className='col-9'>
+            <h4>Missouri River Data Sheets - Edit Data</h4>
+          </div>
+          <div className='col-3'>
+            <Button
+              isOutline
+              size='small'
+              variant='info'
+              text='Fish Data Sheets'
+              title='Go to associated fish datasheets'
+              className='float-right'
+              handleClick={() => doUpdateUrl(`/fish-data-sheet?mrId=${mrId}`)}
+            />
+          </div>
+        </div>
         {/* Top Level Info */}
         <Card className='mt-3'>
           <Card.Body>
