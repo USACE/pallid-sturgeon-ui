@@ -7,10 +7,7 @@ const homeDataBundle = {
 
   getReducer: () => {
     const initialData = {
-      downloadInfo: {
-        versionData: {},
-        zipData: null,
-      },
+      downloadInfo: {},
       errorLog: {
         data: [],
       },
@@ -36,18 +33,7 @@ const homeDataBundle = {
         case 'SET_DOWNLOAD_INFO_VERSION_DATA': 
           return {
             ...state,
-            downloadInfo: {
-              ...state.downloadInfo,
-              versionData: payload,
-            }
-          };
-        case 'SET_DOWNLOAD_INFO_ZIP_DATA': 
-          return {
-            ...state,
-            downloadInfo: {
-              ...state.downloadInfo,
-              zipData: payload,
-            }
+            downloadInfo: payload,
           };
         case 'SET_ERROR_LOG_DATA':
           return {
@@ -105,7 +91,7 @@ const homeDataBundle = {
   },
 
   selectHome: state => state.home,
-  selectDownloadInfoVersionInfo: state => state.home.downloadInfo.versionData,
+  selectDownloadInfo: state => state.home.downloadInfo,
   selectErrorLog: state => state.home.errorLog,
   selectUsgNoVialNumbers: state => state.home.usgNoVialNumbers,
   selectUnapprovedDataSheets: state => state.home.unapprovedDataSheets,
@@ -142,9 +128,8 @@ const homeDataBundle = {
     dispatch({ type: 'FETCH_DOWNLOAD_ZIP_START' });
     const toastId = toast.loading('Preparing .zip file...');
 
-    const { name } = store.selectDownloadInfoVersionInfo();
-
     const url = '/psapi/downloadZip';
+    const { name } = store.selectDownloadInfo();
 
     apiFetch(url)
       .then(res => res.blob())
