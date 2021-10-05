@@ -12,9 +12,6 @@ const EditDataSheet = connect(
   }) => {
     const { activeType, lastParams } = dataEntry;
 
-    console.log('test activeType: ', activeType);
-    console.log('test lastParams: ', lastParams);
-
     const getForm = () => {
       switch(activeType) {
         case 'missouriRiver':

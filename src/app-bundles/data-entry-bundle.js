@@ -7,6 +7,7 @@ export default {
   getReducer: () => {
     const initialData = {
       data: [],
+      fishData: {},
       totalCount: 0,
       activeType: '',
       lastParams: {},
@@ -28,6 +29,16 @@ export default {
             totalCount: payload.data.totalCount,
             activeType: payload.type,
           };
+        case 'DATA_ENTRY_UPDATE_FISH_DATA':
+          return {
+            ...state,
+            fishData: payload,
+          };
+        case 'DATA_ENTRY_UPDATE_ACTIVE_TYPE':
+          return {
+            ...state,
+            activeType: payload,
+          };
         default:
           return state;
       }
@@ -36,9 +47,14 @@ export default {
 
   selectDataEntry: state => state.dataEntry,
   selectDataEntryData: state => state.dataEntry.data.length ? state.dataEntry.data[0] : {},
+  selectDataEntryFishData: state => state.dataEntry.fishData,
   selectDataEntryTotalCount: state => state.dataEntry.totalCount,
   selectDataEntryActiveType: state => state.dataEntry.activeType,
   selectDataEntryLastParams: state => state.dataEntry.lastParams,
+
+  doDataEntrySetActiveType: (type) => ({ dispatch }) => {
+    dispatch({ type: 'DATA_ENTRY_UPDATE_ACTIVE_TYPE', payload: type });
+  },
 
   doDataEntryLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_DATA_ENTRY_INIT_DATA' });
@@ -139,8 +155,33 @@ export default {
         }
         dispatch({ type: 'FISH_DATA_ENTRY_FETCH_FINISHED' });
       } else {
-        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_ERROR', payload: err });
+        dispatch({ type: 'FISH_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for datasheet. Please try again.');
+      }      
+    });
+  },
+
+  doFetchFishDataByMrId: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'FISH_DATA_ENTRY_FETCH_BY_MRID_START' });
+    const toastId = toast.loading('Loading datasheet...');
+
+    const data = store.selectDataEntryData();
+    const { mrId } = data;
+
+    const url = `/psapi/fishDataEntry?mrId=${mrId}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'DATA_ENTRY_UPDATE_FISH_DATA',
+          payload: body,
+        });
+
+        tSuccess(toastId, 'Datasheet loaded!');
+        dispatch({ type: 'FISH_DATA_ENTRY_FETCH_BY_MRID_FINISHED' });
+      } else {
+        tError(toastId, 'Error loading datasheet. Please try again.');
+        dispatch({ type: 'FISH_DATA_ENTRY_FETCH_BY_MRID_ERROR', payload: err });
       }      
     });
   },

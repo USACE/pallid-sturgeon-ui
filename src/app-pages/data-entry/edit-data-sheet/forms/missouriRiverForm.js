@@ -22,11 +22,11 @@ const reduceFormState = (state, action) => {
 
 const MissouriRiverForm = connect(
   'doUpdateMoRiverDataEntry',
-  'doUpdateUrl',
+  'doDataEntrySetActiveType',
   'selectDataEntryData',
   ({
     doUpdateMoRiverDataEntry,
-    doUpdateUrl,
+    doDataEntrySetActiveType,
     dataEntryData,
   }) => {
     const {
@@ -131,7 +131,7 @@ const MissouriRiverForm = connect(
               text='Fish Data Sheets'
               title='Go to associated fish datasheets'
               className='float-right'
-              handleClick={() => doUpdateUrl(`/fish-data-sheet?mrId=${mrId}`)}
+              handleClick={() => doDataEntrySetActiveType('fish')}
             />
           </div>
         </div>
@@ -447,6 +447,7 @@ const MissouriRiverForm = connect(
                         { value: 2, text: 'Bank Notch' },
                         { value: 3, text: 'Top Notch' },
                         { value: 4, text: 'Side Notch' },
+                        // 5 & 6 ?
                         { value: 7, text: 'Bank & Top Notch' },
                         { value: 8, text: 'Bank & Side Notch' },
                         { value: 9, text: 'Notch (Undefined)' },

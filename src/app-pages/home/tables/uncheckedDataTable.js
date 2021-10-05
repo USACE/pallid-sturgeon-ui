@@ -4,6 +4,7 @@ import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
 import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 
 import Pagination from 'app-components/pagination';
+import MrIdCellRenderer from 'common/gridCellRenderers/mrIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -20,11 +21,16 @@ const UncheckedDataTable = connect(
     return (
       <>
         <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
-          <AgGridReact rowData={data}>
+          <AgGridReact
+            rowData={data}
+            frameworkComponents={{
+              mrIdCellRenderer: MrIdCellRenderer,
+            }}
+          >
             <AgGridColumn field='psb' headerName='Project : Segment : Bend' resizable width={300} />
             <AgGridColumn field='fieldOffice' width={125} />
             <AgGridColumn field='recorder' width={150} />
-            <AgGridColumn field='mrId' headerName='mrId' width={150} />
+            <AgGridColumn field='mrId' headerName='mrId' width={150} cellRenderer='mrIdCellRenderer' />
             <AgGridColumn field='siteId' width={150} />
             <AgGridColumn field='projectCode' width={150} />
             <AgGridColumn field='seasonCode' width={150} />
