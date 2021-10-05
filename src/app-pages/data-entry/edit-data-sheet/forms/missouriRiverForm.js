@@ -426,7 +426,12 @@ const MissouriRiverForm = connect(
                       showPlaceholderWhileValid
                       defaultOption={defaultStructureFlow || ''}
                       onChange={value => dispatch({ type: 'update', field: 'structureFlow', value })}
-                      options={[]}
+                      options={[
+                        { value: 0, text: '0' },
+                        { value: 1, text: 'Dry' },
+                        { value: 2, text: 'Partial' },
+                        { value: 3, text: 'Overflowing' },
+                      ]}
                     />
                   </div>
                   <div className='col-3'>
@@ -436,7 +441,16 @@ const MissouriRiverForm = connect(
                       showPlaceholderWhileValid
                       defaultOption={defaultStructureMod || ''}
                       onChange={value => dispatch({ type: 'update', field: 'structureMod', value })}
-                      options={[]}
+                      options={[
+                        { value: 0, text: '0' },
+                        { value: 1, text: 'Unnotched' },
+                        { value: 2, text: 'Bank Notch' },
+                        { value: 3, text: 'Top Notch' },
+                        { value: 4, text: 'Side Notch' },
+                        { value: 7, text: 'Bank & Top Notch' },
+                        { value: 8, text: 'Bank & Side Notch' },
+                        { value: 9, text: 'Notch (Undefined)' },
+                      ]}
                     />
                   </div>
                 </div>

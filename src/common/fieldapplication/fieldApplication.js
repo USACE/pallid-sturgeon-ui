@@ -27,6 +27,7 @@ const FieldApplication = connect(
                 size='small'
                 variant='light'
                 className='ml-2'
+                title={`Download ${displayName}`}
                 text={displayName}
                 handleClick={() => doFetchDownloadZip()}
               />

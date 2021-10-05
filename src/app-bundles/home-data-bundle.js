@@ -123,7 +123,7 @@ const homeDataBundle = {
   doFetchDownloadInfo: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'FETCH_DOWNLOAD_INFO_START' });
 
-    const url = '/psapi/downloadInfo?id=54';
+    const url = '/psapi/downloadInfo';
 
     apiGet(url, (err, body) => {
       if (!err) {
@@ -140,11 +140,11 @@ const homeDataBundle = {
 
   doFetchDownloadZip: () => ({ dispatch, store, apiFetch }) => {
     dispatch({ type: 'FETCH_DOWNLOAD_ZIP_START' });
-    const toastId = toast.loading('Preparing .zip files...');
+    const toastId = toast.loading('Preparing .zip file...');
 
     const { name } = store.selectDownloadInfoVersionInfo();
 
-    const url = '/psapi/downloadZip?id=54';
+    const url = '/psapi/downloadZip';
 
     apiFetch(url)
       .then(res => res.blob())
