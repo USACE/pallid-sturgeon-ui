@@ -100,7 +100,7 @@ export default {
     const { tab, ...params } = store.selectDatasheetParams();
 
     const query = queryFromObject({
-      ...params
+      ...params,
     });
 
     const url = `/psapi${uriValues[tab]}${query}`;

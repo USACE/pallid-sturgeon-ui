@@ -13,10 +13,10 @@ jobs:
     env:
       PUBLIC_URL: https://develop-pallid-sturgeon.rsgis.dev
       REACT_APP_API_URL: https://develop-pallid-sturgeon-api.rsgis.dev
-    #   REACT_APP_CUMULUS_API_URL: https://develop-cumulus-api.rsgis.dev
-    #   REACT_APP_SHOW_LOGIN: no
-    #   REACT_APP_SHARED_API_URL: https://develop-shared-api.rsgis.dev
-    #   REACT_APP_WATER_API_URL: https://develop-water-api.rsgis.dev
+      REACT_APP_KEYCLOAK_URL: https://auth-test.sec.usace.army.mil/auth
+      REACT_APP_REDIRECT_URL: https://develop-pallid-sturgeon.rsgis.dev
+      REACT_APP_KEYCLOAK_REALM: DLS
+      REACT_APP_KEYCLOAK_CLIENT: pallid-sturgeon-dev
     runs-on: ubuntu-latest
     strategy:
       matrix:

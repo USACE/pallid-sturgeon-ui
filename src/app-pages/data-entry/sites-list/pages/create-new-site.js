@@ -18,10 +18,9 @@ const CreateNewSite = connect(
     doNewSiteLoadData,
     domains,
   }) => {
-    const { projects, seasons, bends, segments, fieldOffices, sampleUnitTypes } = domains;
+    const { projects, seasons, bends, segments, sampleUnitTypes } = domains;
 
     const [year, setYear] = useState('');
-    const [fieldOffice, setFieldOffice] = useState('');
     const [recorder, setRecorder] = useState('');
     const [project, setProject] = useState('');
     const [segment, setSegment] = useState('');
@@ -37,7 +36,6 @@ const CreateNewSite = connect(
     const createNewSite = () => {
       const payload = {
         siteYear: Number(year),
-        fieldOffice,
         project,
         segment: String(segment),
         season,
@@ -62,14 +60,6 @@ const CreateNewSite = connect(
                   placeholderText='Select year...'
                   onChange={val => setYear(val)}
                   options={dropdownYearsToNow()}
-                />
-              </div>
-              <div className='col-3'>
-                <Select
-                  label='Field Office'
-                  placeholderText='Select field office...'
-                  onChange={val => setFieldOffice(val)}
-                  options={createDropdownOptions(fieldOffices)}
                 />
               </div>
               <div className='col-2'>
