@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useReducer, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import Papa from 'papaparse';
 

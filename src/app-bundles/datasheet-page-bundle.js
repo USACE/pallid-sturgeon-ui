@@ -1,8 +1,5 @@
 import { queryFromObject } from 'utils';
 
-import { toast } from 'react-toastify';
-import { tSuccess, tError } from 'common/toast/toastHelper';
-
 export default {
   name: 'datasheet',
   getReducer: () => {

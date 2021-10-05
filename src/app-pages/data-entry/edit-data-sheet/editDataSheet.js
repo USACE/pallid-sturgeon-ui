@@ -1,20 +1,33 @@
 import React from 'react';
 import { connect } from 'redux-bundler-react';
 
+import FishForm from './forms/fishForm';
+import MissouriRiverForm from './forms/missouriRiverForm';
+import SupplementalForm from './forms/supplementalForm';
+
 const EditDataSheet = connect(
   'selectDataEntry',
   ({
     dataEntry,
   }) => {
-    const { activeType, data } = dataEntry;
+    const { activeType, lastParams } = dataEntry;
+
+    const getForm = () => {
+      switch(activeType) {
+        case 'missouriRiver':
+          return <MissouriRiverForm />;
+        case 'fish':
+          return <FishForm />;
+        case 'supplemental':
+          return <SupplementalForm />;
+        default:
+          return <>Unknown data type.</>;
+      }
+    };
 
     return (
       <div className='container-fluid overflow-auto'>
-        TODO
-        <br/>
-        <br/>
-        Type: {activeType}<br/>
-        Data: {JSON.stringify(data)}
+        {getForm()}
       </div>
     );
   }

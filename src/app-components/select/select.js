@@ -67,10 +67,10 @@ const Select = ({
 
   /** Execute parent's onChange function after our interal state has changed. */
   useEffect(() => {
-    if (currentOption) {
+    if (currentOption !== previousOption) {
       onChange(currentOption);
     }
-  }, [currentOption, onChange]);
+  }, [currentOption, previousOption, onChange]);
 
   return (
     <>
