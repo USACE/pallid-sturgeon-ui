@@ -7,12 +7,12 @@ import './fieldApplication.scss';
 
 const FieldApplication = connect(
   'doFetchDownloadZip',
-  'selectDownloadInfoVersionInfo',
+  'selectDownloadInfo',
   ({
     doFetchDownloadZip,
-    downloadInfoVersionInfo,
+    downloadInfo,
   }) => {
-    const { displayName } = downloadInfoVersionInfo;
+    const { displayName } = downloadInfo;
   
     return (
       <>
