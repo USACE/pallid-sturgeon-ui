@@ -32,7 +32,8 @@ export default connect(
     geneticCardSummaryPagination,
   }) => {
     const { year, minDate, maxDate, broodstock, hatchwild, speciesId, archive } = params;
-    const { totalResults, pageSize, pageNumber } = geneticCardSummaryPagination;
+    const { totalResults } = geneticCardSummaryPagination;
+    const fieldDisabled = !year;
 
     useEffect(() => {
       if (params.year) {
@@ -63,6 +64,7 @@ export default connect(
               <div className='col-3'>
                 <label>Date Range - Min</label>
                 <input
+                  disabled={fieldDisabled}
                   type='date'
                   className='form-control'
                   value={minDate}
@@ -72,6 +74,7 @@ export default connect(
               <div className='col-3'>
                 <label>Date Range - Min</label>
                 <input
+                  disabled={fieldDisabled}
                   type='date'
                   className='form-control'
                   value={maxDate}
@@ -82,6 +85,7 @@ export default connect(
             <div className='row mt-2'>
               <div className='col-2'>
                 <Select
+                  isDisabled={fieldDisabled}
                   label='Broodstock'
                   value={broodstock}
                   onChange={val => doUpdateGeneticCardSummaryParams({ broodstock: val })}
@@ -90,6 +94,7 @@ export default connect(
               </div>
               <div className='col-2'>
                 <Select
+                  isDisabled={fieldDisabled}
                   label='Hatchery/Wild'
                   value={hatchwild}
                   onChange={val => doUpdateGeneticCardSummaryParams({ hatchwild: val })}
@@ -98,6 +103,7 @@ export default connect(
               </div>
               <div className='col-2'>
                 <Select
+                  isDisabled={fieldDisabled}
                   label='Species Id'
                   value={speciesId}
                   onChange={val => doUpdateGeneticCardSummaryParams({ speciesId: val })}
@@ -106,6 +112,7 @@ export default connect(
               </div>
               <div className='col-2'>
                 <Select
+                  isDisabled={fieldDisabled}
                   label='Archive'
                   value={archive}
                   onChange={val => doUpdateGeneticCardSummaryParams({ archive: val })}
