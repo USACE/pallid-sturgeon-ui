@@ -31,7 +31,7 @@ export default connect(
     geneticCardSummaryParams: params,
     geneticCardSummaryPagination,
   }) => {
-    const { year, minDate, maxDate, broodstock, hatchwild, speciesId, archive } = params;
+    const { year, minDate, maxDate, broodstock, hatchWild, speciesId, archive } = params;
     const { totalResults } = geneticCardSummaryPagination;
     const fieldDisabled = !year;
 
@@ -96,8 +96,8 @@ export default connect(
                 <Select
                   isDisabled={fieldDisabled}
                   label='Hatchery/Wild'
-                  value={hatchwild}
-                  onChange={val => doUpdateGeneticCardSummaryParams({ hatchwild: val })}
+                  value={hatchWild}
+                  onChange={val => doUpdateGeneticCardSummaryParams({ hatchWild: val })}
                   options={yesNoOptions}
                 />
               </div>
