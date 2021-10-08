@@ -6,16 +6,23 @@ import Button from 'app-components/button';
 import Card from 'app-components/card';
 import Pagination from 'app-components/pagination';
 
+import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
+import SpeciesEditor from 'common/gridCellEditors/speciesEditor';
+
 // 92457 for testing
 
 const FishForm = connect(
   'doFetchFishDataByMrId',
   'doFetchMoRiverDataEntry',
+  'doFetchSupplementalDataEntry',
+  'doUpdateFishDataEntry',
   'selectDataEntryData',
   'selectDataEntryFishData',
   ({
     doFetchFishDataByMrId,
     doFetchMoRiverDataEntry,
+    doFetchSupplementalDataEntry,
+    doUpdateFishDataEntry,
     dataEntryData,
     dataEntryFishData,
   }) => {
@@ -48,18 +55,26 @@ const FishForm = connect(
     return (
       <>
         <div className='row'>
-          <div className='col-9'>
+          <div className='col-8'>
             <h4>Fish Datasheets for Missouri River Datasheet {mrId}</h4>
           </div>
-          <div className='col-3'>
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              className='float-right'
-              text='Missouri River Datasheet'
-              handleClick={() => doFetchMoRiverDataEntry({ tableId: mrId })}
-            />
+          <div className='col-4'>
+            <div className='btn-group float-right'>
+              <Button
+                isOutline
+                size='small'
+                variant='info'
+                text='Missouri River Datasheet'
+                handleClick={() => doFetchMoRiverDataEntry({ tableId: mrId })}
+              />
+              <Button
+                isOutline
+                size='small'
+                variant='info'
+                text='Supplemental Datasheets'
+                handleClick={() => doFetchSupplementalDataEntry({ mrId })}
+              />
+            </div>
           </div>
         </div>
 
@@ -178,13 +193,30 @@ const FishForm = connect(
               <AgGridReact
                 defaultColDef={{
                   width: 120,
+                  editable: true,
+                  lockPinned: true,
                 }}
+                rowHeight={35}
                 rowData={pagedItems}
+                editType='fullRow'
+                onRowValueChanged={({ data }) => doUpdateFishDataEntry(data)}
+                frameworkComponents={{
+                  editCellRenderer: EditCellRenderer,
+                  speciesEditor: SpeciesEditor,
+                }}
               >
+                <AgGridColumn
+                  field='edit'
+                  width={90}
+                  pinned
+                  lockPosition
+                  cellRenderer='editCellRenderer'
+                  editable={false}
+                />
                 <AgGridColumn field='id' headerName='Field ID' />
                 <AgGridColumn field='fid' headerName='F ID' />
                 <AgGridColumn field='panelhook' headerName='Panel Hook' />
-                <AgGridColumn field='species' />
+                <AgGridColumn field='species' cellEditor='speciesEditor' />
                 <AgGridColumn field='length' />
                 <AgGridColumn field='weight' />
                 <AgGridColumn field='fishcount' headerName='Count' />

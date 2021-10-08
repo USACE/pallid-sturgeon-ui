@@ -205,5 +205,22 @@ export default {
     });
   },
 
+  doUpdateFishDataEntry: (rowData) => ({ dispatch, apiPut }) => {
+    dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_START' });
+    const toastId = toast.loading('Saving fish datasheet...');
+
+    const url = '/psapi/fishDataEntry';
+
+    apiPut(url, rowData, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, 'Datasheet successfully updated!');
+        dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
+      } else {
+        dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
+        tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
+      }      
+    });
+  },
+
   // @TODO - create 'update' functions for fish / supp (and possibly 'create' for moRiver, fish and supp)
 };
