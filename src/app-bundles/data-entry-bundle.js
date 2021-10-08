@@ -1,5 +1,5 @@
 import { toast } from 'react-toastify';
-import { tSuccess, tError } from 'common/toast/toastHelper';
+import { tSuccess, tError, tWarning } from 'common/toast/toastHelper';
 import { queryFromObject } from 'utils';
 
 export default {
@@ -8,6 +8,7 @@ export default {
     const initialData = {
       data: [],
       fishData: {},
+      supplementalData: [],
       totalCount: 0,
       activeType: '',
       lastParams: {},
@@ -33,6 +34,11 @@ export default {
           return {
             ...state,
             fishData: payload,
+          };
+        case 'DATA_ENTRY_UPDATE_SUPPLEMENTAL_DATA':
+          return {
+            ...state,
+            supplementalData: payload,
           };
         case 'DATA_ENTRY_UPDATE_ACTIVE_TYPE':
           return {
@@ -118,7 +124,7 @@ export default {
         });
 
         if (store.selectDataEntryTotalCount() === 0) {
-          tError(toastId, 'No datasheets found. Please try again.');
+          tWarning(toastId, 'No supplemental datasheets.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
           store.doUpdateUrl('/find-data-sheet/edit-data-sheet');
@@ -128,6 +134,27 @@ export default {
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for datasheet. Please try again.');
       }
+    });
+  },
+
+  doFetchSupplementalDataByMrId: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_BY_MRID_START' });
+
+    const data = store.selectDataEntryData();
+    const { mrId } = data;
+
+    const url = `/psapi/supplementalDataEntry?mrId=${mrId}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'DATA_ENTRY_UPDATE_SUPPLEMENTAL_DATA',
+          payload: body,
+        });
+        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_BY_MRID_FINISHED' });
+      } else {
+        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_BY_MRID_ERROR', payload: err });
+      }      
     });
   },
 
@@ -163,7 +190,6 @@ export default {
 
   doFetchFishDataByMrId: () => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'FISH_DATA_ENTRY_FETCH_BY_MRID_START' });
-    const toastId = toast.loading('Loading datasheet...');
 
     const data = store.selectDataEntryData();
     const { mrId } = data;
@@ -176,11 +202,8 @@ export default {
           type: 'DATA_ENTRY_UPDATE_FISH_DATA',
           payload: body,
         });
-
-        tSuccess(toastId, 'Datasheet loaded!');
         dispatch({ type: 'FISH_DATA_ENTRY_FETCH_BY_MRID_FINISHED' });
       } else {
-        tError(toastId, 'Error loading datasheet. Please try again.');
         dispatch({ type: 'FISH_DATA_ENTRY_FETCH_BY_MRID_ERROR', payload: err });
       }      
     });
