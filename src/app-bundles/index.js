@@ -17,6 +17,7 @@ import searchReportsPageBundle from './search-reports-page-bundle';
 import sitesBundle from './sites-bundle';
 import uploadBundle from './upload-bundle';
 import homeDataBundle from './home-data-bundle';
+import geneticCardSummaryBundle from './genetic-card-summary-bundle';
 
 // Mock Token User
 const mockTokenPublic =
@@ -59,6 +60,7 @@ export default composeBundles(
   dataEntryBundle,
   datasheetPageBundle,
   domainsBundle,
+  geneticCardSummaryBundle,
   homeDataBundle,
   modalBundle,
   notificationBundle,

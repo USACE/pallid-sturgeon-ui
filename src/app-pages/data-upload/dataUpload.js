@@ -88,7 +88,7 @@ export default connect(
                 onChange={value => setVersion(value)}
                 options={[
                   // { value: '3.7.1' },
-                  { value: '4.0.4' },
+                  { value: '4.1.1' },
                 ]}
               />
               <label><small>Recorder:</small></label>

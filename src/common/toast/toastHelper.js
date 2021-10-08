@@ -7,3 +7,7 @@ export const tSuccess = (id, message) => {
 export const tError = (id, message) => {
   toast.update(id, { render: message, type: 'error', isLoading: false, autoClose: 7500, closeOnClick: true, draggable: true });
 };
+
+export const tWarning = (id, message) => {
+  toast.update(id, { render: message, type: 'warning', isLoading: false, autoClose: 4000, closeOnClick: true, draggable: true });
+};

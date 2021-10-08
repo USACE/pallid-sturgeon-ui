@@ -40,6 +40,8 @@ export default connect(
     const [approvalFilter, setApprovalFilter] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
+    const [fromDateFilter, setFromDateFilter] = useState('');
+    const [toDateFilter, setToDateFilter] = useState('');
 
     const { projects, seasons } = domains;
     const { missouriRiverData = {}, fishData = {}, suppData = {} } = datasheetData;
@@ -52,6 +54,8 @@ export default connect(
       setApprovalFilter('');
       setSeasonFilter('');
       setSpeciesFilter('');
+      setFromDateFilter('');
+      setToDateFilter('');
     };
 
     useEffect(() => {
@@ -61,6 +65,8 @@ export default connect(
         month: monthFilter,
         project: projectFilter,
         season: seasonFilter,
+        fromDate: fromDateFilter,
+        toDate: toDateFilter,
       });
     }, [yearFilter, monthFilter, projectFilter, seasonFilter, currentTab, doUpdateDatasheetParams]);
 
@@ -159,9 +165,19 @@ export default connect(
                   Date Range (From - To)
                 </small></label>
                 <br />
-                <input disabled type='date' className='form-control mt-1 mr-2 date-input' />
+                <input
+                  type='date'
+                  className='form-control mt-1 mr-2 date-input'
+                  value={fromDateFilter}
+                  onChange={e => setFromDateFilter(e.target.value)}
+                />
                 -
-                <input disabled type='date' className='form-control mt-1 ml-2 date-input' />
+                <input
+                  type='date'
+                  className='form-control mt-1 ml-2 date-input'
+                  value={toDateFilter}
+                  onChange={e => setToDateFilter(e.target.value)}
+                />
               </div>
             </div>
             <div className='mt-2'>
