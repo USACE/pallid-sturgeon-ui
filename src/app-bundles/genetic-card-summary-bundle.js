@@ -60,6 +60,27 @@ const geneticCardSummaryBundle = {
     });
   },
 
+  doFetchAllGeneticCardSummary: (filePrefix) => ({ dispatch, store, apiFetch }) => {
+    dispatch({ type: 'ALL_GENETIC_CARD_SUMMARY_FETCH_START' });
+
+    const params = store.selectGeneticCardSummaryParams();
+    const query = queryFromObject(params);
+    const url = `/psapi/geneticFullDataSummary${query}`;
+
+    apiFetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filePrefix}-${new Date().toISOString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+    dispatch({ type: 'ALL_GENETIC_CARD_SUMMARY_FETCH_FINISHED' });
+  },
+
   doUpdateGeneticCardSummaryParams: (params) => ({ dispatch }) => {
     dispatch({ type: 'UPDATE_GENETIC_CARD_SUMMARY_PARAMS', payload: params });
   },

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
+import Button from 'app-components/button';
 import Card from 'app-components/card';
 import Icon from 'app-components/icon';
 import Select from 'app-components/select';
@@ -14,11 +15,13 @@ const yesNoOptions = [
 
 export default connect(
   'doFetchGeneticCardSummary',
+  'doFetchAllGeneticCardSummary',
   'doUpdateGeneticCardSummaryParams',
   'selectGeneticCardSummaryData',
   'selectGeneticCardSummaryParams',
   ({
     doFetchGeneticCardSummary,
+    doFetchAllGeneticCardSummary,
     doUpdateGeneticCardSummaryParams,
     geneticCardSummaryData,
     geneticCardSummaryParams: params,
@@ -39,7 +42,7 @@ export default connect(
           <Card.Body>
             <Icon icon='help-circle' />
             <span className='info-message ml-2'>
-              Click the "Download Data" link at the top of the report to download the Genetic Card Summary for the year and filters selected.
+              Click the "Export as CSV" link at the top of the report to download the Genetic Card Summary for the year and filters selected.
               The displayed report below only shows a portion of the fields that are included in the downloaded report. 
             </span>
             <div className='row mt-3'>
@@ -109,7 +112,15 @@ export default connect(
         <Card className='mt-3'>
           <Card.Header text='Genetic Card Table' />
           <Card.Body>
-            <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
+            <Button
+              isOutline
+              size='small'
+              variant='info'
+              text='Export as CSV'
+              icon={<Icon icon='download' />}
+              handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
+            />
+            <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
               <AgGridReact
                 rowData={geneticCardSummaryData}
                 defaultColDef={{
@@ -119,7 +130,7 @@ export default connect(
                 {/* Columns might not match up to data, needs tested */}
                 <AgGridColumn field='year' />
                 <AgGridColumn field='fieldOffice' />
-                <AgGridColumn field='project' />
+                <AgGridColumn field='projectCode' headerName='project' />
                 <AgGridColumn field='sturgeonType' />
                 <AgGridColumn field='geneticVialNum' headerName='Genetic Vial #' />
                 <AgGridColumn field='pittag' headerName='Pit Tag #' />
