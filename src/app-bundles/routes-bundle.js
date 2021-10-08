@@ -14,23 +14,29 @@ import NotFound from '../app-pages/404';
 import SignUp from '../app-pages/signup/signup';
 import SearchReports from 'app-pages/data-summaries/search-reports';
 import CreateNewSite from 'app-pages/data-entry/sites-list/pages/create-new-site';
+import PriorityFish from 'app-pages/data-summaries/priorityFish';
+import LastLocation from 'app-pages/data-summaries/lastLocation';
+import TagReplacement from 'app-pages/data-summaries/tagReplacement';
 
 export default createRouteBundle(
   {
     '': Home,
     '/': Home,
-    '/find-data-sheet': DataEntry,
-    '/find-data-sheet/edit-data-sheet': EditDataSheet,
+    '/data-sheet': DataSheet,
     '/data-upload': DataUpload,
     '/error-log': ErrorLog,
-    '/data-sheet': DataSheet,
+    '/find-data-sheet': DataEntry,
+    '/find-data-sheet/edit-data-sheet': EditDataSheet,
     '/genetics-card-summary': GeneticCard,
-    '/search-reports': SearchReports,
-    '/sites-list': SitesList,
-    '/sites-list/create-new-site': CreateNewSite,
+    '/last-location': LastLocation,
     '/logout': Logout,
     '/map': Map,
+    '/priority-fish': PriorityFish,
+    '/search-reports': SearchReports,
     '/signup': SignUp,
+    '/sites-list': SitesList,
+    '/sites-list/create-new-site': CreateNewSite,
+    '/tag-replacement': TagReplacement,
     '*': NotFound,
   }
 );
