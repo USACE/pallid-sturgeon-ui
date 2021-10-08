@@ -5,6 +5,7 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import Icon from 'app-components/icon';
+import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
 import { dropdownYearsToNow } from 'utils';
 
@@ -17,16 +18,21 @@ export default connect(
   'doFetchGeneticCardSummary',
   'doFetchAllGeneticCardSummary',
   'doUpdateGeneticCardSummaryParams',
+  'doUpdateGeneticCardSummaryPagination',
   'selectGeneticCardSummaryData',
   'selectGeneticCardSummaryParams',
+  'selectGeneticCardSummaryPagination',
   ({
     doFetchGeneticCardSummary,
     doFetchAllGeneticCardSummary,
     doUpdateGeneticCardSummaryParams,
+    doUpdateGeneticCardSummaryPagination,
     geneticCardSummaryData,
     geneticCardSummaryParams: params,
+    geneticCardSummaryPagination,
   }) => {
     const { year, minDate, maxDate, broodstock, hatchwild, speciesId, archive } = params;
+    const { totalResults, pageSize, pageNumber } = geneticCardSummaryPagination;
 
     useEffect(() => {
       if (params.year) {
@@ -143,6 +149,11 @@ export default connect(
                 <AgGridColumn field='speciesId' headerName='Species Id?' />
                 <AgGridColumn field='archive' headerName='Archive?' />
               </AgGridReact>
+              <Pagination
+                className='mt-3'
+                itemCount={totalResults}
+                handlePageChange={(pageNumber, pageSize) => doUpdateGeneticCardSummaryPagination({ pageNumber, pageSize })}
+              />
             </div>
           </Card.Body>
         </Card>
