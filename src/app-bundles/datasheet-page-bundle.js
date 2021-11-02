@@ -51,7 +51,7 @@ export default {
     store.doDomainSeasonsFetch();
   },
 
-  doDatasheetFetch: () => ({ dispatch, apiGet }) => {
+  doDatasheetFetch: () => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
 
     const uris = {
@@ -86,7 +86,7 @@ export default {
     });
   },
 
-  doFetchAllDatasheet: (filePrefix) => ({ dispatch, apiFetch }) => {
+  doFetchAllDatasheet: (filePrefix) => ({ dispatch, store, apiFetch }) => {
     dispatch({ type: 'DATASHEET_ALL_MISSOURI_FETCH_START' });
 
     const uris = {
