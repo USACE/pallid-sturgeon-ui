@@ -4,6 +4,7 @@ import { ToastContainer } from 'react-toastify';
 
 import Modal from 'app-components/modal';
 import NavBar from 'app-components/navigation';
+import Hero from 'app-components/hero';
 import Footer from './common/footer/Footer';
 import PageContent from 'app-components/page-content';
 
@@ -17,7 +18,7 @@ export default connect('selectRoute', 'selectAuth', ({ route: Route, auth }) => 
     <ToastContainer autoClose={3500} hideProgressBar={false} />
     <NavBar />
     <PageContent>
-      {auth.token ? <Route />:<p></p>}
+      {auth.token ? <Route />:<Hero />}
     </PageContent>
     <Modal closeWithEscape />
     <Footer />
