@@ -12,12 +12,12 @@ import './css/bootstrap/css/bootstrap.water.min.css';
 import './css/mdi/css/materialdesignicons.min.css';
 import './css/index.scss';
 
-export default connect('selectRoute', ({ route: Route }) => (
+export default connect('selectRoute', 'selectAuth', ({ route: Route, auth }) => (
   <>
     <ToastContainer autoClose={3500} hideProgressBar={false} />
     <NavBar />
     <PageContent>
-      <Route />
+      {auth.token ? <Route />:<p></p>}
     </PageContent>
     <Modal closeWithEscape />
     <Footer />
