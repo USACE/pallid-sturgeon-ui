@@ -10,6 +10,7 @@ import GeneticCard from '../app-pages/data-summaries/geneticCard';
 import Home from '../app-pages/home/home';
 import Logout from '../app-pages/logout';
 import Map from '../app-pages/map/map';
+import UserList from '../app-pages/admin/userList';
 import NotFound from '../app-pages/404';
 import SignUp from '../app-pages/signup/signup';
 import SearchReports from 'app-pages/data-summaries/search-reports';
@@ -34,6 +35,7 @@ export default createRouteBundle(
     '/priority-fish': PriorityFish,
     '/search-reports': SearchReports,
     '/signup': SignUp,
+    '/user-access-requests': UserList,
     '/sites-list': SitesList,
     '/sites-list/create-new-site': CreateNewSite,
     '/tag-replacement': TagReplacement,

@@ -5,6 +5,8 @@ import Accordion from 'app-components/accordion';
 import Hero from 'app-components/hero';
 import UsgNoVialNumbersTable from './tables/usgNoVialNumberTable';
 import UncheckedDataTable from './tables/uncheckedDataTable';
+import RoleFilter from 'app-components/role-filter';
+import RoleRequestSentMessage from 'app-components/role-request-sent';
 
 const Home = connect(
   'doHomeFetch',
@@ -18,7 +20,9 @@ const Home = connect(
     }, [doHomeFetch]);
 
     return (
-      <>
+      <RoleFilter
+        allowRoles={['ADMINISTRATOR']}
+        alt={() => <RoleRequestSentMessage className='p-2' />}>
         <Hero />
         <div className='container pt-4'>
           <Accordion.List>
@@ -33,7 +37,7 @@ const Home = connect(
             </Accordion.Item>
           </Accordion.List>
         </div>
-      </>
+      </RoleFilter>
     );
   }
 );
