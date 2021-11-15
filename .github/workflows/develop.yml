@@ -13,9 +13,9 @@ jobs:
     env:
       PUBLIC_URL: https://develop-pallid-sturgeon.rsgis.dev
       REACT_APP_API_URL: https://develop-pallid-sturgeon-api.rsgis.dev
-      REACT_APP_KEYCLOAK_URL: https://develop-auth.corps.cloud/auth
+      REACT_APP_KEYCLOAK_URL: https://auth-test.sec.usace.army.mil/auth
       REACT_APP_REDIRECT_URL: https://develop-pallid-sturgeon.rsgis.dev
-      REACT_APP_KEYCLOAK_REALM: USACE
+      REACT_APP_KEYCLOAK_REALM: CWBI-DEV
       REACT_APP_KEYCLOAK_CLIENT: pallid-sturgeon-dev
     runs-on: ubuntu-latest
     strategy:
