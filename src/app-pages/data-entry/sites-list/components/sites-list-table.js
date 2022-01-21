@@ -62,7 +62,6 @@ const SitesListTable = connect(
             <AgGridColumn field='sampleUnitTypeCode' headerName='Sample Unit Type' cellEditor='sampleUnitTypeEditor' cellEditorParams={{ sampleUnitTypes }} />
             <AgGridColumn field='bendrn' headerName='Bend R/N' />
             <AgGridColumn field='bendRiverMile' />
-            <AgGridColumn field='comments' />
           </AgGridReact>
         </div>
       </div>

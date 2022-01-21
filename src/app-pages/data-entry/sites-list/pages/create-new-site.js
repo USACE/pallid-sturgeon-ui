@@ -27,7 +27,6 @@ const CreateNewSite = connect(
     const [sampleUnitType, setSampleUnitType] = useState('');
     const [season, setSeason] = useState('');
     const [bend, setBend] = useState('');
-    const [comments, setComments] = useState('');
 
     useEffect(() => {
       doNewSiteLoadData();
@@ -42,7 +41,6 @@ const CreateNewSite = connect(
         sampleUnitTypeCode: sampleUnitType,
         bendrn: String(bend),
         editInitials: recorder,
-        comments,
       };
 
       doPostNewSite(payload);
@@ -114,19 +112,6 @@ const CreateNewSite = connect(
                   placeholder='Select bend r/n...'
                   onChange={(_, __, value) => setBend(value)}
                   items={createBendsDropdownOptions(bends)}
-                />
-              </div>
-            </div>
-            <hr />
-            <div className='row mt-3'>
-              <div className='col-12'>
-                <label><small>Comments</small></label>
-                <textarea
-                  rows={3}
-                  placeholder='Enter comments...'
-                  className='form-control mt-1'
-                  onChange={e => setComments(e.target.value)}
-                  value={comments}
                 />
               </div>
             </div>
