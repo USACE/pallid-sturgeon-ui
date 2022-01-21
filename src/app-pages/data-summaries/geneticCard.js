@@ -31,7 +31,7 @@ export default connect(
     geneticCardSummaryParams: params,
     geneticCardSummaryPagination,
   }) => {
-    const { year, minDate, maxDate, broodstock, hatchWild, speciesId, archive } = params;
+    const { year, minDate, maxDate, broodstock, hatchWild, speciesId } = params;
     const { totalResults } = geneticCardSummaryPagination;
     const fieldDisabled = !year;
 
@@ -110,15 +110,6 @@ export default connect(
                   options={yesNoOptions}
                 />
               </div>
-              <div className='col-2'>
-                <Select
-                  isDisabled={fieldDisabled}
-                  label='Archive'
-                  value={archive}
-                  onChange={val => doUpdateGeneticCardSummaryParams({ archive: val })}
-                  options={yesNoOptions}
-                />
-              </div>
             </div>
           </Card.Body>
         </Card>
@@ -154,7 +145,6 @@ export default connect(
                 <AgGridColumn field='broodstock' headerName='Broodstock?' />
                 <AgGridColumn field='hatchwild' headerName='Hatch/Wild?' />
                 <AgGridColumn field='speciesId' headerName='Species Id?' />
-                <AgGridColumn field='archive' headerName='Archive?' />
               </AgGridReact>
               <Pagination
                 className='mt-3'

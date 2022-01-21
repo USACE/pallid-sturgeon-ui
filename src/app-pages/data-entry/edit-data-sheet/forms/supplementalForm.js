@@ -74,7 +74,6 @@ const SupplementalForm = connect(
               <AgGridColumn field='broodstock' />
               <AgGridColumn field='hatchWild' />
               <AgGridColumn field='speciesId' />
-              <AgGridColumn field='archive' />
               <AgGridColumn field='head' />
               <AgGridColumn field='snouttomouth' />
               <AgGridColumn field='inter' />
