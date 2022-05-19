@@ -22,7 +22,8 @@ const Home = connect(
     return (
       <RoleFilter
         allowRoles={['ADMINISTRATOR']}
-        alt={() => <RoleRequestSentMessage className='p-2' />}>
+        alt={() => <RoleRequestSentMessage className='p-2' />}
+      >
         <Hero />
         <div className='container pt-4'>
           <Accordion.List>

@@ -38,12 +38,12 @@ const utilityLinks = [
 ];
 
 const NavBar = connect(
-  'doAuthenticate',
-  'selectAuthLoggedIn',
+  'doAuthLogin',
+  'selectAuthIsLoggedIn',
   'selectPathname',
   ({
-    doAuthenticate,
-    authLoggedIn,
+    doAuthLogin,
+    authIsLoggedIn,
     pathname,
   }) => {
     const [show, setShow] = useState(false);
@@ -77,7 +77,7 @@ const NavBar = connect(
         </button>
         <div className={navCollapseClasses}>
           <ul className='navbar-nav ml-auto'>
-            {authLoggedIn ? (
+            {authIsLoggedIn ? (
               <RoleFilter
                 allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}>
                 <NavItem href={['/']}>Home</NavItem>
@@ -100,7 +100,7 @@ const NavBar = connect(
                 <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
               </RoleFilter>
             ) : (
-              <NavItem handler={() => doAuthenticate()}>Login</NavItem>
+              <NavItem handler={() => doAuthLogin()}>Login</NavItem>
             )}
           </ul>
         </div>

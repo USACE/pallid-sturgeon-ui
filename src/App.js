@@ -13,14 +13,23 @@ import './css/bootstrap/css/bootstrap.water.min.css';
 import './css/mdi/css/materialdesignicons.min.css';
 import './css/index.scss';
 
-export default connect('selectRoute', 'selectAuth', ({ route: Route, auth }) => (
-  <>
-    <ToastContainer autoClose={3500} hideProgressBar={false} />
-    <NavBar />
-    <PageContent>
-      {auth.token ? <Route />:<Hero />}
-    </PageContent>
-    <Modal closeWithEscape />
-    <Footer />
-  </>
-));
+export default connect(
+  'selectRoute',
+  'selectAuthIsMocked',
+  'selectAuthTokenRaw',
+  ({ 
+    route: Route,
+    authIsMocked,
+    authToken,
+  }) => (
+    <>
+      <ToastContainer autoClose={3500} hideProgressBar={false} />
+      <NavBar />
+      <PageContent>
+        {(authIsMocked || !!authToken) ? <Route />:<Hero />}
+      </PageContent>
+      <Modal closeWithEscape />
+      <Footer />
+    </>
+  )
+);

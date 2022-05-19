@@ -1,10 +1,10 @@
 import React from 'react';
 import { connect } from 'redux-bundler-react';
 
-export const isUserAllowed = (userRole, allowRoles = []) => {
+export const isUserAllowed = (userRoles = [], allowRoles = []) => {
   // If there are no userRole, user shouldn't be here
-  if (!userRole) return false;
-  if (userRole.role === 'ADMINISTRATOR') return true;
+  if (!userRoles.length) return false;
+  if (userRoles.includes('ADMINISTRATOR')) return true;
 
   // set our default show value, false makes us find an allow role, true makes us deny
   // if you add both allow and deny we first see if you are allowed, then deny overrides
@@ -14,7 +14,7 @@ export const isUserAllowed = (userRole, allowRoles = []) => {
   for (var i = 0; i < allowRoles.length; i++) {
     const roleString = allowRoles[i];
 
-    if (userRole.role === roleString) {
+    if (userRoles.includes(roleString)) {
       showChildren = true;
       break;
     }
@@ -24,14 +24,15 @@ export const isUserAllowed = (userRole, allowRoles = []) => {
 };
 
 export default connect(
-  'selectUserRole',
+  'selectAuthRoles',
   ({
-    userRole,
+    authRoles,
     allowRoles = [],
     alt = null,
     children,
   }) => {
-    const showChildren = isUserAllowed(userRole, allowRoles);
+    console.log('test authRoles: ', authRoles);
+    const showChildren = isUserAllowed(authRoles, allowRoles);
 
     if (showChildren) {
       return <>{children}</>;

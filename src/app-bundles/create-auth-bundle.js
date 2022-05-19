@@ -53,7 +53,7 @@ const createAuthBundle = (opts) => {
         const token = store.selectAuthTokenMockRaw();
         dispatch({
           type: 'AUTH_LOGGED_IN',
-          payload: { token: token, error: null, shouldVerifyToken: true },
+          payload: { token: token, error: null, shouldVerifyToken: false },
         });
       } else {
         const url = store.selectAuthUrl();
@@ -149,8 +149,10 @@ const createAuthBundle = (opts) => {
     }),
 
     selectAuthRoles: createSelector('selectAuthTokenPayload', (payload) => {
-      if (!payload.hasOwnProperty('roles')) return [];
-      return payload.roles;
+      if (!payload.hasOwnProperty('resource_access')) return [];
+      // if (!payload.resource_access.hasOwnProperty('pallid-sturgeon-dev')) return [];
+      // if (!payload.resource_access['pallid-sturgeon-dev'].hasOwnProperty('roles')) return [];
+      return payload['resource_access']['pallid-sturgeon-dev']['roles'];
     }),
 
     selectAuthGroups: createSelector('selectAuthRoles', (roles) => roles.map((role) => {
@@ -169,7 +171,7 @@ const createAuthBundle = (opts) => {
       return groupRoles;
     }),
 
-    selectAuthIsLoggedIn: (state) => !!state.auth.token,
+    selectAuthIsLoggedIn: (state) => state.auth.isMock || !!state.auth.token,
 
     reactAuthShouldVerifyToken: (state) => {
       if (state.auth.shouldVerifyToken)

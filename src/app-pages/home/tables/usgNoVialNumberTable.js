@@ -1,7 +1,6 @@
 import React from 'react';
 import { connect } from 'redux-bundler-react';
-import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
-import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
+import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import MrIdCellRenderer from 'common/gridCellRenderers/mrIdCellRenderer';
 
