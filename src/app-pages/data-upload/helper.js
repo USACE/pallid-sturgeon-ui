@@ -44,7 +44,7 @@ export const formatAsNumber = (value, _header) => {
   const keepAString = ['u1','u2','u3','u4','u5','u6','u7'];
   if (typeof value === 'string' && value.length === 0){
     return null;
-  } else if (isNumeric(value) && keepAString.findIndex(_header.toLowerCase()) === -1) {
+  } else if (isNumeric(value) && keepAString.indexOf(_header.toLowerCase()) === -1) {
     return Number(value);
   }
 
