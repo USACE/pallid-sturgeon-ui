@@ -41,7 +41,7 @@ export const formatJsonKey = (key = '', _index) => {
 };
 
 export const formatAsNumber = (value, _header) => {
-  const keepAString = ["siteFid","mrFid","season","setdate","subsampleROrN","subsamplen","recorder","gear","gearType","structurenumber","usgs","riverstage","u1","u2","u3","u4","u5","u6","u7","macro","meso","habitatrn","qc","microStructure","structureFlow","structureMod","setSite_1","setSite_2","setSite_3","startTime","stopTime","watervel","comments","checkby","noTurbidity","noVelocity","editInitials","lastEditComment","fieldOffice"];
+  const keepAString = ['siteFid','mrFid','season','setdate','subsampleROrN','subsamplen','recorder','gear','gearType','structurenumber','usgs','riverstage','u1','u2','u3','u4','u5','u6','u7','macro','meso','habitatrn','qc','microStructure','structureFlow','structureMod','setSite_1','setSite_2','setSite_3','startTime','stopTime','watervel','comments','checkby','noTurbidity','noVelocity','editInitials','lastEditComment','fieldOffice'];
   if (typeof value === 'string' && value.length === 0){
     return null;
   } else if (isNumeric(value) && keepAString.indexOf(_header.toLowerCase()) === -1) {
