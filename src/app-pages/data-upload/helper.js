@@ -41,7 +41,9 @@ export const formatJsonKey = (key = '', _index) => {
 };
 
 export const formatAsNumber = (value, _header) => {
-  if (isNumeric(value)) {
+  if (typeof value === "string" && value.length === 0){
+    return null;
+  } else if (isNumeric(value)) {
     return Number(value);
   }
 
