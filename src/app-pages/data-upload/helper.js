@@ -19,7 +19,7 @@ export const getIsRequired = (key, files) => {
 };
 
 export const reduceCsvState = (state, action) => {
-  switch (action.type) {
+  switch (action.type) {//Adding some filler text so it forces the process to update
     case 'update':
       return {
         ...state,
@@ -50,3 +50,4 @@ export const formatAsNumber = (value, _header) => {
 
   return value;
 };
+//Adding some filler text so it forces the process to update
