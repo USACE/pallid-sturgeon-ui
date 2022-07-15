@@ -4,7 +4,7 @@ export default {
   name: 'datasheet',
   getReducer: () => {
     const initialData = {
-      pageSize: 20,
+      pageSize: 50,
       pageNumber: 0,
       totalResults: 0,
       params: {},
@@ -58,6 +58,9 @@ export default {
       missouriRiverData: '/missouriDataSummary',
       fishData: '/fishDataSummary',
       suppData: '/suppDataSummary',
+      telemetryData: '/telemetryDataSummary',
+      procedureData: '/procedureDataSummary',
+      searchData: '/searchDataSummary',
     };
 
     const uriKeys = Object.keys(uris);
@@ -75,14 +78,18 @@ export default {
     const url = `/psapi${uriValues[tab]}${query}`;
 
     apiGet(url, (_err, body) => {
-      dispatch({
-        type: 'DATASHEETS_UPDATED_DATA',
-        payload: {
-          key: uriKeys[tab],
-          data: body,
-        }
-      });
-      dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
+      if (!_err) {
+        dispatch({
+          type: 'DATASHEETS_UPDATED_DATA',
+          payload: {
+            key: uriKeys[tab],
+            data: body,
+          }
+        });
+        dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
+      } else {
+        dispatch({ type: 'DATASHEET_FETCH_DATA_ERROR', payload: _err });
+      }
     });
   },
 
@@ -93,6 +100,9 @@ export default {
       missouriRiverData: '/missouriFullDataSummary',
       fishData: '/fishFullDataSummary',
       suppData: '/suppFullDataSummary',
+      telemetryData: '/telemetryFullDataSummary',
+      procedureData: '/procedureFullDataSummary',
+      searchData: '/searchFulLDataSummary',
     };
 
     const uriKeys = Object.keys(uris);
@@ -125,5 +135,6 @@ export default {
 
   doUpdateDatasheetParams: (params) => ({ dispatch, store }) => {
     dispatch({ type: 'UPDATE_DATASHEET_PARAMS', payload: params });
+    store.doDatasheetFetch();
   },
 };

@@ -12,6 +12,7 @@ import MissouriRiverTable from './tables/missouriRiverTable';
 import ProcedureTable from './tables/procedureTable';
 import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
+import SearchTable from './tables/searchTable';
 
 import { createDropdownOptions } from './datasheetHelpers';
 import { dropdownYearsToNow } from 'utils';
@@ -44,8 +45,16 @@ export default connect(
     const [toDateFilter, setToDateFilter] = useState('');
 
     const { projects, seasons } = domains;
-    const { missouriRiverData = {}, fishData = {}, suppData = {} } = datasheetData;
-    const tabs = ['missouriRiverData', 'fishData',  'suppData'];
+    const { 
+      missouriRiverData = {}, 
+      fishData = {}, 
+      suppData = {}, 
+      telemetryData = {},
+      procedureData = {}, 
+      searchData = {},
+    } = datasheetData;
+
+    const tabs = ['missouriRiverData', 'fishData',  'suppData', 'telemetryData', 'procedureData', 'searchData'];
 
     const clearAllFilters = () => {
       setYearFilter('');
@@ -59,7 +68,7 @@ export default connect(
     };
 
     useEffect(() => {
-      doUpdateDatasheetParams({
+      const params = {
         tab: currentTab,
         year: yearFilter,
         month: monthFilter,
@@ -67,7 +76,8 @@ export default connect(
         season: seasonFilter,
         fromDate: fromDateFilter,
         toDate: toDateFilter,
-      });
+      };
+      doUpdateDatasheetParams(params);
     }, [yearFilter, monthFilter, projectFilter, seasonFilter, currentTab, doUpdateDatasheetParams]);
 
     useEffect(() => {
@@ -89,6 +99,7 @@ export default connect(
                   onChange={val => setYearFilter(val)}
                   value={yearFilter}
                   options={dropdownYearsToNow()}
+                  defaultOption={new Date().getFullYear()}
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
@@ -212,16 +223,27 @@ export default connect(
                   content: <FishTable rowData={fishData.items} />,
                 }, {
                   title: 'Supplemental',
-                  content: <SupplementalTable rowData={suppData.items}/>,
+                  content: <SupplementalTable rowData={suppData.items} />,
                 },
-                { title: 'Telemetry', content: <TelemetryTable />, isDisabled: true },
-                { title: 'Procedure', content: <ProcedureTable />, isDisabled: true },
+                { 
+                  title: 'Telemetry', 
+                  content: <TelemetryTable rowData={telemetryData.items} />,
+                },
+                { 
+                  title: 'Procedure', 
+                  content: <ProcedureTable rowData={procedureData.items} />,
+                },
+                { 
+                  title: 'Search Effort', 
+                  content: <SearchTable rowData={searchData.items} />
+                },
               ]}
               onTabChange={(_str, ind) => setCurrentTab(ind)}
             />
             <Pagination
               className='mt-2'
               itemCount={(datasheetData[tabs[currentTab]] || {}).totalCount}
+              defaultItemsPerPage='50'
               handlePageChange={(pageNumber, pageSize) => doSetDatasheetPagination({ pageSize, pageNumber })}
             />
           </Card.Body>
