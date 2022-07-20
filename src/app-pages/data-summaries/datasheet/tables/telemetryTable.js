@@ -23,23 +23,20 @@ const TelemetryTable = ({ doFetchAllDatasheet, rowData = [] }) => (
         <AgGridColumn headerName='ID' field='tId' />
         {/* <AgGridColumn headerName='T FID' field='tFid' />
         <AgGridColumn headerName='Se ID' field='seId' /> */}
-        {/* <AgGridColumn headerName='UniqueID' field='uniqueId' />
+        {/* <AgGridColumn headerName='UniqueID' field='uniqueId' /> */}
         <AgGridColumn headerName='Year' field='year' />
         <AgGridColumn headerName='Field Office' field='fieldOffice' />
         <AgGridColumn headerName='Project' field='project' />
         <AgGridColumn headerName='Segment' field='segment' />
-        <AgGridColumn headerName='Season' field='season' /> */}
+        <AgGridColumn headerName='Season' field='season' />
         <AgGridColumn headerName='Bend' field='bend' />
-        <AgGridColumn headerName='Conductivity' field='conductivity' sortable unSortIcon />
         <AgGridColumn headerName='Radio Tag Number' field='radioTagNum' />
         <AgGridColumn headerName='Frequency' field='frequencyIdCode' />
         <AgGridColumn headerName='Capture Time' field='captureTime' />
-        {/* <AgGridColumn headerName='Capture Latitude' field='captureLatitude' />
+        <AgGridColumn headerName='Capture Latitude' field='captureLatitude' />
         <AgGridColumn headerName='Capture Longitude' field='captureLongitude' />
-        <AgGridColumn headerName='Position Confidence' field='positionConfidence' />
-        <AgGridColumn headerName='Macro Habitat Code' field='macroId' />
-        <AgGridColumn headerName='Meso Habitat Code' field='mesoId' />
-        <AgGridColumn headerName='Depth' field='depth' /> */}
+        <AgGridColumn headerName='Depth' field='depth' />
+        <AgGridColumn headerName='Conductivity' field='conductivity' sortable unSortIcon />
       </AgGridReact>
     </div>
   </>

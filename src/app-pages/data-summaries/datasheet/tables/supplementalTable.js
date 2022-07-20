@@ -38,6 +38,7 @@ const SupplementalTable = connect(
           <AgGridColumn field='bendrn' headerName='Bend R/N' />
           <AgGridColumn field='bendRiverMile' />
           <AgGridColumn field='hatcheryOrigin' />
+          <AgGridColumn field='turbidity' />
           <AgGridColumn field='checkedby' />
         </AgGridReact>
       </div>
