@@ -22,6 +22,7 @@ const administrationLinks = [
   '/multiple-check-by',
   '/multiple-record-approval',
   '/user-access-requests',
+  '/edit-user',
 ];
 
 const dataEntryLinks = [
