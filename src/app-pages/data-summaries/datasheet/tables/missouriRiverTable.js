@@ -25,6 +25,7 @@ const MissouriRiverTable = connect(
       />
       <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
         <AgGridReact rowData={rowData}>
+          <AgGridColumn field='uniqueID' sortable unSortIcon />
           <AgGridColumn field='year' />
           <AgGridColumn field='fieldOffice' sortable unSortIcon />
           <AgGridColumn field='project' />
@@ -35,7 +36,6 @@ const MissouriRiverTable = connect(
           <AgGridColumn field='bendRiverMile' />
           <AgGridColumn field='subsample' />
           <AgGridColumn field='pass' />
-          <AgGridColumn field='uniqueID' sortable unSortIcon />
           <AgGridColumn field='setDate' sortable unSortIcon />
           <AgGridColumn field='conductivity' sortable unSortIcon />
           <AgGridColumn field='checkedby' sortable unSortIcon />

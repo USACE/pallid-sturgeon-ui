@@ -1,45 +1,41 @@
 import React from 'react';
+import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+
+import Button from 'app-components/button';
+import Icon from 'app-components/icon';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-const ProcedureTable = () => (
+const ProcedureTable = ({ doFetchAllDatasheet, rowData = [] }) => (
   <>
-    <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
-      <AgGridReact rowData={[]}>
-        <AgGridColumn field='Last Updated' />
-        <AgGridColumn field='Purpose Code' />
-        <AgGridColumn field='Procedure Date' />
-        <AgGridColumn field='Procedure Start Time' />
-        <AgGridColumn field='Procedure End Time' />
-        <AgGridColumn field='Procedure By' />
-        <AgGridColumn field='Antibiotic Injection Ind' />
-        <AgGridColumn field='Photo Dorsal Ind' />
-        <AgGridColumn field='Photo Ventral Ind' />
-        <AgGridColumn field='Photo Left Ind' />
-        <AgGridColumn field='Old Radio Tag Num' />
-        <AgGridColumn field='Old Frequency ID' />
-        <AgGridColumn field='DST Serial Num' />
-        <AgGridColumn field='DST Start Date' />
-        <AgGridColumn field='DST Start Time' />
-        <AgGridColumn field='DST Reimplant ID' />
-        <AgGridColumn field='New Radio Tag Num' />
-        <AgGridColumn field='New Frequency ID' />
-        <AgGridColumn field='Sex Code' />
-        <AgGridColumn field='Fish Health Comments' />
-        <AgGridColumn field='Spawn Code' />
-        <AgGridColumn field='Eval Location Code' />
-        <AgGridColumn field='Blood Sample Ind' />
-        <AgGridColumn field='Egg Sample Ind' />
-        <AgGridColumn field='Visual Repro Status Code' />
-        <AgGridColumn field='Ultrasound Repro Status Code' />
-        <AgGridColumn field='Ultrasound Gonad Length' />
-        <AgGridColumn field='Gonad Condition' />
-        <AgGridColumn field='Expected Spawn Year' />
+    <Button
+      isOutline
+      size='small'
+      variant='info'
+      text='Export as CSV'
+      icon={<Icon icon='download' />}
+      handleClick={() => doFetchAllDatasheet('procedure-datasheet')}
+    />
+    <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
+      <AgGridReact rowData={rowData}>
+        <AgGridColumn headerName='ID' field='id' sortable unSortIcon />
+        <AgGridColumn headerName='UniqueID' field='uniqueId' sortable unSortIcon />
+        <AgGridColumn headerName='Year' field='year' />
+        <AgGridColumn headerName='Field Office' field='fieldOffice' />
+        <AgGridColumn headerName='Project' field='project' />
+        <AgGridColumn headerName='Segment' field='segment' />
+        <AgGridColumn headerName='Season' field='season' />
+        <AgGridColumn headerName='Purpose Code' field='purposeCode' sortable unSortIcon />
+        <AgGridColumn headerName='Procedure Date' field='procedureDate' sortable unSortIcon />
+        <AgGridColumn headerName='New Radio Tag Num' field='newRadioTagNum' sortable unSortIcon />
+        <AgGridColumn headerName='New Frequency ID' field='newFrequencyId' sortable unSortIcon />
+        <AgGridColumn headerName='Spawn Code' field='spawnCode' sortable unSortIcon />
+        <AgGridColumn headerName='Expected Spawn Year' field='expectedSpawnYear' sortable unSortIcon />
       </AgGridReact>
     </div>
   </>
 );
 
-export default ProcedureTable;
+export default connect('doFetchAllDatasheet', ProcedureTable);
