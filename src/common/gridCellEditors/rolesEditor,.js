@@ -1,11 +1,11 @@
-import React, { useState, forwardRef, useImperativeHandle} from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 
 import Select from 'app-components/select';
-import { createFieldOfficeDropdownOptions } from 'app-pages/data-entry/helpers';
+import { createRolesDropdownOptions } from 'app-pages/data-entry/helpers';
 
-const SeasonEditor = forwardRef(({
+const RolesEditor = forwardRef(({
   value,
-  fieldOffices,
+  roles,
 }, ref) => {
   const [selectedValue, setSelectedValue] = useState(value);
 
@@ -16,13 +16,13 @@ const SeasonEditor = forwardRef(({
 
   return (
     <Select
-      title='Edit Field Office'
+      title='Edit Role'
       value={selectedValue}
       onChange={v => setSelectedValue(v)}
       defaultOption={value}
-      options={createFieldOfficeDropdownOptions(fieldOffices)}
+      options={createRolesDropdownOptions(roles)}
     />
   );
 });
 
-export default SeasonEditor;
+export default RolesEditor;

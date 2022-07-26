@@ -25,3 +25,21 @@ export const createBendsDropdownOptions = data => {
     };
   }).filter(e => e);
 };
+
+export const createRolesDropdownOptions = data => {
+  if (!data) return [];
+
+  return data.data.map(opt => ({
+    text: opt.description,
+    value: opt.id,
+  }));
+};
+
+export const createFieldOfficeDropdownOptions = data => {
+  if (!data) return [];
+
+  return data.data.map(opt => ({
+    text: opt.description,
+    value: opt.code,
+  }));
+};
