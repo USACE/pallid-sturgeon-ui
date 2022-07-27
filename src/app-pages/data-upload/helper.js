@@ -31,7 +31,7 @@ export const reduceCsvState = (state, action) => {
 };
 
 export const formatJsonKey = (key = '', _index) => {
-  const str = key.toLowerCase();
+  const str = key.toLowerCase().trim();
   const words = str.split('_');
 
   return words.map((word, i) => {
