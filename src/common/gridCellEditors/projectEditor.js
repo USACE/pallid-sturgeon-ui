@@ -3,7 +3,7 @@ import React, { useState, forwardRef, useImperativeHandle} from 'react';
 import Select from 'app-components/select';
 import { createDropdownOptions } from 'app-pages/data-entry/helpers';
 
-const SeasonEditor = forwardRef(({
+const ProjectEditor = forwardRef(({
   value,
   projects,
 }, ref) => {
@@ -25,4 +25,4 @@ const SeasonEditor = forwardRef(({
   );
 });
 
-export default SeasonEditor;
+export default ProjectEditor;

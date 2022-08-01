@@ -1,11 +1,12 @@
 import React, { useState, forwardRef, useImperativeHandle} from 'react';
 
 import Select from 'app-components/select';
-import { createFieldOfficeDropdownOptions } from 'app-pages/data-entry/helpers';
+import { createDropdownOptions, createFieldOfficeIdDropdownOptions } from 'app-pages/data-entry/helpers';
 
-const SeasonEditor = forwardRef(({
+const FieldOfficeEditor = forwardRef(({
   value,
   fieldOffices,
+  isId
 }, ref) => {
   const [selectedValue, setSelectedValue] = useState(value);
 
@@ -20,9 +21,9 @@ const SeasonEditor = forwardRef(({
       value={selectedValue}
       onChange={v => setSelectedValue(v)}
       defaultOption={value}
-      options={createFieldOfficeDropdownOptions(fieldOffices)}
+      options={isId ? createFieldOfficeIdDropdownOptions(fieldOffices) : createDropdownOptions(fieldOffices)}
     />
   );
 });
 
-export default SeasonEditor;
+export default FieldOfficeEditor;

@@ -22,7 +22,7 @@ const usersBundle = {
   selectUsers: state =>  state.userBundles,
   selectUsersData: state => state.userBundles.data,
 
-  doFetchUsers: () => ({ dispatch, apiGet }) => {
+  doFetchUsers: () => ({ dispatch, apiGet, store }) => {
     dispatch({ type: 'USERS_FETCH_START'});
     const uri = '/psapi/users';
 
@@ -31,6 +31,8 @@ const usersBundle = {
         dispatch({ type: 'USERS_FETCH_ERROR', payload: err});
       } else {
         dispatch({ type: 'UPDATE_USERS', payload: body});
+        store.doDomainProjectsFetch();
+        store.doDomainFieldOfficesFetch();
       }
     });
 

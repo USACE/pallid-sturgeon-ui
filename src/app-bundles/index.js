@@ -60,5 +60,5 @@ export default composeBundles(
   userAccessRequestBundle,
   rolesBundle,
   fieldOfficesBundle,
-  usersBundle
+  usersBundle,
 );
