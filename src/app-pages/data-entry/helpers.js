@@ -35,7 +35,20 @@ export const createRolesDropdownOptions = data => {
   }));
 };
 
-export const createFieldOfficeDropdownOptions = data => {
+export const createFieldOfficeIdDropdownOptions = data => {
+  if (!data) return [];
+
+  return data.map(d => {
+    const { id, description } = d;
+
+    return {
+      value: id,
+      text: description,
+    };
+  });
+};
+
+export const createProjectDropdownOptions = data => {
   if (!data) return [];
 
   return data.data.map(opt => ({

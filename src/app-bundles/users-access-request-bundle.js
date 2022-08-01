@@ -34,7 +34,7 @@ const userAccessRequestBundle = {
       },
     });
   },
-  doLoadUserAccessRequests: () => ({ dispatch, apiGet }) => {
+  doLoadUserAccessRequests: () => ({ dispatch, apiGet, store }) => {
     dispatch({
       type: 'FETCH_USERS_ACCESS_REQUESTS_START',
       payload: { shouldQuery: false },
@@ -50,9 +50,7 @@ const userAccessRequestBundle = {
             lastError: Date.now(),
           },
         });
-
       } else {
-
         dispatch({
           type: 'USERS_ACCESS_REQUESTS_LOADED',
           payload: {
@@ -62,6 +60,8 @@ const userAccessRequestBundle = {
             err: null,
           },
         });
+        store.doDomainProjectsFetch();
+        store.doDomainFieldOfficesFetch();
       }
     });
   },
@@ -84,6 +84,25 @@ const userAccessRequestBundle = {
       }
     });
   },
+
+  doUpdateRoleOffice: (userRoleOfficeData) => ({ dispatch, apiPut, store }) => {
+    dispatch({ type: 'USER_ROLE_OFFICE_UPDATE_START' });
+
+    const { id, roleId, officeId, projectCode } = userRoleOfficeData;
+
+    const url = '/psapi/userRoleOffice';
+    const payload = { userId: parseInt(id), roleId: parseInt(roleId), officeId: parseInt(officeId), projectCode: projectCode };
+
+    apiPut(url, payload, (err, _body) => {
+      if (!err) {
+        dispatch({ type: 'USER_ROLE_OFFICE_UPDATE_FINISHED' });
+        store.doFetchUsers();
+      } else {
+        dispatch({ type: 'USER_ROLE_OFFICE_UPDATE_ERROR', payload: err });
+      }
+    });
+  },
+  
   selectUserAccessRequests: (state) =>  state.userAccessRequests,
 
   reactShouldLoadUserAccessRequests: createSelector('selectUserAccessRequests', (userAccessRequests) => {

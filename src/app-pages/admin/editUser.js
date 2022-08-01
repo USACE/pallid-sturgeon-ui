@@ -3,30 +3,32 @@ import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import Card from 'app-components/card';
-
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import FieldOfficeEditor from 'common/gridCellEditors/fieldOfficeEditor';
 import RolesEditor from 'common/gridCellEditors/rolesEditor,';
+import ProjectEditor from 'common/gridCellEditors/projectEditor';
+import { rolesList, fieldOfficeList, projectCodeList } from './helper';
 
 export default connect(
-  'doFetchFieldOffices',
   'doFetchUsers',
   'doFetchRoles',
-  'selectFieldOffices',
+  'doUpdateRoleOffice',
   'selectUsersData',
   'selectRoles',
+  'selectDomains',
   ({
-    doFetchFieldOffices,
     doFetchUsers,
     doFetchRoles,
-    fieldOffices,
+    doUpdateRoleOffice,
     usersData,
-    roles, 
+    roles,
+    domains
   }) => {
+    const { projects, fieldOffices } = domains;
+
     useEffect(() => {
       doFetchUsers();
       doFetchRoles();
-      doFetchFieldOffices();
     }, []);
 
     return (
@@ -42,15 +44,17 @@ export default connect(
                   rowHeight={35}
                   rowData={usersData}
                   editType='fullRow'
+                  onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
                   defaultColDef={{
-                    width: 200,
+                    width: 150,
                     editable: true,
                     lockPinned: true,
                   }}
                   frameworkComponents={{
                     editCellRenderer: EditCellRenderer,
                     fieldOfficeEditor: FieldOfficeEditor,
-                    rolesEditor: RolesEditor
+                    rolesEditor: RolesEditor,
+                    projectEditor: ProjectEditor,
                   }}
                 >
                   <AgGridColumn
@@ -61,11 +65,32 @@ export default connect(
                     cellRenderer='editCellRenderer'
                     editable={false}
                   />
-                  <AgGridColumn field='firstName' />
-                  <AgGridColumn field='lastName' />
-                  <AgGridColumn field='email' />
-                  <AgGridColumn field='role' cellEditor='rolesEditor' cellEditorParams={{ roles }} />
-                  <AgGridColumn field='officeCode' cellEditor='fieldOfficeEditor' cellEditorParams={{ fieldOffices }} />
+                  <AgGridColumn field='firstName' editable={false} />
+                  <AgGridColumn field='lastName' editable={false} />
+                  <AgGridColumn field='email' width={250} editable={false} />
+                  <AgGridColumn
+                    field='roleId'
+                    headerName='Role'
+                    cellEditor='rolesEditor'
+                    cellEditorParams={{ roles }}
+                    cellRenderer={(params) => rolesList[params.value]}
+                  />
+                  <AgGridColumn 
+                    field='officeId' 
+                    headerName='Field Office'
+                    width={300} 
+                    cellEditor='fieldOfficeEditor' 
+                    cellEditorParams={{ fieldOffices, isId: true }} 
+                    cellRenderer={(params) => fieldOfficeList[params.value]}
+                  />
+                  <AgGridColumn 
+                    field='projectCode' 
+                    headerName='Project'
+                    width={300} 
+                    cellEditor='projectEditor' 
+                    cellEditorParams={{ projects }} 
+                    cellRenderer={(params) => projectCodeList[params.value]}
+                  />
                 </AgGridReact>
               </div>
             </Card.Body>
