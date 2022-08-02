@@ -9,31 +9,27 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const UsgNoVialNumbersTable = connect(
-  'selectUsgNoVialNumbers',
+  'selectUsgNoVialNumbersData',
   ({
-    usgNoVialNumbers,
-  }) => {
-    const { data } = usgNoVialNumbers;
-
-    return (
-      <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
-        <AgGridReact
-          rowData={data}
-          frameworkComponents={{
-            mrIdCellRenderer: MrIdCellRenderer,
-          }}
-        >
-          <AgGridColumn field='fp' headerName='Full Project' resizable width={300} />
-          <AgGridColumn field='speciesCode' width={125} />
-          <AgGridColumn field='fId' headerName='fId' width={150} />
-          <AgGridColumn field='mrID' headerName='mrId' width={150} cellRenderer='mrIdCellRenderer' />
-          <AgGridColumn field='mrsiteId' headerName='mrSiteId' width={150} />
-          <AgGridColumn field='sSiteID' headerName='sSiteId' width={150} />
-          <AgGridColumn field='GeneticsVialNumber' width={250} />
-        </AgGridReact>
-      </div>
-    );
-  }
+    usgNoVialNumbersData,
+  }) => (
+    <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
+      <AgGridReact
+        rowData={usgNoVialNumbersData}
+        frameworkComponents={{
+          mrIdCellRenderer: MrIdCellRenderer,
+        }}
+      >
+        <AgGridColumn field='fp' headerName='Full Project' resizable width={300} sortable unSortIcon />
+        <AgGridColumn field='speciesCode' width={125} sortable unSortIcon />
+        <AgGridColumn field='fId' headerName='fId' width={150} sortable unSortIcon />
+        <AgGridColumn field='mrID' headerName='mrId' width={150} cellRenderer='mrIdCellRenderer' sortable unSortIcon />
+        <AgGridColumn field='mrsiteId' headerName='mrSiteId' width={150} sortable unSortIcon />
+        <AgGridColumn field='sSiteID' headerName='sSiteId' width={150} sortable unSortIcon />
+        <AgGridColumn field='GeneticsVialNumber' width={250} sortable unSortIcon />
+      </AgGridReact>
+    </div>
+  )
 );
 
 export default UsgNoVialNumbersTable;

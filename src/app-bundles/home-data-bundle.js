@@ -94,13 +94,15 @@ const homeDataBundle = {
   selectDownloadInfo: state => state.home.downloadInfo,
   selectErrorLog: state => state.home.errorLog,
   selectUsgNoVialNumbers: state => state.home.usgNoVialNumbers,
+  selectUsgNoVialNumbersData: state => state.home.usgNoVialNumbers.data,
   selectUnapprovedDataSheets: state => state.home.unapprovedDataSheets,
   selectUncheckedDataSheets: state => state.home.uncheckedDataSheets,
+  selectUncheckedDataSheetsData: state => state.home.uncheckedDataSheets.data,
 
   doHomeFetch: () => ({ dispatch, store }) => {
     dispatch({ type: 'FETCHING_HOME_DATA '});
     store.doFetchDownloadInfo();
-    store.doFetchErrorLog();
+    // store.doFetchErrorLog();
     store.doFetchUsgNoVialNumbers();
     store.doFetchUnapprovedData();
     store.doFetchUncheckedData();
@@ -148,23 +150,23 @@ const homeDataBundle = {
       });
   },
 
-  doFetchErrorLog: () => ({ dispatch, apiGet }) => {
-    dispatch({ type: 'FETCH_ERROR_LOG_START' });
+  // doFetchErrorLog: () => ({ dispatch, apiGet }) => {
+  //   dispatch({ type: 'FETCH_ERROR_LOG_START' });
 
-    const url = '/psapi/errorCount';
+  //   const url = '/psapi/errorCount';
 
-    apiGet(url, (err, body) => {
-      if (!err) {
-        dispatch({
-          type: 'SET_ERROR_LOG_DATA',
-          payload: body,
-        });
-        dispatch({ type: 'FETCH_ERROR_LOG_FINISH' });
-      } else {
-        dispatch({ type: 'FETCH_ERROR_LOG_ERROR' });
-      }
-    });
-  },
+  //   apiGet(url, (err, body) => {
+  //     if (!err) {
+  //       dispatch({
+  //         type: 'SET_ERROR_LOG_DATA',
+  //         payload: body,
+  //       });
+  //       dispatch({ type: 'FETCH_ERROR_LOG_FINISH' });
+  //     } else {
+  //       dispatch({ type: 'FETCH_ERROR_LOG_ERROR' });
+  //     }
+  //   });
+  // },
 
   doFetchUsgNoVialNumbers: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'FETCH_USG_NO_VIAL_NUMBERS_START' });
