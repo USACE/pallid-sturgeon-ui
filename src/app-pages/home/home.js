@@ -10,10 +10,10 @@ import RoleRequestSentMessage from 'app-components/role-request-sent';
 
 const Home = connect(
   'doHomeFetch',
-  'selectErrorLog',
+  // 'selectErrorLog',
   ({
     doHomeFetch,
-    errorLog,
+    // errorLog,
   }) => {
     useEffect(() => {
       doHomeFetch();
@@ -33,7 +33,7 @@ const Home = connect(
               <UncheckedDataTable />
             </Accordion.Item>
             <Accordion.Item headingText='Office Error Log'>
-              {errorLog && errorLog.data.length ? errorLog.data : 'No Errors at this time.'}
+              {/* {errorLog && errorLog.data.length ? errorLog.data : 'No Errors at this time.'} */}
             </Accordion.Item>
           </Accordion.List>
         </div>
