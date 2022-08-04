@@ -23,14 +23,14 @@ const homeDataBundle = {
       uncheckedDataSheets: {
         data: [],
         totalResults: 0,
-        pageSize: 20,
+        pageSize: 50,
         pageNumber: 0,
       },
     };
 
     return (state = initialData, { type, payload }) => {
       switch (type) {
-        case 'SET_DOWNLOAD_INFO_VERSION_DATA': 
+        case 'SET_DOWNLOAD_INFO_VERSION_DATA':
           return {
             ...state,
             downloadInfo: payload,
@@ -84,6 +84,15 @@ const homeDataBundle = {
               ...payload,
             },
           };
+        case 'SET_HOME_PAGINATION':
+          return {
+            ...state,
+            uncheckedDataSheets: {
+              ...state.uncheckedDataSheets,
+              pageSize: payload.pageSize,
+              pageNumber: payload.pageNumber,
+            },
+          };
         default:
           return state;
       }
@@ -93,16 +102,17 @@ const homeDataBundle = {
   selectHome: state => state.home,
   selectDownloadInfo: state => state.home.downloadInfo,
   selectErrorLog: state => state.home.errorLog,
+  selectErrorLogData: state => state.home.errorLog.data,
   selectUsgNoVialNumbers: state => state.home.usgNoVialNumbers,
   selectUsgNoVialNumbersData: state => state.home.usgNoVialNumbers.data,
   selectUnapprovedDataSheets: state => state.home.unapprovedDataSheets,
   selectUncheckedDataSheets: state => state.home.uncheckedDataSheets,
-  selectUncheckedDataSheetsData: state => state.home.uncheckedDataSheets.data,
+  selectUncheckedDataParams: state => state.home.uncheckedDataSheets.params,
 
   doHomeFetch: () => ({ dispatch, store }) => {
-    dispatch({ type: 'FETCHING_HOME_DATA '});
+    dispatch({ type: 'FETCHING_HOME_DATA ' });
     store.doFetchDownloadInfo();
-    // store.doFetchErrorLog();
+    store.doFetchOfficeErrorLogs();
     store.doFetchUsgNoVialNumbers();
     store.doFetchUnapprovedData();
     store.doFetchUncheckedData();
@@ -168,6 +178,24 @@ const homeDataBundle = {
   //   });
   // },
 
+  doFetchOfficeErrorLogs: () => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'FETCH_ERROR_LOG_START' });
+
+    const url = '/psapi/officeErrorLog';
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'SET_ERROR_LOG_DATA',
+          payload: body,
+        });
+        dispatch({ type: 'FETCH_ERROR_LOG_FINISHED' });
+      } else {
+        dispatch({ type: 'FETCH_RROR_LOG_ERROR' });
+      }
+    });
+  },
+
   doFetchUsgNoVialNumbers: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'FETCH_USG_NO_VIAL_NUMBERS_START' });
 
@@ -190,7 +218,7 @@ const homeDataBundle = {
     dispatch({ type: 'FETCH_UNAPPROVED_DATA_START' });
 
     const params = store.selectUnapprovedDataSheets();
-    const { pageSize, pageNumber} = params;
+    const { pageSize, pageNumber } = params;
 
     const query = queryFromObject({
       size: pageSize,
@@ -215,7 +243,7 @@ const homeDataBundle = {
   doFetchUncheckedData: () => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'FETCH_UNCHECKED_DATA_START' });
     const params = store.selectUncheckedDataSheets();
-    const { pageSize, pageNumber} = params;
+    const { pageSize, pageNumber } = params;
 
     const query = queryFromObject({
       size: pageSize,
@@ -242,6 +270,11 @@ const homeDataBundle = {
     store.doFetchUncheckedData();
   },
 
+  doSetHomePagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
+    dispatch({ type: 'SET_HOME_PAGINATION', payload: { pageSize, pageNumber }});
+    store.doHomeFetch();
+  },
+
   /*
     e.GET(urlContext+"/errorCount", PallidSturgeonH.GetErrorCount)
     e.GET(urlContext+"/usgNoVialNumbers", PallidSturgeonH.GetUsgNoVialNumbers)
@@ -250,7 +283,7 @@ const homeDataBundle = {
     e.GET(urlContext+"/downloadInfo", PallidSturgeonH.GetDownloadInfo)
     e.GET(urlContext+"/downloadZip", PallidSturgeonH.GetDownloadZip)
   */
-  
+
 };
 
 export default homeDataBundle;

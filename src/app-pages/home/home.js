@@ -7,13 +7,12 @@ import UsgNoVialNumbersTable from './tables/usgNoVialNumberTable';
 import UncheckedDataTable from './tables/uncheckedDataTable';
 import RoleFilter from 'app-components/role-filter';
 import RoleRequestSentMessage from 'app-components/role-request-sent';
+import OfficeErrorLogTable from './tables/officeErrorLog';
 
 const Home = connect(
   'doHomeFetch',
-  // 'selectErrorLog',
   ({
     doHomeFetch,
-    // errorLog,
   }) => {
     useEffect(() => {
       doHomeFetch();
@@ -33,7 +32,7 @@ const Home = connect(
               <UncheckedDataTable />
             </Accordion.Item>
             <Accordion.Item headingText='Office Error Log'>
-              {/* {errorLog && errorLog.data.length ? errorLog.data : 'No Errors at this time.'} */}
+              <OfficeErrorLogTable />
             </Accordion.Item>
           </Accordion.List>
         </div>

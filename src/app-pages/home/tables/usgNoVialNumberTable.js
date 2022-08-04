@@ -20,12 +20,12 @@ const UsgNoVialNumbersTable = connect(
           mrIdCellRenderer: MrIdCellRenderer,
         }}
       >
-        <AgGridColumn field='fp' headerName='Full Project' resizable width={300} sortable unSortIcon />
+        <AgGridColumn field='mrID' headerName='mrId' width={100} cellRenderer='mrIdCellRenderer' sortable unSortIcon />
+        <AgGridColumn field='fp' headerName='Full Project' resizable width={400} sortable unSortIcon />
         <AgGridColumn field='speciesCode' width={125} sortable unSortIcon />
-        <AgGridColumn field='fId' headerName='fId' width={150} sortable unSortIcon />
-        <AgGridColumn field='mrID' headerName='mrId' width={150} cellRenderer='mrIdCellRenderer' sortable unSortIcon />
-        <AgGridColumn field='mrsiteId' headerName='mrSiteId' width={150} sortable unSortIcon />
-        <AgGridColumn field='sSiteID' headerName='sSiteId' width={150} sortable unSortIcon />
+        <AgGridColumn field='fId' headerName='fId' width={100} sortable unSortIcon />
+        <AgGridColumn field='mrsiteId' headerName='mrSiteId' width={100} sortable unSortIcon />
+        <AgGridColumn field='sSiteID' headerName='sSiteId' width={100} sortable unSortIcon />
         <AgGridColumn field='GeneticsVialNumber' width={250} sortable unSortIcon />
       </AgGridReact>
     </div>
