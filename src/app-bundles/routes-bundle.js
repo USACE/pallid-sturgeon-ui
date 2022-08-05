@@ -21,6 +21,7 @@ import LastLocation from 'app-pages/data-summaries/lastLocation';
 import TagReplacement from 'app-pages/data-summaries/tagReplacement';
 import EditUser from 'app-pages/admin/editUser';
 import MultipleRecordApproval from 'app-pages/admin/multipleRecordApproval';
+import SiteDatasheet from 'app-pages/data-entry/datasheets/components/site-datasheet';
 
 export default createRouteBundle(
   {
@@ -44,6 +45,7 @@ export default createRouteBundle(
     '/user-access-requests': UserList,
     '/sites-list': SitesList,
     '/sites-list/create-new-site': CreateNewSite,
+    '/sites-list/datasheet': SiteDatasheet,
     '/tag-replacement': TagReplacement,
     '*': NotFound,
   }

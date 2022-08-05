@@ -70,7 +70,7 @@ const SitesList = connect(
               placeholderText='Select year...'
               onChange={value => setYearFilter(value)}
               value={yearFilter}
-              options={dropdownYearsToNow()}
+              options={dropdownYearsToNow(2011)}
             />
           </div>
           <div className='col-2 offset-8'>

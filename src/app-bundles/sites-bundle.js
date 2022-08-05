@@ -135,4 +135,37 @@ export default {
     dispatch({ type: 'UPDATE_SITE_PARAMS', payload: params });
     store.doSitesFetch();
   },
+
+  doFetchSiteById: (params, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'SITE_DATA_ENTRY_BY_ID_FETCH_START', payload: params });
+    const toastId = ignoreToast ? null : toast.loading('Finding datasheet...');
+
+    const url = `/psapi/siteDataEntryById${queryFromObject(params)}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'SITES_UPDATED_ITEMS',
+          payload: body
+        });
+
+        if (store.selectSitesTotalResults() === 0 && !ignoreToast) {
+          tError(toastId, 'No sites found. Please try again.');
+        } else {
+          if (!ignoreToast) {
+            tSuccess(toastId, 'Site found!');
+          }
+          store.doUpdateUrl('/sites-list/datasheet');
+        }
+        dispatch({ type: 'SITE_DATA_ENTRY_BY_ID_FETCH_FINISHED' });
+      } else {
+        dispatch({ type: 'SITE_DATA_ENTRY_BY_ID_FETCH_ERROR', payload: err });
+        if (!ignoreToast) {
+          tError(toastId, 'Error searching for site. Please try again.');
+        }
+      }
+
+    });
+
+  },
 };

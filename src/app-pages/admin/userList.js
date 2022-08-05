@@ -4,7 +4,7 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 import Select from 'app-components/select';
-import { createDropdownOptions, createRolesDropdownOptions } from 'app-pages/data-entry/helpers';
+import { createDropdownOptions, createRolesDropdownOptions, createFieldOfficeIdDropdownOptions } from 'app-pages/data-entry/helpers';
 
 import './admin.scss';
 
@@ -167,7 +167,7 @@ export default connect(
                       }}
                       placeholderText='Select Office...'
                       data-size='3'
-                      options={createDropdownOptions(fieldOffices)}
+                      options={createFieldOfficeIdDropdownOptions(fieldOffices)}
                     />
                   </div></td>
                   <td className='text-center' style={{ width: '20%' }}><div className='select'>
