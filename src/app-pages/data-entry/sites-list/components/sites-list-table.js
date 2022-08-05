@@ -10,6 +10,7 @@ import ProjectEditor from 'common/gridCellEditors/projectEditor';
 import SampleUnitTypeEditor from 'common/gridCellEditors/sampleUnitTypeEditor';
 import SeasonEditor from 'common/gridCellEditors/seasonEditor';
 import SegmentEditor from 'common/gridCellEditors/segmentEditor';
+import SiteIdCellRenderer from 'common/gridCellRenderers/siteIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -45,6 +46,7 @@ const SitesListTable = connect(
               sampleUnitTypeEditor: SampleUnitTypeEditor,
               seasonEditor: SeasonEditor,
               segmentEditor: SegmentEditor,
+              siteIdCellRenderer: SiteIdCellRenderer
             }}
           >
             <AgGridColumn
@@ -55,6 +57,7 @@ const SitesListTable = connect(
               cellRenderer='editCellRenderer'
               editable={false}
             />
+            <AgGridColumn field='siteId' cellRenderer='siteIdCellRenderer' />
             <AgGridColumn field='fieldOffice' cellEditor='fieldOfficeEditor' cellEditorParams={{ fieldOffices }} />
             <AgGridColumn field='project' cellEditor='projectEditor' cellEditorParams={{ projects }} />
             <AgGridColumn field='segment' cellEditor='segmentEditor' cellEditorParams={{ segments }} />
