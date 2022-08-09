@@ -40,3 +40,7 @@ export const projectCodeList = {
   5: '6 - Focused Research',
   6: '5 - Dalbey Bottoms',
 };
+
+export const NoRoleAccessMessage = ({ className }) => (
+  <small className={`has-text-weight-light ${className}`}><center>You do not have role access to this section/page. Please reach out to Admin if you need access.</center></small>
+);

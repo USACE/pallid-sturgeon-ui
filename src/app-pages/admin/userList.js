@@ -5,6 +5,8 @@ import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 import Select from 'app-components/select';
 import { createDropdownOptions, createRolesDropdownOptions, createFieldOfficeIdDropdownOptions } from 'app-pages/data-entry/helpers';
+import RoleFilter from 'app-components/role-filter';
+import { NoRoleAccessMessage } from './helper';
 
 import './admin.scss';
 
@@ -127,88 +129,92 @@ export default connect(
     }, []);
 
     return (
-      <div className='col-md-9'>
-        <table className='table table-bordered'>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Office</th>
-              <th>Project</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {userAccessRequests.data.map((user, i) => {
-              const isRoleItemUpdated = isRoleUpdated(user.id);
-              const isOfficeItemUpdated = isOfficeUpdated(user.id);
-              const isProjectItemUpdated = isProjectUpdated(user.id);
-              return (
-                <tr key={user.id}>
-                  <td className='text-center' style={{ width: '20%' }}>{user.firstName} {user.lastName}</td>
-                  <td className='text-center' style={{ width: '20%' }}>{user.email}</td>
-                  <td className='text-center' style={{ width: '20%' }}><div className='select'>
-                    <Select
-                      onChange={function (val) {
-                        user.roleId = val;
-                        handleRoleUpdate(user.id);
-                      }}
-                      placeholderText='Select Role...'
-                      data-size='3'
-                      options={createRolesDropdownOptions(roles)}
-                    />
-                  </div></td>
-                  <td className='text-center' style={{ width: '20%' }}><div className='select'>
-                    <Select
-                      onChange={function (val) {
-                        user.officeId = val;
-                        handleOfficeUpdate(user.id);
-                      }}
-                      placeholderText='Select Office...'
-                      data-size='3'
-                      options={createFieldOfficeIdDropdownOptions(fieldOffices)}
-                    />
-                  </div></td>
-                  <td className='text-center' style={{ width: '20%' }}><div className='select'>
-                    <Select
-                      onChange={function (val) {
-                        user.projectCode = val;
-                        handleProjectUpdate(user.id);
-                      }}
-                      placeholderText='Select Project...'
-                      data-size='3'
-                      options={createDropdownOptions(projects)}
-                    />
-                  </div></td>
-                  <td style={{ width: '5%' }}>
-                    <Button
-                      className={'icon-button small-btn'}
-                      title='Save'
-                      disabled={!isRoleItemUpdated || !isOfficeItemUpdated || !isProjectItemUpdated}
-                      onClick={function (e) {
-                        doRoleOfficeUpdate({
-                          userId: user.id,
-                          roleId: parseInt(user.roleId),
-                          officeId: parseInt(user.officeId),
-                          projectCode: user.projectCode
-                        }, () => {
-                          removeRoleUpdate(user.id);
-                          removeOfficeUpdate(user.id);
-                          removeProjectUpdate(user.id);
-                        });
-                      }}
-                      icon={<Icon icon='content-save'
-                        className={`button-icon ${user.id} mr-2`}
-                      />}
-                    />
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <RoleFilter
+        allowRoles={['ADMINISTRATOR']}
+        alt={() => <NoRoleAccessMessage className='p-2' />}>
+        <div className='col-md-9'>
+          <table className='table table-bordered'>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Office</th>
+                <th>Project</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {userAccessRequests.data.map((user, i) => {
+                const isRoleItemUpdated = isRoleUpdated(user.id);
+                const isOfficeItemUpdated = isOfficeUpdated(user.id);
+                const isProjectItemUpdated = isProjectUpdated(user.id);
+                return (
+                  <tr key={user.id}>
+                    <td className='text-center' style={{ width: '20%' }}>{user.firstName} {user.lastName}</td>
+                    <td className='text-center' style={{ width: '20%' }}>{user.email}</td>
+                    <td className='text-center' style={{ width: '20%' }}><div className='select'>
+                      <Select
+                        onChange={function (val) {
+                          user.roleId = val;
+                          handleRoleUpdate(user.id);
+                        }}
+                        placeholderText='Select Role...'
+                        data-size='3'
+                        options={createRolesDropdownOptions(roles)}
+                      />
+                    </div></td>
+                    <td className='text-center' style={{ width: '20%' }}><div className='select'>
+                      <Select
+                        onChange={function (val) {
+                          user.officeId = val;
+                          handleOfficeUpdate(user.id);
+                        }}
+                        placeholderText='Select Office...'
+                        data-size='3'
+                        options={createFieldOfficeIdDropdownOptions(fieldOffices)}
+                      />
+                    </div></td>
+                    <td className='text-center' style={{ width: '20%' }}><div className='select'>
+                      <Select
+                        onChange={function (val) {
+                          user.projectCode = val;
+                          handleProjectUpdate(user.id);
+                        }}
+                        placeholderText='Select Project...'
+                        data-size='3'
+                        options={createDropdownOptions(projects)}
+                      />
+                    </div></td>
+                    <td style={{ width: '5%' }}>
+                      <Button
+                        className={'icon-button small-btn'}
+                        title='Save'
+                        disabled={!isRoleItemUpdated || !isOfficeItemUpdated || !isProjectItemUpdated}
+                        onClick={function (e) {
+                          doRoleOfficeUpdate({
+                            userId: user.id,
+                            roleId: parseInt(user.roleId),
+                            officeId: parseInt(user.officeId),
+                            projectCode: user.projectCode
+                          }, () => {
+                            removeRoleUpdate(user.id);
+                            removeOfficeUpdate(user.id);
+                            removeProjectUpdate(user.id);
+                          });
+                        }}
+                        icon={<Icon icon='content-save'
+                          className={`button-icon ${user.id} mr-2`}
+                        />}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </RoleFilter>
     );
   }
 );

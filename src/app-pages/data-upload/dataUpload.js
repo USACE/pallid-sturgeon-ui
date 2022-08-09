@@ -86,9 +86,10 @@ export default connect(
               <Select
                 className='w-25 d-inline-block mb-1 mr-4'
                 onChange={value => setVersion(value)}
-                defaultOption={{ value: '4.1.1' }}
+                defaultOption={{ value: '4.1.3' }}
                 options={[
                   // { value: '3.7.1' },
+                  { value: '4.1.3' },
                   { value: '4.1.1' },
                 ]}
               />
