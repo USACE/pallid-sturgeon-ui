@@ -7,6 +7,7 @@ import UsgNoVialNumbersTable from './tables/usgNoVialNumberTable';
 import UncheckedDataTable from './tables/uncheckedDataTable';
 import OfficeErrorLogTable from './tables/officeErrorLog';
 import RoleFilter from 'app-components/role-filter';
+import RoleRequestSentMessage from 'app-components/role-request-sent';
 
 const Home = connect(
   'doHomeFetch',
