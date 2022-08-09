@@ -59,6 +59,8 @@ const Pagination = ({
             { value: '10' },
             { value: '20' },
             { value: '50' },
+            { value: '100' },
+            { value: '200' },
           ]}
         />
         <ul className='pagination pointer'>

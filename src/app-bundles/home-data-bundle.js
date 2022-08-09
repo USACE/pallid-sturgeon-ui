@@ -17,13 +17,19 @@ const homeDataBundle = {
       unapprovedDataSheets: {
         data: [],
         totalResults: 0,
-        pageSize: 20,
+        pageSize: 100,
         pageNumber: 0,
       },
       uncheckedDataSheets: {
         data: [],
         totalResults: 0,
-        pageSize: 50,
+        pageSize: 100,
+        pageNumber: 0,
+      },
+      bafiDataSheets: {
+        data: [],
+        totalResults: 0,
+        pageSize: 100,
         pageNumber: 0,
       },
     };
@@ -51,15 +57,16 @@ const homeDataBundle = {
               data: payload,
             },
           };
-        case 'SET_UNAPROVED_DATA_DATA':
+        case 'SET_UNAPPROVED_DATA_DATA':
           return {
             ...state,
             unapprovedDataSheets: {
               ...state.unapprovedDataSheets,
-              data: payload,
+              data: payload.items,
+              totalResults: payload.totalCount,
             },
           };
-        case 'UPDATE_UNAPROVED_DATA_STATE':
+        case 'UPDATE_UNAPPROVED_DATA_STATE':
           return {
             ...state,
             unapprovedDataSheets: {
@@ -81,6 +88,23 @@ const homeDataBundle = {
             ...state,
             uncheckedDataSheets: {
               ...state.uncheckedDataSheets,
+              ...payload,
+            },
+          };
+        case 'SET_BAFI_DATA_DATA':
+          return {
+            ...state,
+            bafiDataSheets: {
+              ...state.bafiDataSheets,
+              data: payload.items,
+              totalResults: payload.totalCount,
+            },
+          };
+        case 'UPDATE_BAFI_DATA_STATE':
+          return {
+            ...state,
+            bafiDataSheets: {
+              ...state.bafiDataSheets,
               ...payload,
             },
           };
@@ -106,6 +130,7 @@ const homeDataBundle = {
   selectUsgNoVialNumbers: state => state.home.usgNoVialNumbers,
   selectUsgNoVialNumbersData: state => state.home.usgNoVialNumbers.data,
   selectUnapprovedDataSheets: state => state.home.unapprovedDataSheets,
+  selectBafiDataSheets: state => state.home.bafiDataSheets,
   selectUncheckedDataSheets: state => state.home.uncheckedDataSheets,
   selectUncheckedDataParams: state => state.home.uncheckedDataSheets.params,
 
@@ -115,6 +140,7 @@ const homeDataBundle = {
     store.doFetchOfficeErrorLogs();
     store.doFetchUsgNoVialNumbers();
     store.doFetchUnapprovedData();
+    store.doFetchBafiData();
     store.doFetchUncheckedData();
   },
 
@@ -216,7 +242,6 @@ const homeDataBundle = {
 
   doFetchUnapprovedData: () => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'FETCH_UNAPPROVED_DATA_START' });
-
     const params = store.selectUnapprovedDataSheets();
     const { pageSize, pageNumber } = params;
 
@@ -236,6 +261,31 @@ const homeDataBundle = {
         dispatch({ type: 'FETCH_UNAPPROVED_DATA_FINISH' });
       } else {
         dispatch({ type: 'FETCH_UNAPPROVED_DATA_ERROR' });
+      }
+    });
+  },
+
+  doFetchBafiData: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'FETCH_BAFI_DATA_START' });
+    const params = store.selectUnapprovedDataSheets();
+    const { pageSize, pageNumber } = params;
+
+    const query = queryFromObject({
+      size: pageSize,
+      page: pageNumber,
+    });
+
+    const url = `/psapi/bafiDataSheets${query}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'SET_BAFI_DATA_DATA',
+          payload: body,
+        });
+        dispatch({ type: 'FETCH_BAFI_DATA_FINISH' });
+      } else {
+        dispatch({ type: 'FETCH_BAFI_DATA_ERROR' });
       }
     });
   },
@@ -271,7 +321,7 @@ const homeDataBundle = {
   },
 
   doSetHomePagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
-    dispatch({ type: 'SET_HOME_PAGINATION', payload: { pageSize, pageNumber }});
+    dispatch({ type: 'SET_HOME_PAGINATION', payload: { pageSize, pageNumber } });
     store.doHomeFetch();
   },
 

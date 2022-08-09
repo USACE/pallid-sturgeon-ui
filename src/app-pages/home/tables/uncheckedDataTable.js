@@ -45,7 +45,7 @@ const UncheckedDataTable = connect(
         <Pagination
           className='mt-2'
           itemCount={totalResults}
-          defaultItemsPerPage='50'
+          defaultItemsPerPage='100'
           handlePageChange={(pageNumber, pageSize) => doSetHomePagination({ pageSize, pageNumber })} />
       </>
     );

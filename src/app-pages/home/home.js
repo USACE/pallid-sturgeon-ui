@@ -8,6 +8,8 @@ import UncheckedDataTable from './tables/uncheckedDataTable';
 import OfficeErrorLogTable from './tables/officeErrorLog';
 import RoleFilter from 'app-components/role-filter';
 import RoleRequestSentMessage from 'app-components/role-request-sent';
+import UnapprovedDataTable from './tables/unapprovedDataTable';
+import BafiDataTable from './tables/bafiDataTable';
 
 const Home = connect(
   'doHomeFetch',
@@ -30,14 +32,24 @@ const Home = connect(
                 <UsgNoVialNumbersTable />
               </Accordion.Item>
             </RoleFilter>
-            <RoleFilter allowRoles={['OFFICE ADMIN']}>
-              <Accordion.Item headingText='Unchecked Data Sheet Records'>
-                <UncheckedDataTable />
+            <RoleFilter allowRoles={['ADMINISTRATOR']}>
+              <Accordion.Item headingText='Datasheet Records for Approval'>
+                <UnapprovedDataTable />
+              </Accordion.Item>
+            </RoleFilter>
+            <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE USER']}>
+              <Accordion.Item headingText='BAFI Datasheets'>
+                <BafiDataTable />
               </Accordion.Item>
             </RoleFilter>
             <RoleFilter allowRoles={['OFFICE ADMIN', 'OFFICE USER']}>
               <Accordion.Item headingText='Office Error Log'>
                 <OfficeErrorLogTable />
+              </Accordion.Item>
+            </RoleFilter>
+            <RoleFilter allowRoles={['OFFICE ADMIN']}>
+              <Accordion.Item headingText='Unchecked Data Sheet Records'>
+                <UncheckedDataTable />
               </Accordion.Item>
             </RoleFilter>
           </Accordion.List>
