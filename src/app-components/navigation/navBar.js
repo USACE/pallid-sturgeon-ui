@@ -19,7 +19,6 @@ const dataSummaryLinks = [
 
 const administrationLinks = [
   '/data-query',
-  '/multiple-check-by',
   '/multiple-record-approval',
   '/user-access-requests',
   '/edit-user',
@@ -83,19 +82,28 @@ const NavBar = connect(
                 allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}>
                 <NavItem href={['/']}>Home</NavItem>
                 <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
-                <NavItem
-                  href={dataEntryLinks}
-                  inlcudedLinks={[
-                    '/sites-list/create-new-site',
-                    '/sites-list/edit-site',
-                  ]}
-                >
-                  Data Entry
-                </NavItem>
-                <NavItem href={['/data-upload']}>Data Upload</NavItem>
-                <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
                 <RoleFilter
-                  allowRoles={['ADMINISTRATOR']}>
+                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
+                  <NavItem
+                    href={dataEntryLinks}
+                    inlcudedLinks={[
+                      '/sites-list/create-new-site',
+                      '/sites-list/edit-site',
+                    ]}
+                  >
+                    Data Entry
+                  </NavItem>
+                </RoleFilter>
+                <RoleFilter
+                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
+                  <NavItem href={['/data-upload']}>Data Upload</NavItem>
+                </RoleFilter>
+                <RoleFilter
+                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
+                  <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
+                </RoleFilter>
+                <RoleFilter
+                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN']}>
                   <NavItem href={administrationLinks}>Admin</NavItem>
                 </RoleFilter>
                 <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
