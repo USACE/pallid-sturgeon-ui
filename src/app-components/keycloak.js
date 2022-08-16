@@ -11,6 +11,7 @@ class Keycloak {
     this.sessionEndWarning = config.sessionEndWarning || 60;
     this.sessionEndingCallback = config.onSessionEnding;
     this.keycloakUrl = `${config.keycloakUrl}/realms/${config.realm}/protocol/openid-connect`;
+    this.idpHint = process.env.REACT_APP_IDP_HINT;
   }
 
   refreshInterval(expiresIn) {
@@ -27,7 +28,15 @@ class Keycloak {
   }
 
   authenticate() {
-    const url = `${this.config.keycloakUrl}/realms/${this.config.realm}/protocol/openid-connect/auth?response_type=code&client_id=${this.config.client}&scope=openid&redirect_uri=${this.config.redirectUrl}`;
+    const url = `${this.config.keycloakUrl}/realms/${
+      this.config.realm
+    }/protocol/openid-connect/auth?response_type=code${
+      this.idpHint ? `&kc_idp_hint=${this.idpHint}` : ''
+    }&client_id=${
+      this.config.client
+    }&scope=openid&redirect_uri=${
+      this.config.redirectUrl
+    }&nocache=${new Date().getTime()}`;
     window.location.href = url;
   }
 
