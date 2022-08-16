@@ -36,7 +36,7 @@ class Keycloak {
       this.config.client
     }&scope=openid&redirect_uri=${
       this.config.redirectUrl
-    }`;
+    }&nocache=${new Date().getTime()}`;
     window.location.href = url;
   }
 
