@@ -4,12 +4,12 @@ import Card from 'app-components/card';
 import Button from 'app-components/button';
 import TabContainer from 'app-components/tab/tabContainer';
 
-import MissouriRiverTable from 'app-pages/data-summaries/datasheet/tables/missouriRiverTable';
-import FishTable from 'app-pages/data-summaries/datasheet/tables/fishTable';
-import SupplementalTable from 'app-pages/data-summaries/datasheet/tables/supplementalTable';
-import ProcedureTable from 'app-pages/data-summaries/datasheet/tables/procedureTable';
-import SearchTable from 'app-pages/data-summaries/datasheet/tables/searchTable';
-import TelemetryTable from 'app-pages/data-summaries/datasheet/tables/telemetryTable';
+import MissouriDsTable from '../tables/missouriDsTable';
+import SearchDsTable from '../tables/searchDsTable';
+import FishDsTable from '../tables/fishDsTable';
+import SuppDsTable from '../tables/suppDsTable';
+import TelemetryDsTable from '../tables/telemetryDsTable';
+import ProcedureDsTable from '../tables/procedureDsTable';
 
 const SiteDatasheet = connect(
   'doFetchSitesDatasheets',
@@ -40,6 +40,7 @@ const SiteDatasheet = connect(
 
     const {
       missouriRiverData = {},
+      searchData = {},
     } = sitesDatasheetData;
 
     useEffect(() => {
@@ -110,41 +111,26 @@ const SiteDatasheet = connect(
             <TabContainer
               tabs={[
                 {
-                  title: 'Missouri River',
-                  content: <>
-                    <Button
-                      isOutline
-                      size='small'
-                      variant='info'
-                      text='Create Missouri River Datasheet'
-                      title='Create Missouri River Datasheet'
-                      className='float-right mr-2'
-                    // handleClick={() => doDataEntrySetActiveType('fish')}
-                    />
-                    <MissouriRiverTable rowData={missouriRiverData.items} />
-                  </>,
+                  title: `Missouri River (${missouriRiverData.totalCount ? missouriRiverData.totalCount : '0'})`,
+                  content: <MissouriDsTable rowData={missouriRiverData.items} />,
                 }, {
                   title: 'Fish',
-                  // content: <FishTable rowData={fishData.items} />,
-                  isDisabled: true,
+                  content: <FishDsTable />,
                 }, {
                   title: 'Supplemental',
-                  // content: <SupplementalTable rowData={suppData.items} />,
-                  isDisabled: true,
+                  content: <SuppDsTable />,
                 },
                 {
                   title: 'Telemetry',
-                  // content: <TelemetryTable rowData={telemetryData.items} />,
-                  isDisabled: true,
+                  content: <TelemetryDsTable />,
                 },
                 {
                   title: 'Procedure',
-                  // content: <ProcedureTable rowData={procedureData.items} />,
-                  isDisabled: true,
+                  content: <ProcedureDsTable />,
                 },
                 {
-                  title: 'Search Effort',
-                  // content: <SearchTable rowData={searchData.items} />
+                  title: `Search Effort (${searchData.totalCount ? searchData.totalCount : '0'})`,
+                  content: <SearchDsTable rowData={searchData.items} />
                 },
               ]}
               onTabChange={(_str, ind) => setCurrentTab(ind)}

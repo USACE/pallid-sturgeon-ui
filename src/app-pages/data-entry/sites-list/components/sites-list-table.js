@@ -25,6 +25,18 @@ const SitesListTable = connect(
   }) => {
     const { projects, seasons, bends, segments, fieldOffices, sampleUnitTypes } = domains;
 
+    const cellStyle = (params) => {
+      if (params.value === 8665) {
+        return {
+          backgroundColor: '#aaffaa',
+        };
+      } else {
+        return {
+          backgroundColor: '',
+        };
+      }
+    };
+
     return (
       <div className='pt-3'>
         <DownloadAsCSV filePrefix='site-table' content={sitesData} />
@@ -57,7 +69,7 @@ const SitesListTable = connect(
               cellRenderer='editCellRenderer'
               editable={false}
             />
-            <AgGridColumn field='siteId' cellRenderer='siteIdCellRenderer' />
+            <AgGridColumn field='siteId' cellRenderer='siteIdCellRenderer' cellStyle={cellStyle} />
             <AgGridColumn field='fieldOffice' cellEditor='fieldOfficeEditor' cellEditorParams={{ fieldOffices }} />
             <AgGridColumn field='project' cellEditor='projectEditor' cellEditorParams={{ projects }} />
             <AgGridColumn field='segment' cellEditor='segmentEditor' cellEditorParams={{ segments }} />

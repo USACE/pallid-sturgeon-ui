@@ -46,23 +46,21 @@ const sitesDatasheetBundle = {
   selectSitesDatasheetParams: state => state.sitesDatasheet.params,
   selectSitesDatasheetData: state => state.sitesDatasheet.data,
 
-  doFetchSitesDatasheets: (siteId) => ({ dispatch, store, apiGet }) => {
+  doFetchSitesDatasheets: () => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'SITES_DATASHEET_FETCH_DATA_START' });
 
     const uris = {
       missouriRiverData: '/missouriDatasheets',
-      // fishData: '/fishDataSummary',
-      // suppData: '/suppDataSummary',
-      // telemetryData: '/telemetryDataSummary',
-      // procedureData: '/procedureDataSummary',
-      // searchData: '/',
+      fishData: '/fishDataSummary',
+      suppData: '/suppDataSummary',
+      telemetryData: '/telemetryDataSummary',
+      procedureData: '/procedureDataSummary',
+      searchData: '/searchDatasheets',
     };
 
     const uriKeys = Object.keys(uris);
     const uriValues = Object.values(uris);
-    console.log('uriValues: ', uriValues);
     const { tab, ...params } = store.selectSitesDatasheetParams();
-    console.log('tab: ', tab);
     const size = store.selectSitesDatasheetPageSize();
     const number = store.selectSitesDatasheetPageNumber();
 
@@ -70,11 +68,9 @@ const sitesDatasheetBundle = {
       ...params,
       size,
       number,
-      // siteId,
     });
 
     const url = `/psapi${uriValues[tab]}${query}`;
-    // const url = `/psapi/missouriDatasheets${query}`;
 
     apiGet(url, (_err, body) => {
       if (!_err) {

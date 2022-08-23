@@ -33,7 +33,6 @@ export default createRouteBundle(
     '/edit-user': EditUser,
     '/error-log': ErrorLog,
     '/find-data-sheet': DataEntry,
-    '/find-data-sheet/edit-data-sheet': EditDataSheet,
     '/genetics-card-summary': GeneticCard,
     '/last-location': LastLocation,
     '/logout': Logout,
@@ -46,7 +45,11 @@ export default createRouteBundle(
     '/sites-list': SitesList,
     '/sites-list/create-new-site': CreateNewSite,
     '/sites-list/datasheet': SiteDatasheet,
+    '/sites-list/datasheet/:datasheet/:formType': EditDataSheet,
     '/tag-replacement': TagReplacement,
     '*': NotFound,
+  },
+  {
+    routeInfoSelector: 'selectPathnameMinusHomepage',
   }
 );
