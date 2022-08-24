@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
@@ -6,15 +6,17 @@ import Card from 'app-components/card';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import { searchTypeOptions } from './_shared/selectHelper';
 
-const reduceFormState = (state, action) => {
+const reducer = (state, action) => {
   switch (action.type) {
-    case 'update':
+    case 'UPDATE_INPUT':
       return {
         ...state,
         [action.field]: action.value,
       };
+    case 'INITIALIZE_FORM':
+      return Object.assign({}, state, action.payload);
     default:
-      throw new Error();
+      return state;
   }
 };
 
@@ -24,74 +26,11 @@ const SearchEffortForm = connect(
     dataEntryData,
     edit
   }) => {
-    const [formData, dispatch] = useReducer(reduceFormState, edit ? dataEntryData : {});
-    const formComplete = edit ? !!defaultComplete : false;
+    const [state, dispatch] = useReducer(reducer, {});
 
-    const {
-      bendRiverMile, // *
-      bendrn, // *
-      complete: defaultComplete,
-      fieldOffice,
-      project,
-      sampleUnit, // *
-      sampleUnitType, // *
-      season,
-      segment,
-      year, // *
-      checkby,
-      comments,
-      complete,
-      conductivity,
-      depth1,
-      depth2,
-      depth3,
-      discharge,
-      distance,
-      do: doValue,
-      editInitials,
-      gravel,
-      micro,
-      netrivermile,
-      noTurbidity,
-      noVelocity,
-      qc,
-      recorder,
-      riverstage,
-      sand,
-      setdate,
-      silt,
-      startLatitude,
-      startLongitude,
-      startTime,
-      stopLatitude,
-      stopLongitude,
-      stopTime,
-      structurenumber,
-      subsample,
-      subsamplepass,
-      temp,
-      turbidity,
-      u1,
-      u2,
-      u3,
-      u4,
-      u5,
-      usgs,
-      velocity02or06_1,
-      velocity02or06_2,
-      velocity02or06_3,
-      velocity08_1,
-      velocity08_2,
-      velocity08_3,
-      velocitybot1,
-      velocitybot2,
-      velocitybot3,
-      width,
-    } = formData;
-
-    const handleChange = (e) => {
+    const handleChange = e => {
       dispatch({
-        type: 'update',
+        type: 'UPDATE_INPUT',
         field: e.target.name,
         value: e.target.value
       });
@@ -99,11 +38,41 @@ const SearchEffortForm = connect(
 
     const handleSelect = (field, val) => {
       dispatch({
-        type: 'update',
+        type: 'UPDATE_INPUT',
         field: field,
         value: val
       });
     };
+
+    // TODO: Complete this function
+    const doSave = () => {
+      if (edit) {
+        // doUpdate
+      } else {
+        // doPost
+      }
+    };
+
+    const saveIsDisabled = !(
+      !!state['searchDate'] &&
+      !!state['recorder'] &&
+      !!state['searchTypeCode'] &&
+      !!state['startTime'] &&
+      !!state['startLatitude'] &&
+      !!state['startLongitude'] &&
+      !!state['stopTime'] &&
+      !!state['stopLatitude'] &&
+      !!state['stopLongitude'] 
+    );
+
+    useEffect(() => {
+      if (edit) {
+        dispatch({
+          type: 'INITIALIZE_FORM',
+          payload: dataEntryData,
+        });
+      }
+    }, [edit, dataEntryData]);
 
     return (
       <>
@@ -118,12 +87,12 @@ const SearchEffortForm = connect(
             {edit && <>
               <div className='row'>
                 <div className='col-3'>
-                  <b className='mr-3'>Data Sheet Id:</b>
-                  {mrId || '--'}
+                  <b className='mr-3'>Datasheet Id:</b>
+                  {/* {mrId || '--'} */}
                 </div>
                 <div className='col-3'>
                   <b className='mr-2'>Field Id:</b>
-                  {mrFid || '--'}
+                  {/* {mrFid || '--'} */}
                 </div>
               </div>
               <hr />
@@ -132,42 +101,42 @@ const SearchEffortForm = connect(
             <div className='row mt-2'>
               <div className='col-2'>
                 <b className='mr-2'>Year:</b>
-                {year || '--'}
+                {/* {year || '--'} */}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Field Office:</b>
-                {fieldOffice || '--'}
+                {/* {fieldOffice || '--'} */}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Project:</b>
-                {project || '--'}
+                {/* {project || '--'} */}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Segment:</b>
-                {segment || '--'}
+                {/* {segment || '--'} */}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Season:</b>
-                {season || '--'}
+                {/* {season || '--'} */}
               </div>
             </div>
             <hr />
             <div className='row mt-2'>
               <div className='col-2'>
                 <b className='mr-2'>Sample Unit Type:</b>
-                {sampleUnitType || '--'}
+                {/* {sampleUnitType || '--'} */}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Sample Unit:</b>
-                {sampleUnit || '--'}
+                {/* {sampleUnit || '--'} */}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>R/N:</b>
-                {bendrn || '--'}
+                {/* {bendrn || '--'} */}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Bend River Mile:</b>
-                {bendRiverMile || '--'}
+                {/* {bendRiverMile || '--'} */}
               </div>
             </div>
           </Card.Body>
@@ -180,17 +149,17 @@ const SearchEffortForm = connect(
                 <div className='row'>
                   <div className='col-4 pl-4'>
                     <label><small>Checked By</small></label>
-                    <div>{checkby || '--'}</div>
+                    {/* <div>{checkby || '--'}</div> */}
                   </div>
                   <div className='col-4 text-center'>
                     <label><small>Approved?</small></label>
                     <input
-                      disabled={formComplete}
+                      // disabled={formComplete}
                       type='checkbox'
-                      title='No Turbidity Field'
+                      title='approved'
                       className='form-control mt-1'
                       style={{ height: '15px', width: '15px', margin: 'auto' }}
-                      checked={!!complete}
+                      // checked={!!complete}
                       // onClick={() => dispatch({ type: 'update', field: 'complete', value: !!complete ? '' : '1' })}
                       // onClick={handleSelect('complete', !!complete ? '' : '1')}
                       onChange={() => { }}
@@ -201,11 +170,11 @@ const SearchEffortForm = connect(
               <div className='col-1'>
                 <label><small>QC</small></label>
                 <input
-                  disabled={formComplete}
+                  // disabled={formComplete}
                   type='text'
-                  title='No Turbidity Field'
+                  title='qc'
                   className='form-control mt-1'
-                  value={qc}
+                // value={qc}
                 // onChange={e => dispatch({ type: 'update', field: 'qc', value: e.target.value })}
                 // onChange={handleChange}
                 />
@@ -218,16 +187,14 @@ const SearchEffortForm = connect(
                     className='mr-2'
                     variant='secondary'
                     text='Cancel'
-                    href='/find-data-sheet'
+                    // href='/find-data-sheet'
                   />
-                  {!formComplete && (
-                    <Button
-                      size='small'
-                      variant='success'
-                      text='Save'
-                    // handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                    />
-                  )}
+                  <Button
+                    size='small'
+                    variant='success'
+                    text='Save'
+                  // handleClick={() => doUpdateMoRiverDataEntry(formData)}
+                  />
                 </div>
               </div>
             </div>
@@ -239,54 +206,57 @@ const SearchEffortForm = connect(
           <Card.Body>
             <Row>
               <div className='col-2'>
-                <Input name='searchdate' label='SearchDate' type='date' />
+                <Input name='searchDate' label='Search Date' type='date' value={state['searchDate']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='recorder' label='Recorder Initials' type='text' />
+                <Input name='recorder' label='Recorder Initials' value={state['recorder']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
-                  name='searchType'
+                  name='searchTypeCode'
                   label='Search Type'
                   options={searchTypeOptions}
+                  value={state['searchTypeCode']}
+                  onChange={val => handleSelect('searchTypeCode', val)}
+                  isRequired
                 />
               </div>
               <div className='col-2'>
-                <Input name='temp' label='Temp (C)' />
+                <Input name='temp' label='Temp (C)' value={state['temp']} onChange={handleChange} />
               </div>
               <div className='col-2'>
-                <Input name='conductivity' label='Conductivity' />
+                <Input name='conductivity' label='Conductivity' value={state['conductivity']} onChange={handleChange} />
               </div>
             </Row>
             <Row>
               <div className='col-2'>
-                <Input name='startTime' label='Start Time' />
+                <Input name='startTime' label='Start Time' value={state['startTime']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='startLatitude' label='Start Latitude' />
+                <Input name='startLatitude' label='Start Latitude' value={state['startLatitude']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='startLongitude' label='Start Longitude' />
+                <Input name='startLongitude' label='Start Longitude' value={state['startLongitude']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='stopTime' label='Stop Time' />
+                <Input name='stopTime' label='Stop Time' value={state['stopTime']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='stopLatitude' label='Stop Latitude' />
+                <Input name='stopLatitude' label='Stop Latitude' value={state['stopLatitude']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='stopLongitude' label='Stop Longitude' />
+                <Input name='stopLongitude' label='Stop Longitude' value={state['stopLongitude']} onChange={handleChange} isRequired />
               </div>
             </Row>
-            <Row>
+            {edit && (<Row>
               <div className='col-5'>
-                <TextArea name='editComments' label='Edit Comments' />
+                <TextArea name='editComments' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} />
               </div>
               <div className='col-2'>
-                <Input name='editInitials' label='Edit Initials' />
+                <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} />
               </div>
-            </Row>
-            <div className='row'>
+            </Row>)}
+            <Row>
               <div className='col-2 offset-10'>
                 <div className='float-right'>
                   <Button
@@ -305,17 +275,16 @@ const SearchEffortForm = connect(
                     // handleClick={() => doUpdateMoRiverDataEntry(formData)}
                     />
                   )}
-                  {!formComplete && (
-                    <Button
-                      size='small'
-                      variant='success'
-                      text={edit ? 'Apply Changes' : 'Save'}
-                    // handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                    />
-                  )}
+                  <Button
+                    size='small'
+                    variant='success'
+                    text={edit ? 'Apply Changes' : 'Save'}
+                    isDisabled={saveIsDisabled}
+                  // handleClick={() => doUpdateMoRiverDataEntry(formData)}
+                  />
                 </div>
               </div>
-            </div>
+            </Row>
           </Card.Body>
         </Card>
       </>

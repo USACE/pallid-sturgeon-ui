@@ -43,8 +43,8 @@ export const TextArea = ({ value, name, label, onChange, rowCount = 3, className
   );
 };
 
-export const SelectCustomLabel = ({ name, label, required, options, value, onChange, helperText, helperDirection, className, defaultValue, isDisabled = false }) => {
-  const showRequired = required && !value;
+export const SelectCustomLabel = ({ name, label, options, value, onChange, helperText, helperDirection, className, defaultValue, isRequired, isDisabled = false }) => {
+  const showRequired = isRequired && !value;
 
   if (helperText) {
     return (

@@ -25,7 +25,6 @@ const reducer = (state, action) => {
 
 const SupplementalForm = connect(
   'selectDataEntryData',
-  'selectDataEntryLastParams',
   ({
     dataEntryData,
     edit,
@@ -37,7 +36,7 @@ const SupplementalForm = connect(
 
     const handleChange = (e) => {
       dispatch({
-        type: 'update',
+        type: 'UPDATE_INPUT',
         field: e.target.name,
         value: e.target.value
       });
@@ -45,7 +44,7 @@ const SupplementalForm = connect(
 
     const handleSelect = (field, val) => {
       dispatch({
-        type: 'update',
+        type: 'UPDATE_INPUT',
         field: field,
         value: val
       });
@@ -314,7 +313,6 @@ const SupplementalForm = connect(
             <Row>
               <div className='col-4 offset-8'>
                 <div className='float-right'>
-
                   <Button
                     size='small'
                     className='mr-2'
@@ -322,7 +320,6 @@ const SupplementalForm = connect(
                     text={edit ? 'Apply Changes' : 'Save'}
                   // handleClick={() => doUpdateMoRiverDataEntry(formData)}
                   />
-
                   <Button
                     isOutline
                     size='small'
