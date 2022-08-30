@@ -451,3 +451,29 @@ export const u7Options = [
   { value: 'FP', text: 'Floodplain' },
   { value: 'SE', text: 'Transmitter Seeding' },
 ];
+
+// Search Effort Form Select Options
+export const searchTypeOptions = [
+  { value: 'BS', text: 'BS' },
+  { value: 'IN', text: 'IN' },
+  { value: 'RS', text: 'RS' },
+  { value: 'TA', text: 'TA' },
+];
+
+// Telemetry Form Select Options
+export const frequencyIdOptions = [
+  { value: 'A69-1602', text: 'A69-1602' },
+  { value: 'R_149.760_3', text: 'R_149.760_3' },
+  { value: 'R_149.620_3', text: 'R_149.620_3' },
+  { value: 'A_180.0', text: 'A_180.0' },
+  { value: 'A_76.8_1.1.4', text: 'A_76.8_1.1.4' },
+  { value: 'A_200_1.14.1', text: 'A_200_1.14.1' },
+  { value: 'A_69.0', text: 'A_69.0' },
+  { value: 'A69-1601', text: 'A69-1601' },
+];
+
+export const positionConfidenceOptions = [
+  { value: 1, text: '1' },
+  { value: 2, text: '2' },
+  { value: 3, text: '3' },
+];

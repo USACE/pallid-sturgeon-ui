@@ -94,7 +94,7 @@ export default {
           if (!ignoreToast) {
             tSuccess(toastId, 'Datasheet found!');
           }
-          store.doUpdateUrl('/find-data-sheet/edit-data-sheet');
+          store.doUpdateUrl('/sites-list/datasheet/missouriRiver/edit');
         }
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_FINISHED' });
       } else {
@@ -127,7 +127,7 @@ export default {
           tWarning(toastId, 'No supplemental datasheets.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
-          store.doUpdateUrl('/find-data-sheet/edit-data-sheet');
+          store.doUpdateUrl('/sites-list/datasheet/supplemental/edit');
         }
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_FINISHED' });
       } else {
@@ -137,26 +137,6 @@ export default {
     });
   },
 
-  doFetchSupplementalDataByMrId: () => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_BY_MRID_START' });
-
-    const data = store.selectDataEntryData();
-    const { mrId } = data;
-
-    const url = `/psapi/supplementalDataEntry?mrId=${mrId}`;
-
-    apiGet(url, (err, body) => {
-      if (!err) {
-        dispatch({
-          type: 'DATA_ENTRY_UPDATE_SUPPLEMENTAL_DATA',
-          payload: body,
-        });
-        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_BY_MRID_FINISHED' });
-      } else {
-        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_BY_MRID_ERROR', payload: err });
-      }      
-    });
-  },
 
   doFetchFishDataEntry: (params) => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'FISH_DATA_ENTRY_FETCH_START', payload: params });
@@ -178,7 +158,7 @@ export default {
           tError(toastId, 'No datasheets found. Please try again.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
-          store.doUpdateUrl('/find-data-sheet/edit-data-sheet');
+          store.doUpdateUrl('/sites-list/datasheet/fish/edit');
         }
         dispatch({ type: 'FISH_DATA_ENTRY_FETCH_FINISHED' });
       } else {

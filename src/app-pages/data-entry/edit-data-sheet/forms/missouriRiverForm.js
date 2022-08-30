@@ -4,7 +4,7 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import Select from 'app-components/select';
-import { gearCodeOptions, macroOptions, mesoOptions, microStructureOptions, setSite_1_2Options, setSite_3Options, u7Options } from './helper';
+import { gearCodeOptions, macroOptions, mesoOptions, microStructureOptions, setSite_1_2Options, setSite_3Options, u7Options } from './_shared/selectHelper';
 
 const reduceFormState = (state, action) => {
   switch (action.type) {
@@ -28,6 +28,7 @@ const MissouriRiverForm = connect(
     doUpdateMoRiverDataEntry,
     doDataEntrySetActiveType,
     dataEntryData,
+    edit,
   }) => {
     const {
       bendRiverMile, // *
@@ -61,7 +62,7 @@ const MissouriRiverForm = connect(
       year, // *
     } = dataEntryData;
 
-    const [formData, dispatch] = useReducer(reduceFormState, dataEntryData);
+    const [formData, dispatch] = useReducer(reduceFormState, edit ? dataEntryData : {});
 
     const {
       checkby,
@@ -115,40 +116,48 @@ const MissouriRiverForm = connect(
       width,
     } = formData;
 
-    const formComplete = !!defaultComplete;
-  
+    const formComplete = edit ? !!defaultComplete : false;
+
+    const handleChange = (e) => {
+      dispatch({ 
+        type: 'update', 
+        field: e.target.name, 
+        value: e.target.value 
+      });
+    };
+
+    const handleSelect = (field, val) => {
+      dispatch({
+        type: 'update', 
+        field: field, 
+        value: val
+      });
+    };
+
     return (
       <>
         <div className='row'>
           <div className='col-9'>
-            <h4>Missouri River Data Sheets - Edit Data</h4>
-          </div>
-          <div className='col-3'>
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              text='Fish Data Sheets'
-              title='Go to associated fish datasheets'
-              className='float-right'
-              handleClick={() => doDataEntrySetActiveType('fish')}
-            />
+            <h4>{edit ? 'Edit' : 'Create'} Missouri River Datasheet</h4>
           </div>
         </div>
         {/* Top Level Info */}
         <Card className='mt-3'>
           <Card.Body>
-            <div className='row'>
-              <div className='col-3'>
-                <b className='mr-3'>Data Sheet Id:</b>
-                {mrId || '--'}
+            {edit && <>
+              <div className='row'>
+                <div className='col-3'>
+                  <b className='mr-3'>Data Sheet Id:</b>
+                  {mrId || '--'}
+                </div>
+                <div className='col-3'>
+                  <b className='mr-2'>Field Id:</b>
+                  {mrFid || '--'}
+                </div>
               </div>
-              <div className='col-3'>
-                <b className='mr-2'>Field Id:</b>
-                {mrFid || '--'}
-              </div>
-            </div>
-            <hr />
+              <hr />
+            </>
+            }
             <div className='row mt-2'>
               <div className='col-2'>
                 <b className='mr-2'>Year:</b>
@@ -212,7 +221,7 @@ const MissouriRiverForm = connect(
                       style={{ height: '15px', width: '15px', margin: 'auto' }}
                       checked={!!complete}
                       onClick={() => dispatch({ type: 'update', field: 'complete', value: !!complete ? '' : '1' })}
-                      onChange={() => {}}
+                      onChange={() => { }}
                     />
                   </div>
                 </div>
@@ -253,7 +262,7 @@ const MissouriRiverForm = connect(
         </Card>
         {/* Form Fields */}
         <Card className='mt-3'>
-          <Card.Header text='Missouri River Data Sheet Form' />
+          <Card.Header text='Missouri River Datasheet Form' />
           <Card.Body>
             <div className='row'>
               <div className='col-2'>
@@ -802,7 +811,7 @@ const MissouriRiverForm = connect(
                 </div>
               </div>
             </div>
-            
+
             <div className='row mt-5'>
               <div className='col-5'>
                 <div className='row'>
@@ -841,7 +850,7 @@ const MissouriRiverForm = connect(
                       style={{ height: '15px', width: '15px', margin: 'auto' }}
                       checked={!!noTurbidity}
                       onClick={() => dispatch({ type: 'update', field: 'noTurbidity', value: !noTurbidity })}
-                      onChange={() => {}}
+                      onChange={() => { }}
                     />
                   </div>
                 </div>
@@ -1078,7 +1087,7 @@ const MissouriRiverForm = connect(
                   style={{ height: '15px', width: '15px', margin: 'auto' }}
                   checked={!!noVelocity}
                   onClick={() => dispatch({ type: 'update', field: 'noVelocity', value: !noVelocity })}
-                  onChange={() => {}}
+                  onChange={() => { }}
                 />
               </div>
               <div className='col-5'>

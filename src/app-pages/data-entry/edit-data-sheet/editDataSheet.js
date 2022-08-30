@@ -3,23 +3,29 @@ import { connect } from 'redux-bundler-react';
 
 import FishForm from './forms/fishForm';
 import MissouriRiverForm from './forms/missouriRiverForm';
+import SearchEffortForm from './forms/searchEffortForm';
 import SupplementalForm from './forms/supplementalForm';
+import TelemetryForm from './forms/telemetryForm';
 
 const EditDataSheet = connect(
-  'selectDataEntry',
+  'selectRouteParams',
   ({
-    dataEntry,
+    routeParams,
   }) => {
-    const { activeType, lastParams } = dataEntry;
+    const { datasheet, formType } = routeParams;
 
     const getForm = () => {
-      switch(activeType) {
+      switch(datasheet) {
         case 'missouriRiver':
-          return <MissouriRiverForm />;
+          return <MissouriRiverForm edit={formType === 'edit' ? true : false} />;
         case 'fish':
           return <FishForm />;
         case 'supplemental':
-          return <SupplementalForm />;
+          return <SupplementalForm edit={formType === 'edit' ? true : false} />;
+        case 'searchEffort':
+          return <SearchEffortForm edit={formType === 'edit' ? true : false} />;
+        case 'telemetry':
+          return <TelemetryForm edit={formType === 'edit' ? true : false} />;
         default:
           return <>Unknown data type.</>;
       }

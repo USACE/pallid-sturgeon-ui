@@ -164,8 +164,6 @@ export default {
           tError(toastId, 'Error searching for site. Please try again.');
         }
       }
-
     });
-
   },
 };
