@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Card from 'app-components/card/card';
-import FindDataSheet from './components/find-data-sheet';
+import FindDataSheet from './pages/find-data-sheet';
 
 const DataSheets = () => (
   <div className='container-fluid'>

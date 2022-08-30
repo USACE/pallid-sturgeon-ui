@@ -21,7 +21,7 @@ import LastLocation from 'app-pages/data-summaries/lastLocation';
 import TagReplacement from 'app-pages/data-summaries/tagReplacement';
 import EditUser from 'app-pages/admin/editUser';
 import MultipleRecordApproval from 'app-pages/admin/multipleRecordApproval';
-import SiteDatasheet from 'app-pages/data-entry/datasheets/components/site-datasheet';
+import SiteDatasheet from 'app-pages/data-entry/datasheets/pages/site-datasheet';
 
 export default createRouteBundle(
   {
@@ -49,7 +49,4 @@ export default createRouteBundle(
     '/tag-replacement': TagReplacement,
     '*': NotFound,
   },
-  {
-    routeInfoSelector: 'selectPathnameMinusHomepage',
-  }
 );

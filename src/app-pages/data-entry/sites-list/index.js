@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from 'app-components/card';
-import NewSite from './components/new-site';
 import SitesList from './components/sites-list';
 
 import '../dataentry.scss';

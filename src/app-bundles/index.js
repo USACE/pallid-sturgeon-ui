@@ -24,7 +24,6 @@ import rolesBundle from './roles-bundle';
 import fieldOfficesBundle from './field-offices-bundle';
 import usersBundle from './users-bundle';
 import sitesDatasheetBundle from './sites-datasheet-bundle';
-import nestedUrlBundle from './nest-url-bundle';
 
 // Mock Token User
 const mockTokenApplicationAdmin =
@@ -64,5 +63,4 @@ export default composeBundles(
   fieldOfficesBundle,
   usersBundle,
   sitesDatasheetBundle,
-  nestedUrlBundle,
 );

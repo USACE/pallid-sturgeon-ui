@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
+
 import Card from 'app-components/card';
 import TabContainer from 'app-components/tab/tabContainer';
+import DataHeader from '../components/dataHeader';
 
 import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
 
 const SiteDatasheet = connect(
-  'doFetchSitesDatasheets',
-  'doSetSitesDatasheetPagination',
   'doUpdateSitesDatasheetParams',
   'selectSitesDatasheetData',
   'selectSitesData',
   ({
-    doFetchSitesDatasheets,
-    doSetSitesDatasheetPagination,
     doUpdateSitesDatasheetParams,
     sitesDatasheetData,
     sitesData
@@ -56,55 +54,19 @@ const SiteDatasheet = connect(
           </div>
         </div>
         {/* Top Level Info */}
-        <Card className='mb-3'>
-          <Card.Body>
-            <div className='row mt-2'>
-              <div className='col-2'>
-                <b className='mr-2'>Site ID:</b>
-                {siteId || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Year:</b>
-                {year || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Field Office:</b>
-                {fieldOfficeDescription || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Project:</b>
-                {projectDescription || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Segment:</b>
-                {segmentDescription || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Season:</b>
-                {seasonDescription || '--'}
-              </div>
-            </div>
-            <hr />
-            <div className='row mt-2'>
-              <div className='col-2'>
-                <b className='mr-2'>Sample Unit Type:</b>
-                {sampleUnitType || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Sample Unit:</b>
-                {bend || bend === 0 ? bend : '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>R/N:</b>
-                {bendrn || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Bend River Mile:</b>
-                {bendRiverMile || '--'}
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
+        <DataHeader 
+          type='Site'
+          id={siteId} 
+          year={year} 
+          fieldOffice={fieldOfficeDescription}
+          project={projectDescription}
+          segment={segmentDescription}
+          season={seasonDescription}
+          sampleUnitType={sampleUnitType}
+          sampleUnit={bend}
+          bendrn={bendrn}
+          bendRiverMile={bendRiverMile}
+        />
         {/* Tab Container */}
         <Card>
           <Card.Header text='Datasheets' />
