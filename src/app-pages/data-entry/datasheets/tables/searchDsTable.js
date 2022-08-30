@@ -36,28 +36,16 @@ const SearchDsTable = connect(
       />
       <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
         <AgGridReact
-          suppressClickEdit
           rowHeight={35}
           rowData={rowData}
-          editType='fullRow'
           // onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
           defaultColDef={{
             width: 150,
-            editable: true,
-            lockPinned: true,
           }}
           frameworkComponents={{
             editCellRenderer: EditCellRenderer,
           }}
         >
-          <AgGridColumn
-            field='edit'
-            width={90}
-            pinned
-            lockPosition
-            cellRenderer='editCellRenderer'
-            editable={false}
-          />
           <AgGridColumn field='seId' headerName='Search ID' sortable unSortIcon />
           <AgGridColumn field='searchTypeCode' sortable unSortIcon />
           <AgGridColumn field='startTime' sortable unSortIcon />

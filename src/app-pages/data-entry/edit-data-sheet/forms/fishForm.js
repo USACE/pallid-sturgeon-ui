@@ -193,7 +193,7 @@ const FishForm = connect(
             <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
               <AgGridReact
                 defaultColDef={{
-                  width: 120,
+                  width: 100,
                   editable: true,
                   lockPinned: true,
                 }}
@@ -216,23 +216,18 @@ const FishForm = connect(
                 />
                 <AgGridColumn field='id' headerName='Field ID' />
                 <AgGridColumn field='fid' headerName='F ID' />
-                <AgGridColumn field='panelhook' headerName='Panel Hook' />
+                <AgGridColumn field='panelHook' headerName='Panel Hook' />
                 <AgGridColumn field='species' cellEditor='speciesEditor' />
                 <AgGridColumn field='length' />
                 <AgGridColumn field='weight' />
-                <AgGridColumn field='fishcount' headerName='Count' />
-                <AgGridColumn field='ftprefix' headerName='FT Prefix' />
-                {/* <AgGridColumn field='floytag' /> */}
-                <AgGridColumn field='ftmr' headerName='M/R' />
+                <AgGridColumn field='countF' headerName='Count' />
+                <AgGridColumn field='ftPrefix' headerName='FT Prefix' />
+                <AgGridColumn field='mR' headerName='M/R' />
                 <AgGridColumn field='ftnum' headerName='Genetics Vial #' />
-                {/* <AgGridColumn field='condition' /> */}
                 <AgGridColumn field='finCurl' />
                 <AgGridColumn field='otolith' />
-                <AgGridColumn field='rayspine' headerName='Ray Spine' />
-                {/* <AgGridColumn field='kn' /> */}
-                {/* <AgGridColumn field='wr' /> */}
+                <AgGridColumn field='raySpine' headerName='Ray Spine' />
                 <AgGridColumn field='scale' />
-                {/* <AgGridColumn field='rsd' /> */}
                 <AgGridColumn field='bait' />
               </AgGridReact>
             </div>

@@ -51,10 +51,6 @@ const sitesDatasheetBundle = {
 
     const uris = {
       missouriRiverData: '/missouriDatasheets',
-      fishData: '/fishDataSummary',
-      suppData: '/suppDataSummary',
-      telemetryData: '/telemetryDataSummary',
-      procedureData: '/procedureDataSummary',
       searchData: '/searchDatasheets',
     };
 

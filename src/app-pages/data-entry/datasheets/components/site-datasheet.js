@@ -1,15 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import Card from 'app-components/card';
-import Button from 'app-components/button';
 import TabContainer from 'app-components/tab/tabContainer';
 
 import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
-import FishDsTable from '../tables/fishDsTable';
-import SuppDsTable from '../tables/suppDsTable';
-import TelemetryDsTable from '../tables/telemetryDsTable';
-import ProcedureDsTable from '../tables/procedureDsTable';
 
 const SiteDatasheet = connect(
   'doFetchSitesDatasheets',
@@ -26,14 +21,16 @@ const SiteDatasheet = connect(
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
 
+    console.log('sitedata: ', sitesData);
     const {
       siteId,
-      siteYear,
-      fieldOffice,
-      project,
-      segment,
-      season,
-      sampleUnitTypeCode,
+      year,
+      fieldOfficeDescription,
+      projectDescription,
+      segmentDescription,
+      seasonDescription,
+      sampleUnitType,
+      bend,
       bendrn,
       bendRiverMile
     } = sitesData[0];
@@ -63,35 +60,39 @@ const SiteDatasheet = connect(
           <Card.Body>
             <div className='row mt-2'>
               <div className='col-2'>
+                <b className='mr-2'>Site ID:</b>
+                {siteId || '--'}
+              </div>
+              <div className='col-2'>
                 <b className='mr-2'>Year:</b>
-                {siteYear || '--'}
+                {year || '--'}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Field Office:</b>
-                {fieldOffice || '--'}
+                {fieldOfficeDescription || '--'}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Project:</b>
-                {project || '--'}
+                {projectDescription || '--'}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Segment:</b>
-                {segment || '--'}
+                {segmentDescription || '--'}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Season:</b>
-                {season || '--'}
+                {seasonDescription || '--'}
               </div>
             </div>
             <hr />
             <div className='row mt-2'>
               <div className='col-2'>
                 <b className='mr-2'>Sample Unit Type:</b>
-                {sampleUnitTypeCode || '--'}
+                {sampleUnitType || '--'}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>Sample Unit:</b>
-                {'--'}
+                {bend || bend === 0 ? bend : '--'}
               </div>
               <div className='col-2'>
                 <b className='mr-2'>R/N:</b>
@@ -113,20 +114,6 @@ const SiteDatasheet = connect(
                 {
                   title: `Missouri River (${missouriRiverData.totalCount ? missouriRiverData.totalCount : '0'})`,
                   content: <MissouriDsTable rowData={missouriRiverData.items} />,
-                }, {
-                  title: 'Fish',
-                  content: <FishDsTable />,
-                }, {
-                  title: 'Supplemental',
-                  content: <SuppDsTable />,
-                },
-                {
-                  title: 'Telemetry',
-                  content: <TelemetryDsTable />,
-                },
-                {
-                  title: 'Procedure',
-                  content: <ProcedureDsTable />,
                 },
                 {
                   title: `Search Effort (${searchData.totalCount ? searchData.totalCount : '0'})`,

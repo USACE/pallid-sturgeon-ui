@@ -25,17 +25,9 @@ const SitesListTable = connect(
   }) => {
     const { projects, seasons, bends, segments, fieldOffices, sampleUnitTypes } = domains;
 
-    const cellStyle = (params) => {
-      if (params.value === 8665) {
-        return {
-          backgroundColor: '#aaffaa',
-        };
-      } else {
-        return {
-          backgroundColor: '',
-        };
-      }
-    };
+    const cellStyle = (params) => ({
+      backgroundColor: params.data.bkgColor,
+    });
 
     return (
       <div className='pt-3'>
@@ -47,6 +39,7 @@ const SitesListTable = connect(
             defaultColDef={{
               editable: true,
               lockPinned: true,
+              width: 150
             }}
             rowData={sitesData}
             editType='fullRow'
@@ -69,12 +62,14 @@ const SitesListTable = connect(
               cellRenderer='editCellRenderer'
               editable={false}
             />
-            <AgGridColumn field='siteId' cellRenderer='siteIdCellRenderer' cellStyle={cellStyle} />
-            <AgGridColumn field='fieldOffice' cellEditor='fieldOfficeEditor' cellEditorParams={{ fieldOffices }} />
-            <AgGridColumn field='project' cellEditor='projectEditor' cellEditorParams={{ projects }} />
-            <AgGridColumn field='segment' cellEditor='segmentEditor' cellEditorParams={{ segments }} />
+            <AgGridColumn field='year' />
+            <AgGridColumn field='siteId' />
+            <AgGridColumn field='fieldoffice' cellEditor='fieldOfficeEditor' cellEditorParams={{ fieldOffices }} />
+            <AgGridColumn field='projectId' cellEditor='projectEditor' cellEditorParams={{ projects }} />
+            <AgGridColumn field='segmentId' cellEditor='segmentEditor' cellEditorParams={{ segments }} />
             <AgGridColumn field='season' cellEditor='seasonEditor' cellEditorParams={{ seasons }} />
-            <AgGridColumn field='sampleUnitTypeCode' headerName='Sample Unit Type' cellEditor='sampleUnitTypeEditor' cellEditorParams={{ sampleUnitTypes }} />
+            <AgGridColumn field='bend' headerName='Sample Unit' cellStyle={cellStyle} cellRenderer='siteIdCellRenderer' />
+            <AgGridColumn field='sampleUnitType' headerName='Sample Unit Type' cellEditor='sampleUnitTypeEditor' cellEditorParams={{ sampleUnitTypes }} />
             <AgGridColumn field='bendrn' headerName='Bend R/N' />
             <AgGridColumn field='bendRiverMile' />
           </AgGridReact>

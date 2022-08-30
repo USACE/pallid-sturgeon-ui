@@ -3,16 +3,16 @@ import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 
-const SiteIdCellRenderer = connect(
-  'doFetchSiteById',
-  ({ doFetchSiteById, data, value }) => (
+const fishIdCellRenderer = connect(
+  'doFetchFishDataEntry',
+  ({ doFetchFishDataEntry, data, value }) => (
     <Button
       size='small'
       variant='link'
       className='p-0 mb-1'
       text={value}
-      handleClick={() => doFetchSiteById({ siteId: data.siteId })}
+      handleClick={() => doFetchFishDataEntry({ mrId: data.mrId })}
     />
   ));
 
-export default SiteIdCellRenderer;
+export default fishIdCellRenderer;
