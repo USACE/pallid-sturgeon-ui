@@ -3,7 +3,6 @@ import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
-import FilterSelect from 'app-components/filter-select';
 import { Input, Row, SelectCustomLabel, FilterSelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 import { dropdownYearsToNow } from 'utils';
