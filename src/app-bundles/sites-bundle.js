@@ -58,6 +58,7 @@ export default {
     store.doDomainSeasonsFetch();
     store.doDomainSegmentsFetch();
     store.doDomainBendsFetch();
+    store.doDomainBendRnFetch();
     store.doDomainFieldOfficesFetch();
     store.doDomainSampleUnitTypesFetch();
   },

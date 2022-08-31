@@ -4,7 +4,7 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import FilterSelect from 'app-components/filter-select';
-import { Input, Row, SelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { Input, Row, SelectCustomLabel, FilterSelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 import { dropdownYearsToNow } from 'utils';
 
@@ -31,7 +31,7 @@ const CreateNewSite = connect(
     doNewSiteLoadData,
     domains,
   }) => {
-    const { fieldOffices, projects, seasons, bends, segments, sampleUnitTypes } = domains;
+    const { fieldOffices, projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
 
 
@@ -134,19 +134,20 @@ const CreateNewSite = connect(
                 />
               </div>
               <div className='col-3'>
-                <SelectCustomLabel
+                <FilterSelectCustomLabel
                   label='Sample Unit'
                   name='bend'
-                  onChange={val => handleSelect('bend', val)}
-                  value={state['bend']}
-                  options={createBendsDropdownOptions(bends)}
+                  placeholder='Select bend...'
+                  value={Number(state['bend'])}
+                  onChange={(_, __, value) => handleSelect('bend', value)}
+                  items={createBendsDropdownOptions(bends)}
                   isRequired
                 />
               </div>
             </Row>
             <Row>
               <div className='col-6'>
-                <FilterSelect
+                <FilterSelectCustomLabel
                   label='Segment'
                   name='segmentId'
                   placeholder='Select segment...'
@@ -157,13 +158,13 @@ const CreateNewSite = connect(
                 />
               </div>
               <div className='col-6'>
-                <FilterSelect
+                <SelectCustomLabel
                   label='Bend R/N'
                   name='bendrn'
-                  placeholder='Select bend r/n...'
+                  onChange={val => handleSelect('bendrn', val)}
                   value={state['bendrn']}
-                  onChange={(_, __, value) => handleSelect('bendrn', value)}
-                  items={createBendsDropdownOptions(bends)}
+                  options={createDropdownOptions(bendRn)}
+                  isRequired
                 />
               </div>
             </Row>

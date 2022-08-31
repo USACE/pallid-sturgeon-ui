@@ -99,7 +99,7 @@ const FilterSelect = ({
             <input
               disabled={isDisabled}
               ref={inputRef}
-              className='form-control'
+              className={`form-control ${dropdownClasses}`}
               placeholder={placeholder}
               onChange={e => handleChange(e.target.value)}
               value={!!handleInputChange ? value : inputVal}

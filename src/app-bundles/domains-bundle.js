@@ -9,6 +9,7 @@ export default {
       bends: [],
       fieldOffices: [],
       sampleUnitTypes: [],
+      bendRn: [],
     };
 
     return (state = initialData, { type, payload }) => {
@@ -21,6 +22,8 @@ export default {
           return { ...state, segments: payload };
         case 'DOMAIN_UPDATED_BENDS':
           return { ...state, bends: payload };
+        case 'DOMAIN_UPDATED_BENDRN':
+          return { ...state, bendRn: payload };
         case 'DOMAIN_UPDATED_FIELD_OFFICES':
           return { ...state, fieldOffices: payload };
         case 'DOMAIN_UPDATED_SAMPLE_UNIT_TYPES':
@@ -36,6 +39,7 @@ export default {
   selectDomainsSeasons: state => state.domains.seasons,
   selectDomainsSegments: state => state.domains.segments,
   selectDomainsBends: state => state.domains.bends,
+  selectDomainsBendRn: state => state.domains.bendRn,
   selectDomainsFieldOffices: state => state.domains.fieldOffices,
   selectDomainsSampleUnitTypes: state => state.domains.sampleUnitTypes,
 
@@ -92,6 +96,20 @@ export default {
         payload: body,
       });
       dispatch({ type: 'DOMAIN_FETCH_BENDS_FINISHED' });
+    });
+  },
+
+  doDomainBendRnFetch: () => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_BENDRN_START' });
+
+    const url = '/psapi/bendRn';
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_BENDRN',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_BENDRN_FINISHED' });
     });
   },
 
