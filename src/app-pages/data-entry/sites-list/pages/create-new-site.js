@@ -1,13 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import FilterSelect from 'app-components/filter-select';
-import Select from 'app-components/select';
-
+import { Input, Row, SelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 import { dropdownYearsToNow } from 'utils';
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'UPDATE_INPUT':
+      return {
+        ...state,
+        [action.field]: action.payload
+      };
+    case 'INITIALIZE_FORM':
+      return Object.assign({}, state, action.payload);
+    default:
+      return state;
+  }
+};
 
 const CreateNewSite = connect(
   'doPostNewSite',
@@ -18,103 +31,142 @@ const CreateNewSite = connect(
     doNewSiteLoadData,
     domains,
   }) => {
-    const { projects, seasons, bends, segments, sampleUnitTypes } = domains;
+    const { fieldOffices, projects, seasons, bends, segments, sampleUnitTypes } = domains;
+    const [state, dispatch] = useReducer(reducer, {});
 
-    const [year, setYear] = useState('');
-    const [recorder, setRecorder] = useState('');
-    const [project, setProject] = useState('');
-    const [segment, setSegment] = useState('');
-    const [sampleUnitType, setSampleUnitType] = useState('');
-    const [season, setSeason] = useState('');
-    const [bend, setBend] = useState('');
+
+    const handleChange = e => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: e.target.name,
+        payload: e.target.value
+      });
+    };
+
+    const handleSelect = (field, val) => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: field,
+        payload: val
+      });
+    };
+
+    const saveIsDisabled = !(
+      !!state['year'] &&
+      !!state['fieldoffice'] &&
+      !!state['editInitials'] &&
+      !!state['projectId'] &&
+      !!state['segmentId'] &&
+      !!state['sampleUnitType'] &&
+      !!state['season'] &&
+      !!state['bendrn']
+    );
 
     useEffect(() => {
       doNewSiteLoadData();
     }, [doNewSiteLoadData]);
-
-    const createNewSite = () => {
-      const payload = {
-        siteYear: Number(year),
-        project,
-        segment: String(segment),
-        season,
-        sampleUnitTypeCode: sampleUnitType,
-        bendrn: String(bend),
-        editInitials: recorder,
-      };
-
-      doPostNewSite(payload);
-    };
 
     return (
       <div className='container-fluid w-75'>
         <Card>
           <Card.Header text='Create New Site' />
           <Card.Body>
-            <div className='row'>
+            <Row>
               <div className='col-2'>
-                <Select
+                <SelectCustomLabel
                   label='Year'
-                  placeholderText='Select year...'
-                  onChange={val => setYear(val)}
+                  name='year'
+                  value={Number(state['year'])}
+                  onChange={val => handleSelect('year', val)}
                   options={dropdownYearsToNow()}
+                  isRequired
+                />
+              </div>
+              <div className='col-4'>
+                <SelectCustomLabel
+                  label='Field Office'
+                  name='fieldoffice'
+                  value={state['fieldoffice']}
+                  onChange={val => handleSelect('fieldoffice', val)}
+                  options={createDropdownOptions(fieldOffices)}
+                  isRequired
                 />
               </div>
               <div className='col-2'>
-                <label><small>Recorder</small></label>
-                <input
-                  type='text'
-                  placeholder='Enter initials...'
-                  className='form-control mt-1'
-                  onChange={e => setRecorder(e.target.value)}
-                  value={recorder}
+                <Input 
+                  label='Recorder' 
+                  name='editInitials'
+                  value={state['editInitials']}
+                  onChange={handleChange}
+                  isRequired
                 />
               </div>
-            </div>
-            <div className='row mt-3'>
+            </Row>
+            <Row>
               <div className='col-3'>
-                <Select
+                <SelectCustomLabel
                   label='Project'
-                  placeholderText='Select project...'
-                  onChange={value => setProject(value)}
+                  name='projectId'
+                  onChange={val => handleSelect('projectId', val)}
+                  value={Number(state['projectId'])}
                   options={createDropdownOptions(projects)}
+                  isRequired
                 />
               </div>
               <div className='col-3'>
-                <Select
+                <SelectCustomLabel
                   label='Season'
-                  placeholderText='Select season...'
-                  onChange={value => setSeason(value)}
+                  name='season'
+                  onChange={val=> handleSelect('season', val)}
+                  value={state['season']}
                   options={createDropdownOptions(seasons)}
+                  isRequired
                 />
               </div>
               <div className='col-3'>
-                <Select
+                <SelectCustomLabel
                   label='Sample Unit Type'
-                  placeholderText='Select sample unit type...'
-                  onChange={value => setSampleUnitType(value)}
+                  name='sampleUnitType'
+                  onChange={val => handleSelect('sampleUnitType', val)}
+                  value={state['sampleUnitType']}
                   options={createDropdownOptions(sampleUnitTypes)}
+                  isRequired
                 />
               </div>
-            </div>
-            <div className='row mt-3'>
+              <div className='col-3'>
+                <SelectCustomLabel
+                  label='Sample Unit'
+                  name='bend'
+                  onChange={val => handleSelect('bend', val)}
+                  value={state['bend']}
+                  options={createBendsDropdownOptions(bends)}
+                  isRequired
+                />
+              </div>
+            </Row>
+            <Row>
               <div className='col-6'>
                 <FilterSelect
                   label='Segment'
+                  name='segmentId'
                   placeholder='Select segment...'
-                  onChange={(_, __, value) => setSegment(value)}
+                  value={state['segmentId']}
+                  onChange={(_, __, value) => handleSelect('segmentId', value)}
                   items={createDropdownOptions(segments)}
+                  isRequired
                 />
               </div>
               <div className='col-6'>
                 <FilterSelect
                   label='Bend R/N'
+                  name='bendrn'
                   placeholder='Select bend r/n...'
-                  onChange={(_, __, value) => setBend(value)}
+                  value={state['bendrn']}
+                  onChange={(_, __, value) => handleSelect('bendrn', value)}
                   items={createBendsDropdownOptions(bends)}
                 />
               </div>
-            </div>
+            </Row>
             <hr />
             <div className='d-flex justify-content-end'>
               <Button
@@ -126,7 +178,8 @@ const CreateNewSite = connect(
                 className='ml-2'
                 variant='success'
                 text='Create'
-                handleClick={() => createNewSite()}
+                handleClick={() => doPostNewSite(state)}
+                isDisabled={saveIsDisabled}
               />
             </div>
           </Card.Body>
