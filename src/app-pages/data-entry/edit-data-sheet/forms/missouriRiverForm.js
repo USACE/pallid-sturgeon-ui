@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
@@ -6,6 +6,7 @@ import Card from 'app-components/card';
 import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
 import { gearCodeOptions, macroOptions, mesoOptions, microStructureOptions, setSite_1_2Options, setSite_3Options, u7Options } from './_shared/selectHelper';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
+import Approval from 'app-pages/data-entry/datasheets/components/approval';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -24,16 +25,24 @@ const reducer = (state, action) => {
 // 11847 for testing
 
 const MissouriRiverForm = connect(
+  'doSaveMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
-  'doDataEntrySetActiveType',
+  // 'doDataEntrySetActiveType',
   'selectDataEntryData',
   ({
+    doSaveMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
-    doDataEntrySetActiveType,
+    // doDataEntrySetActiveType,
     dataEntryData,
     edit,
   }) => {
-    const [state, dispatch] = useReducer(reducer, {});
+    const [isNoTurbidity, setIsNoTurbidity] = useState(false);
+    const [isNoVelocity, setIsNoVelocity] = useState(false);
+    const initialState = { 
+      noTurbidity: 'N', noVelocity: 'N'
+    };
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const formComplete = true;
 
     const handleChange = e => {
       dispatch({
@@ -43,25 +52,46 @@ const MissouriRiverForm = connect(
       });
     };
 
-    const handleSelect = (field, val) => {
+    const handleNumber = e => {
       dispatch({
         type: 'UPDATE_INPUT',
-        field: field,
-        payload: val
+        field: e.target.name,
+        payload: isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value)
       });
     };
 
-    // TODO: Complete this function
+    const handleFloat = e => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: e.target.name,
+        payload: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value)
+      });
+    };
+
+    const handleSelect = (field, val) => {
+      if (field === 'noTurbidity') {
+        setIsNoTurbidity(val);
+      }
+      if (field === 'noVelocity') {
+        setIsNoVelocity(val);
+      }
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: field,
+        payload: field === 'noTurbidity' || field === 'noVelocity' ? (val === true ? 'Y' : 'N') : val
+      });
+    };
+
     const doSave = () => {
       if (edit) {
         doUpdateMoRiverDataEntry(state);
       } else {
-        // doPost
+        doSaveMoRiverDataEntry(state);
       }
     };
 
     const saveIsDisabled = !(
-      !!state['setdate'] &&
+      // !!state['setdate'] &&
       !!state['subsample'] &&
       !!state['subsamplepass'] &&
       !!state['subsamplen'] &&
@@ -81,6 +111,12 @@ const MissouriRiverForm = connect(
           type: 'INITIALIZE_FORM',
           payload: dataEntryData,
         });
+        if (dataEntryData['noTurbidity']) {
+          setIsNoTurbidity(dataEntryData['noTurbidity']);
+        }
+        if (dataEntryData['noVelocity']) {
+          setIsNoVelocity(dataEntryData['noVelocity']);
+        } 
       }
     }, [edit, dataEntryData]);
 
@@ -92,105 +128,24 @@ const MissouriRiverForm = connect(
           </div>
         </div>
         {/* Top Level Info */}
-        {/* TO DO: where is this info derived from? From the associated site? */}
+        {/* TO DO: where is the data derived from? From the associated site? */}
         <DataHeader />
         {/* Approval */}
-        <Card className='mt-3'>
-          <Card.Body>
-            <div className='row'>
-              <div className='col-3' style={{ borderRight: '1px solid lightgray' }}>
-                <div className='row'>
-                  <div className='col-4 pl-4'>
-                    <label><small>Checked By</small></label>
-                    {/* <div>{checkby || '--'}</div> */}
-                  </div>
-                  <div className='col-4 text-center'>
-                    <label><small>Approved?</small></label>
-                    <input
-                      // disabled={!formComplete}
-                      type='checkbox'
-                      title='No Turbidity Field'
-                      className='form-control mt-1'
-                      style={{ height: '15px', width: '15px', margin: 'auto' }}
-                      // checked={!!complete}
-                      // onClick={() => dispatch({ type: 'update', field: 'complete', value: !!complete ? '' : '1' })}
-                      onChange={() => { }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className='col-1'>
-                <label><small>QC</small></label>
-                <input
-                  // disabled={!formComplete}
-                  type='text'
-                  title='No Turbidity Field'
-                  className='form-control mt-1'
-                // value={qc}
-                // onChange={e => dispatch({ type: 'update', field: 'qc', value: e.target.value })}
-                />
-              </div>
-              <div className='col-2 offset-6'>
-                <div className='float-right pt-4'>
-                  <Button
-                    isOutline
-                    size='small'
-                    className='mr-2'
-                    variant='secondary'
-                    text='Cancel'
-                    href='/find-data-sheet'
-                  />
-                  {/* {!formComplete && ( */}
-                  <Button
-                    size='small'
-                    variant='success'
-                    text='Save'
-                  // handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                  />
-                  {/* )} */}
-                </div>
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
+        {/* TO DO: include component props */}
+        <Approval />
         {/* Form Fields */}
         <Card className='mt-3'>
           <Card.Header text='Missouri River Datasheet Form' />
           <Card.Body>
             <Row>
               <div className='col-2'>
-                <Input
-                  label='Setdate'
-                  name='setdate'
-                  type='date'
-                  placeholder='Enter Date...'
-                  value={state['setdate'] ? state['setdate'].split('T')[0] : ''}
-                  onChange={handleChange}
-                  // isDisabled={!formComplete}
-                  isRequired
-                />
+                <Input label='Setdate' name='setdate' type='date' value={state['setdate'] ? state['setdate'].split('T')[0] : ''} onChange={handleChange} isDisabled={!formComplete}  isRequired />
               </div>
               <div className='col-1'>
-                <Input
-                  label='Subsample'
-                  name='subsample'
-                  type='number'
-                  value={state['subsample']}
-                  onChange={handleChange}
-                  // isDisabled={!formComplete}
-                  isRequired
-                />
+                <Input label='Subsample' name='subsample' type='number' value={state['subsample'] || ''} onChange={handleNumber} isDisabled={!formComplete} maxlength='3' isRequired />
               </div>
               <div className='col-1'>
-                <Input
-                  label='Pass'
-                  name='subsamplepass'
-                  type='number'
-                  value={state['subsamplepass']}
-                  onChange={handleChange}
-                  // isDisabled={!formComplete}
-                  isRequired
-                />
+                <Input label='Pass' name='subsamplepass' type='number' value={state['subsamplepass'] || ''} onChange={handleNumber} isDisabled={!formComplete} isRequired  />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
@@ -202,7 +157,7 @@ const MissouriRiverForm = connect(
                     { value: 'R' },
                     { value: 'N' },
                   ]}
-                  // isDisabled={!formComplete}
+                  isDisabled={!formComplete}
                   isRequired
                 />
               </div>
@@ -211,13 +166,14 @@ const MissouriRiverForm = connect(
                   label='Gear Type'
                   name='gearType'
                   value={state['gearType']}
+                  defaultValue='S'
                   onChange={val => handleSelect('gearType', val)}
                   options={[
                     { value: 'E' },
                     { value: 'S' },
                     { value: 'W' },
                   ]}
-                  // isDisabled={!formComplete}
+                  isDisabled={!formComplete}
                   isRequired
                 />
               </div>
@@ -228,18 +184,11 @@ const MissouriRiverForm = connect(
                   value={state['gearCode']}
                   onChange={val => handleSelect('gearCode', val)}
                   options={gearCodeOptions}
-                // isDisabled={!formComplete}
+                  isDisabled={!formComplete}
                 />
               </div>
               <div className='col-1'>
-                <Input
-                  label='Recorder'
-                  name='recorder'
-                  value={state['recorder']}
-                  onChange={handleChange}
-                  // isDisabled={!formComplete}
-                  isRequired
-                />
+                <Input label='Recorder' name='recorder' value={state['recorder']} onChange={handleChange} isDisabled={!formComplete} isRequired />
               </div>
             </Row>
             <Row>
@@ -252,7 +201,7 @@ const MissouriRiverForm = connect(
                       value={state['macro']}
                       onChange={val => handleSelect('macro', val)}
                       options={macroOptions}
-                      // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                       isRequired
                     />
                   </div>
@@ -263,32 +212,17 @@ const MissouriRiverForm = connect(
                       value={state['meso']}
                       onChange={val => handleSelect('meso', val)}
                       options={mesoOptions}
-                      // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                       isRequired
                     />
                   </div>
                 </Row>
                 <Row className='mt-2'>
                   <div className='col-6'>
-                    <Input
-                      label='Temp (c)'
-                      name='temp'
-                      type='number'
-                      step={0.1}
-                      value={state['temp']}
-                      onChange={handleChange}
-                      // isDisabled={!formComplete}
-                      isRequired
-                    />
+                    <Input label='Temp (c)' name='temp' type='number' step={0.1} value={state['temp'] || ''} onChange={handleFloat} isDisabled={!formComplete} isRequired />
                   </div>
                   <div className='col-6'>
-                    <Input
-                      label='Width'
-                      name='width'
-                      value={state['width']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Width' name='width' type='number' step={0.1} value={state['width'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -296,13 +230,7 @@ const MissouriRiverForm = connect(
                 <Row>
                   <div className='col-3'>
                     {/* this field is a calculated field? */}
-                    <Input
-                      label='Micro'
-                      name='micro'
-                      value={state['micro']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Micro' name='micro' value={state['micro']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
                     <SelectCustomLabel
@@ -311,7 +239,7 @@ const MissouriRiverForm = connect(
                       value={state['microStructure']}
                       onChange={val => handleSelect('microStructure', val)}
                       options={microStructureOptions}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                   <div className='col-3'>
@@ -326,7 +254,7 @@ const MissouriRiverForm = connect(
                         { value: 2, text: 'Partial' },
                         { value: 3, text: 'Overflowing' },
                       ]}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                   <div className='col-3'>
@@ -346,7 +274,7 @@ const MissouriRiverForm = connect(
                         { value: 8, text: 'Bank & Side Notch' },
                         { value: 9, text: 'Notch (Undefined)' },
                       ]}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                 </Row>
@@ -358,7 +286,7 @@ const MissouriRiverForm = connect(
                       value={state['setSite1']}
                       onChange={val => handleSelect('setSite1', val)}
                       options={setSite_1_2Options}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                   <div className='col-3'>
@@ -368,7 +296,7 @@ const MissouriRiverForm = connect(
                       value={state['setSite2']}
                       onChange={val => handleSelect('setSite2', val)}
                       options={setSite_1_2Options}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                   <div className='col-3'>
@@ -378,7 +306,7 @@ const MissouriRiverForm = connect(
                       value={state['setSite3']}
                       onChange={val => handleSelect('setSite3', val)}
                       options={setSite_3Options}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                 </Row>
@@ -389,160 +317,57 @@ const MissouriRiverForm = connect(
               <div className='col-5 pb-3' style={{ borderRight: '1px solid lightgray' }}>
                 <Row>
                   <div className='col-4'>
-                    <Input
-                      label='Start Time'
-                      name='startTime'
-                      value={state['startTime']}
-                      onChange={handleChange}
-                      // isDisabled={!formComplete}
-                      isRequired
-                    />
+                    <Input label='Start Time' name='startTime' value={state['startTime']} onChange={handleChange} isDisabled={!formComplete} isRequired />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Start Latitude'
-                      name='startLatitude'
-                      type='number'
-                      value={state['startLatitude']}
-                      onChange={handleChange}
-                      // isDisabled={!formComplete}
-                      isRequired
-                    />
+                    <Input label='Start Latitude' name='startLatitude' type='number' value={state['startLatitude'] || ''} onChange={handleNumber} isDisabled={!formComplete} isRequired />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Start Longitude'
-                      name='startLongitude'
-                      type='number'
-                      value={state['startLongitude']}
-                      onChange={handleChange}
-                      // isDisabled={!formComplete}
-                      isRequired
-                    />
+                    <Input label='Start Longitude' name='startLongitude' type='number' value={state['startLongitude'] || ''} onChange={handleNumber} isDisabled={!formComplete} isRequired />
                   </div>
                 </Row>
                 <Row>
                   <div className='col-3'>
-                    <Input
-                      label='Distance (m)'
-                      name='distance'
-                      type='number'
-                      value={state['distance']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Distance (m)' name='distance' type='number' value={state['distance'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input
-                      label='Depth (m)'
-                      name='depth1'
-                      type='number'
-                      step={0.1}
-                      value={state['depth1']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Depth (m)' name='depth1' type='number' step={0.1} value={state['depth1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input
-                      label=' '
-                      name='depth2'
-                      type='number'
-                      step={0.1}
-                      value={state['depth2']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label=' ' name='depth2' type='number' step={0.1} value={state['depth2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input
-                      label=' '
-                      name='depth13'
-                      type='number'
-                      step={0.1}
-                      value={state['depth3']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label=' ' name='depth13' type='number' step={0.1} value={state['depth3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <Row className='mt-2'>
                   <div className='col-4'>
-                    <Input
-                      label='Stop Time'
-                      name='stopTime'
-                      value={state['stopTime']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Stop Time' name='stopTime' value={state['stopTime']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Stop Latitude'
-                      type='number'
-                      value={state['stopLatitude']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Stop Latitude' name='stopLatitude' type='number' value={state['stopLatitude'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Stop Longitude'
-                      name='stopLongitude'
-                      type='number'
-                      value={state['stopLongitude']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Stop Longitude' name='stopLongitude' type='number' value={state['stopLongitude'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
               <div className='col-7 pb-3'>
                 <Row className='no-gutters'>
                   <div className='col-1 mr-2'>
-                    <Input
-                      label='U1'
-                      name='u1'
-                      value={state['u1']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='U1' name='u1' value={state['u1']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-1 mr-2'>
-                    <Input
-                      label='U2'
-                      name='u2'
-                      value={state['u2']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='U2' name='u2' value={state['u2']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-1 mr-2'>
-                    <Input
-                      label='U3'
-                      name='u3'
-                      value={state['u3']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='U3' name='u3' value={state['u3']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-1 mr-2'>
-                    <Input
-                      label='U4'
-                      name='u4'
-                      value={state['u4']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='U4' name='u4' value={state['u4']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-2 mr-2'>
-                    <Input
-                      label='U5'
-                      name='u5'
-                      value={state['u5']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='U5' name='u5' value={state['u5']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-2 mr-2'>
                     <SelectCustomLabel
@@ -554,7 +379,7 @@ const MissouriRiverForm = connect(
                         { value: 'MNCF' },
                         { value: 'NSTS' },
                       ]}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                   <div className='col-3'>
@@ -564,75 +389,33 @@ const MissouriRiverForm = connect(
                       value={state['u7']}
                       onChange={val => handleSelect('u7', val)}
                       options={u7Options}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                 </Row>
                 <Row>
                   <div className='col-3'>
-                    <Input
-                      label='Structure Number'
-                      name='structurenumber'
-                      value={state['structurenumber']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Structure Number' name='structurenumber' value={state['structurenumber']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input
-                      label='Net River Mile'
-                      name='netrivermile'
-                      value={state['netrivermile']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Net River Mile' name='netrivermile' type='number' step={0.1} value={state['netrivermile'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input
-                      label='Conductivity'
-                      name='conductivity'
-                      value={state['conductivity']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Conductivity' name='conductivity' type='number' value={state['conductivity'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input
-                      label='D.O.'
-                      name='do'
-                      value={state['do']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='D.O.' name='do' type='number' step={0.1} value={state['do'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <Row>
                   <div className='col-3'>
-                    <Input
-                      label='USGS Gauge Code'
-                      name='usgs'
-                      value={state['usgs']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='USGS Gauge Code' name='usgs' value={state['usgs']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input
-                      label='River Stage'
-                      name='riverstage'
-                      value={state['riverstage']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='River Stage' name='riverstage' type='number' step={0.1} value={state['riverstage'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input
-                      label='Discharge'
-                      name='discharge'
-                      value={state['discharge']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Discharge' name='discharge' type='number' value={state['discharge'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -651,20 +434,13 @@ const MissouriRiverForm = connect(
                         { value: 'R', text: 'Random' },
                         { value: 'N', text: 'Non-random' },
                       ]}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                   <div className='col-3'>
-                    <Input
-                      label='Turbidity'
-                      name='turbidity'
-                      value={state['turbidity']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Turbidity' name='turbidity' type='number' value={state['turbidity'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4 text-center'>
-                    {/* TODO: fix checkbox element logic */}
                     <label><small>No Turbidity</small></label>
                     <input
                       name='noTurbidity'
@@ -672,11 +448,9 @@ const MissouriRiverForm = connect(
                       title='No Turbidity Field'
                       className='form-control mt-1'
                       style={{ height: '15px', width: '15px', margin: 'auto' }}
-                      // checked={!!state['noTurbidity']}
-                      value={state['noTurbidity']}
-                      // onClick={handleSelect('noTurbidity', !noTurbidity)}
-                      onChange={() => { }}
-                      // disabled={!formComplete}
+                      checked={isNoTurbidity}
+                      onChange={() => handleSelect('noTurbidity', !isNoTurbidity)}
+                      disabled={!formComplete}
                     />
                   </div>
                 </Row>
@@ -690,27 +464,22 @@ const MissouriRiverForm = connect(
                     <SelectCustomLabel
                       name='cobble'
                       value={state['cobble']}
-                      onChange={val => handleSelect('cobble', val)}
+                      defaultValue={0}
+                      onChange={val => handleSelect('cobble', parseInt(val))}
                       options={[
                         { value: 0, text: 'None' },
                         { value: 1, text: 'Incidental' },
                         { value: 2, text: 'Dominant' },
                         { value: 3, text: 'Ubiquitous' },
                       ]}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                   <div className='col-2 text-right mt-1'>
                     <label><small>Silt (%)</small></label>
                   </div>
                   <div className='col-4'>
-                    <Input
-                      name='silt'
-                      type='number'
-                      value={state['silt']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input name='silt' type='number' value={state['silt'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <Row className='mt-2'>
@@ -721,27 +490,22 @@ const MissouriRiverForm = connect(
                     <SelectCustomLabel
                       name='organic'
                       value={state['organic']}
-                      onChange={val => handleSelect('organic', val)}
+                      defaultValue={0}
+                      onChange={val => handleSelect('organic', parseInt(val))}
                       options={[
                         { value: 0, text: 'None' },
                         { value: 1, text: 'Incidental' },
                         { value: 2, text: 'Dominant' },
                         { value: 3, text: 'Ubiquitous' },
                       ]}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                   <div className='col-2 text-right mt-1'>
                     <label><small>Sand (%)</small></label>
                   </div>
                   <div className='col-4'>
-                    <Input
-                      name='sand'
-                      type='number'
-                      value={state['sand']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input name='sand' type='number' value={state['sand'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <Row className='mt-2'>
@@ -752,7 +516,8 @@ const MissouriRiverForm = connect(
                     <SelectCustomLabel
                       name='watervel'
                       value={state['watervel']}
-                      onChange={val => handleSelect('watervel', val)}
+                      defaultValue={0}
+                      onChange={val => handleSelect('watervel', parseInt(val))}
                       options={[
                         { value: 0, text: 'Not reliable' },
                         { value: 1, text: 'Eddy' },
@@ -761,20 +526,14 @@ const MissouriRiverForm = connect(
                         { value: 4, text: '0.6 - 0.9 m/s' },
                         { value: 5, text: '> 0.9 m/s' },
                       ]}
-                    // isDisabled={!formComplete}
+                      isDisabled={!formComplete}
                     />
                   </div>
                   <div className='col-2 text-right mt-1'>
                     <label><small>Gravel (%)</small></label>
                   </div>
                   <div className='col-4'>
-                    <Input
-                      name='gravel'
-                      type='number'
-                      value={state['gravel']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input name='gravel' type='number' value={state['gravel'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -784,128 +543,59 @@ const MissouriRiverForm = connect(
               <div className='col-5'>
                 <Row>
                   <div className='col-4'>
-                    <Input
-                      label='Velocity 1 (bot)'
-                      name='velocitybot1'
-                      value={state['velocitybot1']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Velocity 1 (bot)' name='velocitybot1' type='number' value={state['velocitybot1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Velocity 1 (0.8 or 0.5)'
-                      name='velocity08_1'
-                      value={state['velocity08_1']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Velocity 1 (0.8 or 0.5)' name='velocity08_1' type='number' value={state['velocity08_1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Velocity 1 (0.2 or 0.6)'
-                      name='velocity02or06_1'
-                      value={state['velocity02or06_1']}
-                      onChange={handleChange}
-                      // disabled={!formComplete}
-                    />
+                    <Input label='Velocity 1 (0.2 or 0.6)' name='velocity02or06_1' type='number' value={state['velocity02or06_1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <div className='row mt-2'>
                   <div className='col-4'>
-                    <Input
-                      label='Velocity 2 (bot)'
-                      name='velocitybot2'
-                      value={state['velocitybot2']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Velocity 2 (bot)' name='velocitybot2' type='number' value={state['velocitybot2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Velocity 2 (0.8 or 0.5)'
-                      name='velocity08_2'
-                      value={state['velocity08_2']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Velocity 2 (0.8 or 0.5)' name='velocity08_2' type='number' value={state['velocity08_2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Velocity 2 (0.2 or 0.6)'
-                      name='velocity02or06_2'
-                      value={state['velocity02or06_2']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Velocity 2 (0.2 or 0.6)' name='velocity02or06_2' type='number' value={state['velocity02or06_2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </div>
                 <Row className='mt-2'>
                   <div className='col-4'>
-                    <Input
-                      label='Velocity 3 (bot)'
-                      name='velocitybot3'
-                      value={state['velocitybot3']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Velocity 3 (bot)' name='velocitybot3' type='number' value={state['velocitybot3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Velocity 3 (0.8)'
-                      name='velocity08_3'
-                      value={state['velocity08_3']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Velocity 3 (0.8)' name='velocity08_3' type='number' value={state['velocity08_3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input
-                      label='Velocity 3 (0.2 or 0.6)'
-                      name='velocity02or06_3'
-                      value={state['velocity02or06_3']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input label='Velocity 3 (0.2 or 0.6)' name='velocity02or06_3' type='number' value={state['velocity02or06_3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
               <div className='col-2 text-center'>
                 <label><small>No Velocities</small></label>
-                {/* TODO: fix checkbox element logic */}
                 <input
                   name='noVelocity'
                   type='checkbox'
                   title='No Velocties Field'
                   className='form-control mt-1'
                   style={{ height: '15px', width: '15px', margin: 'auto' }}
-                  value={state['noVelocity']}
-                  // checked={!!noVelocity}
-                  // onClick={handleSelect('noVelocity', !noVelocity)}
-                  onChange={() => { }}
-                  // disabled={!formComplete}
+                  checked={isNoVelocity}
+                  onChange={() => handleSelect('noVelocity', !isNoVelocity)}
+                  disabled={!formComplete}
                 />
               </div>
               <div className='col-5'>
-                <TextArea
-                  label='Comments'
-                  name='comments'
-                  rows={5}
-                  value={state['comments']}
-                  onChange={handleChange}
-                // isDisabled={!formComplete}
-                />
+                <TextArea label='Comments' name='comments' rows={5} value={state['comments']} onChange={handleChange} isDisabled={!formComplete} />
                 <Row className='mt-2'>
                   <div className='col-9 pt-1 text-right'>
                     <label><small>Edit Initials</small></label>
                   </div>
                   <div className='col-3'>
-                    <Input
-                      name='editInitials'
-                      value={state['editInitials']}
-                      onChange={handleChange}
-                    // isDisabled={!formComplete}
-                    />
+                    <Input name='editInitials' value={state['editInitials']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -923,15 +613,13 @@ const MissouriRiverForm = connect(
                     text='Cancel'
                     href='/find-data-sheet'
                   />
-                  {/* {!formComplete && ( */}
                   <Button
                     size='small'
                     variant='success'
                     text='Save'
-                    // handleClick={() => doUpdateMoRiverDataEntry(formData)}
+                    handleClick={() => doSave()}
                     isDisabled={saveIsDisabled}
                   />
-                  {/* )} */}
                 </div>
               </div>
             </Row>

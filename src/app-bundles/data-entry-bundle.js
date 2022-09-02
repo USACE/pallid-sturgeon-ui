@@ -189,6 +189,25 @@ export default {
     });
   },
 
+  doSaveMoRiverDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
+    dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
+    const toastId = toast.loading('Saving datasheet...');
+    // const params = store.selectDataEntryLastParams();
+
+    const url = '/psapi/moriverDataEntry';
+
+    apiPost(url, formData, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, 'Datasheet successfully updated!');
+        dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
+        // store.doFetchMoRiverDataEntry(params, true);
+      } else {
+        dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
+        tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
+      }      
+    });
+  },
+
   doUpdateMoRiverDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');

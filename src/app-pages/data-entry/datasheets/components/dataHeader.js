@@ -1,5 +1,6 @@
 import React from 'react';
 import Card from 'app-components/card';
+import { Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 const DataHeader = ({
   type,
@@ -17,7 +18,7 @@ const DataHeader = ({
 }) => (
   <Card className='mb-3'>
     <Card.Body>
-      <div className='row mt-2'>
+      <Row className='border-bottom'>
         <div className='col-2'>
           <b className='mr-2'>{type} ID:</b>
           {id || '--'}
@@ -48,9 +49,8 @@ const DataHeader = ({
           <b className='mr-2'>Season:</b>
           {season || '--'}
         </div>
-      </div>
-      <hr />
-      <div className='row mt-2'>
+      </Row>
+      <Row>
         <div className='col-2'>
           <b className='mr-2'>Sample Unit Type:</b>
           {sampleUnitType || '--'}
@@ -67,7 +67,7 @@ const DataHeader = ({
           <b className='mr-2'>Bend River Mile:</b>
           {bendRiverMile || '--'}
         </div>
-      </div>
+      </Row>
     </Card.Body>
   </Card>
 );

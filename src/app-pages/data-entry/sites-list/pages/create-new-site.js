@@ -91,13 +91,7 @@ const CreateNewSite = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input 
-                  label='Recorder' 
-                  name='editInitials'
-                  value={state['editInitials']}
-                  onChange={handleChange}
-                  isRequired
-                />
+                <Input label='Recorder' name='editInitials' value={state['editInitials']} onChange={handleChange} isRequired />
               </div>
             </Row>
             <Row>
