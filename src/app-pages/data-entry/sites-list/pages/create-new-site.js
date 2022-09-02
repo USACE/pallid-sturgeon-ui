@@ -33,7 +33,6 @@ const CreateNewSite = connect(
     const { fieldOffices, projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
 
-
     const handleChange = e => {
       dispatch({
         type: 'UPDATE_INPUT',
