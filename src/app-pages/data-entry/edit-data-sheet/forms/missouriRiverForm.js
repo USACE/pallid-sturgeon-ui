@@ -22,27 +22,29 @@ const reducer = (state, action) => {
   }
 };
 
-// 11847 for testing
+// 1615 for testing
 
 const MissouriRiverForm = connect(
   'doSaveMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
-  // 'doDataEntrySetActiveType',
   'selectDataEntryData',
+  'selectSitesData',
   ({
     doSaveMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
-    // doDataEntrySetActiveType,
     dataEntryData,
+    sitesData,
     edit,
   }) => {
+    const initialState = {
+      noTurbidity: 'N', 
+      noVelocity: 'N'
+    };
+    const [state, dispatch] = useReducer(reducer, edit ? {} : initialState);
     const [isNoTurbidity, setIsNoTurbidity] = useState(false);
     const [isNoVelocity, setIsNoVelocity] = useState(false);
-    const initialState = { 
-      noTurbidity: 'N', noVelocity: 'N'
-    };
-    const [state, dispatch] = useReducer(reducer, initialState);
-    const formComplete = true;
+    const data = sitesData[0];
+    const formComplete = true;  
 
     const handleChange = e => {
       dispatch({
@@ -111,14 +113,14 @@ const MissouriRiverForm = connect(
           type: 'INITIALIZE_FORM',
           payload: dataEntryData,
         });
-        if (dataEntryData['noTurbidity']) {
+        if (dataEntryData['noTurbidity'] && dataEntryData['noTurbidity'] !== '') {
           setIsNoTurbidity(dataEntryData['noTurbidity']);
         }
-        if (dataEntryData['noVelocity']) {
+        if (dataEntryData['noVelocity'] && dataEntryData['noVelocity'] !== '') {
           setIsNoVelocity(dataEntryData['noVelocity']);
         } 
       }
-    }, [edit, dataEntryData]);
+    }, [edit]);
 
     return (
       <>
@@ -128,8 +130,19 @@ const MissouriRiverForm = connect(
           </div>
         </div>
         {/* Top Level Info */}
-        {/* TO DO: where is the data derived from? From the associated site? */}
-        <DataHeader />
+        <DataHeader 
+          type='Site'
+          id={data ? data.siteId : state['siteId']} 
+          year={data ? data.year : state['year']} 
+          fieldOffice={data ? data.fieldOfficeDescription : state['fieldoffice']}
+          project={data ? data.projectDescription : state['projectId']}
+          segment={data ? data.segmentDescription : state['segmentId']}
+          season={data ? data.seasonDescription : state['seasonId']}
+          sampleUnitType={data ? data.sampleUnitType : state['sampleUnitType']}
+          sampleUnit={data ? data.bend : state['bend']}
+          bendrn={data ? data.bendrn : state['bendrn']}
+          bendRiverMile={data ? data.bendRiverMile : state['bendRiverMile']}
+        />
         {/* Approval */}
         {/* TO DO: include component props */}
         <Approval />
@@ -139,7 +152,16 @@ const MissouriRiverForm = connect(
           <Card.Body>
             <Row>
               <div className='col-2'>
-                <Input label='Setdate' name='setdate' type='date' value={state['setdate'] ? state['setdate'].split('T')[0] : ''} onChange={handleChange} isDisabled={!formComplete}  isRequired />
+                {/* TODO: figure out date format */}
+                <Input 
+                  label='Setdate' 
+                  name='setdate' 
+                  type='date' 
+                  value={state['setdate'] ? state['setdate'].split('T')[0] : ''}
+                  onChange={handleChange}
+                  isDisabled 
+                  isRequired 
+                />
               </div>
               <div className='col-1'>
                 <Input label='Subsample' name='subsample' type='number' value={state['subsample'] || ''} onChange={handleNumber} isDisabled={!formComplete} maxlength='3' isRequired />
@@ -463,9 +485,9 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <SelectCustomLabel
                       name='cobble'
-                      value={state['cobble']}
+                      value={Number(state['cobble'])}
                       defaultValue={0}
-                      onChange={val => handleSelect('cobble', parseInt(val))}
+                      onChange={val => handleSelect('cobble', val)}
                       options={[
                         { value: 0, text: 'None' },
                         { value: 1, text: 'Incidental' },
@@ -489,9 +511,9 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <SelectCustomLabel
                       name='organic'
-                      value={state['organic']}
+                      value={Number(state['organic'])}
                       defaultValue={0}
-                      onChange={val => handleSelect('organic', parseInt(val))}
+                      onChange={val => handleSelect('organic', val)}
                       options={[
                         { value: 0, text: 'None' },
                         { value: 1, text: 'Incidental' },
@@ -515,9 +537,9 @@ const MissouriRiverForm = connect(
                   <div className='col-4'>
                     <SelectCustomLabel
                       name='watervel'
-                      value={state['watervel']}
+                      value={Number(state['watervel'])}
                       defaultValue={0}
-                      onChange={val => handleSelect('watervel', parseInt(val))}
+                      onChange={val => handleSelect('watervel', val)}
                       options={[
                         { value: 0, text: 'Not reliable' },
                         { value: 1, text: 'Eddy' },
@@ -613,12 +635,13 @@ const MissouriRiverForm = connect(
                     text='Cancel'
                     href='/find-data-sheet'
                   />
+                  {/* TODO: remove condition once update works */}
                   <Button
                     size='small'
                     variant='success'
                     text='Save'
                     handleClick={() => doSave()}
-                    isDisabled={saveIsDisabled}
+                    isDisabled={edit ? true : saveIsDisabled}
                   />
                 </div>
               </div>

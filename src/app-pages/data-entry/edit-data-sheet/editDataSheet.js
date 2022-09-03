@@ -12,7 +12,10 @@ const EditDataSheet = connect(
   ({
     routeParams,
   }) => {
-    const { datasheet, formType } = routeParams;
+    const { form } = routeParams;
+    const parseForm = form.split('-');
+    const datasheet = parseForm[0];
+    const formType = parseForm[1];
 
     const getForm = () => {
       switch(datasheet) {

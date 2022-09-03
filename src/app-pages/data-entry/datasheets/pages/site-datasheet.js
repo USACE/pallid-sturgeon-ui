@@ -15,7 +15,7 @@ const SiteDatasheet = connect(
   ({
     doUpdateSitesDatasheetParams,
     sitesDatasheetData,
-    sitesData
+    sitesData,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
 
@@ -75,7 +75,7 @@ const SiteDatasheet = connect(
               tabs={[
                 {
                   title: `Missouri River (${missouriRiverData.totalCount ? missouriRiverData.totalCount : '0'})`,
-                  content: <MissouriDsTable rowData={missouriRiverData.items} />,
+                  content: <MissouriDsTable rowData={missouriRiverData.items} siteId={siteId} />,
                 },
                 {
                   title: `Search Effort (${searchData.totalCount ? searchData.totalCount : '0'})`,

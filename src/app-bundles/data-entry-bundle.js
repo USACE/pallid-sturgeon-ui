@@ -94,7 +94,7 @@ export default {
           if (!ignoreToast) {
             tSuccess(toastId, 'Datasheet found!');
           }
-          store.doUpdateUrl('/sites-list/datasheet/missouriRiver/edit');
+          store.doUpdateUrl('/sites-list/datasheet/missouriRiver-edit');
         }
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_FINISHED' });
       } else {
@@ -127,7 +127,7 @@ export default {
           tWarning(toastId, 'No supplemental datasheets.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
-          store.doUpdateUrl('/sites-list/datasheet/supplemental/edit');
+          store.doUpdateUrl('/sites-list/datasheet/supplemental-edit');
         }
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_FINISHED' });
       } else {
@@ -158,7 +158,7 @@ export default {
           tError(toastId, 'No datasheets found. Please try again.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
-          store.doUpdateUrl('/sites-list/datasheet/fish/edit');
+          store.doUpdateUrl('/sites-list/datasheet/fish-edit');
         }
         dispatch({ type: 'FISH_DATA_ENTRY_FETCH_FINISHED' });
       } else {
@@ -211,7 +211,7 @@ export default {
   doUpdateMoRiverDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
-    const params = store.selectDataEntryLastParams();
+    // const params = store.selectDataEntryLastParams();
 
     const url = '/psapi/moriverDataEntry';
 
@@ -219,7 +219,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchMoRiverDataEntry(params, true);
+        // store.doFetchMoRiverDataEntry(params, true);
       } else {
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
