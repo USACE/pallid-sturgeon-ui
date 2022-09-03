@@ -7,6 +7,7 @@ import Icon from 'app-components/icon';
 
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import FishIdCellRenderer from 'common/gridCellRenderers/fishIdCellRenderer';
+import MrIdCellRenderer from 'common/gridCellRenderers/mrIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -21,10 +22,6 @@ const MissouriDsTable = connect(
     const fishCellStyle = (params) => ({
       backgroundColor: params.data.bkgColor,
     });
-
-    // const suppCellStyle = (params) => ({
-    //   backgroundColor: params.data.suppBkgColor,
-    // });
 
     return (
       <>
@@ -43,7 +40,7 @@ const MissouriDsTable = connect(
           text='Create Missouri River Datasheet'
           title='Create Missouri River Datasheet'
           className='float-right mr-2'
-          handleClick={() => doUpdateUrl('/sites-list/datasheet/missouriRiver/create')}
+          handleClick={() => doUpdateUrl('/sites-list/datasheet/missouriRiver-create')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
@@ -55,10 +52,11 @@ const MissouriDsTable = connect(
             }}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
-              fishIdCellRenderer: FishIdCellRenderer
+              fishIdCellRenderer: FishIdCellRenderer,
+              mrIdCellRenderer: MrIdCellRenderer
             }}
           >
-            <AgGridColumn field='mrId' sortable unSortIcon />
+            <AgGridColumn field='mrId' cellRenderer='mrIdCellRenderer' sortable unSortIcon />
             <AgGridColumn field='mrFid' sortable unSortIcon />
             <AgGridColumn field='fishCount' headerName='# of Fish' cellStyle={fishCellStyle} cellRenderer='fishIdCellRenderer' sortable unSortIcon />
             <AgGridColumn field='subsample' />

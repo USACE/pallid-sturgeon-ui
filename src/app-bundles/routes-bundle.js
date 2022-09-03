@@ -45,7 +45,7 @@ export default createRouteBundle(
     '/sites-list': SitesList,
     '/sites-list/create-new-site': CreateNewSite,
     '/sites-list/datasheet': SiteDatasheet,
-    '/sites-list/datasheet/:datasheet/:formType': EditDataSheet,
+    '/sites-list/datasheet/:form': EditDataSheet,
     '/tag-replacement': TagReplacement,
     '*': NotFound,
   },

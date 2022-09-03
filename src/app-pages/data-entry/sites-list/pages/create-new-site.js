@@ -33,7 +33,6 @@ const CreateNewSite = connect(
     const { fieldOffices, projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
 
-
     const handleChange = e => {
       dispatch({
         type: 'UPDATE_INPUT',
@@ -92,13 +91,7 @@ const CreateNewSite = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input 
-                  label='Recorder' 
-                  name='editInitials'
-                  value={state['editInitials']}
-                  onChange={handleChange}
-                  isRequired
-                />
+                <Input label='Recorder' name='editInitials' value={state['editInitials']} onChange={handleChange} isRequired />
               </div>
             </Row>
             <Row>
