@@ -5,6 +5,8 @@ import Button from 'app-components/button';
 import Card from 'app-components/card';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import { searchTypeOptions } from './_shared/selectHelper';
+import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
+import Approval from 'app-pages/data-entry/datasheets/components/approval';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -20,13 +22,25 @@ const reducer = (state, action) => {
   }
 };
 
+// 1046 for testing
+
 const SearchEffortForm = connect(
+  'doSaveSearchDataEntry',
+  'doUpdateSearchDataEntry',
   'selectDataEntryData',
+  'selectSitesData',
   ({
+    doSaveSearchDataEntry,
+    doUpdateSearchDataEntry,
     dataEntryData,
+    sitesData,
     edit
   }) => {
-    const [state, dispatch] = useReducer(reducer, {});
+    const initialState = {
+      dsId: 123123
+    };
+    const [state, dispatch] = useReducer(reducer, initialState);
+    const data = sitesData[0];
 
     const handleChange = e => {
       dispatch({
@@ -44,17 +58,24 @@ const SearchEffortForm = connect(
       });
     };
 
-    // TODO: Complete this function
+    const handleFloat = e => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: e.target.name,
+        value: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value)
+      });
+    };
+
     const doSave = () => {
       if (edit) {
-        // doUpdate
+        doUpdateSearchDataEntry(state);
       } else {
-        // doPost
+        doSaveSearchDataEntry(state);
       }
     };
 
     const saveIsDisabled = !(
-      !!state['searchDate'] &&
+      // !!state['searchDate'] &&
       !!state['recorder'] &&
       !!state['searchTypeCode'] &&
       !!state['startTime'] &&
@@ -76,137 +97,27 @@ const SearchEffortForm = connect(
 
     return (
       <>
-        <div className='row'>
+        <Row>
           <div className='col-9'>
             <h4>{edit ? 'Edit' : 'Create'} Search Effort Datasheet</h4>
           </div>
-        </div>
+        </Row>
         {/* Top Level Info */}
-        <Card className='mt-3'>
-          <Card.Body>
-            {edit && <>
-              <div className='row'>
-                <div className='col-3'>
-                  <b className='mr-3'>Datasheet Id:</b>
-                  {/* {mrId || '--'} */}
-                </div>
-                <div className='col-3'>
-                  <b className='mr-2'>Field Id:</b>
-                  {/* {mrFid || '--'} */}
-                </div>
-              </div>
-              <hr />
-            </>
-            }
-            <div className='row mt-2'>
-              <div className='col-2'>
-                <b className='mr-2'>Year:</b>
-                {/* {year || '--'} */}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Field Office:</b>
-                {/* {fieldOffice || '--'} */}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Project:</b>
-                {/* {project || '--'} */}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Segment:</b>
-                {/* {segment || '--'} */}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Season:</b>
-                {/* {season || '--'} */}
-              </div>
-            </div>
-            <hr />
-            <div className='row mt-2'>
-              <div className='col-2'>
-                <b className='mr-2'>Sample Unit Type:</b>
-                {/* {sampleUnitType || '--'} */}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Sample Unit:</b>
-                {/* {sampleUnit || '--'} */}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>R/N:</b>
-                {/* {bendrn || '--'} */}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Bend River Mile:</b>
-                {/* {bendRiverMile || '--'} */}
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
+        {/* TO DO: include component props */}
+        <DataHeader 
+          type='Site'
+          id={data ? data.siteId : state['siteId']}
+        />
         {/* Approval */}
-        <Card className='mt-3'>
-          <Card.Body>
-            <div className='row'>
-              <div className='col-3' style={{ borderRight: '1px solid lightgray' }}>
-                <div className='row'>
-                  <div className='col-4 pl-4'>
-                    <label><small>Checked By</small></label>
-                    {/* <div>{checkby || '--'}</div> */}
-                  </div>
-                  <div className='col-4 text-center'>
-                    <label><small>Approved?</small></label>
-                    <input
-                      // disabled={formComplete}
-                      type='checkbox'
-                      title='approved'
-                      className='form-control mt-1'
-                      style={{ height: '15px', width: '15px', margin: 'auto' }}
-                      // checked={!!complete}
-                      // onClick={() => dispatch({ type: 'update', field: 'complete', value: !!complete ? '' : '1' })}
-                      // onClick={handleSelect('complete', !!complete ? '' : '1')}
-                      onChange={() => { }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className='col-1'>
-                <label><small>QC</small></label>
-                <input
-                  // disabled={formComplete}
-                  type='text'
-                  title='qc'
-                  className='form-control mt-1'
-                // value={qc}
-                // onChange={e => dispatch({ type: 'update', field: 'qc', value: e.target.value })}
-                // onChange={handleChange}
-                />
-              </div>
-              <div className='col-2 offset-6'>
-                <div className='float-right pt-4'>
-                  <Button
-                    isOutline
-                    size='small'
-                    className='mr-2'
-                    variant='secondary'
-                    text='Cancel'
-                    // href='/find-data-sheet'
-                  />
-                  <Button
-                    size='small'
-                    variant='success'
-                    text='Save'
-                  // handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                  />
-                </div>
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
+        {/* TO DO: include component props */}
+        <Approval />
         {/* Form Fields */}
         <Card className='mt-3'>
           <Card.Header text='Search Effort Datasheet Form' />
           <Card.Body>
             <Row>
               <div className='col-2'>
-                <Input name='searchDate' label='Search Date' type='date' value={state['searchDate']} onChange={handleChange} isRequired />
+                <Input name='searchDate' label='Search Date' type='date' value={state['searchDate'] ? state['searchDate'].split('T')[0] : ''}  onChange={handleChange} isRequired isDisabled />
               </div>
               <div className='col-2'>
                 <Input name='recorder' label='Recorder Initials' value={state['recorder']} onChange={handleChange} isRequired />
@@ -233,19 +144,19 @@ const SearchEffortForm = connect(
                 <Input name='startTime' label='Start Time' value={state['startTime']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='startLatitude' label='Start Latitude' value={state['startLatitude']} onChange={handleChange} isRequired />
+                <Input name='startLatitude' type='number' label='Start Latitude' value={state['startLatitude'] || ''} onChange={handleFloat} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='startLongitude' label='Start Longitude' value={state['startLongitude']} onChange={handleChange} isRequired />
+                <Input name='startLongitude' type='number' label='Start Longitude' value={state['startLongitude'] || ''} onChange={handleFloat} isRequired />
               </div>
               <div className='col-2'>
                 <Input name='stopTime' label='Stop Time' value={state['stopTime']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='stopLatitude' label='Stop Latitude' value={state['stopLatitude']} onChange={handleChange} isRequired />
+                <Input name='stopLatitude' type='number' label='Stop Latitude' value={state['stopLatitude'] || ''} onChange={handleFloat} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='stopLongitude' label='Stop Longitude' value={state['stopLongitude']} onChange={handleChange} isRequired />
+                <Input name='stopLongitude' type='number' label='Stop Longitude' value={state['stopLongitude'] || ''} onChange={handleFloat} isRequired />
               </div>
             </Row>
             {edit && (<Row>
@@ -267,20 +178,12 @@ const SearchEffortForm = connect(
                     text='Cancel'
                   // href='/find-data-sheet'
                   />
-                  {edit && (
-                    <Button
-                      size='small'
-                      variant='danger'
-                      text='Delete'
-                    // handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                    />
-                  )}
                   <Button
                     size='small'
                     variant='success'
                     text={edit ? 'Apply Changes' : 'Save'}
+                    handleClick={() => doSave()}
                     isDisabled={saveIsDisabled}
-                  // handleClick={() => doUpdateMoRiverDataEntry(formData)}
                   />
                 </div>
               </div>

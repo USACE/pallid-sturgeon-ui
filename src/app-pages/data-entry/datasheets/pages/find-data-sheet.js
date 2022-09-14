@@ -11,10 +11,16 @@ const FindDataSheet = connect(
   'doFetchMoRiverDataEntry',
   'doFetchSupplementalDataEntry',
   'doFetchFishDataEntry',
+  'doFetchSearchDataEntry',
+  'doFetchTelemetryDataEntry',
+  'doUpdateUrl',
   ({
     doFetchMoRiverDataEntry,
     doFetchSupplementalDataEntry,
     doFetchFishDataEntry,
+    doFetchSearchDataEntry,
+    doFetchTelemetryDataEntry,
+    doUpdateUrl,
   }) => {
     const [pitTag, setPitTag] = useState('');
     const [tableId, setTableId] = useState('');
@@ -45,6 +51,15 @@ const FindDataSheet = connect(
         case 'missouriRiver':
           doFetchMoRiverDataEntry(params);
           break;
+        case 'searchEffort':
+          doFetchSearchDataEntry(params);
+          break;
+        case 'telemetry':
+          doFetchTelemetryDataEntry(params, doUpdateUrl('/sites-list/datasheet/telemetry-edit'));
+          break;
+        // case 'procedure':
+        //   doFetchProcedureDataEntry(params);
+        //   break;
         default:
           console.log('select a datasheet type');
           break;

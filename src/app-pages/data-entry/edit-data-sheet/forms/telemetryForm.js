@@ -1,97 +1,51 @@
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import { frequencyIdOptions, macroOptions, mesoOptions, positionConfidenceOptions } from './_shared/selectHelper';
+import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
+import Approval from 'app-pages/data-entry/datasheets/components/approval';
 
-const reduceFormState = (state, action) => {
+const reducer = (state, action) => {
   switch (action.type) {
-    case 'update':
+    case 'UPDATE_INPUT':
       return {
         ...state,
         [action.field]: action.value,
       };
+    case 'INITIALIZE_FORM':
+      return Object.assign({}, state, action.payload);
     default:
-      throw new Error();
+      return state;
   }
 };
 
 const TelemetryForm = connect(
+  'doSaveTelemetryDataEntry',
+  'doUpdateTelemetryDataEntry',
   'selectDataEntryData',
+  'selectDataEntry',
+  'selectDataEntryLastParams',
+  'selectSitesData',
   ({
+    doSaveTelemetryDataEntry,
+    doUpdateTelemetryDataEntry,
     dataEntryData,
+    dataEntry,
+    dataEntryLastParams,
+    sitesData,
     edit
   }) => {
-    const [formData, dispatch] = useReducer(reduceFormState, edit ? dataEntryData : {});
-    const formComplete = edit ? !!defaultComplete : false;
-
-    const {
-      bendRiverMile, // *
-      bendrn, // *
-      complete: defaultComplete,
-      fieldOffice,
-      project,
-      sampleUnit, // *
-      sampleUnitType, // *
-      season,
-      segment,
-      year, // *
-      checkby,
-      comments,
-      complete,
-      conductivity,
-      depth1,
-      depth2,
-      depth3,
-      discharge,
-      distance,
-      do: doValue,
-      editInitials,
-      gravel,
-      micro,
-      netrivermile,
-      noTurbidity,
-      noVelocity,
-      qc,
-      recorder,
-      riverstage,
-      sand,
-      setdate,
-      silt,
-      startLatitude,
-      startLongitude,
-      startTime,
-      stopLatitude,
-      stopLongitude,
-      stopTime,
-      structurenumber,
-      subsample,
-      subsamplepass,
-      temp,
-      turbidity,
-      u1,
-      u2,
-      u3,
-      u4,
-      u5,
-      usgs,
-      velocity02or06_1,
-      velocity02or06_2,
-      velocity02or06_3,
-      velocity08_1,
-      velocity08_2,
-      velocity08_3,
-      velocitybot1,
-      velocitybot2,
-      velocitybot3,
-      width,
-    } = formData;
+    const initialState = {
+      seId: dataEntryLastParams.seId
+    };
+    const [state, dispatch] = useReducer(reducer, initialState);
 
     const handleChange = (e) => {
       dispatch({
-        type: 'update',
+        type: 'UPDATE_INPUT',
         field: e.target.name,
         value: e.target.value
       });
@@ -99,166 +53,97 @@ const TelemetryForm = connect(
 
     const handleSelect = (field, val) => {
       dispatch({
-        type: 'update',
+        type: 'UPDATE_INPUT',
         field: field,
         value: val
       });
     };
 
+    const handleNumber = e => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: e.target.name,
+        value: isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value)
+      });
+    };
+
+    const handleFloat = e => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: e.target.name,
+        value: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value)
+      });
+    };
+
+    const doSave = () => {
+      if (edit) {
+        doUpdateTelemetryDataEntry(state);
+      } else {
+        doSaveTelemetryDataEntry(state);
+      }
+    };
+
+    const saveIsDisabled = !(
+      !!state['radioTagNum'] &&
+      !!state['frequencyIdCode'] &&
+      !!state['captureDate'] &&
+      !!state['captureLatitude'] &&
+      !!state['captureLongitude'] &&
+      !!state['positionConfidence']
+    );
+
+    useEffect(() => {
+      if (edit) {
+        dispatch({
+          type: 'INITIALIZE_FORM',
+          payload: dataEntryData,
+        });
+      }
+    }, [edit, dataEntryData]);
+
+    console.log(state);
+
     return (
       <>
-        <div className='row'>
+        <Row>
           <div className='col-9'>
             <h4>{edit ? 'Edit' : 'Create'} Telemetry Datasheet</h4>
           </div>
-        </div>
+        </Row>
+        {/* @TODO: include component props */}
         {/* Top Level Info */}
-        <Card className='mt-3'>
-          <Card.Body>
-            {edit && <>
-              <div className='row'>
-                <div className='col-3'>
-                  <b className='mr-3'>Data Sheet Id:</b>
-                  {mrId || '--'}
-                </div>
-                <div className='col-3'>
-                  <b className='mr-2'>Field Id:</b>
-                  {mrFid || '--'}
-                </div>
-              </div>
-              <hr />
-            </>
-            }
-            <div className='row mt-2'>
-              <div className='col-2'>
-                <b className='mr-2'>Year:</b>
-                {year || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Field Office:</b>
-                {fieldOffice || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Project:</b>
-                {project || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Segment:</b>
-                {segment || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Season:</b>
-                {season || '--'}
-              </div>
-            </div>
-            <hr />
-            <div className='row mt-2'>
-              <div className='col-2'>
-                <b className='mr-2'>Sample Unit Type:</b>
-                {sampleUnitType || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Sample Unit:</b>
-                {sampleUnit || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>R/N:</b>
-                {bendrn || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Bend River Mile:</b>
-                {bendRiverMile || '--'}
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
+        <DataHeader />
         {/* Approval */}
-        <Card className='mt-3'>
-          <Card.Body>
-            <div className='row'>
-              <div className='col-3' style={{ borderRight: '1px solid lightgray' }}>
-                <div className='row'>
-                  <div className='col-4 pl-4'>
-                    <label><small>Checked By</small></label>
-                    <div>{checkby || '--'}</div>
-                  </div>
-                  <div className='col-4 text-center'>
-                    <label><small>Approved?</small></label>
-                    <input
-                      disabled={formComplete}
-                      type='checkbox'
-                      title='No Turbidity Field'
-                      className='form-control mt-1'
-                      style={{ height: '15px', width: '15px', margin: 'auto' }}
-                      checked={!!complete}
-                      // onClick={() => dispatch({ type: 'update', field: 'complete', value: !!complete ? '' : '1' })}
-                      // onClick={handleSelect('complete', !!complete ? '' : '1')}
-                      onChange={() => { }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className='col-1'>
-                <label><small>QC</small></label>
-                <input
-                  disabled={formComplete}
-                  type='text'
-                  title='No Turbidity Field'
-                  className='form-control mt-1'
-                  value={qc}
-                // onChange={e => dispatch({ type: 'update', field: 'qc', value: e.target.value })}
-                // onChange={handleChange}
-                />
-              </div>
-              <div className='col-2 offset-6'>
-                <div className='float-right pt-4'>
-                  <Button
-                    isOutline
-                    size='small'
-                    className='mr-2'
-                    variant='secondary'
-                    text='Cancel'
-                    href='/find-data-sheet'
-                  />
-                  {!formComplete && (
-                    <Button
-                      size='small'
-                      variant='success'
-                      text='Save'
-                    // handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                    />
-                  )}
-                </div>
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
+        <Approval />
         {/* Form Fields */}
         <Card className='mt-3'>
           <Card.Header text='Telemetry Datasheet Form' />
           <Card.Body>
             <Row>
               <div className='col-2'>
-                <Input name='bend' label='Bend' />
+                <Input name='bend' label='Bend' type='number' value={state['bend'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
-                <Input name='radioTagNum' label='Radio Tag Number' />
+                <Input name='radioTagNum' label='Radio Tag Number' type='number' value={state['radioTagNum'] || ''} onChange={handleNumber} isRequired />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
-                  name='frequencyId'
+                  name='frequencyIdCode'
                   label='Frequency ID'
+                  value={Number(state['frequencyIdCode'])}
                   options={frequencyIdOptions}
+                  onChange={val => handleSelect('frequencyIdCode', val)}
+                  isRequired
                 />
               </div>
               <div className='col-2'>
-                <Input name='captureTime' label='Capture Time' />
+                <Input name='captureDate' label='Capture Time' value={state['captureDate']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='captureLatitude' label='Capture Longitude' />
+                <Input name='captureLatitude' label='Capture Latitude' type='number' value={state['captureLatitude'] || ''} onChange={handleFloat} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='captureLongitude' label='Capture Longitude' />
+                <Input name='captureLongitude' label='Capture Longitude' type='number' value={state['captureLongitude'] || ''} onChange={handleFloat} isRequired />
               </div>
             </Row>
             <Row>
@@ -266,14 +151,19 @@ const TelemetryForm = connect(
                 <SelectCustomLabel
                   name='positionConfidence'
                   label='Position Confidence'
+                  value={Number(state['positionConfidence'])}
                   options={positionConfidenceOptions}
+                  onChange={val => handleSelect('positionConfidence', val)}
+                  isRequired
                 />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
-                  name='meso'
+                  name='mesoId'
                   label='Meso'
+                  value={state['mesoId']}
                   options={mesoOptions}
+                  onChange={val => handleSelect('mesoId', val)}
                 />
               </div>
               <div className='col-2'>
@@ -281,41 +171,43 @@ const TelemetryForm = connect(
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
-                  name='macro'
+                  name='macroId'
                   label='Macro'
+                  value={state['macroId']}
                   options={macroOptions}
+                  onChange={val => handleSelect('macroId', val)}
                 />
               </div>
               <div className='col-2'>
-                <Input name='temp' label='Temp' />
+                <Input name='temp' label='Temp' type='number' value={state['temp'] || ''} onChange={handleFloat} />
               </div>
               <div className='col-2'>
-                <Input name='conductivity' label='Conductivity' />
+                <Input name='conductivity' label='Conductivity' type='number' value={state['conductivity'] || ''} onChange={handleNumber} />
               </div>
             </Row>
             <Row>
               <div className='col-2'>
-                <Input name='turbidity' label='Turbidity' />
+                <Input name='turbidity' label='Turbidity' type='number' value={state['turbidity'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
-                <Input name='silt' label='Silt' />
+                <Input name='silt' label='Silt' type='number' value={state['silt'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
-                <Input name='sand' label='Sand' />
+                <Input name='sand' label='Sand' type='number' value={state['sand'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
-                <Input name='gravel' label='Gravel' />
+                <Input name='gravel' label='Gravel' type='number' value={state['gravel'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-4'>
-                <TextArea name='comments' label='Comments' />
+                <TextArea name='comments' label='Comments' value={state['comments']} onChange={handleChange} />
               </div>
             </Row>
             <Row>
               <div className='col-5'>
-                <TextArea name='editComments' label='Edit Comments' />
+                <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} />
               </div>
               <div className='col-2'>
-                <Input name='editInitials' label='Edit Initials' />
+                <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} />
               </div>
             </Row>
             <div className='row'>
@@ -329,22 +221,13 @@ const TelemetryForm = connect(
                     text='Cancel'
                   // href='/find-data-sheet'
                   />
-                  {edit && (
-                    <Button
-                      size='small'
-                      variant='danger'
-                      text='Delete'
-                    // handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                    />
-                  )}
-                  {!formComplete && (
-                    <Button
-                      size='small'
-                      variant='success'
-                      text={edit ? 'Apply Changes' : 'Save'}
-                    // handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                    />
-                  )}
+                  <Button
+                    size='small'
+                    variant='success'
+                    text={edit ? 'Apply Changes' : 'Save'}
+                    handleClick={() => doSave()}
+                    isDisabled={saveIsDisabled}
+                  />
                 </div>
               </div>
             </div>

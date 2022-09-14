@@ -46,7 +46,6 @@ const MissouriDsTable = connect(
           <AgGridReact
             rowHeight={35}
             rowData={rowData}
-            // onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
             defaultColDef={{
               width: 150,
             }}

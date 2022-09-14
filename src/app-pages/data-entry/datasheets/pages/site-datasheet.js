@@ -19,7 +19,6 @@ const SiteDatasheet = connect(
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
 
-    console.log('sitedata: ', sitesData);
     const {
       siteId,
       year,
