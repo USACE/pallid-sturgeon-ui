@@ -4,8 +4,8 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
-
-import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
+import SearchIdCellRenderer from 'common/gridCellRenderers/searchIdCellRenderer';
+import TelemetryIdCellRenderer from 'common/gridCellRenderers/telemetryIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -32,7 +32,7 @@ const SearchDsTable = connect(
         text='Create Search Effort Datasheet'
         title='Create Search Effort Datasheet'
         className='float-right mr-2'
-        handleClick={() => doUpdateUrl('/sites-list/datasheet/searchEffort/create')}
+        handleClick={() => doUpdateUrl('/sites-list/datasheet/searchEffort-create')}
       />
       <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
         <AgGridReact
@@ -43,10 +43,12 @@ const SearchDsTable = connect(
             width: 150,
           }}
           frameworkComponents={{
-            editCellRenderer: EditCellRenderer,
+            searchIdCellRenderer: SearchIdCellRenderer,
+            telemetryIdCellRenderer: TelemetryIdCellRenderer,
           }}
         >
-          <AgGridColumn field='seId' headerName='Search ID' sortable unSortIcon />
+          <AgGridColumn field='seId' headerName='Search ID' cellRenderer='searchIdCellRenderer' sortable unSortIcon />
+          <AgGridColumn field='dsId' cellRenderer='telemetryIdCellRenderer' cellRendererParams={{ paramType: 'seId', uri: '/sites-list/datasheet/telemetry'}} sortable unSortIcon />
           <AgGridColumn field='searchTypeCode' sortable unSortIcon />
           <AgGridColumn field='startTime' sortable unSortIcon />
           <AgGridColumn field='startLatitude' sortable unSortIcon />

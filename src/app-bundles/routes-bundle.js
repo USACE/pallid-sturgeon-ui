@@ -22,6 +22,7 @@ import TagReplacement from 'app-pages/data-summaries/tagReplacement';
 import EditUser from 'app-pages/admin/editUser';
 import MultipleRecordApproval from 'app-pages/admin/multipleRecordApproval';
 import SiteDatasheet from 'app-pages/data-entry/datasheets/pages/site-datasheet';
+import TelemetryDsTable from 'app-pages/data-entry/datasheets/tables/telemetryDsTable';
 
 export default createRouteBundle(
   {
@@ -45,6 +46,7 @@ export default createRouteBundle(
     '/sites-list': SitesList,
     '/sites-list/create-new-site': CreateNewSite,
     '/sites-list/datasheet': SiteDatasheet,
+    '/sites-list/datasheet/telemetry': TelemetryDsTable,
     '/sites-list/datasheet/:form': EditDataSheet,
     '/tag-replacement': TagReplacement,
     '*': NotFound,

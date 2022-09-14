@@ -462,14 +462,14 @@ export const searchTypeOptions = [
 
 // Telemetry Form Select Options
 export const frequencyIdOptions = [
-  { value: 'A69-1602', text: 'A69-1602' },
-  { value: 'R_149.760_3', text: 'R_149.760_3' },
-  { value: 'R_149.620_3', text: 'R_149.620_3' },
-  { value: 'A_180.0', text: 'A_180.0' },
-  { value: 'A_76.8_1.1.4', text: 'A_76.8_1.1.4' },
-  { value: 'A_200_1.14.1', text: 'A_200_1.14.1' },
-  { value: 'A_69.0', text: 'A_69.0' },
-  { value: 'A69-1601', text: 'A69-1601' },
+  { value: 1, text: 'A69-1602' },
+  { value: 2, text: 'R_149.760_3' },
+  { value: 3, text: 'R_149.620_3' },
+  { value: 4, text: 'A_180.0' },
+  { value: 5, text: 'A_76.8_1.1.4' },
+  { value: 6, text: 'A_200_1.14.1' },
+  { value: 7, text: 'A_69.0' },
+  { value: 8, text: 'A69-1601' },
 ];
 
 export const positionConfidenceOptions = [

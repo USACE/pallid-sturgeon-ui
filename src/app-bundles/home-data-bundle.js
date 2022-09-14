@@ -17,19 +17,19 @@ const homeDataBundle = {
       unapprovedDataSheets: {
         data: [],
         totalResults: 0,
-        pageSize: 100,
+        pageSize: 20,
         pageNumber: 0,
       },
       uncheckedDataSheets: {
         data: [],
         totalResults: 0,
-        pageSize: 100,
+        pageSize: 20,
         pageNumber: 0,
       },
       bafiDataSheets: {
         data: [],
         totalResults: 0,
-        pageSize: 100,
+        pageSize: 20,
         pageNumber: 0,
       },
     };
