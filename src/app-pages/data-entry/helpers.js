@@ -56,3 +56,30 @@ export const createProjectDropdownOptions = data => {
     value: opt.code,
   }));
 };
+
+export const createMesoOptions = data => {
+  if (!data) return [];
+
+  return data.map(opt => ({
+    text: opt.code,
+    value: opt.code,
+  }));
+};
+
+export const createStructureFlowOptions = data => {
+  if (!data) return [];
+
+  return data.map(opt => ({
+    text: opt.code,
+    value: opt.id,
+  }));
+};
+
+export const createStructureModOptions = data => {
+  if (!data) return [];
+
+  return data.map((opt, index) => ({
+    text: opt.description,
+    value: opt.code,
+  }));
+};

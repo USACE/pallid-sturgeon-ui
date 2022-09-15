@@ -1,3 +1,5 @@
+import { queryFromObject } from 'utils';
+
 export default {
   name: 'domains',
 
@@ -10,6 +12,9 @@ export default {
       fieldOffices: [],
       sampleUnitTypes: [],
       bendRn: [],
+      meso: [],
+      structureFlow: [],
+      structureMod: [],
     };
 
     return (state = initialData, { type, payload }) => {
@@ -27,7 +32,13 @@ export default {
         case 'DOMAIN_UPDATED_FIELD_OFFICES':
           return { ...state, fieldOffices: payload };
         case 'DOMAIN_UPDATED_SAMPLE_UNIT_TYPES':
-          return { ... state, sampleUnitTypes: payload };
+          return { ...state, sampleUnitTypes: payload };
+        case 'DOMAIN_UPDATED_MESO':
+          return { ...state, meso: payload };
+        case 'DOMAIN_UPDATED_STRUCTURE_FLOW':
+          return { ...state, structureFlow: payload };
+        case 'DOMAIN_UPDATED_STRUCTURE_MOD':
+          return { ...state, structureMod: payload };
         default:
           return state;
       }
@@ -42,6 +53,9 @@ export default {
   selectDomainsBendRn: state => state.domains.bendRn,
   selectDomainsFieldOffices: state => state.domains.fieldOffices,
   selectDomainsSampleUnitTypes: state => state.domains.sampleUnitTypes,
+  selectDomainsMeso: state => state.domains.meso,
+  selectDomainsStructureFlow: state => state.domains.structureFlow,
+  selectDomainsStructureMod: state => state.domains.structureMod,
 
   doDomainProjectsFetch: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_PROJECTS_START' });
@@ -138,6 +152,48 @@ export default {
         payload: body,
       });
       dispatch({ type: 'DOMAIN_FETCH_SAMPLE_UNIT_TYPES_FINISHED' });
+    });
+  },
+
+  doDomainsMesoFetch: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_MESO_START' });
+
+    const url = `/psapi/meso${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_MESO',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_MESO_FINISHED' });
+    });
+  },
+
+  doDomainsStructureFlowFetch: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_FLOW_START' });
+
+    const url = `/psapi/structureFlow${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_STRUCTURE_FLOW',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_FLOW_FINISHED' });
+    });
+  },
+
+  doDomainsStructureModFetch: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_MOD_START' });
+
+    const url = `/psapi/structureMod${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_STRUCTURE_MOD',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_MOD_FINISHED' });
     });
   },
 };
