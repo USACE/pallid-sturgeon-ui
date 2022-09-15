@@ -86,7 +86,7 @@ const Select = ({
         disabled={isDisabled}
       >
         {showPlaceholder && placeholderOption}
-        {options.map(option => <Option value={option.value} text={option.text} key={option.value} />)}
+        {options.map((option, index) => <Option value={option.value} text={option.text} key={index} />)}
       </select>
     </>
   );

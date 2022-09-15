@@ -4,9 +4,10 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
-import { gearCodeOptions, macroOptions, mesoOptions, microStructureOptions, setSite_1_2Options, setSite_3Options, u7Options } from './_shared/selectHelper';
+import { gearCodeOptions, macroOptions, microStructureOptions, setSite_1_2Options, setSite_3Options, u7Options } from './_shared/selectHelper';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import Approval from 'app-pages/data-entry/datasheets/components/approval';
+import { createMesoOptions, createStructureFlowOptions, createStructureModOptions } from 'app-pages/data-entry/helpers';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -27,13 +28,25 @@ const reducer = (state, action) => {
 const MissouriRiverForm = connect(
   'doSaveMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
+  'doDomainsMesoFetch',
+  'doDomainsStructureFlowFetch',
+  'doDomainsStructureModFetch',
   'selectDataEntryData',
   'selectSitesData',
+  'selectDomainsMeso',
+  'selectDomainsStructureFlow',
+  'selectDomainsStructureMod',
   ({
     doSaveMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
+    doDomainsMesoFetch,
+    doDomainsStructureFlowFetch,
+    doDomainsStructureModFetch,
     dataEntryData,
     sitesData,
+    domainsMeso,
+    domainsStructureFlow,
+    domainsStructureMod,
     edit,
   }) => {
     const initialState = {
@@ -76,6 +89,15 @@ const MissouriRiverForm = connect(
       }
       if (field === 'noVelocity') {
         setIsNoVelocity(val);
+      }
+      if (field === 'macro') {
+        doDomainsMesoFetch({ macro: val});
+      }
+      if (field === 'microStructure') {
+        doDomainsStructureFlowFetch({ microStructure: val });
+      }
+      if (field === 'structureFlow') {
+        doDomainsStructureModFetch({ structureFlow: val });
       }
       dispatch({
         type: 'UPDATE_INPUT',
@@ -233,7 +255,7 @@ const MissouriRiverForm = connect(
                       name='meso'
                       value={state['meso']}
                       onChange={val => handleSelect('meso', val)}
-                      options={mesoOptions}
+                      options={createMesoOptions(domainsMeso)}
                       isDisabled={!formComplete}
                       isRequired
                     />
@@ -270,12 +292,7 @@ const MissouriRiverForm = connect(
                       name='structureFlow'
                       value={state['structureFlow']}
                       onChange={val => handleSelect('structureFlow', val)}
-                      options={[
-                        { value: 0, text: '0' },
-                        { value: 1, text: 'Dry' },
-                        { value: 2, text: 'Partial' },
-                        { value: 3, text: 'Overflowing' },
-                      ]}
+                      options={createStructureFlowOptions(domainsStructureFlow)}
                       isDisabled={!formComplete}
                     />
                   </div>
@@ -285,17 +302,7 @@ const MissouriRiverForm = connect(
                       name='structureMod'
                       value={state['structureMod']}
                       onChange={val => handleSelect('structureMod', val)}
-                      options={[
-                        { value: 0, text: '0' },
-                        { value: 1, text: 'Unnotched' },
-                        { value: 2, text: 'Bank Notch' },
-                        { value: 3, text: 'Top Notch' },
-                        { value: 4, text: 'Side Notch' },
-                        // 5 & 6 ?
-                        { value: 7, text: 'Bank & Top Notch' },
-                        { value: 8, text: 'Bank & Side Notch' },
-                        { value: 9, text: 'Notch (Undefined)' },
-                      ]}
+                      options={createStructureModOptions(domainsStructureMod)}
                       isDisabled={!formComplete}
                     />
                   </div>
@@ -611,7 +618,7 @@ const MissouriRiverForm = connect(
                 />
               </div>
               <div className='col-5'>
-                <TextArea label='Comments' name='comments' rows={5} value={state['comments']} onChange={handleChange} isDisabled={!formComplete} />
+                <TextArea label='Comments' name='lastEditComment' rows={5} value={state['lastEditComment']} onChange={handleChange} isDisabled={!formComplete} />
                 <Row className='mt-2'>
                   <div className='col-9 pt-1 text-right'>
                     <label><small>Edit Initials</small></label>
@@ -641,7 +648,7 @@ const MissouriRiverForm = connect(
                     variant='success'
                     text='Save'
                     handleClick={() => doSave()}
-                    isDisabled={edit ? true : saveIsDisabled}
+                    isDisabled={saveIsDisabled}
                   />
                 </div>
               </div>
