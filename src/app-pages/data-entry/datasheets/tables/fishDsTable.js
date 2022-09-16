@@ -28,61 +28,57 @@ const FishDsTable = connect(
     doUpdateUrl,
     dataEntryData,
     dataEntry,
-  }) => {
-    console.log('fish data - data entry data: ', dataEntryData);
-    console.log('fish data - data entry: ', dataEntry);
-
-    return (
-      <div className='container-fluid overflow-auto'>
-        <Row>
-          <div className='col-8'>
-            <h4>Missouri River Datasheet - Fish Datasheets</h4>
-          </div>
-        </Row>
-        {/* @TODO: include component props */}
-        {/* Top Level Info */}
-        <DataHeader />
-        {/* Approval */}
-        <Approval />
-        {/* Fish Data Table */}
-        <Card className='mt-3'>
-          <Card.Header text='Fish Datasheets' />
-          <Card.Body>
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              text='Export as CSV'
-              icon={<Icon icon='download' />}
-            // handleClick={() => doFetchAllDatasheet('search-datasheet')}
-            />
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              text='Create Fish Datasheet'
-              title='Create Fish Datasheet'
-              className='float-right mr-2'
-              handleClick={() => doUpdateUrl('/sites-list/datasheet/fish-create')}
-            />
-            <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
-              <AgGridReact
-                defaultColDef={{
-                  width: 100,
-                  // editable: true,
-                  // lockPinned: true,
-                }}
-                rowHeight={35}
-                rowData={dataEntry.data}
-                // editType='fullRow'
-                // onRowValueChanged={({ data }) => doUpdateFishDataEntry(data)}
-                frameworkComponents={{
-                  // editCellRenderer: EditCellRenderer,
-                  speciesEditor: SpeciesEditor,
-                  fishIdCellRenderer: FishIdCellRenderer
-                }}
-              >
-                {/* <AgGridColumn
+  }) => (
+    <div className='container-fluid overflow-auto'>
+      <Row>
+        <div className='col-8'>
+          <h4>Missouri River Datasheet - Fish Datasheets</h4>
+        </div>
+      </Row>
+      {/* @TODO: include component props */}
+      {/* Top Level Info */}
+      <DataHeader />
+      {/* Approval */}
+      <Approval />
+      {/* Fish Data Table */}
+      <Card className='mt-3'>
+        <Card.Header text='Fish Datasheets' />
+        <Card.Body>
+          <Button
+            isOutline
+            size='small'
+            variant='info'
+            text='Export as CSV'
+            icon={<Icon icon='download' />}
+          // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+          />
+          <Button
+            isOutline
+            size='small'
+            variant='info'
+            text='Create Fish Datasheet'
+            title='Create Fish Datasheet'
+            className='float-right mr-2'
+            handleClick={() => doUpdateUrl('/sites-list/datasheet/fish-create')}
+          />
+          <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
+            <AgGridReact
+              defaultColDef={{
+                width: 100,
+                // editable: true,
+                // lockPinned: true,
+              }}
+              rowHeight={35}
+              rowData={dataEntry.data}
+              // editType='fullRow'
+              // onRowValueChanged={({ data }) => doUpdateFishDataEntry(data)}
+              frameworkComponents={{
+                // editCellRenderer: EditCellRenderer,
+                speciesEditor: SpeciesEditor,
+                fishIdCellRenderer: FishIdCellRenderer
+              }}
+            >
+              {/* <AgGridColumn
                   field='edit'
                   width={90}
                   pinned
@@ -90,36 +86,35 @@ const FishDsTable = connect(
                   cellRenderer='editCellRenderer'
                   editable={false}
                 /> */}
-                <AgGridColumn field='fid' headerName='Fish ID' cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/fish-edit' }} />
-                <AgGridColumn field='ffid' headerName='Field ID' />
-                <AgGridColumn field='panelHook' headerName='Panel Hook' />
-                <AgGridColumn field='species' cellEditor='speciesEditor' />
-                <AgGridColumn field='length' />
-                <AgGridColumn field='weight' />
-                <AgGridColumn field='countF' headerName='Count' />
-                <AgGridColumn field='ftPrefix' headerName='FT Prefix' />
-                <AgGridColumn field='mR' headerName='M/R' />
-                <AgGridColumn field='ftnum' headerName='Genetics Vial #' />
-                <AgGridColumn field='finCurl' />
-                <AgGridColumn field='otolith' />
-                <AgGridColumn field='raySpine' headerName='Ray Spine' />
-                <AgGridColumn field='scale' />
-                <AgGridColumn field='bait' />
-                <AgGridColumn field='editInitials' />
-                <AgGridColumn field='lastEditComment' />
-                <AgGridColumn field='uploadedBy' />
-              </AgGridReact>
-            </div>
-            {/* <Pagination
+              <AgGridColumn field='fid' headerName='Fish ID' cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/fish-edit' }} />
+              <AgGridColumn field='ffid' headerName='Field ID' />
+              <AgGridColumn field='panelHook' headerName='Panel Hook' />
+              <AgGridColumn field='species' cellEditor='speciesEditor' />
+              <AgGridColumn field='length' />
+              <AgGridColumn field='weight' />
+              <AgGridColumn field='countF' headerName='Count' />
+              <AgGridColumn field='ftPrefix' headerName='FT Prefix' />
+              <AgGridColumn field='mR' headerName='M/R' />
+              <AgGridColumn field='ftnum' headerName='Genetics Vial #' />
+              <AgGridColumn field='finCurl' />
+              <AgGridColumn field='otolith' />
+              <AgGridColumn field='raySpine' headerName='Ray Spine' />
+              <AgGridColumn field='scale' />
+              <AgGridColumn field='bait' />
+              <AgGridColumn field='editInitials' />
+              <AgGridColumn field='lastEditComment' />
+              <AgGridColumn field='uploadedBy' />
+            </AgGridReact>
+          </div>
+          {/* <Pagination
               className='mt-2'
               itemCount={totalCount}
               handlePageChange={(pageNumber, itemsPerPage) => setPagination({ pageNumber, itemsPerPage })}
             /> */}
-          </Card.Body>
-        </Card>
-      </div>
-    );
-  }
+        </Card.Body>
+      </Card>
+    </div>
+  )
 );
 
 export default FishDsTable;
