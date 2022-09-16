@@ -22,7 +22,7 @@ const EditDataSheet = connect(
         case 'missouriRiver':
           return <MissouriRiverForm edit={formType === 'edit' ? true : false} />;
         case 'fish':
-          return <FishForm />;
+          return <FishForm edit={formType === 'edit' ? true : false} />;
         case 'supplemental':
           return <SupplementalForm edit={formType === 'edit' ? true : false} />;
         case 'searchEffort':

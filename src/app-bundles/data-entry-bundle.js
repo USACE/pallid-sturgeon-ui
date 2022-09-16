@@ -160,7 +160,7 @@ export default {
   },
 
 
-  doFetchFishDataEntry: (params) => ({ dispatch, store, apiGet }) => {
+  doFetchFishDataEntry: (params, callback = null) => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'FISH_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = toast.loading('Finding datasheet...');
 
@@ -180,33 +180,14 @@ export default {
           tError(toastId, 'No datasheets found. Please try again.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
-          store.doUpdateUrl('/sites-list/datasheet/fish-edit');
+          if (callback && typeof callback === 'function') {
+            callback();
+          }
         }
         dispatch({ type: 'FISH_DATA_ENTRY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for datasheet. Please try again.');
-      }
-    });
-  },
-
-  doFetchFishDataByMrId: () => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'FISH_DATA_ENTRY_FETCH_BY_MRID_START' });
-
-    const data = store.selectDataEntryData();
-    const { mrId } = data;
-
-    const url = `/psapi/fishDataEntry?mrId=${mrId}`;
-
-    apiGet(url, (err, body) => {
-      if (!err) {
-        dispatch({
-          type: 'DATA_ENTRY_UPDATE_FISH_DATA',
-          payload: body,
-        });
-        dispatch({ type: 'FISH_DATA_ENTRY_FETCH_BY_MRID_FINISHED' });
-      } else {
-        dispatch({ type: 'FISH_DATA_ENTRY_FETCH_BY_MRID_ERROR', payload: err });
       }
     });
   },
@@ -325,6 +306,25 @@ export default {
         // store.doFetchMoRiverDataEntry(params, true);
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
+        tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
+      }
+    });
+  },
+
+  doSaveFishDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
+    dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_START' });
+    const toastId = toast.loading('Saving datasheet...');
+    // const params = store.selectDataEntryLastParams();
+
+    const url = '/psapi/fishDataEntry';
+
+    apiPost(url, formData, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, 'Datasheet successfully updated!');
+        dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
+        // store.doFetchMoRiverDataEntry(params, true);
+      } else {
+        dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
       }
     });

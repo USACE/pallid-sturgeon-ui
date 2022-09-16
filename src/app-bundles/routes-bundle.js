@@ -23,6 +23,7 @@ import EditUser from 'app-pages/admin/editUser';
 import MultipleRecordApproval from 'app-pages/admin/multipleRecordApproval';
 import SiteDatasheet from 'app-pages/data-entry/datasheets/pages/site-datasheet';
 import TelemetryDsTable from 'app-pages/data-entry/datasheets/tables/telemetryDsTable';
+import FishDsTable from 'app-pages/data-entry/datasheets/tables/fishDsTable';
 
 export default createRouteBundle(
   {
@@ -47,6 +48,7 @@ export default createRouteBundle(
     '/sites-list/create-new-site': CreateNewSite,
     '/sites-list/datasheet': SiteDatasheet,
     '/sites-list/datasheet/telemetry': TelemetryDsTable,
+    '/sites-list/datasheet/fish': FishDsTable,
     '/sites-list/datasheet/:form': EditDataSheet,
     '/tag-replacement': TagReplacement,
     '*': NotFound,

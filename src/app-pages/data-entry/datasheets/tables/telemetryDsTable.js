@@ -30,7 +30,6 @@ const TelemetryDsTable = connect(
     <div className='container-fluid overflow-auto'>
       <Row>
         <div className='col-8'>
-          {/* @TODO: include search effort ID */}
           <h4>Search Effort Datasheet - Telemetry Datasheets </h4>
         </div>
       </Row>
