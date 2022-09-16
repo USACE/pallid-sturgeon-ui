@@ -1,0 +1,125 @@
+import React, { useEffect, useState } from 'react';
+import { connect } from 'redux-bundler-react';
+import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+
+import Button from 'app-components/button';
+import Card from 'app-components/card';
+import Icon from 'app-components/icon';
+import Pagination from 'app-components/pagination';
+import { Row } from '../../edit-data-sheet/forms/_shared/helper';
+import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
+import SpeciesEditor from 'common/gridCellEditors/speciesEditor';
+import FishIdCellRenderer from 'common/gridCellRenderers/fishIdCellRenderer';
+import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
+import Approval from 'app-pages/data-entry/datasheets/components/approval';
+
+// For testing
+// 2113724 (Field Office: MO)
+
+const FishDsTable = connect(
+  // 'doFetchSupplementalDataEntry',
+  // 'doUpdateFishDataEntry',
+  'doUpdateUrl',
+  'selectDataEntryData',
+  'selectDataEntry',
+  ({
+    // doFetchSupplementalDataEntry,
+    // doUpdateFishDataEntry,
+    doUpdateUrl,
+    dataEntryData,
+    dataEntry,
+  }) => {
+    console.log('fish data - data entry data: ', dataEntryData);
+    console.log('fish data - data entry: ', dataEntry);
+
+    return (
+      <div className='container-fluid overflow-auto'>
+        <Row>
+          <div className='col-8'>
+            <h4>Missouri River Datasheet - Fish Datasheets</h4>
+          </div>
+        </Row>
+        {/* @TODO: include component props */}
+        {/* Top Level Info */}
+        <DataHeader />
+        {/* Approval */}
+        <Approval />
+        {/* Fish Data Table */}
+        <Card className='mt-3'>
+          <Card.Header text='Fish Datasheets' />
+          <Card.Body>
+            <Button
+              isOutline
+              size='small'
+              variant='info'
+              text='Export as CSV'
+              icon={<Icon icon='download' />}
+            // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+            />
+            <Button
+              isOutline
+              size='small'
+              variant='info'
+              text='Create Fish Datasheet'
+              title='Create Fish Datasheet'
+              className='float-right mr-2'
+              handleClick={() => doUpdateUrl('/sites-list/datasheet/fish-create')}
+            />
+            <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
+              <AgGridReact
+                defaultColDef={{
+                  width: 100,
+                  // editable: true,
+                  // lockPinned: true,
+                }}
+                rowHeight={35}
+                rowData={dataEntry.data}
+                // editType='fullRow'
+                // onRowValueChanged={({ data }) => doUpdateFishDataEntry(data)}
+                frameworkComponents={{
+                  // editCellRenderer: EditCellRenderer,
+                  speciesEditor: SpeciesEditor,
+                  fishIdCellRenderer: FishIdCellRenderer
+                }}
+              >
+                {/* <AgGridColumn
+                  field='edit'
+                  width={90}
+                  pinned
+                  lockPosition
+                  cellRenderer='editCellRenderer'
+                  editable={false}
+                /> */}
+                <AgGridColumn field='fid' headerName='Fish ID' cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/fish-edit' }} />
+                <AgGridColumn field='ffid' headerName='Field ID' />
+                <AgGridColumn field='panelHook' headerName='Panel Hook' />
+                <AgGridColumn field='species' cellEditor='speciesEditor' />
+                <AgGridColumn field='length' />
+                <AgGridColumn field='weight' />
+                <AgGridColumn field='countF' headerName='Count' />
+                <AgGridColumn field='ftPrefix' headerName='FT Prefix' />
+                <AgGridColumn field='mR' headerName='M/R' />
+                <AgGridColumn field='ftnum' headerName='Genetics Vial #' />
+                <AgGridColumn field='finCurl' />
+                <AgGridColumn field='otolith' />
+                <AgGridColumn field='raySpine' headerName='Ray Spine' />
+                <AgGridColumn field='scale' />
+                <AgGridColumn field='bait' />
+                <AgGridColumn field='editInitials' />
+                <AgGridColumn field='lastEditComment' />
+                <AgGridColumn field='uploadedBy' />
+              </AgGridReact>
+            </div>
+            {/* <Pagination
+              className='mt-2'
+              itemCount={totalCount}
+              handlePageChange={(pageNumber, itemsPerPage) => setPagination({ pageNumber, itemsPerPage })}
+            /> */}
+          </Card.Body>
+        </Card>
+      </div>
+    );
+  }
+);
+
+export default FishDsTable;

@@ -15,6 +15,10 @@ export default {
       meso: [],
       structureFlow: [],
       structureMod: [],
+      species: [],
+      ftPrefixes: [],
+      mr: [],
+      otolith: [],
     };
 
     return (state = initialData, { type, payload }) => {
@@ -39,6 +43,14 @@ export default {
           return { ...state, structureFlow: payload };
         case 'DOMAIN_UPDATED_STRUCTURE_MOD':
           return { ...state, structureMod: payload };
+        case 'DOMAIN_UPDATED_SPECIES':
+          return { ...state, species: payload };
+        case 'DOMAIN_UPDATED_FT_PREFIXES':
+          return { ...state, ftPrefixes: payload };
+        case 'DOMAIN_UPDATED_MR':
+          return { ...state, mr: payload };
+        case 'DOMAIN_UPDATED_OTOLITH':
+          return { ...state, otolith: payload };
         default:
           return state;
       }
@@ -56,6 +68,10 @@ export default {
   selectDomainsMeso: state => state.domains.meso,
   selectDomainsStructureFlow: state => state.domains.structureFlow,
   selectDomainsStructureMod: state => state.domains.structureMod,
+  selectDomainsSpecies: state => state.domains.species,
+  selectDomainsFtPrefixes: state => state.domains.ftPrefixes,
+  selectDomainsMr: state => state.domains.mr,
+  selectDomainsOtolith: state => state.domains.otolith,
 
   doDomainProjectsFetch: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_PROJECTS_START' });
@@ -194,6 +210,62 @@ export default {
         payload: body,
       });
       dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_MOD_FINISHED' });
+    });
+  },
+
+  doDomainsSpeciesFetch: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_SPECIES_START' });
+
+    const url = `/psapi/species${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_SPECIES',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_SPECIES_FINISHED' });
+    });
+  },
+
+  doDomainsFtPrefixesFetch: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_FT_PREFIXES_START' });
+
+    const url = `/psapi/ftPrefix${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_FT_PREFIXES',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_FT_PREFIXES_FINISHED' });
+    });
+  },
+
+  doDomainsMrFetch: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_MR_START' });
+
+    const url = `/psapi/mr${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_MR',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_MR_FINISHED' });
+    });
+  },
+
+  doDomainsOtolithFetch: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_OTOLITH_START' });
+
+    const url = `/psapi/otolith${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_OTOLITH',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_OTOLITH_FINISHED' });
     });
   },
 };

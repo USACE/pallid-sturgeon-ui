@@ -57,7 +57,7 @@ const MissouriDsTable = connect(
           >
             <AgGridColumn field='mrId' cellRenderer='mrIdCellRenderer' sortable unSortIcon />
             <AgGridColumn field='mrFid' sortable unSortIcon />
-            <AgGridColumn field='fishCount' headerName='# of Fish' cellStyle={fishCellStyle} cellRenderer='fishIdCellRenderer' sortable unSortIcon />
+            <AgGridColumn field='fishCount' headerName='# of Fish' cellStyle={fishCellStyle} cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'mrId', uri: '/sites-list/datasheet/fish'}} sortable unSortIcon />
             <AgGridColumn field='subsample' />
             <AgGridColumn field='subsamplepass' />
             <AgGridColumn field='conductivity' sortable unSortIcon />

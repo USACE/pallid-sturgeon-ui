@@ -477,3 +477,10 @@ export const positionConfidenceOptions = [
   { value: 2, text: '2' },
   { value: 3, text: '3' },
 ];
+
+// Fish Form Select Options
+export const finCurlOptions = [
+  { value: '', text: 'N/A' },
+  { value: 'Y', text: 'Yes' },
+  { value: 'N', text: 'No' },
+];

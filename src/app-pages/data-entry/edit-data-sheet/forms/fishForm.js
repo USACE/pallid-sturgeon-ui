@@ -1,241 +1,276 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { connect } from 'redux-bundler-react';
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
-import Pagination from 'app-components/pagination';
+import { FilterSelectCustomLabel, Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
+import { finCurlOptions } from './_shared/selectHelper';
+import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
+import Approval from 'app-pages/data-entry/datasheets/components/approval';
+import { createDropdownOptions, createMesoOptions } from 'app-pages/data-entry/helpers';
 
-import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
-import SpeciesEditor from 'common/gridCellEditors/speciesEditor';
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'UPDATE_INPUT':
+      return {
+        ...state,
+        [action.field]: action.value,
+      };
+    case 'INITIALIZE_FORM':
+      return Object.assign({}, state, action.payload);
+    default:
+      return state;
+  }
+};
 
-// For testing
-// 92457 (Field Office: MO)
+// 1046 for testing
 
 const FishForm = connect(
-  'doFetchFishDataByMrId',
-  'doFetchMoRiverDataEntry',
-  'doFetchSupplementalDataEntry',
+  'doDomainsSpeciesFetch',
+  'doDomainsFtPrefixesFetch',
+  'doDomainsMrFetch',
+  'doDomainsOtolithFetch',
+  'doSaveFishDataEntry',
   'doUpdateFishDataEntry',
   'selectDataEntryData',
-  'selectDataEntryFishData',
+  'selectDataEntryLastParams',
+  'selectSitesData',
+  'selectDomainsSpecies',
+  'selectDomainsFtPrefixes',
+  'selectDomainsMr',
+  'selectDomainsOtolith',
   ({
-    doFetchFishDataByMrId,
-    doFetchMoRiverDataEntry,
-    doFetchSupplementalDataEntry,
+    doDomainsSpeciesFetch,
+    doDomainsFtPrefixesFetch,
+    doDomainsMrFetch,
+    doDomainsOtolithFetch,
+    doSaveFishDataEntry,
     doUpdateFishDataEntry,
     dataEntryData,
-    dataEntryFishData,
+    dataEntryLastParams,
+    sitesData,
+    domainsSpecies,
+    domainsFtPrefixes,
+    domainsMr,
+    domainsOtolith,
+    edit
   }) => {
-    const {
-      fid,
-      mrId,
-      year,
-      fieldOffice,
-      project,
-      segment,
-      season,
-      sampleUnitType,
-      sampleUnit,
-      bendrn,
-      bendRiverMile,
-    } = dataEntryData;
+    const initialState = {
+      mrId: dataEntryLastParams.mrId
+    };
+    const [state, dispatch] = useReducer(reducer, initialState);
 
-    const { items = [], totalCount = 0 } = dataEntryFishData;
+    const handleChange = e => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: e.target.name,
+        value: e.target.value
+      });
+    };
 
-    const [pagination, setPagination] = useState({ itemsPerPage: 20, pageNumber: 0 });
-    const pagedItems = items.filter((_e, i) => (
-      i >= pagination.pageNumber * pagination.itemsPerPage &&
-      i < pagination.pageNumber * pagination.itemsPerPage + pagination.itemsPerPage
-    ));
+    const handleSelect = (field, val) => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: field,
+        value: val
+      });
+    };
+
+    const handleNumber = e => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: e.target.name,
+        value: isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value)
+      });
+    };
+
+    const doSave = () => {
+      if (edit) {
+        doUpdateFishDataEntry(state);
+      } else {
+        doSaveFishDataEntry(state);
+      }
+    };
+
+    const saveIsDisabled = !(
+      !!state['species']
+    );
 
     useEffect(() => {
-      doFetchFishDataByMrId();
-    }, [doFetchFishDataByMrId]);
+      if (edit) {
+        dispatch({
+          type: 'INITIALIZE_FORM',
+          payload: dataEntryData,
+        });
+      }
+    }, [edit, dataEntryData]);
+
+    useEffect(() => {
+      doDomainsFtPrefixesFetch();
+      doDomainsMrFetch();
+      doDomainsOtolithFetch();
+      doDomainsSpeciesFetch();
+    }, []);
 
     return (
       <>
-        <div className='row'>
-          <div className='col-8'>
-            <h4>Fish Datasheets for Missouri River Datasheet {mrId}</h4>
+        <Row>
+          <div className='col-9'>
+            <h4>{edit ? 'Edit' : 'Create'} Fish Datasheet</h4>
           </div>
-          <div className='col-4'>
-            <div className='btn-group float-right'>
-              <Button
-                isOutline
-                size='small'
-                variant='info'
-                text='Missouri River Datasheet'
-                handleClick={() => doFetchMoRiverDataEntry({ tableId: mrId })}
-              />
-              <Button
-                isOutline
-                size='small'
-                variant='info'
-                text='Supplemental Datasheets'
-                handleClick={() => doFetchSupplementalDataEntry({ mrId })}
-              />
-            </div>
-          </div>
-        </div>
-
+        </Row>
         {/* Top Level Info */}
-        <Card className='mt-3'>
-          <Card.Body>
-            <div className='row'>
-              <div className='col-2'>
-                <b className='mr-2'>Year:</b>
-                {year || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Field Office:</b>
-                {fieldOffice || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Project:</b>
-                {project || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Segment:</b>
-                {segment || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Season:</b>
-                {season || '--'}
-              </div>
-            </div>
-            <hr />
-            <div className='row mt-2'>
-              <div className='col-2'>
-                <b className='mr-2'>Sample Unit Type:</b>
-                {sampleUnitType || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Sample Unit:</b>
-                {sampleUnit || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>R/N:</b>
-                {bendrn || '--'}
-              </div>
-              <div className='col-2'>
-                <b className='mr-2'>Bend River Mile:</b>
-                {bendRiverMile || '--'}
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
-        
+        {/* TO DO: include component props */}
+        <DataHeader />
         {/* Approval */}
+        {/* TO DO: include component props */}
+        <Approval />
+        {/* Form Fields */}
         <Card className='mt-3'>
+          <Card.Header text='Fish Datasheet Form' />
           <Card.Body>
-            <div className='row'>
-              <div className='col-3' style={{ borderRight: '1px solid lightgray' }}>
-                <div className='row'>
-                  <div className='col-4 pl-4'>
-                    <label><small>Checked By</small></label>
-                    {/* <div>{checkby || '--'}</div> */}
-                  </div>
-                  <div className='col-4 text-center'>
-                    <label><small>Approved?</small></label>
-                    {/* <input
-                      disabled={formComplete}
-                      type='checkbox'
-                      title='No Turbidity Field'
-                      className='form-control mt-1'
-                      style={{ height: '15px', width: '15px', margin: 'auto' }}
-                      checked={!!complete}
-                      onClick={() => dispatch({ type: 'update', field: 'complete', value: !!complete ? '' : '1' })}
-                      onChange={() => {}}
-                    /> */}
-                  </div>
-                </div>
+            <Row>
+              <div className='col-2'>
+                <Input name='panelHook' label='Panel/Hook' value={state['panelHook']} onChange={handleChange} />
               </div>
-              <div className='col-1'>
-                <label><small>QC</small></label>
-                {/* <input
-                  disabled={formComplete}
-                  type='text'
-                  title='No Turbidity Field'
-                  className='form-control mt-1'
-                  value={qc}
-                  onChange={e => dispatch({ type: 'update', field: 'qc', value: e.target.value })}
-                /> */}
+              <div className='col-2'>
+                <FilterSelectCustomLabel
+                  name='species'
+                  label='Species'
+                  placeholder='Select species...'
+                  value={state['species']}
+                  items={createMesoOptions(domainsSpecies)}
+                  onChange={(_, __, value) => handleSelect('species', value)}
+                  isRequired 
+                />
               </div>
-              <div className='col-2 offset-6'>
-                <div className='float-right pt-4'>
+              <div className='col-2'>
+                <Input name='length' label='Length' type='number' value={state['length'] || ''} onChange={handleNumber} />
+              </div>
+              <div className='col-2'>
+                <Input name='weight' label='Weight' type='number' value={state['weight'] || ''} onChange={handleNumber} />
+              </div>
+              <div className='col-2'>
+                <Input name='countF' label='Count' type='number' value={state['countF'] || ''} onChange={handleNumber} />
+              </div>
+              <div className='col-2'>
+                <SelectCustomLabel 
+                  name='ftprefix' 
+                  label='FT Prefix'
+                  value={state['ftprefix']}
+                  onChange={val => handleSelect('ftprefix', val)}
+                  options={createMesoOptions(domainsFtPrefixes)} 
+                />
+              </div>
+            </Row>
+            <Row>
+              <div className='col-2'>
+                <Input name='ftnum' label='Floy Tag' value={state['ftnum']} onChange={handleChange} />
+              </div>
+              <div className='col-2'>
+                <SelectCustomLabel 
+                  name='mR' 
+                  label='m/R' 
+                  value={state['mR']} 
+                  options={createDropdownOptions(domainsMr)}
+                  onChange={val => handleSelect('mR', val)} 
+                />
+              </div>
+              <div className='col-2'>
+                <Input name='geneticsVialNumber' label='Genetics Vial #' value={state['geneticsVialNumber']} onChange={handleChange} />
+              </div>
+              <div className='col-2'>
+                <Input name='condition' label='Condition' type='number' value={state['condition'] || ''} onChange={handleNumber} />
+              </div>
+              <div className='col-2'>
+                <SelectCustomLabel 
+                  name='finCurl'
+                  label='Fin Curl' 
+                  value={state['finCurl']}
+                  options={finCurlOptions}
+                  onChange={val => handleSelect('finCurl', val)}
+                />
+              </div>
+              <div className='col-2'>
+                <SelectCustomLabel 
+                  name='otolith' 
+                  label='Otolith' 
+                  value={state['otolith']}
+                  options={createDropdownOptions(domainsOtolith)}
+                  onChange={val => handleSelect('otolith', val)}
+                />
+              </div>
+            </Row>
+            <Row>
+              <div className='col-2'>
+                <SelectCustomLabel 
+                  name='rayspine' 
+                  label='Ray Spine' 
+                  value={state['rayspine']} 
+                  // options={[{text: 'placeholder', value: ''}]}
+                  onChange={val => handleSelect('rayspine', val)} 
+                  isDisabled 
+                />
+              </div>
+              <div className='col-2'>
+                <Input name='kn' label='KN' value={state['kn']} onChange={handleChange} isDisabled />
+              </div>
+              <div className='col-2'>
+                <Input name='wr' label='WR' type='number' value={state['wr']} onChange={handleNumber} isDisabled />
+              </div>
+              <div className='col-2'>
+                <SelectCustomLabel 
+                  name='scale' 
+                  label='Scale' 
+                  value={state['scale']} 
+                  // options={[{text: 'placeholder', value: ''}]}
+                  onChange={val => handleSelect('scale', val)} 
+                  isDisabled 
+                />
+              </div>
+              <div className='col-2'>
+                <Input name='rsd' label='RSD' value={state['rsd']} onChange={handleChange} isDisabled />
+              </div>
+              <div className='col-2'>
+                <SelectCustomLabel 
+                  name='bait' 
+                  label='Bait' 
+                  value={state['bait']} 
+                  // options={[{text: 'placeholder', value: ''}]}
+                  onChange={val => handleSelect('bait', val)} 
+                  isDisabled 
+                />
+              </div>
+            </Row>
+            {edit && (<Row>
+              <div className='col-5'>
+                <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} />
+              </div>
+              <div className='col-2'>
+                <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} />
+              </div>
+            </Row>)}
+            <Row>
+              <div className='col-2 offset-10'>
+                <div className='float-right'>
                   <Button
                     isOutline
                     size='small'
                     className='mr-2'
                     variant='secondary'
                     text='Cancel'
-                    href='/find-data-sheet'
+                  // href='/find-data-sheet'
                   />
-                  {/* {!formComplete && (
-                    <Button
-                      size='small'
-                      variant='success'
-                      text='Save'
-                      handleClick={() => doUpdateMoRiverDataEntry(formData)}
-                    />
-                  )} */}
+                  <Button
+                    size='small'
+                    variant='success'
+                    text={edit ? 'Apply Changes' : 'Save'}
+                    handleClick={() => doSave()}
+                    isDisabled={saveIsDisabled}
+                  />
                 </div>
               </div>
-            </div>
-          </Card.Body>
-        </Card>
-        
-        {/* Fish Data Table */}
-        <Card className='mt-3'>
-          <Card.Header text='Fish Datasheets' />
-          <Card.Body>
-            <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
-              <AgGridReact
-                defaultColDef={{
-                  width: 100,
-                  editable: true,
-                  lockPinned: true,
-                }}
-                rowHeight={35}
-                rowData={pagedItems}
-                editType='fullRow'
-                onRowValueChanged={({ data }) => doUpdateFishDataEntry(data)}
-                frameworkComponents={{
-                  editCellRenderer: EditCellRenderer,
-                  speciesEditor: SpeciesEditor,
-                }}
-              >
-                <AgGridColumn
-                  field='edit'
-                  width={90}
-                  pinned
-                  lockPosition
-                  cellRenderer='editCellRenderer'
-                  editable={false}
-                />
-                <AgGridColumn field='id' headerName='Field ID' />
-                <AgGridColumn field='fid' headerName='F ID' />
-                <AgGridColumn field='panelHook' headerName='Panel Hook' />
-                <AgGridColumn field='species' cellEditor='speciesEditor' />
-                <AgGridColumn field='length' />
-                <AgGridColumn field='weight' />
-                <AgGridColumn field='countF' headerName='Count' />
-                <AgGridColumn field='ftPrefix' headerName='FT Prefix' />
-                <AgGridColumn field='mR' headerName='M/R' />
-                <AgGridColumn field='ftnum' headerName='Genetics Vial #' />
-                <AgGridColumn field='finCurl' />
-                <AgGridColumn field='otolith' />
-                <AgGridColumn field='raySpine' headerName='Ray Spine' />
-                <AgGridColumn field='scale' />
-                <AgGridColumn field='bait' />
-              </AgGridReact>
-            </div>
-            <Pagination
-              className='mt-2'
-              itemCount={totalCount}
-              handlePageChange={(pageNumber, itemsPerPage) => setPagination({ pageNumber, itemsPerPage })}
-            />
+            </Row>
           </Card.Body>
         </Card>
       </>
