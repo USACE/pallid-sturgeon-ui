@@ -7,8 +7,14 @@ export default {
   getReducer: () => {
     const initialData = {
       data: [],
-      fishData: {},
-      supplementalData: [],
+      fishData: {
+        items: [],
+        totalCount: 0,
+      },
+      supplementalData: {
+        items: [],
+        totalCount: 0,
+      },
       searchData: [],
       telemetryData: {},
       totalCount: 0,
@@ -42,12 +48,18 @@ export default {
         case 'DATA_ENTRY_UPDATE_FISH_DATA':
           return {
             ...state,
-            fishData: payload,
+            fishData: {
+              items: payload.items,
+              totalCount: payload.totalCount,
+            }
           };
         case 'DATA_ENTRY_UPDATE_SUPPLEMENTAL_DATA':
           return {
             ...state,
-            supplementalData: payload,
+            supplementalData: {
+              items: payload.items,
+              totalCount: payload.totalCount,
+            }
           };
         case 'DATA_ENTRY_UPDATE_SEARCH_DATA':
           return {
@@ -74,6 +86,9 @@ export default {
   selectDataEntry: state => state.dataEntry,
   selectDataEntryData: state => state.dataEntry.data.length ? state.dataEntry.data[0] : {},
   selectDataEntryFishData: state => state.dataEntry.fishData,
+  selectDataEntryFishTotalCount: state => state.dataEntry.fishData.totalCount,
+  selectDataEntrySupplemental: state => state.dataEntry.supplementalData,
+  selectDataEntrySupplementalTotalCount: state => state.dataEntry.supplementalData.totalCount,
   selectDataEntryTelemetryData: state => state.dataEntry.telemetryData,
   selectDataEntrySearchData: state => state.dataEntry.searchData,
   selectDataEntryTotalCount: state => state.dataEntry.totalCount,
@@ -129,7 +144,7 @@ export default {
     });
   },
 
-  doFetchSupplementalDataEntry: (params) => ({ dispatch, store, apiGet }) => {
+  doFetchSupplementalDataEntry: (params, callback = null) => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = toast.loading('Finding datasheet...');
 
@@ -138,18 +153,17 @@ export default {
     apiGet(url, (err, body) => {
       if (!err) {
         dispatch({
-          type: 'DATA_ENTRY_UPDATED_DATA',
-          payload: {
-            data: body,
-            type: 'supplemental',
-          },
+          type: 'DATA_ENTRY_UPDATE_SUPPLEMENTAL_DATA',
+          payload: body,
         });
 
-        if (store.selectDataEntryTotalCount() === 0) {
+        if (store.selectDataEntrySupplementalTotalCount() === 0) {
           tWarning(toastId, 'No supplemental datasheets.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
-          store.doUpdateUrl('/sites-list/datasheet/supplemental-edit');
+          if (callback && typeof callback === 'function') {
+            callback();
+          }
         }
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_FINISHED' });
       } else {
@@ -169,14 +183,11 @@ export default {
     apiGet(url, (err, body) => {
       if (!err) {
         dispatch({
-          type: 'DATA_ENTRY_UPDATED_DATA',
-          payload: {
-            data: body,
-            type: 'fish',
-          },
+          type: 'DATA_ENTRY_UPDATE_FISH_DATA',
+          payload: body,
         });
 
-        if (store.selectDataEntryTotalCount() === 0) {
+        if (store.selectDataEntryFishTotalCount() === 0) {
           tError(toastId, 'No datasheets found. Please try again.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
@@ -295,7 +306,7 @@ export default {
   doSaveTelemetryDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
-    // const params = store.selectDataEntryLastParams();
+    const params = store.selectDataEntryLastParams();
 
     const url = '/psapi/telemetryDataEntry';
 
@@ -303,7 +314,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
-        // store.doFetchMoRiverDataEntry(params, true);
+        store.doFetchTelemetryDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/telemetry'));
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -314,7 +325,7 @@ export default {
   doSaveFishDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
-    // const params = store.selectDataEntryLastParams();
+    const params = store.selectDataEntryLastParams();
 
     const url = '/psapi/fishDataEntry';
 
@@ -322,9 +333,28 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
-        // store.doFetchMoRiverDataEntry(params, true);
+        store.doFetchFishDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/fish'));
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
+        tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
+      }
+    });
+  },
+
+  doSaveSupplementalDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
+    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_START' });
+    const toastId = toast.loading('Saving datasheet...');
+    const params = store.selectDataEntryLastParams();
+
+    const url = '/psapi/supplementalDataEntry';
+
+    apiPost(url, formData, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, 'Datasheet successfully updated!');
+        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_FINISHED' });
+        store.doFetchSupplementalDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/supplemental'));
+      } else {
+        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
       }
     });
@@ -371,7 +401,7 @@ export default {
   doUpdateTelemetryDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
-    // const params = store.selectDataEntryLastParams();
+    const params = store.selectDataEntryLastParams();
 
     const url = '/psapi/telemetryDataEntry';
 
@@ -379,7 +409,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
-        // store.doFetchMoRiverDataEntry(params, true);
+        store.doFetchTelemetryDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/telemetry'));
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -390,6 +420,7 @@ export default {
   doUpdateFishDataEntry: (rowData) => ({ dispatch, apiPut }) => {
     dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving fish datasheet...');
+    const params = store.selectDataEntryLastParams();
 
     const url = '/psapi/fishDataEntry';
 
@@ -397,8 +428,28 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
+        store.doFetchFishDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/fish'));
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
+        tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
+      }
+    });
+  },
+
+  doUpdateSupplementalDataEntry: (rowData) => ({ dispatch, apiPut }) => {
+    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_START' });
+    const toastId = toast.loading('Saving supplemental datasheet...');
+    const params = store.selectDataEntryLastParams();
+
+    const url = '/psapi/supplementalDataEntry';
+
+    apiPut(url, rowData, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, 'Datasheet successfully updated!');
+        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_FINISHED' });
+        store.doFetchSupplementalDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/supplemental'));
+      } else {
+        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
       }
     });

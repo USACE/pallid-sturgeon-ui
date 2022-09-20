@@ -35,7 +35,7 @@ const ProcedureDsTable = connect(
         className='float-right mr-2'
         handleClick={() => doUpdateUrl('/sites-list/datasheet/procedure/create')}
       />
-      <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
+      <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '200px' }}>
         <AgGridReact
           suppressClickEdit
           rowHeight={35}
