@@ -23,7 +23,7 @@ const reducer = (state, action) => {
   }
 };
 
-// 1046 for testing
+// 7229 for testing
 
 const FishForm = connect(
   'doDomainsSpeciesFetch',
@@ -32,8 +32,8 @@ const FishForm = connect(
   'doDomainsOtolithFetch',
   'doSaveFishDataEntry',
   'doUpdateFishDataEntry',
-  'selectDataEntryData',
   'selectDataEntryLastParams',
+  'selectDataEntryFishData',
   'selectSitesData',
   'selectDomainsSpecies',
   'selectDomainsFtPrefixes',
@@ -46,8 +46,8 @@ const FishForm = connect(
     doDomainsOtolithFetch,
     doSaveFishDataEntry,
     doUpdateFishDataEntry,
-    dataEntryData,
     dataEntryLastParams,
+    dataEntryFishData,
     sitesData,
     domainsSpecies,
     domainsFtPrefixes,
@@ -56,7 +56,7 @@ const FishForm = connect(
     edit
   }) => {
     const initialState = {
-      mrId: dataEntryLastParams.mrId
+      mrId: dataEntryLastParams.mrId,
     };
     const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -100,10 +100,10 @@ const FishForm = connect(
       if (edit) {
         dispatch({
           type: 'INITIALIZE_FORM',
-          payload: dataEntryData,
+          payload: dataEntryFishData.items[0],
         });
       }
-    }, [edit, dataEntryData]);
+    }, [edit, dataEntryFishData]);
 
     useEffect(() => {
       doDomainsFtPrefixesFetch();

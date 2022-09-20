@@ -24,6 +24,8 @@ import MultipleRecordApproval from 'app-pages/admin/multipleRecordApproval';
 import SiteDatasheet from 'app-pages/data-entry/datasheets/pages/site-datasheet';
 import TelemetryDsTable from 'app-pages/data-entry/datasheets/tables/telemetryDsTable';
 import FishDsTable from 'app-pages/data-entry/datasheets/tables/fishDsTable';
+import SuppDsTable from 'app-pages/data-entry/datasheets/tables/suppDsTable';
+import ProcedureDsTable from 'app-pages/data-entry/datasheets/tables/procedureDsTable';
 
 export default createRouteBundle(
   {
@@ -49,6 +51,8 @@ export default createRouteBundle(
     '/sites-list/datasheet': SiteDatasheet,
     '/sites-list/datasheet/telemetry': TelemetryDsTable,
     '/sites-list/datasheet/fish': FishDsTable,
+    '/sites-list/datasheet/supplemental': SuppDsTable,
+    '/sites-list/datasheet/procedure': ProcedureDsTable,
     '/sites-list/datasheet/:form': EditDataSheet,
     '/tag-replacement': TagReplacement,
     '*': NotFound,

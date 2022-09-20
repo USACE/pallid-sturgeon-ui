@@ -43,10 +43,10 @@ const FindDataSheet = connect(
 
       switch(dataSheetType) {
         case 'fish':
-          doFetchFishDataEntry(params);
+          doFetchFishDataEntry(params, doUpdateUrl('/sites-list/datasheet/fish-edit'));
           break;
         case 'supplemental':
-          doFetchSupplementalDataEntry(params);
+          doFetchSupplementalDataEntry(params, doUpdateUrl('/sites-list/datasheet/supplemental-edit'));
           break;
         case 'missouriRiver':
           doFetchMoRiverDataEntry(params);
