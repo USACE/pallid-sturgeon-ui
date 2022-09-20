@@ -38,7 +38,6 @@ const SearchDsTable = connect(
         <AgGridReact
           rowHeight={35}
           rowData={rowData}
-          // onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
           defaultColDef={{
             width: 150,
           }}
@@ -48,7 +47,14 @@ const SearchDsTable = connect(
           }}
         >
           <AgGridColumn field='seId' headerName='Search ID' cellRenderer='searchIdCellRenderer' sortable unSortIcon />
-          <AgGridColumn field='dsId' cellRenderer='telemetryIdCellRenderer' cellRendererParams={{ paramType: 'seId', uri: '/sites-list/datasheet/telemetry'}} sortable unSortIcon />
+          <AgGridColumn
+            field='telemetryEntries'
+            headerName='Telemetry Entries'
+            width={150}
+            cellRenderer='telemetryIdCellRenderer'
+            cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/telemetry' }}
+          />
+          <AgGridColumn field='dsId' sortable unSortIcon />
           <AgGridColumn field='searchTypeCode' sortable unSortIcon />
           <AgGridColumn field='startTime' sortable unSortIcon />
           <AgGridColumn field='startLatitude' sortable unSortIcon />
