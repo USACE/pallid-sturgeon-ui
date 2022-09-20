@@ -9,6 +9,7 @@ import { Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import DataHeader from '../components/dataHeader';
 import Approval from '../components/approval';
 import SuppIdCellRenderer from 'common/gridCellRenderers/suppIdCellRenderer';
+import ProcedureIdCellRenderer from 'common/gridCellRenderers/procedureIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -65,16 +66,23 @@ const SuppDsTable = connect(
                   width: 150,
                 }}
                 frameworkComponents={{
+                  procedureIdCellRenderer: ProcedureIdCellRenderer,
                   suppIdCellRenderer: SuppIdCellRenderer,
                 }}
               >
-                <AgGridColumn field='sid' headerName='Supplemental ID' cellRenderer='suppIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/supplemental-edit' }} />
+                <AgGridColumn field='sid' headerName='Supplemental ID' cellRenderer='suppIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/supplemental-edit' }} sortable unSortIcon />
                 <AgGridColumn field='fid' headerName='Fish ID' sortable unSortIcon />
-                <AgGridColumn field='fFid' sortable unSortIcon />
-                <AgGridColumn field='mrId' />
-                <AgGridColumn field='mrFid' sortable unSortIcon />
+                <AgGridColumn field='fFid' resizable sortable unSortIcon />
+                <AgGridColumn field='mrId' sortable unSortIcon  />
+                <AgGridColumn
+                  field='procEntries'
+                  headerName='Procedure Entries'
+                  width={130}
+                  cellRenderer='procedureIdCellRenderer'
+                  // cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/supplemental' }} 
+                />
                 <AgGridColumn field='tagnumber' sortable unSortIcon />
-                <AgGridColumn field='pitrn' />
+                <AgGridColumn field='pitrn' sortable unSortIcon />
               </AgGridReact>
             </div>
           </Card.Body>

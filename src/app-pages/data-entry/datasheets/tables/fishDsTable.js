@@ -73,7 +73,14 @@ const FishDsTable = connect(
                 }}
               >
                 <AgGridColumn field='fid' headerName='Fish ID' cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/fish-edit' }} />
-                <AgGridColumn field='ffid' headerName='Field ID' cellRenderer='suppIdCellRenderer' cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/supplemental' }} />
+                <AgGridColumn field='ffid' headerName='Field ID' width={150} resizable sortable unSortIcon />
+                <AgGridColumn
+                  field='suppEntries'
+                  headerName='Supp Entries'
+                  width={130}
+                  cellRenderer='suppIdCellRenderer'
+                  cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/supplemental' }} 
+                />
                 <AgGridColumn field='panelHook' headerName='Panel Hook' />
                 <AgGridColumn field='species' cellEditor='speciesEditor' />
                 <AgGridColumn field='length' />

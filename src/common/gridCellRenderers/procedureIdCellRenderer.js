@@ -4,18 +4,19 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 
-const SuppIdCellRenderer = connect(
-  'doFetchSupplementalDataEntry',
+const ProcedureIdCellRenderer = connect(
+  // 'doFetchTelemetryDataEntry',
   'doUpdateUrl',
   ({
-    doFetchSupplementalDataEntry,
+    // doFetchTelemetryDataEntry,
     doUpdateUrl,
     uri,
     paramType,
     value,
     data
   }) => {
-    const params = paramType === 'tableId' ? { tableId: value } : { fId: data.fid };
+    const params = paramType === 'tableId' ? { tableId: value } : { seId: data.seId };
+    const disabled = true;
 
     return (
       <>
@@ -25,7 +26,7 @@ const SuppIdCellRenderer = connect(
             variant='link'
             className='p-0 mb-1'
             text={value}
-            handleClick={() => doFetchSupplementalDataEntry(params, doUpdateUrl(uri))}
+            // handleClick={() => doFetchTelemetryDataEntry(params, doUpdateUrl(uri))}
           />)
         }
         {paramType !== 'tableId' &&
@@ -33,14 +34,15 @@ const SuppIdCellRenderer = connect(
             isOutline
             size='small'
             variant='info'
-            title='Associated Supplemental Data Entries'
+            title={disabled ? 'No associated procedure data entries' : 'Associated Telemetry Data Entries'}
             text='View Data'
             icon={<Icon icon='dots-horizontal' />}
-            handleClick={() => doFetchSupplementalDataEntry(params, doUpdateUrl(uri))}
+            // handleClick={() => doFetchTelemetryDataEntry(params, doUpdateUrl(uri))}
+            isDisabled={disabled}
           />)
         }
       </>
     );
   });
 
-export default SuppIdCellRenderer;
+export default ProcedureIdCellRenderer;
