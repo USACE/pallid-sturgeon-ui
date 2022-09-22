@@ -1,10 +1,9 @@
 import React, { useEffect, useReducer } from 'react';
 import { connect } from 'redux-bundler-react';
+import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
 
-import Button from 'app-components/button';
-import Card from 'app-components/card';
-import { Input, Row, SelectCustomLabel, FilterSelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
+import { Input, Row, SelectCustomLabel, FilterSelectCustomLabel, TextArea } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { createDropdownOptions, createBendsDropdownOptions } from 'app-pages/data-entry/helpers';
 import { dropdownYearsToNow } from 'utils';
 
 const reducer = (state, action) => {
@@ -21,14 +20,20 @@ const reducer = (state, action) => {
   }
 };
 
-const CreateNewSite = connect(
+const SitesFormModal = connect(
   'doPostNewSite',
   'doNewSiteLoadData',
+  'doUpdateSite',
   'selectDomains',
+  'selectSitesData',
   ({
     doPostNewSite,
     doNewSiteLoadData,
+    doUpdateSite,
     domains,
+    sitesData,
+    edit,
+    id
   }) => {
     const { fieldOffices, projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
@@ -52,23 +57,41 @@ const CreateNewSite = connect(
     const saveIsDisabled = !(
       !!state['year'] &&
       !!state['fieldoffice'] &&
-      !!state['editInitials'] &&
       !!state['projectId'] &&
       !!state['segmentId'] &&
       !!state['sampleUnitType'] &&
       !!state['season'] &&
-      !!state['bendrn']
+      !!state['bendrn'] &&
+      (edit ? !!state['editInitials'] && !!state['last_edit_comment'] : true)
     );
+
+    const doSave = () => {
+      if (edit) {
+        doUpdateSite(state);
+      } else {
+        doPostNewSite(state);
+      }
+    };
 
     useEffect(() => {
       doNewSiteLoadData();
     }, [doNewSiteLoadData]);
 
+    useEffect(() => {
+      if (edit) {
+        const filteredData = sitesData.filter(item => item.siteId === id);
+        dispatch({
+          type: 'INITIALIZE_FORM',
+          payload: filteredData[0],
+        });
+      }
+    }, [edit]);
+
     return (
-      <div className='container-fluid w-75'>
-        <Card>
-          <Card.Header text='Create New Site' />
-          <Card.Body>
+      <ModalContent size='lg'>
+        <ModalHeader title={edit ? 'Update Site' : 'Create New Site'} />
+        <section className='modal-body'>
+          <div className='container-fluid'>
             <Row>
               <div className='col-2'>
                 <SelectCustomLabel
@@ -90,11 +113,6 @@ const CreateNewSite = connect(
                   isRequired
                 />
               </div>
-              <div className='col-2'>
-                <Input label='Recorder' name='editInitials' value={state['editInitials']} onChange={handleChange} isRequired />
-              </div>
-            </Row>
-            <Row>
               <div className='col-3'>
                 <SelectCustomLabel
                   label='Project'
@@ -109,12 +127,14 @@ const CreateNewSite = connect(
                 <SelectCustomLabel
                   label='Season'
                   name='season'
-                  onChange={val=> handleSelect('season', val)}
+                  onChange={val => handleSelect('season', val)}
                   value={state['season']}
                   options={createDropdownOptions(seasons)}
                   isRequired
                 />
               </div>
+            </Row>
+            <Row>
               <div className='col-3'>
                 <SelectCustomLabel
                   label='Sample Unit Type'
@@ -125,12 +145,13 @@ const CreateNewSite = connect(
                   isRequired
                 />
               </div>
-              <div className='col-3'>
+              <div className='col-9'>
                 <FilterSelectCustomLabel
                   label='Sample Unit'
                   name='bend'
                   placeholder='Select bend...'
-                  value={Number(state['bend'])}
+                  value={Number(state['bend']) || ''}
+                  // handleInputChange={value => handleSelect('bend', value)}
                   onChange={(_, __, value) => handleSelect('bend', value)}
                   items={createBendsDropdownOptions(bends)}
                   isRequired
@@ -144,6 +165,7 @@ const CreateNewSite = connect(
                   name='segmentId'
                   placeholder='Select segment...'
                   value={state['segmentId']}
+                  // handleInputChange={value => handleSelect('segmentId', value)}
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
                   items={createDropdownOptions(segments)}
                   isRequired
@@ -160,26 +182,25 @@ const CreateNewSite = connect(
                 />
               </div>
             </Row>
-            <hr />
-            <div className='d-flex justify-content-end'>
-              <Button
-                variant='secondary'
-                text='Cancel'
-                href='/sites-list'
-              />
-              <Button
-                className='ml-2'
-                variant='success'
-                text='Create'
-                handleClick={() => doPostNewSite(state)}
-                isDisabled={saveIsDisabled}
-              />
-            </div>
-          </Card.Body>
-        </Card>
-      </div>
+            <Row>
+              <div className='col-6'>
+                <TextArea name='last_edit_comment' label='Comments' value={state['last_edit_comment']} onChange={handleChange} isRequired={edit} />
+              </div>
+              <div className='col-2'>
+                <Input name='editInitials' label='Recorder' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
+              </div>
+            </Row>
+          </div>
+        </section>
+        <ModalFooter
+          showCancelButton
+          saveIsDisabled={saveIsDisabled}
+          saveText={edit ? 'Apply Changes' : 'Save'}
+          onSave={doSave}
+        />
+      </ModalContent>
     );
   }
 );
 
-export default CreateNewSite;
+export default SitesFormModal;

@@ -9,15 +9,18 @@ import Select from 'app-components/select';
 import SitesListTable from './sites-list-table';
 import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 import { dropdownYearsToNow } from 'utils';
+import SitesFormModal from './modals/sitesForm';
 
 import '../../dataentry.scss';
 
 const SitesList = connect(
+  'doModalOpen',
   'doUpdateSiteParams',
   'doSetSitesPagination',
   'selectDomains',
   'selectSitesTotalResults',
   ({
+    doModalOpen,
     doUpdateSiteParams,
     doSetSitesPagination,
     domains,
@@ -80,7 +83,7 @@ const SitesList = connect(
               variant='success'
               text='Create New Site'
               className='mt-3 float-right'
-              href='/sites-list/create-new-site'
+              handleClick={() => doModalOpen(SitesFormModal)}
             />
           </div>
         </div>
@@ -163,7 +166,7 @@ const SitesList = connect(
             <span className='info-message'>Make selections from the drop down lists to go to the Missouri River data sheets associated with your selection.</span>
           </div>
         </div>
-        <SitesListTable domains={domains} />
+        <SitesListTable />
         <Pagination
           className='mt-3'
           itemCount={sitesTotalResults}
