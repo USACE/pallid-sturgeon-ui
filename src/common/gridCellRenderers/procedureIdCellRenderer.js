@@ -5,18 +5,17 @@ import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 
 const ProcedureIdCellRenderer = connect(
-  // 'doFetchTelemetryDataEntry',
+  'doFetchProcedureDataEntry',
   'doUpdateUrl',
   ({
-    // doFetchTelemetryDataEntry,
+    doFetchProcedureDataEntry,
     doUpdateUrl,
     uri,
     paramType,
     value,
     data
   }) => {
-    const params = paramType === 'tableId' ? { tableId: value } : { seId: data.seId };
-    const disabled = true;
+    const params = paramType === 'tableId' ? { tableId: value } : { fId: data.fid };
 
     return (
       <>
@@ -26,7 +25,7 @@ const ProcedureIdCellRenderer = connect(
             variant='link'
             className='p-0 mb-1'
             text={value}
-            // handleClick={() => doFetchTelemetryDataEntry(params, doUpdateUrl(uri))}
+            handleClick={() => doFetchProcedureDataEntry(params, doUpdateUrl(uri))}
           />)
         }
         {paramType !== 'tableId' &&
@@ -34,11 +33,10 @@ const ProcedureIdCellRenderer = connect(
             isOutline
             size='small'
             variant='info'
-            title={disabled ? 'No associated procedure data entries' : 'Associated Telemetry Data Entries'}
+            title='Associated Telemetry Data Entries'
             text='View Data'
             icon={<Icon icon='dots-horizontal' />}
-            // handleClick={() => doFetchTelemetryDataEntry(params, doUpdateUrl(uri))}
-            isDisabled={disabled}
+            handleClick={() => doFetchProcedureDataEntry(params, doUpdateUrl(uri))}
           />)
         }
       </>

@@ -141,6 +141,16 @@ const MissouriRiverForm = connect(
         if (dataEntryData['noVelocity'] && dataEntryData['noVelocity'] !== '') {
           setIsNoVelocity(dataEntryData['noVelocity']);
         } 
+      } else {
+        handleSelect('siteId', Number(data.siteId));
+        handleSelect('siteFid', data.siteFid);
+        handleSelect('fieldoffice', data.fieldOfficeDescription);
+        handleSelect('project', Number(data.projectDescription));
+        handleSelect('segment', Number(data.segmentDescription));
+        handleSelect('season', data.seasonDescription);
+        handleSelect('bend', Number(data.bend));
+        handleSelect('bendrn', data.bendrn);
+        handleSelect('bendrivermile', isNaN(parseFloat(data.bendRiverMile)) ? 0 : parseFloat(data.bendRiverMile));
       }
     }, [edit]);
 
@@ -154,16 +164,16 @@ const MissouriRiverForm = connect(
         {/* Top Level Info */}
         <DataHeader 
           type='Site'
-          id={data ? data.siteId : state['siteId']} 
-          year={data ? data.year : state['year']} 
-          fieldOffice={data ? data.fieldOfficeDescription : state['fieldoffice']}
-          project={data ? data.projectDescription : state['projectId']}
-          segment={data ? data.segmentDescription : state['segmentId']}
-          season={data ? data.seasonDescription : state['seasonId']}
-          sampleUnitType={data ? data.sampleUnitType : state['sampleUnitType']}
-          sampleUnit={data ? data.bend : state['bend']}
-          bendrn={data ? data.bendrn : state['bendrn']}
-          bendRiverMile={data ? data.bendRiverMile : state['bendRiverMile']}
+          id={!edit ? data.siteId : state['siteId']} 
+          year={!edit ? data.year : state['year']} 
+          fieldOffice={!edit ? data.fieldOfficeDescription : state['fieldOffice']}
+          project={!edit ? data.projectDescription : state['project']}
+          segment={!edit ? data.segmentDescription : state['segment']}
+          season={!edit ? data.seasonDescription : state['season']}
+          sampleUnitType={!edit ? data.sampleUnitType : state['sampleUnitType']}
+          sampleUnit={!edit ? data.bend : state['bend']}
+          bendrn={!edit ? data.bendrn : state['bendrn']}
+          bendRiverMile={!edit ? data.bendRiverMile : state['bendRiverMile']}
         />
         {/* Approval */}
         {/* TO DO: include component props */}
@@ -186,7 +196,7 @@ const MissouriRiverForm = connect(
                 />
               </div>
               <div className='col-1'>
-                <Input label='Subsample' name='subsample' type='number' value={state['subsample'] || ''} onChange={handleNumber} isDisabled={!formComplete} maxlength='3' isRequired />
+                <Input label='Subsample' name='subsample' type='number' value={state['subsample'] || ''} onChange={handleNumber} isDisabled={!formComplete} isRequired />
               </div>
               <div className='col-1'>
                 <Input label='Pass' name='subsamplepass' type='number' value={state['subsamplepass'] || ''} onChange={handleNumber} isDisabled={!formComplete} isRequired  />
@@ -263,10 +273,10 @@ const MissouriRiverForm = connect(
                 </Row>
                 <Row className='mt-2'>
                   <div className='col-6'>
-                    <Input label='Temp (c)' name='temp' type='number' step={0.1} value={state['temp'] || ''} onChange={handleFloat} isDisabled={!formComplete} isRequired />
+                    <Input label='Temp (c)' name='temp' type='number' value={state['temp'] || ''} onChange={handleFloat} isDisabled={!formComplete} isRequired />
                   </div>
                   <div className='col-6'>
-                    <Input label='Width' name='width' type='number' step={0.1} value={state['width'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
+                    <Input label='Width' name='width' type='number' value={state['width'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -360,13 +370,13 @@ const MissouriRiverForm = connect(
                     <Input label='Distance (m)' name='distance' type='number' value={state['distance'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label='Depth (m)' name='depth1' type='number' step={0.1} value={state['depth1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Depth (m)' name='depth1' type='number' value={state['depth1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label=' ' name='depth2' type='number' step={0.1} value={state['depth2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label=' ' name='depth2' type='number' value={state['depth2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label=' ' name='depth13' type='number' step={0.1} value={state['depth3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label=' ' name='depth13' type='number' value={state['depth3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <Row className='mt-2'>

@@ -13,6 +13,7 @@ const FindDataSheet = connect(
   'doFetchFishDataEntry',
   'doFetchSearchDataEntry',
   'doFetchTelemetryDataEntry',
+  'doFetchProcedureDataEntry',
   'doUpdateUrl',
   ({
     doFetchMoRiverDataEntry,
@@ -20,6 +21,7 @@ const FindDataSheet = connect(
     doFetchFishDataEntry,
     doFetchSearchDataEntry,
     doFetchTelemetryDataEntry,
+    doFetchProcedureDataEntry,
     doUpdateUrl,
   }) => {
     const [pitTag, setPitTag] = useState('');
@@ -57,9 +59,9 @@ const FindDataSheet = connect(
         case 'telemetry':
           doFetchTelemetryDataEntry(params, doUpdateUrl('/sites-list/datasheet/telemetry-edit'));
           break;
-        // case 'procedure':
-        //   doFetchProcedureDataEntry(params);
-        //   break;
+        case 'procedure':
+          doFetchProcedureDataEntry(params, doUpdateUrl('/sites-list/datasheet/procedure-edit'));
+          break;
         default:
           console.log('select a datasheet type');
           break;
