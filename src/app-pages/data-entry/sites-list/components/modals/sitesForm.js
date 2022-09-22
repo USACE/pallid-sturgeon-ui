@@ -57,12 +57,12 @@ const SitesFormModal = connect(
     const saveIsDisabled = !(
       !!state['year'] &&
       !!state['fieldoffice'] &&
-      !!state['editInitials'] &&
       !!state['projectId'] &&
       !!state['segmentId'] &&
       !!state['sampleUnitType'] &&
       !!state['season'] &&
-      !!state['bendrn']
+      !!state['bendrn'] &&
+      (edit ? !!state['editInitials'] && !!state['last_edit_comment'] : true)
     );
 
     const doSave = () => {
@@ -86,7 +86,7 @@ const SitesFormModal = connect(
         });
       }
     }, [edit]);
-    
+
     return (
       <ModalContent size='lg'>
         <ModalHeader title={edit ? 'Update Site' : 'Create New Site'} />
@@ -182,10 +182,10 @@ const SitesFormModal = connect(
             </Row>
             <Row>
               <div className='col-6'>
-                <TextArea name='last_edit_comment' label='Comments' value={state['last_edit_comment']} onChange={handleChange} />
+                <TextArea name='last_edit_comment' label='Comments' value={state['last_edit_comment']} onChange={handleChange} isRequired={edit} />
               </div>
               <div className='col-2'>
-                <Input name='editInitials' label='Recorder' value={state['editInitials']} onChange={handleChange} isRequired />
+                <Input name='editInitials' label='Recorder' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
               </div>
             </Row>
           </div>
