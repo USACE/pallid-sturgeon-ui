@@ -484,3 +484,39 @@ export const finCurlOptions = [
   { value: 'Y', text: 'Yes' },
   { value: 'N', text: 'No' },
 ];
+
+// Procedure Form Select Options
+export const purposeOptions = [
+  { value: 'II' },
+  { value: 'RI' },
+  { value: 'EV' },
+  { value: 'SE' },
+  { value: 'RT' },
+];
+
+export const sexOptions = [
+  { value: 'F', text: 'Female' },
+  { value: 'M', text: 'Male' },
+  { value: 'U', text: 'Unknown' },
+];
+
+export const spawnEvaluationOptions = [
+  { value: 'NS', text: 'Non-Spawn (NS)' },
+  { value: 'PS', text: 'Partial Spawn (PS)' },
+  { value: 'CP', text: 'Complete Spawn (CP)' },
+  { value: 'UN', text: 'Unknown (UN)' },
+  { value: 'NA', text: 'Not Applicable (NA)' },
+];
+
+export const evalLocationsOptions = [
+  { value: 'F', text: 'Field (F)' },
+  { value: 'GP', text: 'Gavins Point NFH (GP)' },
+  { value: 'BP', text: 'Blind Pony SFH (BP)' },
+  { value: 'NS', text: 'Neosho NFH (NS)' },
+  { value: 'GR', text: 'GR' },
+];
+
+export const visualAssessmentOptions = [
+  { value: 'R' },
+  { value: 'N' },
+];

@@ -38,7 +38,7 @@ const SuppDsTable = connect(
         {/* Approval */}
         <Approval />
         <Card className='mt-3'>
-          <Card.Header text='Supplemental Datasheets' />
+          <Card.Header text='Supplemental Datasheet(s)' />
           <Card.Body>
             <Button
               isOutline
@@ -74,13 +74,7 @@ const SuppDsTable = connect(
                 <AgGridColumn field='fid' headerName='Fish ID' sortable unSortIcon />
                 <AgGridColumn field='fFid' resizable sortable unSortIcon />
                 <AgGridColumn field='mrId' sortable unSortIcon  />
-                <AgGridColumn
-                  field='procEntries'
-                  headerName='Procedure Entries'
-                  width={130}
-                  cellRenderer='procedureIdCellRenderer'
-                  // cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/supplemental' }} 
-                />
+                <AgGridColumn field='procEntries' headerName='Procedure Entries' width={130} cellRenderer='procedureIdCellRenderer' cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/procedure' }} />
                 <AgGridColumn field='tagnumber' sortable unSortIcon />
                 <AgGridColumn field='pitrn' sortable unSortIcon />
               </AgGridReact>
