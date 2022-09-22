@@ -150,7 +150,8 @@ const SitesFormModal = connect(
                   label='Sample Unit'
                   name='bend'
                   placeholder='Select bend...'
-                  value={Number(state['bend'])}
+                  value={Number(state['bend']) || ''}
+                  // handleInputChange={value => handleSelect('bend', value)}
                   onChange={(_, __, value) => handleSelect('bend', value)}
                   items={createBendsDropdownOptions(bends)}
                   isRequired
@@ -164,6 +165,7 @@ const SitesFormModal = connect(
                   name='segmentId'
                   placeholder='Select segment...'
                   value={state['segmentId']}
+                  // handleInputChange={value => handleSelect('segmentId', value)}
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
                   items={createDropdownOptions(segments)}
                   isRequired

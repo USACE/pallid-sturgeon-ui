@@ -67,7 +67,7 @@ export const SelectCustomLabel = ({ name, label, options, value, onChange, helpe
   }
 };
 
-export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, placeholder, helperText, helperDirection, className, isRequired, isDisabled = false }) => {
+export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, handleInputChange, placeholder, helperText, helperDirection, className, isRequired, isDisabled = false }) => {
   const showRequired = isRequired && !value;
 
   if (helperText) {
@@ -75,7 +75,7 @@ export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, p
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
         <div className={`d-flex flex-${helperDirection} w-100`}>
-          <FilterSelect id={name} name={name} items={items} value={value} onChange={onChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
+          <FilterSelect id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
           <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'}><i>{helperText}</i></p>
         </div>
       </>
@@ -84,7 +84,7 @@ export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, p
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
-        <FilterSelect id={name} name={name} items={items} value={value} onChange={onChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
+        <FilterSelect id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
       </>
     );
   }
