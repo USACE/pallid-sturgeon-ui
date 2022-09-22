@@ -15,7 +15,6 @@ import UserList from '../app-pages/admin/userList';
 import NotFound from '../app-pages/404';
 import SignUp from '../app-pages/signup/signup';
 import SearchReports from 'app-pages/data-summaries/search-reports';
-import CreateNewSite from 'app-pages/data-entry/sites-list/pages/create-new-site';
 import PriorityFish from 'app-pages/data-summaries/priorityFish';
 import LastLocation from 'app-pages/data-summaries/lastLocation';
 import TagReplacement from 'app-pages/data-summaries/tagReplacement';
@@ -47,7 +46,6 @@ export default createRouteBundle(
     '/signup': SignUp,
     '/user-access-requests': UserList,
     '/sites-list': SitesList,
-    '/sites-list/create-new-site': CreateNewSite,
     '/sites-list/datasheet': SiteDatasheet,
     '/sites-list/datasheet/telemetry': TelemetryDsTable,
     '/sites-list/datasheet/fish': FishDsTable,

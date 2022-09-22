@@ -63,7 +63,7 @@ export default {
     store.doDomainSampleUnitTypesFetch();
   },
 
-  doSitesFetch: () => ({ dispatch, store, apiGet }) => {
+  doSitesFetch: (data) => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'SITES_FETCH_START' });
     const params = store.selectSitesParams();
     const pageSize = store.selectSitesPageSize();
@@ -74,7 +74,12 @@ export default {
       size: pageSize,
       page: pageNumber,
     });
-    const url = `/psapi/siteDataEntry${query}`;
+
+    const queryById = queryFromObject({
+      ...data,
+    });
+
+    const url = `/psapi/siteDataEntry${data ? queryById : query}`;
 
     apiGet(url, (err, body) => {
       if (!err) {
@@ -111,15 +116,13 @@ export default {
     dispatch({ type: 'SITES_UPDATE_START' });
     const toastId = toast.loading('Saving site data...');
 
-    const { siteId, siteFid, siteYear, fieldOffice, project, segment, season, sampleUnitTypeCode, bendrn, editInitials, comments, ...rest} = siteData;
-
     const url = '/psapi/siteDataEntry';
-    const payload = { siteId, siteFid, siteYear, fieldOffice, project, segment, season, sampleUnitTypeCode, bendrn, editInitials, comments };
 
-    apiPut(url, payload, (err, _body) => {
+    apiPut(url, siteData, (err, _body) => {
       if (!err) {
         dispatch({ type: 'SITES_UPDATE_FINISHED' });
         tSuccess(toastId, 'Changes successfully saved!');
+        store.doSitesFetch();
       } else {
         dispatch({ type: 'SITES_UPDATE_ERROR', payload: err });
         tError(toastId, 'Failed to save changes. Please try again.');
@@ -135,36 +138,5 @@ export default {
   doUpdateSiteParams: (params) => ({ dispatch, store }) => {
     dispatch({ type: 'UPDATE_SITE_PARAMS', payload: params });
     store.doSitesFetch();
-  },
-
-  doFetchSiteById: (params, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'SITE_DATA_ENTRY_BY_ID_FETCH_START', payload: params });
-    const toastId = ignoreToast ? null : toast.loading('Finding datasheet...');
-
-    const url = `/psapi/siteDataEntryById${queryFromObject(params)}`;
-
-    apiGet(url, (err, body) => {
-      if (!err) {
-        dispatch({
-          type: 'SITES_UPDATED_ITEMS',
-          payload: body
-        });
-
-        if (store.selectSitesTotalResults() === 0 && !ignoreToast) {
-          tError(toastId, 'No sites found. Please try again.');
-        } else {
-          if (!ignoreToast) {
-            tSuccess(toastId, 'Site found!');
-          }
-          store.doUpdateUrl('/sites-list/datasheet');
-        }
-        dispatch({ type: 'SITE_DATA_ENTRY_BY_ID_FETCH_FINISHED' });
-      } else {
-        dispatch({ type: 'SITE_DATA_ENTRY_BY_ID_FETCH_ERROR', payload: err });
-        if (!ignoreToast) {
-          tError(toastId, 'Error searching for site. Please try again.');
-        }
-      }
-    });
   },
 };

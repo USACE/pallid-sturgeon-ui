@@ -25,10 +25,6 @@ const administrationLinks = [
 ];
 
 const dataEntryLinks = [
-  {
-    uri: '/sites-list/create-new-site',
-    text: 'Create New Site',
-  },
   '/sites-list',
   '/find-data-sheet',
 ];
