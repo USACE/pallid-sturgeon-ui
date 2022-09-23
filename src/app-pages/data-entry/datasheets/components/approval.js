@@ -29,6 +29,7 @@ const Approval = ({
                 // onClick={() => dispatch({ type: 'update', field: 'complete', value: !!complete ? '' : '1' })}
                 onChange={() => { }}
                 // disabled={!formComplete}
+                disabled
               />
             </div>
           </Row>
@@ -40,23 +41,17 @@ const Approval = ({
             value={qc}
             // onChange={e => dispatch({ type: 'update', field: 'qc', value: e.target.value })}
             // disabled={!formComplete}
+            isDisabled
           />
         </div>
         <div className='col-2 offset-6'>
           <div className='float-right pt-4'>
             <Button
-              isOutline
-              size='small'
-              className='mr-2'
-              variant='secondary'
-              text='Cancel'
-              href='/find-data-sheet'
-            />
-            <Button
               size='small'
               variant='success'
               text='Save'
-            // handleClick={() => doUpdateMoRiverDataEntry(formData)}
+              // handleClick={() => doUpdateMoRiverDataEntry(formData)}
+              isDisabled
             />
           </div>
         </div>

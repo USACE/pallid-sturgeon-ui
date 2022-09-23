@@ -80,7 +80,8 @@ const SupplementalForm = connect(
       !!state['dangler'] &&
       !!state['elcolor'] &&
       !!state['ercolor'] &&
-      !!state['erhv']
+      !!state['erhv'] &&
+      (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
     useEffect(() => {
@@ -220,23 +221,15 @@ const SupplementalForm = connect(
             </Row>
             {edit && (<Row>
               <div className='col-5'>
-                <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} />
+                <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} isRequired={edit} />
               </div>
               <div className='col-2'>
-                <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} />
+                <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
               </div>
             </Row>)}
             <Row>
               <div className='col-4 offset-8'>
                 <div className='float-right'>
-                  <Button
-                    isOutline
-                    size='small'
-                    className='mr-2'
-                    variant='secondary'
-                    text='Cancel'
-                  // href='/find-data-sheet'
-                  />
                   <Button
                     size='small'
                     variant='success'
