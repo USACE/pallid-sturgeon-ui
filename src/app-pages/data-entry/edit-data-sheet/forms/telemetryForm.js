@@ -89,7 +89,8 @@ const TelemetryForm = connect(
       !!state['captureDate'] &&
       !!state['captureLatitude'] &&
       !!state['captureLongitude'] &&
-      !!state['positionConfidence']
+      !!state['positionConfidence'] &&
+      (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
     useEffect(() => {
@@ -213,14 +214,6 @@ const TelemetryForm = connect(
             <div className='row'>
               <div className='col-2 offset-10'>
                 <div className='float-right'>
-                  <Button
-                    isOutline
-                    size='small'
-                    className='mr-2'
-                    variant='secondary'
-                    text='Cancel'
-                  // href='/find-data-sheet'
-                  />
                   <Button
                     size='small'
                     variant='success'

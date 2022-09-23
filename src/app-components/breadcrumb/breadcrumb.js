@@ -29,9 +29,11 @@ const Breadcrumb = ({
               if (!i || i === pathLength - 1) return null;
               return (
                 <li className='breadcrumb-item' key={p}>
-                  <a href={`/${p}`}>
+                  {/* <a href={`/${p}`}> */}
+                  <p>
                     {hrefAsString(p)}
-                  </a>
+                    {/* </a> */}
+                  </p>
                 </li>
               );
             })

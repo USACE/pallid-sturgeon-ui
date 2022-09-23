@@ -30,7 +30,7 @@ const FishDsTable = connect(
       <div className='container-fluid overflow-auto'>
         <Row>
           <div className='col-8'>
-            <h4>Missouri River Datasheet - Fish Datasheets</h4>
+            <h4>Fish Datasheets</h4>
           </div>
         </Row>
         {/* @TODO: include component props */}

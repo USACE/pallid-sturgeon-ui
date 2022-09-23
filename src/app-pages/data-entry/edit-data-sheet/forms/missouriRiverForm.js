@@ -126,7 +126,8 @@ const MissouriRiverForm = connect(
       !!state['temp'] &&
       !!state['startTime'] &&
       !!state['startLatitude'] &&
-      !!state['startLongitude']
+      !!state['startLongitude'] &&
+      (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
     useEffect(() => {
@@ -628,13 +629,13 @@ const MissouriRiverForm = connect(
                 />
               </div>
               <div className='col-5'>
-                <TextArea label='Comments' name='lastEditComment' rows={5} value={state['lastEditComment']} onChange={handleChange} isDisabled={!formComplete} />
+                <TextArea label='Comments' name='lastEditComment' rows={5} value={state['lastEditComment']} onChange={handleChange} isDisabled={!formComplete} isRequired={edit} />
                 <Row className='mt-2'>
                   <div className='col-9 pt-1 text-right'>
                     <label><small>Edit Initials</small></label>
                   </div>
                   <div className='col-3'>
-                    <Input name='editInitials' value={state['editInitials']} onChange={handleChange} isDisabled={!formComplete} />
+                    <Input name='editInitials' value={state['editInitials']} onChange={handleChange} isDisabled={!formComplete} isRequired={edit} />
                   </div>
                 </Row>
               </div>
@@ -645,18 +646,9 @@ const MissouriRiverForm = connect(
               <div className='col-2 offset-10'>
                 <div className='float-right'>
                   <Button
-                    isOutline
-                    size='small'
-                    className='mr-2'
-                    variant='secondary'
-                    text='Cancel'
-                    href='/find-data-sheet'
-                  />
-                  {/* TODO: remove condition once update works */}
-                  <Button
                     size='small'
                     variant='success'
-                    text='Save'
+                    text={edit ? 'Apply Changes' : 'Save'}
                     handleClick={() => doSave()}
                     isDisabled={saveIsDisabled}
                   />
