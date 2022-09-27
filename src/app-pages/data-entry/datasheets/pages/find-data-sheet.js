@@ -51,10 +51,10 @@ const FindDataSheet = connect(
           doFetchSupplementalDataEntry(params, doUpdateUrl('/sites-list/datasheet/supplemental-edit'));
           break;
         case 'missouriRiver':
-          doFetchMoRiverDataEntry(params);
+          doFetchMoRiverDataEntry(params, doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'));
           break;
         case 'searchEffort':
-          doFetchSearchDataEntry(params);
+          doFetchSearchDataEntry(params, doUpdateUrl('/sites-list/datasheet/searchEffort-edit'));
           break;
         case 'telemetry':
           doFetchTelemetryDataEntry(params, doUpdateUrl('/sites-list/datasheet/telemetry-edit'));

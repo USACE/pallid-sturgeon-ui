@@ -28,11 +28,10 @@ const UnapprovedDataTable = connect(
             }}
           >
             <AgGridColumn field='ch' width={100} sortable unSortIcon />
-            <AgGridColumn field='mrId' width={100} cellRenderer='mrIdCellRenderer' sortable unSortIcon />
+            <AgGridColumn field='mrId' width={100} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit'}} sortable unSortIcon />
             <AgGridColumn field='fp' width={400} resizable sortable unSortIcon />
             <AgGridColumn field='segmentDescription' width={350} resizable sortable unSortIcon />
             <AgGridColumn field='bend' width={100} sortable unSortIcon />
-            {/* <AgGridColumn field='setdate' width={100} sortable unSortIcon /> */}
             <AgGridColumn field='subsample' width={120} sortable unSortIcon />
             <AgGridColumn field='recorder' width={100} sortable unSortIcon />
             <AgGridColumn field='checkby' width={100} sortable unSortIcon />
