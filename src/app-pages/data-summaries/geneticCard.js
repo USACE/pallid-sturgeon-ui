@@ -131,20 +131,19 @@ export default connect(
                   width: 125,
                 }}
               >
-                {/* Columns might not match up to data, needs tested */}
                 <AgGridColumn field='year' />
-                <AgGridColumn field='fieldOffice' />
-                <AgGridColumn field='projectCode' headerName='project' />
-                <AgGridColumn field='sturgeonType' />
-                <AgGridColumn field='geneticVialNum' headerName='Genetic Vial #' />
-                <AgGridColumn field='pittag' headerName='Pit Tag #' />
-                <AgGridColumn field='river' />
-                <AgGridColumn field='riverMile' />
-                <AgGridColumn field='state' />
-                <AgGridColumn field='date' />
-                <AgGridColumn field='broodstock' headerName='Broodstock?' />
-                <AgGridColumn field='hatchwild' headerName='Hatch/Wild?' />
-                <AgGridColumn field='speciesId' headerName='Species Id?' />
+                <AgGridColumn field='fieldOffice' sortable unSortIcon />
+                <AgGridColumn field='projectCode' headerName='project' sortable unSortIcon />
+                <AgGridColumn field='sturgeonType' sortable unSortIcon />
+                <AgGridColumn field='geneticVialNum' headerName='Genetic Vial #' sortable unSortIcon />
+                <AgGridColumn field='pittag' headerName='Pit Tag #' sortable unSortIcon />
+                <AgGridColumn field='river' sortable unSortIcon />
+                <AgGridColumn field='riverMile' sortable unSortIcon />
+                <AgGridColumn field='state' sortable unSortIcon />
+                <AgGridColumn field='date' sortable unSortIcon />
+                <AgGridColumn field='broodstock' headerName='Broodstock?' sortable unSortIcon />
+                <AgGridColumn field='hatchwild' headerName='Hatch/Wild?' sortable unSortIcon />
+                <AgGridColumn field='speciesId' headerName='Species Id?' sortable unSortIcon />
               </AgGridReact>
               <Pagination
                 className='mt-3'

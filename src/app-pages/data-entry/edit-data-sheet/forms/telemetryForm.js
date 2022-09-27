@@ -102,8 +102,6 @@ const TelemetryForm = connect(
       }
     }, [edit, dataEntryData]);
 
-    console.log(state);
-
     return (
       <>
         <Row>
@@ -205,10 +203,10 @@ const TelemetryForm = connect(
             </Row>
             <Row>
               <div className='col-5'>
-                <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} />
+                <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} isRequired={edit} />
               </div>
               <div className='col-2'>
-                <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} />
+                <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
               </div>
             </Row>
             <div className='row'>
