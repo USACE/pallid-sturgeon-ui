@@ -44,7 +44,7 @@ export default {
         store.doAuthUpdate(token);
       },
       onRedirect: (sessionState) => {
-        // store.doSessionStateUpdate(sessionState);
+        store.doSessionStateUpdate(sessionState);
       },
       onError: (err) => {
         console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
