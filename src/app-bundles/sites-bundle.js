@@ -112,7 +112,7 @@ export default {
     });
   },
 
-  doUpdateSite: (siteData) => ({ dispatch, apiPost }) => {
+  doUpdateSite: (siteData) => ({ dispatch, apiPost, store }) => {
     dispatch({ type: 'SITES_UPDATE_START' });
     const toastId = toast.loading('Saving site data...');
 
