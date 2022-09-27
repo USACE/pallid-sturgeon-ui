@@ -85,15 +85,15 @@ const userAccessRequestBundle = {
     });
   },
 
-  doUpdateRoleOffice: (userRoleOfficeData) => ({ dispatch, apiPost, store }) => {
+  doUpdateRoleOffice: (userRoleOfficeData) => ({ dispatch, apiPut, store }) => {
     dispatch({ type: 'USER_ROLE_OFFICE_UPDATE_START' });
 
     const { id, roleId, officeId, projectCode } = userRoleOfficeData;
 
-    const url = '/psapi/userRoleOfficeUpdate';
+    const url = '/psapi/userRoleOffice';
     const payload = { userId: parseInt(id), roleId: parseInt(roleId), officeId: parseInt(officeId), projectCode: projectCode };
 
-    apiPost(url, payload, (err, _body) => {
+    apiPut(url, payload, (err, _body) => {
       if (!err) {
         dispatch({ type: 'USER_ROLE_OFFICE_UPDATE_FINISHED' });
         store.doFetchUsers();

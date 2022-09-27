@@ -421,14 +421,14 @@ export default {
     });
   },
 
-  doUpdateMoRiverDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
+  doUpdateMoRiverDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
     const params = store.selectDataEntryLastParams();
 
-    const url = '/psapi/moriverDataEntryUpdate';
+    const url = '/psapi/moriverDataEntry';
 
-    apiPost(url, formData, (err, _body) => {
+    apiPut(url, formData, (err, _body) => {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
@@ -440,14 +440,14 @@ export default {
     });
   },
 
-  doUpdateFishDataEntry: (rowData) => ({ dispatch, store, apiPost }) => {
+  doUpdateFishDataEntry: (rowData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving fish datasheet...');
     const params = store.selectDataEntryLastParams();
 
-    const url = '/psapi/fishDataEntryUpdate';
+    const url = '/psapi/fishDataEntry';
 
-    apiPost(url, rowData, (err, _body) => {
+    apiPut(url, rowData, (err, _body) => {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
@@ -459,14 +459,14 @@ export default {
     });
   },
 
-  doUpdateSupplementalDataEntry: (rowData) => ({ dispatch, store, apiPost }) => {
+  doUpdateSupplementalDataEntry: (rowData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving supplemental datasheet...');
     const params = store.selectDataEntryLastParams();
 
-    const url = '/psapi/supplementalDataEntryUpdate';
+    const url = '/psapi/supplementalDataEntry';
 
-    apiPost(url, rowData, (err, _body) => {
+    apiPut(url, rowData, (err, _body) => {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_FINISHED' });
@@ -478,14 +478,14 @@ export default {
     });
   },
 
-  doUpdateProcedureDataEntry: (rowData) => ({ dispatch, store, apiPost }) => {
+  doUpdateProcedureDataEntry: (rowData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving procedure datasheet...');
     const params = store.selectDataEntryLastParams();
 
-    const url = '/psapi/procedureDataEntryUpdate';
+    const url = '/psapi/procedureDataEntry';
 
-    apiPost(url, rowData, (err, _body) => {
+    apiPut(url, rowData, (err, _body) => {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_FINISHED' });
@@ -497,14 +497,14 @@ export default {
     });
   },
 
-  doUpdateSearchDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
+  doUpdateSearchDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
     const params = store.selectDataEntryLastParams();
 
-    const url = '/psapi/searchDataEntryUpdate';
+    const url = '/psapi/searchDataEntry';
 
-    apiPost(url, formData, (err, _body) => {
+    apiPut(url, formData, (err, _body) => {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_FINISHED' });
@@ -516,14 +516,14 @@ export default {
     });
   },
 
-  doUpdateTelemetryDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
+  doUpdateTelemetryDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
     const params = store.selectDataEntryLastParams();
 
-    const url = '/psapi/telemetryDataEntryUpdate';
+    const url = '/psapi/telemetryDataEntry';
 
-    apiPost(url, formData, (err, _body) => {
+    apiPut(url, formData, (err, _body) => {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
