@@ -28,7 +28,6 @@ const ProcedureTable = ({ doFetchAllDatasheet, rowData = [] }) => (
         <AgGridColumn headerName='Segment' field='segment' />
         <AgGridColumn headerName='Season' field='season' />
         <AgGridColumn headerName='Purpose Code' field='purposeCode' sortable unSortIcon />
-        <AgGridColumn headerName='Procedure Date' field='procedureDate' sortable unSortIcon />
         <AgGridColumn headerName='New Radio Tag Num' field='newRadioTagNum' sortable unSortIcon />
         <AgGridColumn headerName='New Frequency ID' field='newFrequencyId' sortable unSortIcon />
         <AgGridColumn headerName='Spawn Code' field='spawnCode' sortable unSortIcon />
