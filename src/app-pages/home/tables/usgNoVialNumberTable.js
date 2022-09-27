@@ -20,7 +20,7 @@ const UsgNoVialNumbersTable = connect(
           mrIdCellRenderer: MrIdCellRenderer,
         }}
       >
-        <AgGridColumn field='mrID' headerName='mrId' width={100} cellRenderer='mrIdCellRenderer' sortable unSortIcon />
+        <AgGridColumn field='mrID' headerName='mrId' width={100} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit'}} sortable unSortIcon />
         <AgGridColumn field='fp' headerName='Full Project' resizable width={400} sortable unSortIcon />
         <AgGridColumn field='speciesCode' width={125} sortable unSortIcon />
         <AgGridColumn field='fId' headerName='fId' width={100} sortable unSortIcon />

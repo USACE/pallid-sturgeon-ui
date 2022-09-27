@@ -112,13 +112,13 @@ export default {
     });
   },
 
-  doUpdateSite: (siteData) => ({ dispatch, apiPut }) => {
+  doUpdateSite: (siteData) => ({ dispatch, apiPost }) => {
     dispatch({ type: 'SITES_UPDATE_START' });
     const toastId = toast.loading('Saving site data...');
 
-    const url = '/psapi/siteDataEntry';
+    const url = '/psapi/siteDataEntryUpdate';
 
-    apiPut(url, siteData, (err, _body) => {
+    apiPost(url, siteData, (err, _body) => {
       if (!err) {
         dispatch({ type: 'SITES_UPDATE_FINISHED' });
         tSuccess(toastId, 'Changes successfully saved!');

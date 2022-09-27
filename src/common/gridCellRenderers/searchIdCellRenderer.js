@@ -5,17 +5,24 @@ import Button from 'app-components/button';
 
 const SearchIdCellRenderer = connect(
   'doFetchSearchDataEntry',
+  'doUpdateUrl',
   ({
     doFetchSearchDataEntry,
+    doUpdateUrl,
+    uri,
     value,
-  }) => (
-    <Button
-      size='small'
-      variant='link'
-      className='p-0 mb-1'
-      text={value}
-      handleClick={() => doFetchSearchDataEntry({ tableId: value })}
-    />
-  ));
+  }) => {
+    const params = { tableId: value };
+
+    return (
+      <Button
+        size='small'
+        variant='link'
+        className='p-0 mb-1'
+        text={value}
+        handleClick={() => doFetchSearchDataEntry(params, doUpdateUrl(uri))}
+      />
+    );
+  });
 
 export default SearchIdCellRenderer;

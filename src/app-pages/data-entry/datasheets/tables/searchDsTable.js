@@ -46,7 +46,7 @@ const SearchDsTable = connect(
             telemetryIdCellRenderer: TelemetryIdCellRenderer,
           }}
         >
-          <AgGridColumn field='seId' headerName='Search ID' cellRenderer='searchIdCellRenderer' sortable unSortIcon />
+          <AgGridColumn field='seId' headerName='Search ID' cellRenderer='searchIdCellRenderer'  cellRendererParams={{ uri: '/sites-list/datasheet/searchEffort-edit'}} sortable unSortIcon />
           <AgGridColumn
             field='telemetryEntries'
             headerName='Telemetry Entries'

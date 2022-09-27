@@ -162,7 +162,7 @@ const SearchEffortForm = connect(
             </Row>
             {edit && (<Row>
               <div className='col-5'>
-                <TextArea name='editComments' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} isRequired={edit} />
+                <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} isRequired={edit} />
               </div>
               <div className='col-2'>
                 <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
