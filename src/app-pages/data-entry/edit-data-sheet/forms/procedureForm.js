@@ -30,7 +30,6 @@ const ProcedureForm = connect(
   'selectDataEntryLastParams',
   'selectDataEntryProcedure',
   'selectDataEntryFishData',
-  'selectDataEntry',
   'selectSitesData',
   ({
     doSaveProcedureDataEntry,
@@ -38,16 +37,16 @@ const ProcedureForm = connect(
     dataEntryLastParams,
     dataEntryProcedure,
     dataEntryFishData,
-    dataEntry,
     sitesData,
     edit
   }) => {
     const initialState = {
       fid: dataEntryLastParams.fId,
-      fFid: dataEntryFishData.items[0].ffid,
-      mrFid: dataEntryFishData.items[0].mrFid,
+      // fFid: dataEntryFishData.items[0].ffid,
+      // mrFid: dataEntryFishData.items[0].mrFid,
     };
     const [state, dispatch] = useReducer(reducer, initialState);
+    const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
     const handleChange = e => {
       dispatch({
@@ -109,8 +108,7 @@ const ProcedureForm = connect(
           </div>
         </Row>
         {/* Top Level Info */}
-        {/* TO DO: include component props */}
-        <DataHeader />
+        <DataHeader id={siteId} />
         {/* Approval */}
         {/* TO DO: include component props */}
         <Approval />

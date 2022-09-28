@@ -29,19 +29,22 @@ const SupplementalForm = connect(
   'doUpdateSupplementalDataEntry',
   'selectDataEntrySupplemental',
   'selectDataEntryFishData',
+  'selectSitesData',
   ({
     doSaveSupplementalDataEntry,
     doUpdateSupplementalDataEntry,
     dataEntrySupplemental,
     dataEntryFishData,
+    sitesData,
     edit,
   }) => {
     const initialState = {
       fid: dataEntryFishData.items[0].fid,
-      fFid: dataEntryFishData.items[0].ffid,
+      // fFid: dataEntryFishData.items[0].ffid,
       mrId: dataEntryFishData.items[0].mrId
     };
     const [state, dispatch] = useReducer(reducer, initialState);
+    const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
     const handleChange = (e) => {
       dispatch({
@@ -101,8 +104,9 @@ const SupplementalForm = connect(
           </div>
         </Row>
         {/* Top Level Info */}
-        <DataHeader />
+        <DataHeader id={siteId} />
         {/* Approval */}
+        {/* @TODO: include component props */}
         <Approval />
         {/* Form Fields */}
         <Card className='mt-3'>

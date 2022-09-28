@@ -21,6 +21,7 @@ export default {
       },
       searchData: [],
       telemetryData: {},
+      headerData: {},
       totalCount: 0,
       activeType: '',
       lastParams: {},
@@ -90,6 +91,8 @@ export default {
             ...state,
             activeType: payload,
           };
+        case 'UPDATED_HEADER_DATA':
+          return { ...state, headerData: payload };
         default:
           return state;
       }
@@ -109,6 +112,7 @@ export default {
   selectDataEntryTotalCount: state => state.dataEntry.totalCount,
   selectDataEntryActiveType: state => state.dataEntry.activeType,
   selectDataEntryLastParams: state => state.dataEntry.lastParams,
+  selectHeaderData: state => state.dataEntry.headerData,
 
   doDataEntrySetActiveType: (type) => ({ dispatch }) => {
     dispatch({ type: 'DATA_ENTRY_UPDATE_ACTIVE_TYPE', payload: type });
@@ -122,6 +126,20 @@ export default {
     store.doDomainSegmentsFetch();
     store.doDomainBendsFetch();
     store.doDomainSampleUnitTypesFetch();
+  },
+
+  doFetchHeaderData: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'FETCH_HEADER_DATA_START' });
+
+    const url = `/psapi/headerData${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'UPDATED_HEADER_DATA',
+        payload: body,
+      });
+      dispatch({ type: 'FETCH_HEADER_DATA_FINISHED' });
+    });
   },
 
   doFetchMoRiverDataEntry: (params, callback = null) => ({ dispatch, store, apiGet }) => {

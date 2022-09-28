@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 
@@ -7,24 +7,22 @@ import Card from 'app-components/card';
 import Icon from 'app-components/icon';
 import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
 import Approval from 'app-pages/data-entry/datasheets/components/approval';
-import { Row } from '../../edit-data-sheet/forms/_shared/helper';
 import FishIdCellRenderer from 'common/gridCellRenderers/fishIdCellRenderer';
 import SpeciesEditor from 'common/gridCellEditors/speciesEditor';
 import SuppIdCellRenderer from 'common/gridCellRenderers/suppIdCellRenderer';
-
-// For testing
-// 2113724 (Field Office: MO)
+import { Row } from '../../edit-data-sheet/forms/_shared/helper';
 
 const FishDsTable = connect(
   'doUpdateUrl',
-  'selectDataEntry',
   'selectDataEntryFishData',
+  'selectSitesData',
   ({
     doUpdateUrl,
-    dataEntry,
     dataEntryFishData,
+    sitesData,
   }) => {
     const { items } = dataEntryFishData;
+    const { siteId } = sitesData[0];
 
     return (
       <div className='container-fluid overflow-auto'>
@@ -33,10 +31,10 @@ const FishDsTable = connect(
             <h4>Fish Datasheets</h4>
           </div>
         </Row>
-        {/* @TODO: include component props */}
         {/* Top Level Info */}
-        <DataHeader />
+        <DataHeader id={siteId} />
         {/* Approval */}
+        {/* @TODO: include component props */}
         <Approval />
         {/* Fish Data Table */}
         <Card className='mt-3'>

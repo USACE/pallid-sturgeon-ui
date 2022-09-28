@@ -59,7 +59,7 @@ const FindDataSheet = connect(
         case 'telemetry':
           doFetchTelemetryDataEntry(params, doUpdateUrl('/sites-list/datasheet/telemetry-edit'));
           break;
-        case 'procedure':
+        case 'procedures':
           doFetchProcedureDataEntry(params, doUpdateUrl('/sites-list/datasheet/procedure-edit'));
           break;
         default:

@@ -40,7 +40,7 @@ const SearchEffortForm = connect(
       dsId: 123123
     };
     const [state, dispatch] = useReducer(reducer, initialState);
-    const data = sitesData[0];
+    const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
     const handleChange = e => {
       dispatch({
@@ -104,11 +104,7 @@ const SearchEffortForm = connect(
           </div>
         </Row>
         {/* Top Level Info */}
-        {/* TO DO: include component props */}
-        <DataHeader 
-          type='Site'
-          id={data ? data.siteId : state['siteId']}
-        />
+        <DataHeader id={siteId} />
         {/* Approval */}
         {/* TO DO: include component props */}
         <Approval />
