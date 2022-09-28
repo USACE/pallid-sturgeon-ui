@@ -26,14 +26,12 @@ const TelemetryForm = connect(
   'doSaveTelemetryDataEntry',
   'doUpdateTelemetryDataEntry',
   'selectDataEntryData',
-  'selectDataEntry',
   'selectDataEntryLastParams',
   'selectSitesData',
   ({
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
     dataEntryData,
-    dataEntry,
     dataEntryLastParams,
     sitesData,
     edit
@@ -42,6 +40,7 @@ const TelemetryForm = connect(
       seId: dataEntryLastParams.seId
     };
     const [state, dispatch] = useReducer(reducer, initialState);
+    const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
     const handleChange = (e) => {
       dispatch({
@@ -109,10 +108,10 @@ const TelemetryForm = connect(
             <h4>{edit ? 'Edit' : 'Create'} Telemetry Datasheet</h4>
           </div>
         </Row>
-        {/* @TODO: include component props */}
         {/* Top Level Info */}
-        <DataHeader />
+        <DataHeader id={siteId} />
         {/* Approval */}
+        {/* @TODO: include component props */}
         <Approval />
         {/* Form Fields */}
         <Card className='mt-3'>

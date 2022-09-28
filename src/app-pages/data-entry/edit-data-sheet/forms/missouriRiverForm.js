@@ -56,6 +56,7 @@ const MissouriRiverForm = connect(
     const [state, dispatch] = useReducer(reducer, edit ? {} : initialState);
     const [isNoTurbidity, setIsNoTurbidity] = useState(false);
     const [isNoVelocity, setIsNoVelocity] = useState(false);
+    const siteId = edit ? state['siteId'] : sitesData[0].siteId;
     const data = sitesData[0];
     const formComplete = true;  
 
@@ -163,19 +164,7 @@ const MissouriRiverForm = connect(
           </div>
         </div>
         {/* Top Level Info */}
-        <DataHeader 
-          type='Site'
-          id={!edit ? data.siteId : state['siteId']} 
-          year={!edit ? data.year : state['year']} 
-          fieldOffice={!edit ? data.fieldOfficeDescription : state['fieldOffice']}
-          project={!edit ? data.projectDescription : state['project']}
-          segment={!edit ? data.segmentDescription : state['segment']}
-          season={!edit ? data.seasonDescription : state['season']}
-          sampleUnitType={!edit ? data.sampleUnitType : state['sampleUnitType']}
-          sampleUnit={!edit ? data.bend : state['bend']}
-          bendrn={!edit ? data.bendrn : state['bendrn']}
-          bendRiverMile={!edit ? data.bendRiverMile : state['bendRiverMile']}
-        />
+        <DataHeader id={siteId} />
         {/* Approval */}
         {/* TO DO: include component props */}
         <Approval />

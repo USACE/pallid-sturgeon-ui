@@ -16,15 +16,16 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const SuppDsTable = connect(
   'doUpdateUrl',
-  'selectDataEntry',
   'selectDataEntrySupplemental',
+  'selectSitesData',
   ({
     doUpdateUrl,
-    dataEntry,
     dataEntrySupplemental,
+    sitesData,
   }) => {
     const { items, totalCount } = dataEntrySupplemental;
-
+    const { siteId } = sitesData[0];
+    
     return (
       <div className='container-fluid overflow-auto'>
         <Row>
@@ -32,10 +33,10 @@ const SuppDsTable = connect(
             <h4>Supplemental Datasheet</h4>
           </div>
         </Row>
-        {/* @TODO: include component props */}
         {/* Top Level Info */}
-        <DataHeader />
+        <DataHeader id={siteId} />
         {/* Approval */}
+        {/* @TODO: include component props */}
         <Approval />
         <Card className='mt-3'>
           <Card.Header text='Supplemental Datasheet(s)' />

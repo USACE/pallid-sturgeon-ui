@@ -34,11 +34,11 @@ const FishForm = connect(
   'doUpdateFishDataEntry',
   'selectDataEntryLastParams',
   'selectDataEntryFishData',
-  'selectSitesData',
   'selectDomainsSpecies',
   'selectDomainsFtPrefixes',
   'selectDomainsMr',
   'selectDomainsOtolith',
+  'selectSitesData',
   ({
     doDomainsSpeciesFetch,
     doDomainsFtPrefixesFetch,
@@ -48,17 +48,18 @@ const FishForm = connect(
     doUpdateFishDataEntry,
     dataEntryLastParams,
     dataEntryFishData,
-    sitesData,
     domainsSpecies,
     domainsFtPrefixes,
     domainsMr,
     domainsOtolith,
+    sitesData,
     edit
   }) => {
     const initialState = {
       mrId: dataEntryLastParams.mrId,
     };
     const [state, dispatch] = useReducer(reducer, initialState);
+    const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
     const handleChange = e => {
       dispatch({
@@ -121,8 +122,7 @@ const FishForm = connect(
           </div>
         </Row>
         {/* Top Level Info */}
-        {/* TO DO: include component props */}
-        <DataHeader />
+        <DataHeader id={siteId} />
         {/* Approval */}
         {/* TO DO: include component props */}
         <Approval />

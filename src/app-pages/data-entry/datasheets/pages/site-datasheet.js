@@ -18,19 +18,7 @@ const SiteDatasheet = connect(
     sitesData,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-
-    const {
-      siteId,
-      year,
-      fieldOfficeDescription,
-      projectDescription,
-      segmentDescription,
-      seasonDescription,
-      sampleUnitType,
-      bend,
-      bendrn,
-      bendRiverMile
-    } = sitesData[0];
+    const { siteId } = sitesData[0];
 
     const {
       missouriRiverData = {},
@@ -53,19 +41,7 @@ const SiteDatasheet = connect(
           </div>
         </div>
         {/* Top Level Info */}
-        <DataHeader 
-          type='Site'
-          id={siteId} 
-          year={year} 
-          fieldOffice={fieldOfficeDescription}
-          project={projectDescription}
-          segment={segmentDescription}
-          season={seasonDescription}
-          sampleUnitType={sampleUnitType}
-          sampleUnit={bend}
-          bendrn={bendrn}
-          bendRiverMile={bendRiverMile}
-        />
+        <DataHeader id={siteId} />
         {/* Tab Container */}
         <Card>
           <Card.Header text='Datasheets' />
@@ -74,7 +50,7 @@ const SiteDatasheet = connect(
               tabs={[
                 {
                   title: `Missouri River (${missouriRiverData.totalCount ? missouriRiverData.totalCount : '0'})`,
-                  content: <MissouriDsTable rowData={missouriRiverData.items} siteId={siteId} />,
+                  content: <MissouriDsTable rowData={missouriRiverData.items} />,
                 },
                 {
                   title: `Search Effort (${searchData.totalCount ? searchData.totalCount : '0'})`,

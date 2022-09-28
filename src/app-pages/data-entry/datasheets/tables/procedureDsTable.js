@@ -16,11 +16,14 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 const ProcedureDsTable = connect(
   'doUpdateUrl',
   'selectDataEntryProcedure',
+  'selectSitesData',
   ({
     doUpdateUrl,
     dataEntryProcedure,
+    sitesData
   }) => {
     const { items, totalCount } = dataEntryProcedure;
+    const { siteId } = sitesData[0];
 
     return (
       <div className='container-fluid overflow-auto'>
@@ -29,10 +32,10 @@ const ProcedureDsTable = connect(
             <h4>Procedure Datasheet</h4>
           </div>
         </Row>
-        {/* @TODO: include component props */}
         {/* Top Level Info */}
-        <DataHeader />
+        <DataHeader id={siteId} />
         {/* Approval */}
+        {/* @TODO: include component props */}
         <Approval />
         <Card className='mt-3'>
           <Card.Header text='Procedure Datasheet(s)' />
