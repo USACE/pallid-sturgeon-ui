@@ -1,11 +1,37 @@
 import { toast } from 'react-toastify';
 import { tSuccess, tError } from 'common/toast/toastHelper';
+import { queryFromObject } from 'utils';
 
 export default {
   name: 'upload',
-  getReducer: () => {},
+  getReducer: () => {
+    const initialData = {
+      logs: [],
+      data: [],
+    };
 
-  doUploadAllFiles: (params) => ({ dispatch, apiPost }) => {
+    return (state = initialData, { type, payload }) => {
+      switch (type) {
+        case 'UPDATE_UPLOAD_SESSION_LOGS':
+          return {
+            ...state,
+            logs: payload,
+          };
+        case 'UPDATE_UPLOAD':
+          return {
+            ...state,
+            data: payload,
+          };
+        default:
+          return state;
+      }
+    };
+  },
+
+  selectUploadLogs: state => state.upload.logs,
+  selectUploadData: state => state.upload.data,
+
+  doUploadAllFiles: (params) => ({ dispatch, apiPost, store }) => {
     dispatch({ type: 'UPLOAD_FILES_START' });
     const toastId = toast.loading('Uploading files, please wait...');
 
@@ -34,11 +60,34 @@ export default {
 
     apiPost(url, payload, (err, _body) => {
       if (!err) {
+        dispatch({
+          type: 'UPDATE_UPLOAD',
+          payload: _body,
+        });
         dispatch({ type: 'UPLOAD_FILES_FINISHED' });
         tSuccess(toastId, 'Successfully uploaded all files!');
+        store.doFetchUploadSessionLogs({ uploadSessionId: _body.uploadSessionId});
       } else {
         dispatch({ type: 'UPLOAD_FILES_ERROR', payload: err });
         tError(toastId, 'Failed to upload files. Please verify file formats and try again.');
+      }
+    });
+  },
+
+  doFetchUploadSessionLogs: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'FETCH_UPLOAD_SESSION_LOGS_START' });
+
+    const url = `/psapi/uploadSessionLogs${queryFromObject(params)}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({
+          type: 'UPDATE_UPLOAD_SESSION_LOGS',
+          payload: body,
+        });
+        dispatch({ type: 'FETCH_UPLOAD_SESSION_LOGS_FINISHED' });
+      } else {
+        dispatch({ type: 'FETCH_UPLOAD_SESSION_LOGS_ERROR' });
       }
     });
   },
