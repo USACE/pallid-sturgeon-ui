@@ -1,4 +1,4 @@
-import React, { useReducer, useState } from 'react';
+import React, { useReducer, useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import Papa from 'papaparse';
 
@@ -9,11 +9,16 @@ import Select from 'app-components/select';
 import { keyAsText } from 'utils';
 
 import { getIsRequired, reduceCsvState,  formatAsNumber, formatJsonKey } from './helper';
+import './dataupload.scss';
 
 export default connect(
+  'doFetchUploadSessionLogs',
   'doUploadAllFiles',
+  'selectUploadLogs',
   ({
+    doFetchUploadSessionLogs,
     doUploadAllFiles,
+    uploadLogs,
   }) => {
     const [recorder, setRecorder] = useState('');
     const [version, setVersion] = useState(null);
@@ -76,6 +81,10 @@ export default connect(
       doUploadAllFiles({ files, data: csvData, version, recorder });
     };
 
+    useEffect(() => {
+      doFetchUploadSessionLogs();
+    }, []);
+
     return (
       <div className='container-fluid w-75'>
         <Card>
@@ -133,6 +142,24 @@ export default connect(
                 />
               </>
             )}
+          </Card.Body>
+        </Card>
+        <Card className='mt-3'>
+          <Card.Header text='Upload Session Logs' />
+          <Card.Body>
+            {uploadLogs.length ? <>
+              <div>{`Date Created: ${uploadLogs[0].dateCreated.split('T')[0]}`}</div>
+              <div className='text log'>{uploadLogs[0].debugText}</div>
+              <div className='text log'>{uploadLogs[1].debugText}</div>
+              <div className='text log'>{uploadLogs[2].debugText}</div>
+              <div className='text log'>{uploadLogs[3].debugText}</div>
+              <div className='text log'>{uploadLogs[4].debugText}</div>
+              <div className='text log'>{uploadLogs[5].debugText}</div>
+              <div className='text log'>{uploadLogs[6].debugText}</div>
+              <div className='text log'>{uploadLogs[7].debugText}</div>
+              <div className='text log'>{uploadLogs[8].debugText}</div>
+              <div className='text log'>{uploadLogs[9].debugText}</div></> 
+              : <div className='text'>No logs to report</div> }
           </Card.Body>
         </Card>
       </div>

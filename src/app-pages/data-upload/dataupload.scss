@@ -1,0 +1,9 @@
+@import '../../style/variables';
+
+.text {
+  font-style:italic;
+
+  &.log {
+    color:red;
+  }
+}
