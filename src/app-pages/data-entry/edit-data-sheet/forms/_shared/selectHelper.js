@@ -485,6 +485,22 @@ export const finCurlOptions = [
   { value: 'N', text: 'No' },
 ];
 
+export const raySpineOptions = [
+  { value: 'X' },
+];
+
+export const scaleOptions = [
+  { value: 'X' },
+  { value: 'G' },
+];
+
+export const baitOptions = [
+  { value: 'C' },
+  { value: 'F' },
+  { value: 'L' },
+  { value: 'W' },
+];
+
 // Procedure Form Select Options
 export const purposeOptions = [
   { value: 'II' },

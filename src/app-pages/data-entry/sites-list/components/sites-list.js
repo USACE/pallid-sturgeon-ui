@@ -163,7 +163,7 @@ const SitesList = connect(
         <div className='row'>
           <div className='col-md-12 pl-3'>
             <span className='info-message mr-1'><Icon icon='help-circle' /></span>
-            <span className='info-message'>Make selections from the drop down lists to go to the Missouri River data sheets associated with your selection.</span>
+            <span className='info-message'>Make selections from the drop down lists to go to the datasheets associated with your selection.</span>
           </div>
         </div>
         <SitesListTable />

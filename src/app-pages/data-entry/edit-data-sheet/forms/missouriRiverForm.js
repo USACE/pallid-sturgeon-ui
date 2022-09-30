@@ -145,14 +145,6 @@ const MissouriRiverForm = connect(
         } 
       } else {
         handleSelect('siteId', Number(data.siteId));
-        handleSelect('siteFid', data.siteFid);
-        handleSelect('fieldoffice', data.fieldOfficeDescription);
-        handleSelect('project', Number(data.projectDescription));
-        handleSelect('segment', Number(data.segmentDescription));
-        handleSelect('season', data.seasonDescription);
-        handleSelect('bend', Number(data.bend));
-        handleSelect('bendrn', data.bendrn);
-        handleSelect('bendrivermile', isNaN(parseFloat(data.bendRiverMile)) ? 0 : parseFloat(data.bendRiverMile));
       }
     }, [edit]);
 
@@ -198,8 +190,8 @@ const MissouriRiverForm = connect(
                   value={state['subsamplen']}
                   onChange={val => handleSelect('subsamplen', val)}
                   options={[
-                    { value: 'R' },
-                    { value: 'N' },
+                    { value: 'R', text: 'R - Random' },
+                    { value: 'N', text: 'N - Non-Random' },
                   ]}
                   isDisabled={!formComplete}
                   isRequired
@@ -460,8 +452,8 @@ const MissouriRiverForm = connect(
                       value={state['habitatrn']}
                       onChange={val => handleSelect('habitatrn', val)}
                       options={[
-                        { value: 'R', text: 'Random' },
-                        { value: 'N', text: 'Non-random' },
+                        { value: 'R', text: 'R - Random' },
+                        { value: 'N', text: 'N - Non-random' },
                       ]}
                       isDisabled={!formComplete}
                     />
@@ -496,10 +488,10 @@ const MissouriRiverForm = connect(
                       defaultValue={0}
                       onChange={val => handleSelect('cobble', val)}
                       options={[
-                        { value: 0, text: 'None' },
-                        { value: 1, text: 'Incidental' },
-                        { value: 2, text: 'Dominant' },
-                        { value: 3, text: 'Ubiquitous' },
+                        { value: 0, text: '0 - None' },
+                        { value: 1, text: '1 - Incidental' },
+                        { value: 2, text: '2 - Dominant' },
+                        { value: 3, text: '3 - Ubiquitous' },
                       ]}
                       isDisabled={!formComplete}
                     />
@@ -522,10 +514,10 @@ const MissouriRiverForm = connect(
                       defaultValue={0}
                       onChange={val => handleSelect('organic', val)}
                       options={[
-                        { value: 0, text: 'None' },
-                        { value: 1, text: 'Incidental' },
-                        { value: 2, text: 'Dominant' },
-                        { value: 3, text: 'Ubiquitous' },
+                        { value: 0, text: '0 - None' },
+                        { value: 1, text: '1 - Incidental' },
+                        { value: 2, text: '2 - Dominant' },
+                        { value: 3, text: '3 - Ubiquitous' },
                       ]}
                       isDisabled={!formComplete}
                     />

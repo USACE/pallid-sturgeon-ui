@@ -211,7 +211,7 @@ const SupplementalForm = connect(
                 <Input name='mIb' label='M-IB' type='number' value={state['mIb'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
-                <Input name='mouth' label='Mouth' type='number' value={state['mouthwidth'] || ''} onChange={handleNumber} />
+                <Input name='mouthwidth' label='Mouth' type='number' value={state['mouthwidth'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
                 <Input name='rIb' label='R-IB' type='number' value={state['rIb']} onChange={handleNumber} />

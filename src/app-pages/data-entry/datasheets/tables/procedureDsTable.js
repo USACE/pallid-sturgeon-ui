@@ -105,7 +105,6 @@ const ProcedureDsTable = connect(
                 <AgGridColumn field='editInitials' sortable unSortIcon />
                 <AgGridColumn field='lastEditComment' resizable sortable unSortIcon />
                 <AgGridColumn field='lastUpdated' sortable unSortIcon />
-                <AgGridColumn field='uploadSessionId' sortable unSortIcon />
                 <AgGridColumn field='uploadedBy' sortable unSortIcon />
               </AgGridReact>
             </div>

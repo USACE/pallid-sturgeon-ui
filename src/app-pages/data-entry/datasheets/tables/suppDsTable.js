@@ -78,6 +78,37 @@ const SuppDsTable = connect(
                 <AgGridColumn field='procEntries' headerName='Procedure Entries' width={130} cellRenderer='procedureIdCellRenderer' cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/procedure' }} />
                 <AgGridColumn field='tagnumber' sortable unSortIcon />
                 <AgGridColumn field='pitrn' sortable unSortIcon />
+                <AgGridColumn field='cwtyn' sortable unSortIcon />
+                <AgGridColumn field='dangler' sortable unSortIcon />
+                <AgGridColumn field='scuteloc' sortable unSortIcon />
+                <AgGridColumn field='scutenum' sortable unSortIcon />
+                <AgGridColumn field='scuteloc2' sortable unSortIcon />
+                <AgGridColumn field='scutenum2' sortable unSortIcon />
+                <AgGridColumn field='elcolor' sortable unSortIcon />
+                <AgGridColumn field='elhv' sortable unSortIcon />
+                <AgGridColumn field='ercolor' sortable unSortIcon />
+                <AgGridColumn field='erhv' sortable unSortIcon />
+                <AgGridColumn field='genetic' sortable unSortIcon />
+                <AgGridColumn field='geneticNeeds' sortable unSortIcon />
+                <AgGridColumn field='geneticsVialNumber' sortable unSortIcon />
+                <AgGridColumn field='otherTagInfo' sortable unSortIcon />
+                <AgGridColumn field='anal' sortable unSortIcon />
+                <AgGridColumn field='archive' sortable unSortIcon />
+                <AgGridColumn field='broodstock' sortable unSortIcon />
+                <AgGridColumn field='hatchWild' sortable unSortIcon />
+                <AgGridColumn field='hatcheryOrigin' sortable unSortIcon />
+                <AgGridColumn field='head' sortable unSortIcon />
+                <AgGridColumn field='inter' sortable unSortIcon />
+                <AgGridColumn field='lIb' sortable unSortIcon />
+                <AgGridColumn field='lOb' sortable unSortIcon />
+                <AgGridColumn field='mIb' sortable unSortIcon />
+                <AgGridColumn field='rIb' sortable unSortIcon />
+                <AgGridColumn field='rOb' sortable unSortIcon />
+                <AgGridColumn field='mouthwidth' sortable unSortIcon />
+                <AgGridColumn field='recapture' sortable unSortIcon />
+                <AgGridColumn field='lastEditComment' sortable unSortIcon />
+                <AgGridColumn field='editInitials' sortable unSortIcon />
+                <AgGridColumn field='uploadedBy' sortable unSortIcon />
               </AgGridReact>
             </div>
           </Card.Body>
