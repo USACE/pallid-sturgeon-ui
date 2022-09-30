@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
@@ -29,23 +29,31 @@ const ProcedureForm = connect(
   'doUpdateProcedureDataEntry',
   'selectDataEntryLastParams',
   'selectDataEntryProcedure',
-  'selectDataEntryFishData',
   'selectSitesData',
   ({
     doSaveProcedureDataEntry,
     doUpdateProcedureDataEntry,
     dataEntryLastParams,
     dataEntryProcedure,
-    dataEntryFishData,
     sitesData,
     edit
   }) => {
     const initialState = {
       fid: dataEntryLastParams.fId,
-      // fFid: dataEntryFishData.items[0].ffid,
-      // mrFid: dataEntryFishData.items[0].mrFid,
+      dstReimplant: 0,
+      eggSample: 0,
+      antibioticInjection: 0,
+      pDorsal: 0,
+      pVentral: 0,
+      pLeft: 0,
     };
     const [state, dispatch] = useReducer(reducer, initialState);
+    const [isDstReimplant, setIsDstReimplant] = useState(false);
+    const [isEggSample, setIsEggSample] = useState(false);
+    const [isAntibioticInjection, setIsAntibioticInjection] = useState(false);
+    const [isPDorsal, setIsPDorsal] = useState(false);
+    const [isPVentral, setIsPVentral] = useState(false);
+    const [isPLeft, setIsPLeft] = useState(false);
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
     const handleChange = e => {
@@ -70,6 +78,43 @@ const ProcedureForm = connect(
         field: e.target.name,
         value: isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value)
       });
+    };
+
+    // @TODO: consolidate checkbox handlers if possible
+    const handleDstReimplantCheckbox = () => {
+      const val = !isDstReimplant;
+      setIsDstReimplant(val);
+      handleSelect('dstReimplant', val === false ? 0 : 1);
+    };
+
+    const handleEggSampleCheckbox = () => {
+      const val = !isEggSample;
+      setIsEggSample(val);
+      handleSelect('eggSample', val === false ? 0 : 1);
+    };
+
+    const handleAntibioticInjectionCheckbox = () => {
+      const val = !isAntibioticInjection;
+      setIsAntibioticInjection(val);
+      handleSelect('antibioticInjection', val === false ? 0 : 1);
+    };
+
+    const handlePDorsalCheckbox = () => {
+      const val = !isPDorsal;
+      setIsPDorsal(val);
+      handleSelect('pDorsal', val === false ? 0 : 1);
+    };
+
+    const handlePVentralCheckbox = () => {
+      const val = !isPVentral;
+      setIsPVentral(val);
+      handleSelect('pVentral', val === false ? 0 : 1);
+    };
+
+    const handlePLeftCheckbox = () => {
+      const val = !isPLeft;
+      setIsPLeft(val);
+      handleSelect('pLeft', val === false ? 0 : 1);
     };
 
     const doSave = () => {
@@ -97,6 +142,42 @@ const ProcedureForm = connect(
           type: 'INITIALIZE_FORM',
           payload: dataEntryProcedure.items[0],
         });
+        
+        if (dataEntryProcedure.items[0].dstReimplant === 1) {
+          setIsDstReimplant(true);
+        } else {
+          setIsDstReimplant(false);
+        }
+
+        if (dataEntryProcedure.items[0].eggSample === 1) {
+          setIsEggSample(true);
+        } else {
+          setIsEggSample(false);
+        }
+
+        if (dataEntryProcedure.items[0].antibioticInjection === 1) {
+          setIsAntibioticInjection(true);
+        } else {
+          setIsAntibioticInjection(false);
+        }
+
+        if (dataEntryProcedure.items[0].pDorsal === 1) {
+          setIsPDorsal(true);
+        } else {
+          setIsPDorsal(false);
+        }
+
+        if (dataEntryProcedure.items[0].pVentral === 1) {
+          setIsPVentral(true);
+        } else {
+          setIsPVentral(false);
+        }
+
+        if (dataEntryProcedure.items[0].pLeft === 1) {
+          setIsPLeft(true);
+        } else {
+          setIsPLeft(false);
+        }
       }
     }, [edit, dataEntryProcedure]);
 
@@ -128,6 +209,7 @@ const ProcedureForm = connect(
                 />
               </div>
               <div className='col-2'>
+                {/* @TODO: format date */}
                 <Input name='procedureDate' label='Procedure Date' type='date' value={state['procedureDate'] ? state['procedureDate'].split('T')[0] : ''} onChange={handleChange} isDisabled />
               </div>
               <div className='col-2'>
@@ -140,7 +222,7 @@ const ProcedureForm = connect(
                 <Input name='procedureBy' label='Procedure By' value={state['procedureBy']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='oldRadioTagNum' label='Old Radio Tag Number' type='number' value={state['oldRadioTagNum']} onChange={handleNumber} />
+                <Input name='oldRadioTagNum' label='Old Radio Tag Number' type='number' value={state['oldRadioTagNum'] || ''} onChange={handleNumber} />
               </div>
             </Row>
             <Row>
@@ -154,7 +236,7 @@ const ProcedureForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input name='dstSerialNum' label='DST Serial Number' type='number' value={state['dstSerialNum']} onChange={handleNumber} />
+                <Input name='dstSerialNum' label='DST Serial Number' type='number' value={state['dstSerialNum'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
                 {/* @TODO: format date */}
@@ -170,7 +252,9 @@ const ProcedureForm = connect(
                   type='checkbox'
                   className='form-control mt-1'
                   style={{ height: '15px', width: '15px', margin: 'auto' }}
-                  value={state['dstReimplant']}
+                  value={state['dstReimplant'] === 0 ? false : true} 
+                  onChange={handleDstReimplantCheckbox}
+                  checked={isDstReimplant}
                 />
               </div>
               <div className='col-2'>
@@ -223,7 +307,9 @@ const ProcedureForm = connect(
                   type='checkbox'
                   className='form-control mt-1'
                   style={{ height: '15px', width: '15px', margin: 'auto' }}
-                  value={state['eggSample']}
+                  value={state['eggSample'] === 0 ? false : true} 
+                  onChange={handleEggSampleCheckbox}
+                  checked={isEggSample}
                 />
               </div>
               <div className='col-2'>
@@ -247,7 +333,7 @@ const ProcedureForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input name='ultrasoundGonadLength' label='Ultrasound Gonad Length' type='number' value={state['ultrasoundGonadLength']} onChange={handleNumber} />
+                <Input name='ultrasoundGonadLength' label='Ultrasound Gonad Length' type='number' value={state['ultrasoundGonadLength'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
                 <Input name='gonadCondition' label='Gonad Condition' value={state['gonadCondition']} onChange={handleChange} />
@@ -259,7 +345,9 @@ const ProcedureForm = connect(
                   type='checkbox'
                   className='form-control mt-1'
                   style={{ height: '15px', width: '15px', margin: 'auto' }}
-                  value={state['antibioticInjection']}
+                  value={state['antibioticInjection'] === 0 ? false : true} 
+                  onChange={handleAntibioticInjectionCheckbox}
+                  checked={isAntibioticInjection}
                 />
                 <label><small>Head (dorsal)</small></label>
                 <input
@@ -267,7 +355,9 @@ const ProcedureForm = connect(
                   type='checkbox'
                   className='form-control mt-1'
                   style={{ height: '15px', width: '15px', margin: 'auto' }}
-                  value={state['pDorsal']}
+                  value={state['pDorsal'] === 0 ? false : true} 
+                  onChange={handlePDorsalCheckbox}
+                  checked={isPDorsal}
                 />
               </div>
               <div className='col-2 text-center'>
@@ -277,7 +367,9 @@ const ProcedureForm = connect(
                   type='checkbox'
                   className='form-control mt-1'
                   style={{ height: '15px', width: '15px', margin: 'auto' }}
-                  value={state['pVentral']}
+                  value={state['pVentral'] === 0 ? false : true} 
+                  onChange={handlePVentralCheckbox}
+                  checked={isPVentral}
                 />
                 <label><small>Head (left)</small></label>
                 <input
@@ -285,13 +377,15 @@ const ProcedureForm = connect(
                   type='checkbox'
                   className='form-control mt-1'
                   style={{ height: '15px', width: '15px', margin: 'auto' }}
-                  value={state['pLeft']}
+                  value={state['pLeft'] === 0 ? false : true} 
+                  onChange={handlePLeftCheckbox}
+                  checked={isPLeft}
                 />
               </div>
             </Row>
             <Row>
               <div className='col-2'>
-                <Input name='expectedSpawnYear' label='Expected Spawn Year' type='number' value={state['expectedSpawnYear']} onChange={handleNumber} />
+                <Input name='expectedSpawnYear' label='Expected Spawn Year' type='number' value={state['expectedSpawnYear'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-4'>
                 <TextArea name='comments' label='Comments' value={state['comments']} onChange={handleChange} />

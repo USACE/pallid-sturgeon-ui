@@ -4,7 +4,7 @@ import { connect } from 'redux-bundler-react';
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import { FilterSelectCustomLabel, Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
-import { finCurlOptions } from './_shared/selectHelper';
+import { baitOptions, finCurlOptions, raySpineOptions, scaleOptions } from './_shared/selectHelper';
 import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
 import Approval from 'app-pages/data-entry/datasheets/components/approval';
 import { createDropdownOptions, createMesoOptions } from 'app-pages/data-entry/helpers';
@@ -85,6 +85,14 @@ const FishForm = connect(
       });
     };
 
+    const handleFloat = e => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: e.target.name,
+        payload: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value)
+      });
+    };
+
     const doSave = () => {
       if (edit) {
         doUpdateFishDataEntry(state);
@@ -141,6 +149,7 @@ const FishForm = connect(
                   placeholder='Select species...'
                   value={state['species']}
                   items={createMesoOptions(domainsSpecies)}
+                  handleInputChange={value => handleSelect('species', value)}
                   onChange={(_, __, value) => handleSelect('species', value)}
                   isRequired 
                 />
@@ -156,10 +165,10 @@ const FishForm = connect(
               </div>
               <div className='col-2'>
                 <SelectCustomLabel 
-                  name='ftprefix' 
+                  name='ftPrefix' 
                   label='FT Prefix'
-                  value={state['ftprefix']}
-                  onChange={val => handleSelect('ftprefix', val)}
+                  value={state['ftPrefix']}
+                  onChange={val => handleSelect('ftPrefix', val)}
                   options={createMesoOptions(domainsFtPrefixes)} 
                 />
               </div>
@@ -181,7 +190,7 @@ const FishForm = connect(
                 <Input name='geneticsVialNumber' label='Genetics Vial #' value={state['geneticsVialNumber']} onChange={handleChange} />
               </div>
               <div className='col-2'>
-                <Input name='condition' label='Condition' type='number' value={state['condition'] || ''} onChange={handleNumber} />
+                <Input name='condition' label='Condition' type='number' value={state['condition'] || ''} onChange={handleFloat} />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel 
@@ -205,12 +214,12 @@ const FishForm = connect(
             <Row>
               <div className='col-2'>
                 <SelectCustomLabel 
-                  name='rayspine' 
+                  name='raySpine' 
                   label='Ray Spine' 
-                  value={state['rayspine']} 
-                  // options={[{text: 'placeholder', value: ''}]}
-                  onChange={val => handleSelect('rayspine', val)} 
-                  isDisabled 
+                  value={state['raySpine']} 
+                  defaultValue='X'
+                  options={raySpineOptions}
+                  onChange={val => handleSelect('raySpine', val)}
                 />
               </div>
               <div className='col-2'>
@@ -224,9 +233,8 @@ const FishForm = connect(
                   name='scale' 
                   label='Scale' 
                   value={state['scale']} 
-                  // options={[{text: 'placeholder', value: ''}]}
-                  onChange={val => handleSelect('scale', val)} 
-                  isDisabled 
+                  options={scaleOptions}
+                  onChange={val => handleSelect('scale', val)}
                 />
               </div>
               <div className='col-2'>
@@ -237,9 +245,8 @@ const FishForm = connect(
                   name='bait' 
                   label='Bait' 
                   value={state['bait']} 
-                  // options={[{text: 'placeholder', value: ''}]}
-                  onChange={val => handleSelect('bait', val)} 
-                  isDisabled 
+                  options={baitOptions}
+                  onChange={val => handleSelect('bait', val)}
                 />
               </div>
             </Row>

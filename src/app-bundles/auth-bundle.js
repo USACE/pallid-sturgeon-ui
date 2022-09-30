@@ -30,14 +30,11 @@ export default {
   },
 
   init: store => {
-    const { origin, pathname } = store.selectUrlObject();
-    const href = `${origin}${pathname}`;
-
     keycloak = new Keycloak({
       keycloakUrl: keycloakUrl,
       realm: keycloakRealm,
       client: keycloakClient,
-      redirectUrl: href || redirectUrl,
+      redirectUrl: redirectUrl,
       refreshInterval: 30,
       sessionEndWarning: 120,
       onAuthenticate: (token) => {

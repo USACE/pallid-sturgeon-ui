@@ -336,7 +336,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchMoRiverDataEntry(params, store.doUpdateUrl('/sites-list/datasheet'));
+        store.doFetchMoRiverDataEntry({tableId: _body}, store.doUpdateUrl('/sites-list/datasheet'));
       } else {
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
