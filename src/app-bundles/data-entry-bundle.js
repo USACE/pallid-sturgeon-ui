@@ -169,7 +169,7 @@ export default {
         });
 
         if (store.selectDataEntryTotalCount() === 0 && !ignoreToast) {
-          tWarning(toastId, 'No Missouri River datasheets found. Please try again or add a data entry.');
+          tWarning(toastId, 'No Missouri River datasheets found. Add a data entry.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
           if (callback && typeof callback === 'function') {
@@ -198,7 +198,7 @@ export default {
         });
 
         if (store.selectDataEntryFishTotalCount() === 0) {
-          tWarning(toastId, 'No Fish datasheets found. Please try again or add a data entry.');
+          tWarning(toastId, 'No Fish datasheets found. Add a data entry.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
           if (callback && typeof callback === 'function') {
@@ -227,7 +227,7 @@ export default {
         });
 
         if (store.selectDataEntrySupplementalTotalCount() === 0) {
-          tWarning(toastId, 'No Supplemental datasheets found. Please try again or add a data entry.');
+          tWarning(toastId, 'No Supplemental datasheets found. Add a data entry.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
           if (callback && typeof callback === 'function') {
@@ -256,7 +256,7 @@ export default {
         });
 
         if (store.selectDataEntryProcedureTotalCount() === 0) {
-          tWarning(toastId, 'No Procedure datasheets found. Please try again or add a data entry.');
+          tWarning(toastId, 'No Procedure datasheets found. Add a data entry.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
           if (callback && typeof callback === 'function') {
@@ -288,7 +288,7 @@ export default {
         });
 
         if (store.selectDataEntryTotalCount() === 0) {
-          tWarning(toastId, 'No Search Effort datasheets found. Please try again or add a data entry.');
+          tWarning(toastId, 'No Search Effort datasheets found. Add a data entry.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
           if (callback && typeof callback === 'function') {
@@ -320,7 +320,7 @@ export default {
         });
 
         if (store.selectDataEntryTotalCount() === 0) {
-          tWarning(toastId, 'No Telemetry datasheets found. Please try again or add a data entry.');
+          tWarning(toastId, 'No Telemetry datasheets found. Add a data entry.');
         } else {
           tSuccess(toastId, 'Datasheet found!');
           if (callback && typeof callback === 'function') {
