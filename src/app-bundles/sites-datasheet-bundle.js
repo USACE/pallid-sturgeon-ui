@@ -86,7 +86,6 @@ const sitesDatasheetBundle = {
 
   doSetSitesDatasheetPagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
     dispatch({ type: 'SET_SITES_DATASHEET_PAGINATION', payload: { pageSize, pageNumber }});
-    // store.doFetchSitesDatasheets();
   },
 
   doUpdateSitesDatasheetParams: (params) => ({ dispatch, store }) => {

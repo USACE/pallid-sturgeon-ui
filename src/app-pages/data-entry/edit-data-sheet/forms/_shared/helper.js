@@ -8,7 +8,7 @@ export const Row = ({ children, className }) => (
   </div>
 );
 
-export const Input = ({ name, label, className, helperText, helperDirection = 'column', value, step, onChange, type = 'text', isDisabled, isRequired }) => {
+export const Input = ({ name, label, className, helperText, helperDirection = 'column', value, step, onChange, type = 'text', placeholder, isDisabled, isRequired }) => {
   const showRequired = isRequired && !value;
 
   if (helperText) {
@@ -16,8 +16,8 @@ export const Input = ({ name, label, className, helperText, helperDirection = 'c
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
         <div className={`d-flex flex-${helperDirection} w-100`}>
-          <input className={`form-control w-100 mt-1${showRequired ? ' is-invalid' : ''}`} id={name} name={name} disabled={isDisabled} value={value} onChange={onChange} type={type} step={step} />
-          <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'}><i>{helperText}</i></p>
+          <input className={`form-control w-100 mt-1${showRequired ? ' is-invalid' : ''}`} id={name} name={name} disabled={isDisabled} value={value} onChange={onChange} type={type} step={step} placeholder={placeholder} />
+          <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'} style={{fontSize: 'smaller'}} ><i>{helperText}</i></p>
         </div>
       </>
     );
@@ -25,7 +25,7 @@ export const Input = ({ name, label, className, helperText, helperDirection = 'c
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
-        <input className={`form-control w-100${showRequired ? ' is-invalid' : ''}`} id={name} name={name} disabled={isDisabled} value={value} onChange={onChange} type={type} step={step} />
+        <input className={`form-control w-100${showRequired ? ' is-invalid' : ''}`} id={name} name={name} disabled={isDisabled} value={value} onChange={onChange} type={type} step={step} placeholder={placeholder} />
       </>
     );
   }

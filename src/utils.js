@@ -57,6 +57,6 @@ export const dropdownYearsToNow = (toYear = 2018) => {
   const thisYear = new Date().getFullYear();
 
   return [...new Array(thisYear - toYear)].map((_, i) => ({
-    value: thisYear - i,
+    value: thisYear+1 - i,
   }));
 };

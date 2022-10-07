@@ -104,7 +104,7 @@ export default {
       if (!err) {
         dispatch({ type: 'SITES_POST_FINISHED' });
         tSuccess(toastId, 'New site created!');
-        store.doUpdateUrl('/sites-list');
+        store.doSitesFetch();
       } else {
         dispatch({ type: 'SITES_POST_ERROR', payload: err });
         tError(toastId, 'Failed to create site. Please try again.');

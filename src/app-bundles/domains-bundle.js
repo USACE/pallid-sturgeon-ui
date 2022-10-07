@@ -19,6 +19,8 @@ export default {
       ftPrefixes: [],
       mr: [],
       otolith: [],
+      setsite1: [],
+      setsite2: [],
     };
 
     return (state = initialData, { type, payload }) => {
@@ -51,6 +53,10 @@ export default {
           return { ...state, mr: payload };
         case 'DOMAIN_UPDATED_OTOLITH':
           return { ...state, otolith: payload };
+        case 'DOMAIN_UPDATED_SET_SITE_1':
+          return { ...state, setsite1: payload };
+        case 'DOMAIN_UPDATED_SET_SITE_2':
+          return { ...state, setsite2: payload };
         default:
           return state;
       }
@@ -72,6 +78,8 @@ export default {
   selectDomainsFtPrefixes: state => state.domains.ftPrefixes,
   selectDomainsMr: state => state.domains.mr,
   selectDomainsOtolith: state => state.domains.otolith,
+  selectDomainsSetSite1: state => state.domains.setsite1,
+  selectDomainsSetSite2: state => state.domains.setsite2,
 
   doDomainProjectsFetch: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_PROJECTS_START' });
@@ -266,6 +274,34 @@ export default {
         payload: body,
       });
       dispatch({ type: 'DOMAIN_FETCH_OTOLITH_FINISHED' });
+    });
+  },
+
+  doDomainsSetSite1Fetch: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_SET_SITE_1_START' });
+
+    const url = `/psapi/setsite1${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_SET_SITE_1',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_SET_SITE_1_FINISHED' });
+    });
+  },
+
+  doDomainsSetSite2Fetch: (params) => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_SET_SITE_2_START' });
+
+    const url = `/psapi/setsite2${queryFromObject(params)}`;
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_SET_SITE_2',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_SET_SITE_2_FINISHED' });
     });
   },
 };

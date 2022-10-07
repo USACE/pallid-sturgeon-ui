@@ -3,10 +3,11 @@ import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
-import { FilterSelectCustomLabel, Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
-import { baitOptions, finCurlOptions, raySpineOptions, scaleOptions } from './_shared/selectHelper';
 import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
 import Approval from 'app-pages/data-entry/datasheets/components/approval';
+
+import { FilterSelectCustomLabel, Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
+import { baitOptions, finCurlOptions, raySpineOptions, scaleOptions } from './_shared/selectHelper';
 import { createDropdownOptions, createMesoOptions } from 'app-pages/data-entry/helpers';
 
 const reducer = (state, action) => {
@@ -23,15 +24,15 @@ const reducer = (state, action) => {
   }
 };
 
-// 7229 for testing
-
 const FishForm = connect(
   'doDomainsSpeciesFetch',
   'doDomainsFtPrefixesFetch',
   'doDomainsMrFetch',
   'doDomainsOtolithFetch',
+  'doFetchFishDataEntry',
   'doSaveFishDataEntry',
   'doUpdateFishDataEntry',
+  'doUpdateUrl',
   'selectDataEntryLastParams',
   'selectDataEntryFishData',
   'selectDomainsSpecies',
@@ -44,6 +45,8 @@ const FishForm = connect(
     doDomainsFtPrefixesFetch,
     doDomainsMrFetch,
     doDomainsOtolithFetch,
+    doFetchFishDataEntry,
+    doUpdateUrl,
     doSaveFishDataEntry,
     doUpdateFishDataEntry,
     dataEntryLastParams,
@@ -89,15 +92,15 @@ const FishForm = connect(
       dispatch({
         type: 'UPDATE_INPUT',
         field: e.target.name,
-        payload: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value)
+        value: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value)
       });
     };
 
     const doSave = () => {
       if (edit) {
-        doUpdateFishDataEntry(state);
+        doUpdateFishDataEntry(state, doFetchFishDataEntry({ mrId: state['mrId'] }, doUpdateUrl('/sites-list/datasheet/fish')));
       } else {
-        doSaveFishDataEntry(state);
+        doSaveFishDataEntry(state, doFetchFishDataEntry({ mrId: state['mrId'] }, doUpdateUrl('/sites-list/datasheet/fish')));
       }
     };
 
@@ -155,10 +158,10 @@ const FishForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input name='length' label='Length' type='number' value={state['length'] || ''} onChange={handleNumber} />
+                <Input name='length' label='Length' type='number' value={state['length'] || ''} placeholder='max 4 digits' onChange={handleNumber} />
               </div>
               <div className='col-2'>
-                <Input name='weight' label='Weight' type='number' value={state['weight'] || ''} onChange={handleNumber} />
+                <Input name='weight' label='Weight' type='number' value={state['weight'] || ''} placeholder='ex: 12345.6' onChange={handleFloat} />
               </div>
               <div className='col-2'>
                 <Input name='countF' label='Count' type='number' value={state['countF'] || ''} onChange={handleNumber} />
@@ -187,7 +190,7 @@ const FishForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input name='geneticsVialNumber' label='Genetics Vial #' value={state['geneticsVialNumber']} onChange={handleChange} />
+                <Input name='geneticsVialNumber' label='Genetics Vial #' value={state['geneticsVialNumber']} placeholder='ex: STURG-13334' onChange={handleChange} />
               </div>
               <div className='col-2'>
                 <Input name='condition' label='Condition' type='number' value={state['condition'] || ''} onChange={handleFloat} />

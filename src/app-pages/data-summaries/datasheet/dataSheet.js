@@ -76,9 +76,10 @@ export default connect(
         season: seasonFilter,
         fromDate: fromDateFilter,
         toDate: toDateFilter,
+        approved: approvalFilter,
       };
       doUpdateDatasheetParams(params);
-    }, [yearFilter, monthFilter, projectFilter, seasonFilter, currentTab, doUpdateDatasheetParams]);
+    }, [yearFilter, monthFilter, projectFilter, seasonFilter, currentTab, approvalFilter, doUpdateDatasheetParams]);
 
     useEffect(() => {
       doDatasheetLoadData();
@@ -111,17 +112,20 @@ export default connect(
                   onChange={val => setProjectFilter(val)}
                   value={projectFilter}
                   options={createDropdownOptions(projects)}
+                  isDisabled
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
                 <label><small>Approval</small></label>
                 <Select
-                  isDisabled
                   showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setApprovalFilter(val)}
                   value={approvalFilter}
-                  options={[]}
+                  options={[
+                    { value: 0, text: '0 - Not Approved'},
+                    { value: 1, text: '1 - Approved'},
+                  ]}
                 />
               </div>
             </div>
@@ -169,6 +173,7 @@ export default connect(
                     { value: 11, text: 'November' },
                     { value: 12, text: 'December' },
                   ]}
+                  isDisabled
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
@@ -181,6 +186,7 @@ export default connect(
                   className='form-control mt-1 mr-2 date-input'
                   value={fromDateFilter}
                   onChange={e => setFromDateFilter(e.target.value)}
+                  disabled
                 />
                 -
                 <input
@@ -188,6 +194,7 @@ export default connect(
                   className='form-control mt-1 ml-2 date-input'
                   value={toDateFilter}
                   onChange={e => setToDateFilter(e.target.value)}
+                  disabled
                 />
               </div>
             </div>

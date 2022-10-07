@@ -21,7 +21,6 @@ import geneticCardSummaryBundle from './genetic-card-summary-bundle';
 import authBundle from './auth-bundle';
 import userAccessRequestBundle from './users-access-request-bundle';
 import rolesBundle from './roles-bundle';
-import fieldOfficesBundle from './field-offices-bundle';
 import usersBundle from './users-bundle';
 import sitesDatasheetBundle from './sites-datasheet-bundle';
 
@@ -60,7 +59,6 @@ export default composeBundles(
   authBundle,
   userAccessRequestBundle,
   rolesBundle,
-  fieldOfficesBundle,
   usersBundle,
   sitesDatasheetBundle,
 );
