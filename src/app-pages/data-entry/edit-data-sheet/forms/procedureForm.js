@@ -23,18 +23,14 @@ const reducer = (state, action) => {
 };
 
 const ProcedureForm = connect(
-  'doFetchProcedureDataEntry',
   'doSaveProcedureDataEntry',
   'doUpdateProcedureDataEntry',
-  'doUpdateUrl',
   'selectDataEntryFishData',
   'selectDataEntryProcedure',
   'selectSitesData',
   ({
-    doFetchProcedureDataEntry,
     doSaveProcedureDataEntry,
     doUpdateProcedureDataEntry,
-    doUpdateUrl,
     dataEntryFishData,
     dataEntryProcedure,
     sitesData,
@@ -121,9 +117,9 @@ const ProcedureForm = connect(
 
     const doSave = () => {
       if (edit) {
-        doUpdateProcedureDataEntry(state, doFetchProcedureDataEntry({ fId: state['fid'] }, doUpdateUrl('/sites-list/datasheet/procedure')));
+        doUpdateProcedureDataEntry(state, { fId: state['fid'] });
       } else {
-        doSaveProcedureDataEntry(state, doFetchProcedureDataEntry({ fId: state['fid'] }, doUpdateUrl('/sites-list/datasheet/procedure')));
+        doSaveProcedureDataEntry(state, { fId: state['fid'] });
       }
     };
 

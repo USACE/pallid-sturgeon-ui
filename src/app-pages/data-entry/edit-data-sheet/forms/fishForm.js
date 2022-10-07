@@ -29,10 +29,8 @@ const FishForm = connect(
   'doDomainsFtPrefixesFetch',
   'doDomainsMrFetch',
   'doDomainsOtolithFetch',
-  'doFetchFishDataEntry',
   'doSaveFishDataEntry',
   'doUpdateFishDataEntry',
-  'doUpdateUrl',
   'selectDataEntryLastParams',
   'selectDataEntryFishData',
   'selectDomainsSpecies',
@@ -45,8 +43,6 @@ const FishForm = connect(
     doDomainsFtPrefixesFetch,
     doDomainsMrFetch,
     doDomainsOtolithFetch,
-    doFetchFishDataEntry,
-    doUpdateUrl,
     doSaveFishDataEntry,
     doUpdateFishDataEntry,
     dataEntryLastParams,
@@ -98,9 +94,9 @@ const FishForm = connect(
 
     const doSave = () => {
       if (edit) {
-        doUpdateFishDataEntry(state, doFetchFishDataEntry({ mrId: state['mrId'] }, doUpdateUrl('/sites-list/datasheet/fish')));
+        doUpdateFishDataEntry(state, { mrId: state['mrId']});
       } else {
-        doSaveFishDataEntry(state, doFetchFishDataEntry({ mrId: state['mrId'] }, doUpdateUrl('/sites-list/datasheet/fish')));
+        doSaveFishDataEntry(state, { mrId: state['mrId'] });
       }
     };
 

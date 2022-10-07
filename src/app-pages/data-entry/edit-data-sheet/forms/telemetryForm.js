@@ -23,18 +23,14 @@ const reducer = (state, action) => {
 };
 
 const TelemetryForm = connect(
-  'doFetchTelemetryDataEntry',
   'doSaveTelemetryDataEntry',
   'doUpdateTelemetryDataEntry',
-  'doUpdateUrl',
   'selectDataEntryData',
   'selectDataEntryLastParams',
   'selectSitesData',
   ({
-    doFetchTelemetryDataEntry,
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
-    doUpdateUrl,
     dataEntryData,
     dataEntryLastParams,
     sitesData,
@@ -80,9 +76,9 @@ const TelemetryForm = connect(
 
     const doSave = () => {
       if (edit) {
-        doUpdateTelemetryDataEntry(state, doFetchTelemetryDataEntry({ seId: state['seId'] }, doUpdateUrl('/sites-list/datasheet/telemetry')));
+        doUpdateTelemetryDataEntry(state, { seId: state['seId'] });
       } else {
-        doSaveTelemetryDataEntry(state, doFetchTelemetryDataEntry({ seId: state['seId'] }, doUpdateUrl('/sites-list/datasheet/telemetry')));
+        doSaveTelemetryDataEntry(state, { seId: state['seId'] });
       }
     };
 

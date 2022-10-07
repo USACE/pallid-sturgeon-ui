@@ -23,18 +23,14 @@ const reducer = (state, action) => {
 };
 
 const SupplementalForm = connect(
-  'doFetchSupplementalDataEntry',
   'doSaveSupplementalDataEntry',
   'doUpdateSupplementalDataEntry',
-  'doUpdateUrl',
   'selectDataEntrySupplemental',
   'selectDataEntryFishData',
   'selectSitesData',
   ({
-    doFetchSupplementalDataEntry,
     doSaveSupplementalDataEntry,
     doUpdateSupplementalDataEntry,
-    doUpdateUrl,
     dataEntrySupplemental,
     dataEntryFishData,
     sitesData,
@@ -73,9 +69,9 @@ const SupplementalForm = connect(
 
     const doSave = () => {
       if (edit) {
-        doUpdateSupplementalDataEntry(state, doFetchSupplementalDataEntry({ fId: state['fid'] }, doUpdateUrl('/sites-list/datasheet/supplemental')));
+        doUpdateSupplementalDataEntry(state, { fId: state['fid'] });
       } else {
-        doSaveSupplementalDataEntry(state, doFetchSupplementalDataEntry({ fId: state['fid'] }, doUpdateUrl('/sites-list/datasheet/supplemental')));
+        doSaveSupplementalDataEntry(state, { fId: state['fid'] });
       }
     };
 

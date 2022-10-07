@@ -354,7 +354,7 @@ export default {
     });
   },
 
-  doSaveFishDataEntry: (formData, callback = null) => ({ dispatch, store, apiPost }) => {
+  doSaveFishDataEntry: (formData, params) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
@@ -364,9 +364,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
-        if (callback && typeof callback === 'function') {
-          callback();
-        }
+        store.doFetchFishDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/fish'));
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -374,7 +372,7 @@ export default {
     });
   },
 
-  doSaveSupplementalDataEntry: (formData, callback = null) => ({ dispatch, apiPost }) => {
+  doSaveSupplementalDataEntry: (formData, params) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
@@ -384,9 +382,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_FINISHED' });
-        if (callback && typeof callback === 'function') {
-          callback();
-        }
+        store.doFetchSupplementalDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/supplemental'));
       } else {
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -394,7 +390,7 @@ export default {
     });
   },
 
-  doSaveProcedureDataEntry: (formData, callback = null) => ({ dispatch, apiPost }) => {
+  doSaveProcedureDataEntry: (formData, params) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
@@ -404,9 +400,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_FINISHED' });
-        if (callback && typeof callback === 'function') {
-          callback();
-        }
+        store.doFetchProcedureDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/procedure'));
       } else {
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -433,7 +427,7 @@ export default {
     });
   },
 
-  doSaveTelemetryDataEntry: (formData, callback = null) => ({ dispatch, apiPost }) => {
+  doSaveTelemetryDataEntry: (formData, params) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
@@ -443,9 +437,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
-        if (callback && typeof callback === 'function') {
-          callback();
-        }
+        store.doFetchTelemetryDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/telemetry'));
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -472,7 +464,7 @@ export default {
     });
   },
 
-  doUpdateFishDataEntry: (rowData, callback = null) => ({ dispatch, apiPut }) => {
+  doUpdateFishDataEntry: (rowData, params) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving fish datasheet...');
 
@@ -482,9 +474,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
-        if (callback && typeof callback === 'function') {
-          callback();
-        }
+        store.doFetchFishDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/fish'));
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
@@ -492,7 +482,7 @@ export default {
     });
   },
 
-  doUpdateSupplementalDataEntry: (rowData, callback = null) => ({ dispatch, apiPut }) => {
+  doUpdateSupplementalDataEntry: (rowData, params) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving supplemental datasheet...');
 
@@ -502,9 +492,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_FINISHED' });
-        if (callback && typeof callback === 'function') {
-          callback();
-        }
+        store.doFetchSupplementalDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/supplemental'));
       } else {
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
@@ -512,7 +500,7 @@ export default {
     });
   },
 
-  doUpdateProcedureDataEntry: (rowData, callback = null) => ({ dispatch, apiPut }) => {
+  doUpdateProcedureDataEntry: (rowData, params) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving procedure datasheet...');
 
@@ -522,9 +510,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_FINISHED' });
-        if (callback && typeof callback === 'function') {
-          callback();
-        }
+        store.doFetchProcedureDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/procedure'));
       } else {
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
@@ -551,7 +537,7 @@ export default {
     });
   },
 
-  doUpdateTelemetryDataEntry: (formData, callback = null) => ({ dispatch, apiPut }) => {
+  doUpdateTelemetryDataEntry: (formData, params) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
@@ -561,9 +547,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
-        if (callback && typeof callback === 'function') {
-          callback();
-        }
+        store.doFetchTelemetryDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/telemetry'));
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
