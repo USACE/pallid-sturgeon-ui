@@ -23,14 +23,18 @@ const reducer = (state, action) => {
 };
 
 const TelemetryForm = connect(
+  'doFetchTelemetryDataEntry',
   'doSaveTelemetryDataEntry',
   'doUpdateTelemetryDataEntry',
+  'doUpdateUrl',
   'selectDataEntryData',
   'selectDataEntryLastParams',
   'selectSitesData',
   ({
+    doFetchTelemetryDataEntry,
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
+    doUpdateUrl,
     dataEntryData,
     dataEntryLastParams,
     sitesData,
@@ -76,9 +80,9 @@ const TelemetryForm = connect(
 
     const doSave = () => {
       if (edit) {
-        doUpdateTelemetryDataEntry(state);
+        doUpdateTelemetryDataEntry(state, doFetchTelemetryDataEntry({ seId: state['seId'] }, doUpdateUrl('/sites-list/datasheet/telemetry')));
       } else {
-        doSaveTelemetryDataEntry(state);
+        doSaveTelemetryDataEntry(state, doFetchTelemetryDataEntry({ seId: state['seId'] }, doUpdateUrl('/sites-list/datasheet/telemetry')));
       }
     };
 
@@ -135,13 +139,13 @@ const TelemetryForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input name='captureDate' label='Capture Time' value={state['captureDate']} onChange={handleChange} isRequired />
+                <Input name='captureDate' label='Capture Time (hh:mm:ss)' value={state['captureDate']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='captureLatitude' label='Capture Latitude' type='number' value={state['captureLatitude'] || ''} onChange={handleFloat} isRequired />
+                <Input name='captureLatitude' label='Capture Latitude' type='number' value={state['captureLatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='captureLongitude' label='Capture Longitude' type='number' value={state['captureLongitude'] || ''} onChange={handleFloat} isRequired />
+                <Input name='captureLongitude' label='Capture Longitude' type='number' value={state['captureLongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
               </div>
             </Row>
             <Row>
@@ -165,7 +169,7 @@ const TelemetryForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input name='depth' label='Depth' />
+                <Input name='depth' label='Depth (m)' />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
@@ -177,10 +181,10 @@ const TelemetryForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input name='temp' label='Temp' type='number' value={state['temp'] || ''} onChange={handleFloat} />
+                <Input name='temp' label='Temp (c)' type='number' value={state['temp'] || ''} placeholder='ex: 12.1' onChange={handleFloat} />
               </div>
               <div className='col-2'>
-                <Input name='conductivity' label='Conductivity' type='number' value={state['conductivity'] || ''} onChange={handleNumber} />
+                <Input name='conductivity' label='Conductivity' type='number' value={state['conductivity'] || ''} placeholder='max 4 digits' onChange={handleNumber} />
               </div>
             </Row>
             <Row>

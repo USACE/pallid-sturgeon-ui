@@ -23,30 +23,36 @@ const reducer = (state, action) => {
   }
 };
 
-// 1615 for testing
-
 const MissouriRiverForm = connect(
   'doSaveMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
   'doDomainsMesoFetch',
   'doDomainsStructureFlowFetch',
   'doDomainsStructureModFetch',
+  'doDomainsSetSite1Fetch',
+  'doDomainsSetSite2Fetch',
   'selectDataEntryData',
   'selectSitesData',
   'selectDomainsMeso',
   'selectDomainsStructureFlow',
   'selectDomainsStructureMod',
+  'selectDomainsSetSite1',
+  'selectDomainsSetSite2',
   ({
     doSaveMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
     doDomainsMesoFetch,
     doDomainsStructureFlowFetch,
     doDomainsStructureModFetch,
+    doDomainsSetSite1Fetch,
+    doDomainsSetSite2Fetch,
     dataEntryData,
     sitesData,
     domainsMeso,
     domainsStructureFlow,
     domainsStructureMod,
+    domainsSetSite1,
+    domainsSetSite2,
     edit,
   }) => {
     const initialState = {
@@ -85,26 +91,36 @@ const MissouriRiverForm = connect(
     };
 
     const handleSelect = (field, val) => {
-      if (field === 'noTurbidity') {
-        setIsNoTurbidity(val);
-      }
-      if (field === 'noVelocity') {
-        setIsNoVelocity(val);
-      }
       if (field === 'macro') {
         doDomainsMesoFetch({ macro: val});
       }
       if (field === 'microStructure') {
         doDomainsStructureFlowFetch({ microStructure: val });
+        doDomainsSetSite1Fetch({ microstructure: val });
       }
       if (field === 'structureFlow') {
         doDomainsStructureModFetch({ structureFlow: val });
       }
+      if (field === 'setSite1') {
+        doDomainsSetSite2Fetch({ setsite1: val});
+      }
       dispatch({
         type: 'UPDATE_INPUT',
         field: field,
-        payload: field === 'noTurbidity' || field === 'noVelocity' ? (val === true ? 'Y' : 'N') : val
+        payload: val,
       });
+    };
+
+    const handleNoTurbidityCheckbox = () => {
+      const val = !isNoTurbidity;
+      setIsNoTurbidity(val);
+      handleSelect('noTurbidity', val === false ? 'N' : 'Y');
+    };
+
+    const handleNoVelocityCheckbox = () => {
+      const val = !isNoVelocity;
+      setIsNoVelocity(val);
+      handleSelect('noVelocity', val === false ? 'N' : 'Y');
     };
 
     const doSave = () => {
@@ -126,8 +142,8 @@ const MissouriRiverForm = connect(
       !!state['meso'] &&
       !!state['temp'] &&
       !!state['startTime'] &&
-      !!state['startLatitude'] &&
-      !!state['startLongitude'] &&
+      !!state['startlatitude'] &&
+      !!state['startlongitude'] &&
       (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
@@ -137,16 +153,22 @@ const MissouriRiverForm = connect(
           type: 'INITIALIZE_FORM',
           payload: dataEntryData,
         });
-        if (dataEntryData['noTurbidity'] && dataEntryData['noTurbidity'] !== '') {
-          setIsNoTurbidity(dataEntryData['noTurbidity']);
+
+        if (dataEntryData['noTurbidity'] === 'Y') {
+          setIsNoTurbidity(true);
+        } else {
+          setIsNoTurbidity(false);
         }
-        if (dataEntryData['noVelocity'] && dataEntryData['noVelocity'] !== '') {
-          setIsNoVelocity(dataEntryData['noVelocity']);
-        } 
+
+        if (dataEntryData['noVelocity'] === 'Y') {
+          setIsNoVelocity(true);
+        } else {
+          setIsNoVelocity(false);
+        }
       } else {
         handleSelect('siteId', Number(data.siteId));
       }
-    }, [edit]);
+    }, [edit, dataEntryData]);
 
     return (
       <>
@@ -178,10 +200,10 @@ const MissouriRiverForm = connect(
                 />
               </div>
               <div className='col-1'>
-                <Input label='Subsample' name='subsample' type='number' value={state['subsample'] || ''} onChange={handleNumber} isDisabled={!formComplete} isRequired />
+                <Input label='Subsample' name='subsample' type='number' value={state['subsample'] || ''} placeholder='max 3 digits' onChange={handleNumber} isDisabled={!formComplete} isRequired />
               </div>
               <div className='col-1'>
-                <Input label='Pass' name='subsamplepass' type='number' value={state['subsamplepass'] || ''} onChange={handleNumber} isDisabled={!formComplete} isRequired  />
+                <Input label='Pass' name='subsamplepass' type='number' value={state['subsamplepass'] || ''} placeholder='max 1 digit' onChange={handleNumber} isDisabled={!formComplete} isRequired  />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
@@ -216,15 +238,15 @@ const MissouriRiverForm = connect(
               <div className='col-2'>
                 <SelectCustomLabel
                   label='Gear Code'
-                  name='gearCode'
-                  value={state['gearCode']}
-                  onChange={val => handleSelect('gearCode', val)}
+                  name='gear'
+                  value={state['gear']}
+                  onChange={val => handleSelect('gear', val)}
                   options={gearCodeOptions}
                   isDisabled={!formComplete}
                 />
               </div>
               <div className='col-1'>
-                <Input label='Recorder' name='recorder' value={state['recorder']} onChange={handleChange} isDisabled={!formComplete} isRequired />
+                <Input label='Recorder Initials' name='recorder' value={state['recorder']} onChange={handleChange} isDisabled={!formComplete} isRequired />
               </div>
             </Row>
             <Row>
@@ -255,10 +277,10 @@ const MissouriRiverForm = connect(
                 </Row>
                 <Row className='mt-2'>
                   <div className='col-6'>
-                    <Input label='Temp (c)' name='temp' type='number' value={state['temp'] || ''} onChange={handleFloat} isDisabled={!formComplete} isRequired />
+                    <Input label='Temp (c)' name='temp' type='number' value={state['temp'] || ''} placeholder='ex: 12.1' onChange={handleFloat} isDisabled={!formComplete} isRequired />
                   </div>
                   <div className='col-6'>
-                    <Input label='Width' name='width' type='number' value={state['width'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
+                    <Input label='Width' name='width' type='number' value={state['width'] || ''} placeholder='ex: 12.1'onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -306,7 +328,7 @@ const MissouriRiverForm = connect(
                       name='setSite1'
                       value={state['setSite1']}
                       onChange={val => handleSelect('setSite1', val)}
-                      options={setSite_1_2Options}
+                      options={createStructureModOptions(domainsSetSite1)}
                       isDisabled={!formComplete}
                     />
                   </div>
@@ -316,7 +338,7 @@ const MissouriRiverForm = connect(
                       name='setSite2'
                       value={state['setSite2']}
                       onChange={val => handleSelect('setSite2', val)}
-                      options={setSite_1_2Options}
+                      options={createStructureModOptions(domainsSetSite2)}
                       isDisabled={!formComplete}
                     />
                   </div>
@@ -338,38 +360,38 @@ const MissouriRiverForm = connect(
               <div className='col-5 pb-3' style={{ borderRight: '1px solid lightgray' }}>
                 <Row>
                   <div className='col-4'>
-                    <Input label='Start Time' name='startTime' value={state['startTime']} onChange={handleChange} isDisabled={!formComplete} isRequired />
+                    <Input label='Start Time (hh:mm:ss)' name='startTime' value={state['startTime']} onChange={handleChange} isDisabled={!formComplete} isRequired />
                   </div>
                   <div className='col-4'>
-                    <Input label='Start Latitude' name='startLatitude' type='number' value={state['startLatitude'] || ''} onChange={handleNumber} isDisabled={!formComplete} isRequired />
+                    <Input label='Start Latitude' name='startlatitude' type='number' value={state['startlatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isDisabled={!formComplete} isRequired />
                   </div>
                   <div className='col-4'>
-                    <Input label='Start Longitude' name='startLongitude' type='number' value={state['startLongitude'] || ''} onChange={handleNumber} isDisabled={!formComplete} isRequired />
+                    <Input label='Start Longitude' name='startlongitude' type='number' value={state['startlongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isDisabled={!formComplete} isRequired />
                   </div>
                 </Row>
                 <Row>
                   <div className='col-3'>
-                    <Input label='Distance (m)' name='distance' type='number' value={state['distance'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Distance (m)' name='distance' type='number' value={state['distance'] || ''} placeholder='max 3 digits' onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label='Depth (m)' name='depth1' type='number' value={state['depth1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Depth (m)' name='depth1' type='number' value={state['depth1'] || ''} placeholder='ex: 1.2' onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label=' ' name='depth2' type='number' value={state['depth2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label=' ' name='depth2' type='number' value={state['depth2'] || ''} placeholder='ex: 1.2' onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label=' ' name='depth13' type='number' value={state['depth3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label=' ' name='depth3' type='number' value={state['depth3'] || ''} placeholder='ex: 1.2' onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <Row className='mt-2'>
                   <div className='col-4'>
-                    <Input label='Stop Time' name='stopTime' value={state['stopTime']} onChange={handleChange} isDisabled={!formComplete} />
+                    <Input label='Stop Time (hh:mm:ss)' name='stoptime' value={state['stoptime']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input label='Stop Latitude' name='stopLatitude' type='number' value={state['stopLatitude'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Stop Latitude' name='stoplatitude' type='number' value={state['stoplatitude'] || ''} placeholder='ex: 12.34567' onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input label='Stop Longitude' name='stopLongitude' type='number' value={state['stopLongitude'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Stop Longitude' name='stoplongitude' type='number' value={state['stoplongitude'] || ''} placeholder='ex: 12.34567' onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -419,13 +441,13 @@ const MissouriRiverForm = connect(
                     <Input label='Structure Number' name='structurenumber' value={state['structurenumber']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label='Net River Mile' name='netrivermile' type='number' step={0.1} value={state['netrivermile'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
+                    <Input label='Net River Mile' name='netrivermile' type='number' value={state['netrivermile'] || ''} placeholder='ex: 123.4' onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label='Conductivity' name='conductivity' type='number' value={state['conductivity'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Conductivity' name='conductivity' type='number' value={state['conductivity'] || ''} placeholder='max 4 digits' onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label='D.O.' name='do' type='number' step={0.1} value={state['do'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
+                    <Input label='D.O. (Dissolved Oxygen)' name='dissolvedOxygen' type='number' step={0.1} value={state['dissolvedOxygen'] || ''} placeholder='ex: 12.3' onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <Row>
@@ -433,10 +455,10 @@ const MissouriRiverForm = connect(
                     <Input label='USGS Gauge Code' name='usgs' value={state['usgs']} onChange={handleChange} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label='River Stage' name='riverstage' type='number' step={0.1} value={state['riverstage'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
+                    <Input label='River Stage' name='riverstage' type='number' step={0.1} value={state['riverstage'] || ''} placeholder='ex: 12.3' onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-3'>
-                    <Input label='Discharge' name='discharge' type='number' value={state['discharge'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Discharge' name='discharge' type='number' value={state['discharge'] || ''} placeholder='ex: 12345' onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -459,7 +481,7 @@ const MissouriRiverForm = connect(
                     />
                   </div>
                   <div className='col-3'>
-                    <Input label='Turbidity' name='turbidity' type='number' value={state['turbidity'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Turbidity' name='turbidity' type='number' value={state['turbidity'] || ''} placeholder='max 4 digits' onChange={handleNumber} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4 text-center'>
                     <label><small>No Turbidity</small></label>
@@ -470,7 +492,7 @@ const MissouriRiverForm = connect(
                       className='form-control mt-1'
                       style={{ height: '15px', width: '15px', margin: 'auto' }}
                       checked={isNoTurbidity}
-                      onChange={() => handleSelect('noTurbidity', !isNoTurbidity)}
+                      onChange={handleNoTurbidityCheckbox}
                       disabled={!formComplete}
                     />
                   </div>
@@ -500,7 +522,7 @@ const MissouriRiverForm = connect(
                     <label><small>Silt (%)</small></label>
                   </div>
                   <div className='col-4'>
-                    <Input name='silt' type='number' value={state['silt'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input name='silt' type='number' value={state['silt'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <Row className='mt-2'>
@@ -526,7 +548,7 @@ const MissouriRiverForm = connect(
                     <label><small>Sand (%)</small></label>
                   </div>
                   <div className='col-4'>
-                    <Input name='sand' type='number' value={state['sand'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input name='sand' type='number' value={state['sand'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <Row className='mt-2'>
@@ -554,7 +576,7 @@ const MissouriRiverForm = connect(
                     <label><small>Gravel (%)</small></label>
                   </div>
                   <div className='col-4'>
-                    <Input name='gravel' type='number' value={state['gravel'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input name='gravel' type='number' value={state['gravel'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -564,35 +586,35 @@ const MissouriRiverForm = connect(
               <div className='col-5'>
                 <Row>
                   <div className='col-4'>
-                    <Input label='Velocity 1 (bot)' name='velocitybot1' type='number' value={state['velocitybot1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Velocity 1 (bot)' name='velocitybot1' type='number' value={state['velocitybot1'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input label='Velocity 1 (0.8 or 0.5)' name='velocity08_1' type='number' value={state['velocity08_1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Velocity 1 (0.8 or 0.5)' name='velocity081' type='number' value={state['velocity081'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input label='Velocity 1 (0.2 or 0.6)' name='velocity02or06_1' type='number' value={state['velocity02or06_1'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Velocity 1 (0.2 or 0.6)' name='velocity02or061' type='number' value={state['velocity02or061'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
                 <div className='row mt-2'>
                   <div className='col-4'>
-                    <Input label='Velocity 2 (bot)' name='velocitybot2' type='number' value={state['velocitybot2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Velocity 2 (bot)' name='velocitybot2' type='number' value={state['velocitybot2'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input label='Velocity 2 (0.8 or 0.5)' name='velocity08_2' type='number' value={state['velocity08_2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Velocity 2 (0.8 or 0.5)' name='velocity082' type='number' value={state['velocity082'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input label='Velocity 2 (0.2 or 0.6)' name='velocity02or06_2' type='number' value={state['velocity02or06_2'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Velocity 2 (0.2 or 0.6)' name='velocity02or062' type='number' value={state['velocity02or062'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </div>
                 <Row className='mt-2'>
                   <div className='col-4'>
-                    <Input label='Velocity 3 (bot)' name='velocitybot3' type='number' value={state['velocitybot3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Velocity 3 (bot)' name='velocitybot3' type='number' value={state['velocitybot3'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input label='Velocity 3 (0.8)' name='velocity08_3' type='number' value={state['velocity08_3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Velocity 3 (0.8)' name='velocity083' type='number' value={state['velocity083'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                   <div className='col-4'>
-                    <Input label='Velocity 3 (0.2 or 0.6)' name='velocity02or06_3' type='number' value={state['velocity02or06_3'] || ''} onChange={handleNumber} isDisabled={!formComplete} />
+                    <Input label='Velocity 3 (0.2 or 0.6)' name='velocity02or063' type='number' value={state['velocity02or063'] || ''} onChange={handleFloat} isDisabled={!formComplete} />
                   </div>
                 </Row>
               </div>
@@ -605,7 +627,7 @@ const MissouriRiverForm = connect(
                   className='form-control mt-1'
                   style={{ height: '15px', width: '15px', margin: 'auto' }}
                   checked={isNoVelocity}
-                  onChange={() => handleSelect('noVelocity', !isNoVelocity)}
+                  onChange={handleNoVelocityCheckbox}
                   disabled={!formComplete}
                 />
               </div>

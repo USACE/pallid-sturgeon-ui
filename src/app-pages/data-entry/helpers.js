@@ -3,7 +3,6 @@ export const createDropdownOptions = data => {
 
   return data.map(d => {
     const { code, description } = d;
-
     return {
       value: code,
       text: description,

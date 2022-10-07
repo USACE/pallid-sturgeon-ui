@@ -4,6 +4,7 @@ import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
 
 import { Input, Row, SelectCustomLabel, FilterSelectCustomLabel, TextArea } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { createDropdownOptions, createBendsDropdownOptions } from 'app-pages/data-entry/helpers';
+import { fieldOfficeOptions } from '../_shared/helper';
 import { dropdownYearsToNow } from 'utils';
 
 const reducer = (state, action) => {
@@ -35,7 +36,7 @@ const SitesFormModal = connect(
     edit,
     id
   }) => {
-    const { fieldOffices, projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
+    const { projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
 
     const handleChange = e => {
@@ -109,7 +110,7 @@ const SitesFormModal = connect(
                   name='fieldoffice'
                   value={state['fieldoffice']}
                   onChange={val => handleSelect('fieldoffice', val)}
-                  options={createDropdownOptions(fieldOffices)}
+                  options={fieldOfficeOptions}
                   isRequired
                 />
               </div>
@@ -187,7 +188,7 @@ const SitesFormModal = connect(
                 <TextArea name='last_edit_comment' label='Comments' value={state['last_edit_comment']} onChange={handleChange} isRequired={edit} />
               </div>
               <div className='col-2'>
-                <Input name='editInitials' label='Recorder' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
+                <Input name='editInitials' label='Recorder Initials' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
               </div>
             </Row>
           </div>

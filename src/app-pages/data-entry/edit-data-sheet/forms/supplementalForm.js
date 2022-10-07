@@ -3,12 +3,10 @@ import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
-import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
 import Approval from 'app-pages/data-entry/datasheets/components/approval';
 
-// For testing
-// 122 - tableId
+import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -25,14 +23,18 @@ const reducer = (state, action) => {
 };
 
 const SupplementalForm = connect(
+  'doFetchSupplementalDataEntry',
   'doSaveSupplementalDataEntry',
   'doUpdateSupplementalDataEntry',
+  'doUpdateUrl',
   'selectDataEntrySupplemental',
   'selectDataEntryFishData',
   'selectSitesData',
   ({
+    doFetchSupplementalDataEntry,
     doSaveSupplementalDataEntry,
     doUpdateSupplementalDataEntry,
+    doUpdateUrl,
     dataEntrySupplemental,
     dataEntryFishData,
     sitesData,
@@ -40,7 +42,6 @@ const SupplementalForm = connect(
   }) => {
     const initialState = {
       fid: dataEntryFishData.items[0].fid,
-      // fFid: dataEntryFishData.items[0].ffid,
       mrId: dataEntryFishData.items[0].mrId
     };
     const [state, dispatch] = useReducer(reducer, initialState);
@@ -72,9 +73,9 @@ const SupplementalForm = connect(
 
     const doSave = () => {
       if (edit) {
-        doUpdateSupplementalDataEntry(state);
+        doUpdateSupplementalDataEntry(state, doFetchSupplementalDataEntry({ fId: state['fid'] }, doUpdateUrl('/sites-list/datasheet/supplemental')));
       } else {
-        doSaveSupplementalDataEntry(state);
+        doSaveSupplementalDataEntry(state, doFetchSupplementalDataEntry({ fId: state['fid'] }, doUpdateUrl('/sites-list/datasheet/supplemental')));
       }
     };
 
@@ -117,16 +118,46 @@ const SupplementalForm = connect(
                 <Input name='tagnumber' label='Tag Number' value={state['tagnumber']} onChange={handleChange} />
               </div>
               <div className='col-2'>
-                <Input name='pitrn' label='PIT R/N/Z' value={state['pitrn']} onChange={handleChange} />
+                <SelectCustomLabel 
+                  name='pitrn' 
+                  label='PIT (R/N/Z)' 
+                  value={state['pitrn']} 
+                  options={[
+                    { value: 'R' },
+                    { value: 'N' },
+                    { value: 'Z' },
+                  ]}
+                  onChange={val => handleSelect('pitrn', val)}
+                />
               </div>
               <div className='col-2'>
-                <Input name='cwtyn' label='CWT' value={state['cwtyn']} onChange={handleChange} isRequired />
+                <SelectCustomLabel
+                  name='cwtyn' 
+                  label='CWT (Y/N)' 
+                  value={state['cwtyn']} 
+                  options={[
+                    { value: 'Y' },
+                    { value: 'N' },
+                  ]}
+                  onChange={val => handleSelect('cwtyn', val)} 
+                  isRequired
+                />
               </div>
               <div className='col-2'>
                 <Input name='dangler' label='Dangler' value={state['dangler']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='scuteloc' label='Scute Location' value={state['scuteloc']} onChange={handleChange} />
+                <SelectCustomLabel
+                  name='scuteloc' 
+                  label='Scute Location'
+                  value={state['scuteloc']} 
+                  options={[
+                    { value: 'L' },
+                    { value: 'N' },
+                    { value: 'R' },
+                  ]}
+                  onChange={val => handleSelect('scuteloc', val)}
+                />
               </div>
               <div className='col-2'>
                 <Input name='scutenum' label='Scute #' type='number' value={state['scutenum'] || ''} onChange={handleNumber} />
@@ -137,16 +168,47 @@ const SupplementalForm = connect(
                 <Input name='elcolor' label='EL Color' value={state['elcolor']} onChange={handleChange} isRequired/>
               </div>
               <div className='col-2'>
-                <Input name='elhv' label='EL H/V/X' value={state['elhv']} onChange={handleChange} />
+                <SelectCustomLabel
+                  name='elhv' 
+                  label='EL (H/V/X)' 
+                  value={state['elhv']} 
+                  options={[
+                    { value: 'H' },
+                    { value: 'V' },
+                    { value: 'X' },
+                  ]}
+                  onChange={val => handleSelect('elhv', val)}
+                />
               </div>
               <div className='col-2'>
                 <Input name='ercolor' label='ER Color' value={state['ercolor']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='erhv' label='ER H/V/X' value={state['erhv']} onChange={handleChange} isRequired />
+                <SelectCustomLabel
+                  name='erhv' 
+                  label='ER (H/V/X)' 
+                  value={state['erhv']} 
+                  options={[
+                    { value: 'H' },
+                    { value: 'V' },
+                    { value: 'X' },
+                  ]}
+                  onChange={val => handleSelect('erhv', val)} 
+                  isRequired
+                />
               </div>
               <div className='col-2'>
-                <Input name='scuteloc2' label='Scute 2 Location' value={state['scuteloc2']} onChange={handleChange} />
+                <SelectCustomLabel
+                  name='scuteloc2' 
+                  label='Scute 2 Location'
+                  value={state['scuteloc2']} 
+                  options={[
+                    { value: 'L' },
+                    { value: 'N' },
+                    { value: 'R' },
+                  ]}
+                  onChange={val => handleSelect('scuteloc2', val)}
+                />
               </div>
               <div className='col-2'>
                 <Input name='scutenum2' label='Scute 2 #' type='number' value={state['scutenum2'] || ''} onChange={handleNumber} />
@@ -168,7 +230,7 @@ const SupplementalForm = connect(
               <div className='col-2'>
                 <Input name='hatcheryOrigin' label='Hatchery Origin' value={state['hatcheryOrigin']} onChange={handleChange} />
               </div>
-              <div className='col-2'>
+              <div className='col-4'>
                 <TextArea name='otherTagInfo' label='Other Tag Info' value={state['otherTagInfo']} onChange={handleChange} />
               </div>
             </Row>

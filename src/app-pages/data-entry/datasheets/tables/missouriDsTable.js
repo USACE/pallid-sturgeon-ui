@@ -31,7 +31,7 @@ const MissouriDsTable = connect(
           variant='info'
           text='Export as CSV'
           icon={<Icon icon='download' />}
-        // handleClick={() => doFetchAllDatasheet('missouri-river-datasheet')}
+          isDisabled
         />
         <Button
           isOutline

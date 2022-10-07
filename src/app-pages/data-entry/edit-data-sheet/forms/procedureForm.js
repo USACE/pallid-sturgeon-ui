@@ -22,24 +22,26 @@ const reducer = (state, action) => {
   }
 };
 
-// 7229 for testing
-
 const ProcedureForm = connect(
+  'doFetchProcedureDataEntry',
   'doSaveProcedureDataEntry',
   'doUpdateProcedureDataEntry',
-  'selectDataEntryLastParams',
+  'doUpdateUrl',
+  'selectDataEntryFishData',
   'selectDataEntryProcedure',
   'selectSitesData',
   ({
+    doFetchProcedureDataEntry,
     doSaveProcedureDataEntry,
     doUpdateProcedureDataEntry,
-    dataEntryLastParams,
+    doUpdateUrl,
+    dataEntryFishData,
     dataEntryProcedure,
     sitesData,
     edit
   }) => {
     const initialState = {
-      fid: dataEntryLastParams.fId,
+      fid: dataEntryFishData.items[0].fid,
       dstReimplant: 0,
       eggSample: 0,
       antibioticInjection: 0,
@@ -119,9 +121,9 @@ const ProcedureForm = connect(
 
     const doSave = () => {
       if (edit) {
-        doUpdateProcedureDataEntry(state);
+        doUpdateProcedureDataEntry(state, doFetchProcedureDataEntry({ fId: state['fid'] }, doUpdateUrl('/sites-list/datasheet/procedure')));
       } else {
-        doSaveProcedureDataEntry(state);
+        doSaveProcedureDataEntry(state, doFetchProcedureDataEntry({ fId: state['fid'] }, doUpdateUrl('/sites-list/datasheet/procedure')));
       }
     };
 
@@ -143,6 +145,7 @@ const ProcedureForm = connect(
           payload: dataEntryProcedure.items[0],
         });
         
+        // @TODO: consolidate statements if possible
         if (dataEntryProcedure.items[0].dstReimplant === 1) {
           setIsDstReimplant(true);
         } else {
@@ -213,13 +216,13 @@ const ProcedureForm = connect(
                 <Input name='procedureDate' label='Procedure Date' type='date' value={state['procedureDate'] ? state['procedureDate'].split('T')[0] : ''} onChange={handleChange} isDisabled />
               </div>
               <div className='col-2'>
-                <Input name='procedureStartTime' label='Start Time' value={state['procedureStartTime']} onChange={handleChange} isRequired />
+                <Input name='procedureStartTime' label='Start Time (hh:mm:ss)' value={state['procedureStartTime']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='procedureEndTime' label='End Time' value={state['procedureEndTime']} onChange={handleChange} isRequired />
+                <Input name='procedureEndTime' label='End Time (hh:mm:ss)' value={state['procedureEndTime']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='procedureBy' label='Procedure By' value={state['procedureBy']} onChange={handleChange} isRequired />
+                <Input name='procedureBy' label='Procedure By Initials' value={state['procedureBy']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
                 <Input name='oldRadioTagNum' label='Old Radio Tag Number' type='number' value={state['oldRadioTagNum'] || ''} onChange={handleNumber} />
@@ -243,7 +246,7 @@ const ProcedureForm = connect(
                 <Input name='dstStartDate' label='DST Start Date' type='date' value={state['dstStartDate'] ? state['dstStartDate'].split('T')[0] : ''} isDisabled />
               </div>
               <div className='col-2'>
-                <Input name='dstStartTime' label='DST Start Time' value={state['dstStartTime']} onChange={handleChange} />
+                <Input name='dstStartTime' label='DST Start Time (hh:mm:ss)' value={state['dstStartTime']} onChange={handleChange} />
               </div>
               <div className='col-2 text-center'>
                 <label><small>DST Reimplanted</small></label>
@@ -336,7 +339,7 @@ const ProcedureForm = connect(
                 <Input name='ultrasoundGonadLength' label='Ultrasound Gonad Length' type='number' value={state['ultrasoundGonadLength'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
-                <Input name='gonadCondition' label='Gonad Condition' value={state['gonadCondition']} onChange={handleChange} />
+                <Input name='gonadCondition' label='Gonad Condition' value={state['gonadCondition']} placeholder='ex: Stage 1' onChange={handleChange} />
               </div>
               <div className='col-2 text-center'>
                 <label><small>Antibiotic Injection</small></label>

@@ -22,9 +22,8 @@ const reducer = (state, action) => {
   }
 };
 
-// 1046 for testing
-
 const SearchEffortForm = connect(
+  'doFetchSearchDataEntry',
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'selectDataEntryData',
@@ -36,9 +35,7 @@ const SearchEffortForm = connect(
     sitesData,
     edit
   }) => {
-    const initialState = {
-      dsId: 123123
-    };
+    const initialState = {};
     const [state, dispatch] = useReducer(reducer, initialState);
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
@@ -63,6 +60,14 @@ const SearchEffortForm = connect(
         type: 'UPDATE_INPUT',
         field: e.target.name,
         value: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value)
+      });
+    };
+
+    const handleNumber = e => {
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field: e.target.name,
+        value: isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value)
       });
     };
 
@@ -93,6 +98,10 @@ const SearchEffortForm = connect(
           type: 'INITIALIZE_FORM',
           payload: dataEntryData,
         });
+      } else {
+        handleSelect('siteId', siteId);
+        // @TODO: Investigate where dsId comes from
+        handleSelect('dsId', 123123);
       }
     }, [edit, dataEntryData]);
 
@@ -106,7 +115,7 @@ const SearchEffortForm = connect(
         {/* Top Level Info */}
         <DataHeader id={siteId} />
         {/* Approval */}
-        {/* TO DO: include component props */}
+        {/* @TODO: include component props */}
         <Approval />
         {/* Form Fields */}
         <Card className='mt-3'>
@@ -130,30 +139,30 @@ const SearchEffortForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input name='temp' label='Temp (C)' value={state['temp']} onChange={handleChange} />
+                <Input name='temp' label='Temp (c)' type='number' value={state['temp'] || ''} onChange={handleFloat} />
               </div>
               <div className='col-2'>
-                <Input name='conductivity' label='Conductivity' value={state['conductivity']} onChange={handleChange} />
+                <Input name='conductivity' label='Conductivity' type='number' value={state['conductivity'] || ''} onChange={handleNumber} />
               </div>
             </Row>
             <Row>
               <div className='col-2'>
-                <Input name='startTime' label='Start Time' value={state['startTime']} onChange={handleChange} isRequired />
+                <Input name='startTime' label='Start Time (hh:mm:ss)' value={state['startTime']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='startLatitude' type='number' label='Start Latitude' value={state['startLatitude'] || ''} onChange={handleFloat} isRequired />
+                <Input name='startLatitude' type='number' label='Start Latitude' value={state['startLatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='startLongitude' type='number' label='Start Longitude' value={state['startLongitude'] || ''} onChange={handleFloat} isRequired />
+                <Input name='startLongitude' type='number' label='Start Longitude' value={state['startLongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='stopTime' label='Stop Time' value={state['stopTime']} onChange={handleChange} isRequired />
+                <Input name='stopTime' label='Stop Time (hh:mm:ss)' value={state['stopTime']} onChange={handleChange} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='stopLatitude' type='number' label='Stop Latitude' value={state['stopLatitude'] || ''} onChange={handleFloat} isRequired />
+                <Input name='stopLatitude' type='number' label='Stop Latitude' value={state['stopLatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
               </div>
               <div className='col-2'>
-                <Input name='stopLongitude' type='number' label='Stop Longitude' value={state['stopLongitude'] || ''} onChange={handleFloat} isRequired />
+                <Input name='stopLongitude' type='number' label='Stop Longitude' value={state['stopLongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
               </div>
             </Row>
             {edit && (<Row>

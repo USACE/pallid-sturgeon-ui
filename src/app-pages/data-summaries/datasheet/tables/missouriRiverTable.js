@@ -38,6 +38,7 @@ const MissouriRiverTable = connect(
           <AgGridColumn field='pass' />
           <AgGridColumn field='setDate' sortable unSortIcon />
           <AgGridColumn field='conductivity' sortable unSortIcon />
+          <AgGridColumn field='approved' sortable unSortIcon />
           <AgGridColumn field='checkedby' sortable unSortIcon />
         </AgGridReact>
       </div>

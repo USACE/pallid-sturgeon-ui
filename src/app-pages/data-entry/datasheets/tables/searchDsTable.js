@@ -54,7 +54,6 @@ const SearchDsTable = connect(
             cellRenderer='telemetryIdCellRenderer'
             cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/telemetry' }}
           />
-          <AgGridColumn field='dsId' sortable unSortIcon />
           <AgGridColumn field='searchTypeCode' sortable unSortIcon />
           <AgGridColumn field='startTime' sortable unSortIcon />
           <AgGridColumn field='startLatitude' sortable unSortIcon />
@@ -65,6 +64,10 @@ const SearchDsTable = connect(
           <AgGridColumn field='temp' sortable unSortIcon />
           <AgGridColumn field='conductivity' sortable unSortIcon />
           <AgGridColumn field='recorder' sortable unSortIcon />
+          <AgGridColumn field='editInitials' sortable unSortIcon />
+          <AgGridColumn field='lastEditComment' sortable unSortIcon />
+          <AgGridColumn field='lastUpdated' sortable unSortIcon />
+          <AgGridColumn field='uploadedBy' sortable unSortIcon />
         </AgGridReact>
       </div>
     </>
