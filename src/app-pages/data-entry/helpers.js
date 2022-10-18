@@ -82,3 +82,12 @@ export const createStructureModOptions = data => {
     value: opt.code,
   }));
 };
+
+export const createAccountsOptions = data => {
+  if (!data) return [];
+
+  return data.map((opt, index) => ({
+    text: 'Field Office: ' + opt.officeCode + ' - Project: ' + opt.projectCode,
+    value: opt.id,
+  }));
+};

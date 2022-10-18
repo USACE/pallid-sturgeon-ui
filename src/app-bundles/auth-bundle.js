@@ -15,6 +15,7 @@ export default {
       token: null,
       authData: null,
       sessionState: null,
+      roles: [],
     };
 
     return (state = initialState, { type, payload }) => {
@@ -22,7 +23,24 @@ export default {
         case 'START_AUTH':
         case 'UPDATE_SESSION_STATE':
         case 'UPDATE_AUTH':
-          return ({ ...state, ...payload });
+          return ({
+            ...state,
+            loading: payload.loading,
+            token: payload.token,
+            authData: {
+              ...state.authData,
+              ...payload.authData,
+            },
+            roles: payload.roles,
+          });
+        case 'UPDATE_ROLES':
+          return ({
+            ...state,
+            authData: {
+              ...state.authData,
+              role: payload,
+            }
+          });
         default:
           return state;
       }
@@ -38,7 +56,7 @@ export default {
       refreshInterval: 30,
       sessionEndWarning: 120,
       onAuthenticate: (token) => {
-        store.doAuthUpdate(token);
+        store.doFetchAuthRoles(token);
       },
       onRedirect: (sessionState) => {
         store.doSessionStateUpdate(sessionState);
@@ -79,26 +97,41 @@ export default {
     });
   },
 
-  doAuthUpdate: (accessToken) => ({ dispatch, apiGetWithToken }) => {
+  doFetchAuthRoles: (accessToken) => ({ dispatch, apiGetWithToken, store }) => {
     const authInfo = accessToken ? JSON.parse(atob(accessToken.split('.')[1])) : null;
 
     if (authInfo) {
-      const url = `/psapi/userRoleOffice/${authInfo.email}`;
-
+      const url = `/psapi/userRoleOffices/${authInfo.email}`;
       apiGetWithToken(url, accessToken, (_err, body) => {
         dispatch({
           type: 'UPDATE_AUTH',
           payload: {
             token: accessToken,
             authData: {
-              role: body,
               fullName: authInfo ? authInfo.name : '',
               userId: authInfo ? Number(authInfo.sub) : '',
               name: authInfo && authInfo.name ? authInfo.name.split('.')[0] : '',
               exp: authInfo ? authInfo.exp : ''
             },
             loading: false,
+            roles: body,
           },
+        });
+        if (body.length === 1 && !store.selectUserRole()) {
+          store.doAuthUpdate(body[0].id);
+        }
+      });
+    }
+  },
+
+  doAuthUpdate: (id) => ({ dispatch, apiGet }) => {
+    if (id) {
+      const url = `/psapi/userRoleOffice/${id}`;
+
+      apiGet(url, (_err, body) => {
+        dispatch({
+          type: 'UPDATE_ROLES',
+          payload: body,
         });
       });
     } else {
@@ -130,4 +163,6 @@ export default {
   selectUserRole: state => state.auth.authData.role,
 
   selectInitOptions: state => state.auth.initOptions,
+
+  selectAuthRoles: state => state.auth.roles,
 }; 

@@ -13,7 +13,6 @@ import Logout from '../app-pages/logout';
 import Map from '../app-pages/map/map';
 import UserList from '../app-pages/admin/userList';
 import NotFound from '../app-pages/404';
-import SignUp from '../app-pages/signup/signup';
 import SearchReports from 'app-pages/data-summaries/search-reports';
 import PriorityFish from 'app-pages/data-summaries/priorityFish';
 import LastLocation from 'app-pages/data-summaries/lastLocation';
@@ -43,8 +42,6 @@ export default createRouteBundle(
     '/multiple-record-approval': MultipleRecordApproval,
     '/priority-fish': PriorityFish,
     '/search-reports': SearchReports,
-    '/signup': SignUp,
-    '/user-access-requests': UserList,
     '/sites-list': SitesList,
     '/sites-list/datasheet': SiteDatasheet,
     '/sites-list/datasheet/telemetry': TelemetryDsTable,
@@ -53,6 +50,7 @@ export default createRouteBundle(
     '/sites-list/datasheet/procedure': ProcedureDsTable,
     '/sites-list/datasheet/:form': EditDataSheet,
     '/tag-replacement': TagReplacement,
+    '/user-access-requests': UserList,
     '*': NotFound,
   },
 );
