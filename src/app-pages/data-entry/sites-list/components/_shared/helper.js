@@ -23,7 +23,7 @@ export const sitesExportHeaders = [
   { label: 'SEGMENT', key: 'segmentDescription' },
   { label: 'SEASON_ID', key: 'season' },
   { label: 'SEASON', key: 'seasonDescription' },
-  { label: 'SAMPLE_UNIT_TYPE', key: 'sampleUnitType' },
+  { label: 'SAMPLE UNIT TYPE', key: 'sampleUnitType' },
   { label: 'BEND', key: 'bend' },
   { label: 'BENDRN', key: 'bendrn' },
   { label: 'BENDRIVERMILE', key: 'bendRiverMile' },
