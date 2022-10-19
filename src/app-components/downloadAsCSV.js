@@ -7,7 +7,8 @@ import { classArray } from 'utils';
 const DownloadAsCSV = ({
   content = [],
   className = '',
-  filePrefix = ''
+  filePrefix = '',
+  headers,
 }) => {
   const classes = classArray([
     'mb-3',
@@ -23,6 +24,7 @@ const DownloadAsCSV = ({
       className={classes}
       filename={`${filePrefix}-${new Date().toISOString()}.csv`}
       data={content}
+      headers={headers}
     >
       <Icon icon='download' className='mr-1' />
       Export as CSV

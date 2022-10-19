@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
 import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
@@ -6,12 +6,16 @@ import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 import DownloadAsCSV from 'app-components/downloadAsCSV';
 import SiteIdCellRenderer from 'common/gridCellRenderers/siteIdCellRenderer';
 
+import { sitesExportHeaders } from './_shared/helper';
+
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const SitesListTable = connect(
+  'selectExportsData',
   'selectSitesData',
   ({
+    exportsData,
     sitesData,
   }) => {
     const cellStyle = (params) => ({
@@ -20,7 +24,7 @@ const SitesListTable = connect(
 
     return (
       <div className='pt-3'>
-        <DownloadAsCSV filePrefix='site-table' content={sitesData} />
+        <DownloadAsCSV filePrefix='site-table' content={exportsData} headers={sitesExportHeaders} />
         <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             rowHeight={35}
