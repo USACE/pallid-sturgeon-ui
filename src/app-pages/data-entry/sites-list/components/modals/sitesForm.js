@@ -114,7 +114,7 @@ const SitesFormModal = connect(
                   isRequired
                 />
               </div>
-              <div className='col-3'>
+              <div className='col-6'>
                 <SelectCustomLabel
                   label='Project'
                   name='projectId'
@@ -124,7 +124,21 @@ const SitesFormModal = connect(
                   isRequired
                 />
               </div>
-              <div className='col-3'>
+            </Row>
+            <Row>
+              <div className='col-6'>
+                <FilterSelectCustomLabel
+                  label='Segment'
+                  name='segmentId'
+                  placeholder='Select segment...'
+                  value={state['segmentId']}
+                  // handleInputChange={value => handleSelect('segmentId', value)}
+                  onChange={(_, __, value) => handleSelect('segmentId', value)}
+                  items={createDropdownOptions(segments)}
+                  isRequired
+                />
+              </div>
+              <div className='col-4'>
                 <SelectCustomLabel
                   label='Season'
                   name='season'
@@ -160,18 +174,7 @@ const SitesFormModal = connect(
               </div>
             </Row>
             <Row>
-              <div className='col-6'>
-                <FilterSelectCustomLabel
-                  label='Segment'
-                  name='segmentId'
-                  placeholder='Select segment...'
-                  value={state['segmentId']}
-                  // handleInputChange={value => handleSelect('segmentId', value)}
-                  onChange={(_, __, value) => handleSelect('segmentId', value)}
-                  items={createDropdownOptions(segments)}
-                  isRequired
-                />
-              </div>
+              
               <div className='col-6'>
                 <SelectCustomLabel
                   label='Bend R/N'
