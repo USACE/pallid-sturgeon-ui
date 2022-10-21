@@ -24,7 +24,7 @@ const SitesListTable = connect(
 
     return (
       <div className='pt-3'>
-        <DownloadAsCSV filePrefix='site-table' content={exportsData} headers={sitesExportHeaders} />
+        <DownloadAsCSV filePrefix='sites-list' content={exportsData} headers={sitesExportHeaders} />
         <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             rowHeight={35}
