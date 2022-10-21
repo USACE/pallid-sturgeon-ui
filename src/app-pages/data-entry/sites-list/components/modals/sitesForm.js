@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
 
 import { Input, Row, SelectCustomLabel, FilterSelectCustomLabel, TextArea } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { createDropdownOptions, createBendsDropdownOptions } from 'app-pages/data-entry/helpers';
+import { createDropdownOptions, createBendsDropdownOptions, createCustomCodeDropdownOptions } from 'app-pages/data-entry/helpers';
 import { fieldOfficeOptions } from '../_shared/helper';
 import { dropdownYearsToNow } from 'utils';
 
@@ -27,12 +27,14 @@ const SitesFormModal = connect(
   'doUpdateSite',
   'selectDomains',
   'selectSitesData',
+  'selectUserRole',
   ({
     doPostNewSite,
     doNewSiteLoadData,
     doUpdateSite,
     domains,
     sitesData,
+    userRole,
     edit,
     id
   }) => {
@@ -88,6 +90,8 @@ const SitesFormModal = connect(
       }
     }, [edit]);
 
+    console.log(userRole);
+
     return (
       <ModalContent size='lg'>
         <ModalHeader title={edit ? 'Update Site' : 'Create New Site'} />
@@ -98,6 +102,7 @@ const SitesFormModal = connect(
                 <SelectCustomLabel
                   label='Year'
                   name='year'
+                  defaultValue={new Date().getFullYear()}
                   value={Number(state['year'])}
                   onChange={val => handleSelect('year', val)}
                   options={dropdownYearsToNow()}
@@ -108,9 +113,11 @@ const SitesFormModal = connect(
                 <SelectCustomLabel
                   label='Field Office'
                   name='fieldoffice'
+                  defaultValue={userRole.officeCode}
                   value={state['fieldoffice']}
                   onChange={val => handleSelect('fieldoffice', val)}
                   options={fieldOfficeOptions}
+                  isDisabled={userRole.role !== 'ADMINISTRATOR'}
                   isRequired
                 />
               </div>
@@ -118,9 +125,11 @@ const SitesFormModal = connect(
                 <SelectCustomLabel
                   label='Project'
                   name='projectId'
+                  defaultValue={userRole.projectCode}
                   onChange={val => handleSelect('projectId', val)}
                   value={Number(state['projectId'])}
                   options={createDropdownOptions(projects)}
+                  isDisabled={userRole.role !== 'ADMINISTRATOR'}
                   isRequired
                 />
               </div>
@@ -134,11 +143,11 @@ const SitesFormModal = connect(
                   value={state['segmentId']}
                   // handleInputChange={value => handleSelect('segmentId', value)}
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
-                  items={createDropdownOptions(segments)}
+                  items={createCustomCodeDropdownOptions(segments)}
                   isRequired
                 />
               </div>
-              <div className='col-4'>
+              <div className='col-6'>
                 <SelectCustomLabel
                   label='Season'
                   name='season'
@@ -150,17 +159,17 @@ const SitesFormModal = connect(
               </div>
             </Row>
             <Row>
-              <div className='col-3'>
+              <div className='col-4'>
                 <SelectCustomLabel
                   label='Sample Unit Type'
                   name='sampleUnitType'
                   onChange={val => handleSelect('sampleUnitType', val)}
                   value={state['sampleUnitType']}
-                  options={createDropdownOptions(sampleUnitTypes)}
+                  options={createCustomCodeDropdownOptions(sampleUnitTypes)}
                   isRequired
                 />
               </div>
-              <div className='col-9'>
+              <div className='col-8'>
                 <FilterSelectCustomLabel
                   label='Sample Unit'
                   name='bend'
