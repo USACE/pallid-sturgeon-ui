@@ -14,12 +14,14 @@ import SitesFormModal from './modals/sitesForm';
 import '../../dataentry.scss';
 
 const SitesList = connect(
+  'doFetchExportsSites',
   'doModalOpen',
   'doUpdateSiteParams',
   'doSetSitesPagination',
   'selectDomains',
   'selectSitesTotalResults',
   ({
+    doFetchExportsSites,
     doModalOpen,
     doUpdateSiteParams,
     doSetSitesPagination,
@@ -62,6 +64,7 @@ const SitesList = connect(
       };
 
       doUpdateSiteParams(params);
+      doFetchExportsSites(params);
     }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter]);
 
     return (
