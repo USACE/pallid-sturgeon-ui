@@ -1,0 +1,18 @@
+export const sitesExportHeaders = [
+  'SITE_ID',
+  'SITE_YEAR',
+  'SITE_FID',
+  'FIELDOFFICE_ID',
+  'FIELD_OFFICE',
+  'PROJECT_ID',
+  'PROJECT',
+  'SEGMENT_ID',
+  'SEGMENT',
+  'SEASON_ID',
+  'SEASON',
+  'SAMPLE UNIT TYPE',
+  'BEND',
+  'BENDRN',
+  'BENDRIVERMILE',
+  'SAMPLE_UNIT_DESC',
+];

@@ -23,7 +23,7 @@ import userAccessRequestBundle from './users-access-request-bundle';
 import rolesBundle from './roles-bundle';
 import usersBundle from './users-bundle';
 import sitesDatasheetBundle from './sites-datasheet-bundle';
-import exportsBundle from './exports-bundle';
+import exportsBundle from './exports/exports-bundle';
 
 // Mock Token User
 const mockTokenApplicationAdmin =
