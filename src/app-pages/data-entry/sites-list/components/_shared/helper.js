@@ -10,22 +10,3 @@ export const fieldOfficeOptions = [ // Excluding 'ZZ'
   { value: 'KC', text: 'KC - USACE Kansas City District' },
   { value: 'MI', text: 'MI - Missouri Department of Conservation Missisippi River' },
 ];
-
-export const sitesExportHeaders = [
-  { label: 'SITE_ID', key: 'siteId' },
-  { label: 'SITE_YEAR', key: 'year' },
-  { label: 'SITE_FID', key: 'siteFid' },
-  { label: 'FIELDOFFICE_ID', key: 'fieldoffice' },
-  { label: 'FIELD_OFFICE', key: 'fieldOfficeDescription' },
-  { label: 'PROJECT_ID', key: 'projectId' },
-  { label: 'PROJECT', key: 'projectDescription' },
-  { label: 'SEGMENT_ID', key: 'segmentId' },
-  { label: 'SEGMENT', key: 'segmentDescription' },
-  { label: 'SEASON_ID', key: 'season' },
-  { label: 'SEASON', key: 'seasonDescription' },
-  { label: 'SAMPLE UNIT TYPE', key: 'sampleUnitType' },
-  { label: 'BEND', key: 'bend' },
-  { label: 'BENDRN', key: 'bendrn' },
-  { label: 'BENDRIVERMILE', key: 'bendRiverMile' },
-  { label: 'SAMPLE_UNIT_DESC', key: 'sampleUnitDesc' },
-];
