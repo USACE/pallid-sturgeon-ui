@@ -1,5 +1,4 @@
-// Excluding 'ZZ'
-export const fieldOfficeOptions = [
+export const fieldOfficeOptions = [ // Excluding 'ZZ'
   { value: 'CF', text: 'CF - Columbia Fishery Resource Office' },
   { value: 'MO', text: 'MO - Missouri Department of Conservation' },
   { value: 'NE', text: 'NE - Nebraska Game and Parks Commission' },

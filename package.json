@@ -10,6 +10,7 @@
     "ag-grid-community": "^25.3.0",
     "ag-grid-react": "^25.3.0",
     "date-fns": "^2.16.1",
+    "export-to-csv": "^0.2.1",
     "internal-nav-helper": "^3.1.0",
     "lodash.debounce": "^4.0.8",
     "lodash.isequal": "^4.5.0",
