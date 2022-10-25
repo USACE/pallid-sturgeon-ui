@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
 
@@ -22,24 +22,34 @@ const reducer = (state, action) => {
 };
 
 const SitesFormModal = connect(
+  'doDomainBendsFetch',
+  'doDomainSegmentsFetch',
   'doPostNewSite',
   'doNewSiteLoadData',
   'doUpdateSite',
   'selectDomains',
   'selectSitesData',
   'selectUserRole',
+  'selectDomainsBends',
   ({
+    doDomainBendsFetch,
+    doDomainSegmentsFetch,
     doPostNewSite,
     doNewSiteLoadData,
     doUpdateSite,
     domains,
     sitesData,
     userRole,
+    domainsBends,
     edit,
     id
   }) => {
     const { projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
+
+    const [office, setOffice] = useState(userRole.officeCode);
+    const [segment, setSegment] = useState(0);
+    const [bend, setBend] = useState();
 
     const handleChange = e => {
       dispatch({
@@ -50,6 +60,15 @@ const SitesFormModal = connect(
     };
 
     const handleSelect = (field, val) => {
+      if (field==='segmentId') {
+        setSegment(val);
+      }
+      if (field==='fieldoffice') {
+        setOffice(val);
+      }
+      if (field==='bend') {
+        setBend(val);
+      }
       dispatch({
         type: 'UPDATE_INPUT',
         field: field,
@@ -72,13 +91,9 @@ const SitesFormModal = connect(
       if (edit) {
         doUpdateSite(state);
       } else {
-        doPostNewSite(state);
+        doPostNewSite({ bend: bend, segment: segment }, state);
       }
     };
-
-    useEffect(() => {
-      doNewSiteLoadData();
-    }, [doNewSiteLoadData]);
 
     useEffect(() => {
       if (edit) {
@@ -90,7 +105,14 @@ const SitesFormModal = connect(
       }
     }, [edit]);
 
-    console.log(userRole);
+    useEffect(() => {
+      doNewSiteLoadData();
+    }, [doNewSiteLoadData]);
+
+    useEffect(() => {
+      doDomainBendsFetch({ segment: segment });
+      doDomainSegmentsFetch({ office: office });
+    }, [segment, office]);
 
     return (
       <ModalContent size='lg'>
@@ -113,7 +135,7 @@ const SitesFormModal = connect(
                 <SelectCustomLabel
                   label='Field Office'
                   name='fieldoffice'
-                  defaultValue={userRole.officeCode}
+                  defaultValue={userRole.officeCode === 'ZZ' ? '' : userRole.officeCode}
                   value={state['fieldoffice']}
                   onChange={val => handleSelect('fieldoffice', val)}
                   options={fieldOfficeOptions}
@@ -125,7 +147,7 @@ const SitesFormModal = connect(
                 <SelectCustomLabel
                   label='Project'
                   name='projectId'
-                  defaultValue={userRole.projectCode}
+                  defaultValue={userRole.role === 'ADMINISTRATOR' ? '' : userRole.projectCode}
                   onChange={val => handleSelect('projectId', val)}
                   value={Number(state['projectId'])}
                   options={createDropdownOptions(projects)}
@@ -143,7 +165,7 @@ const SitesFormModal = connect(
                   value={state['segmentId']}
                   // handleInputChange={value => handleSelect('segmentId', value)}
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
-                  items={createCustomCodeDropdownOptions(segments)}
+                  items={createDropdownOptions(segments)}
                   isRequired
                 />
               </div>
@@ -175,7 +197,7 @@ const SitesFormModal = connect(
                   name='bend'
                   placeholder='Select bend...'
                   value={Number(state['bend']) || ''}
-                  // handleInputChange={value => handleSelect('bend', value)}
+                  // handleInputChange={value => `${value} test`}
                   onChange={(_, __, value) => handleSelect('bend', value)}
                   items={createBendsDropdownOptions(bends)}
                   isRequired

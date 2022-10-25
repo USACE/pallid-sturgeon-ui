@@ -109,10 +109,10 @@ export default {
     });
   },
 
-  doDomainSegmentsFetch: () => ({ dispatch, apiGet }) => {
+  doDomainSegmentsFetch: (params) => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_SEGMENTS_START' });
 
-    const url = '/psapi/segments';
+    const url = `/psapi/segments${queryFromObject(params)}`;
 
     apiGet(url, (_err, body) => {
       dispatch({
@@ -123,10 +123,10 @@ export default {
     });
   },
 
-  doDomainBendsFetch: () => ({ dispatch, apiGet }) => {
+  doDomainBendsFetch: (params) => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_BENDS_START' });
 
-    const url = '/psapi/bends';
+    const url = `/psapi/bends${queryFromObject(params)}`;
 
     apiGet(url, (_err, body) => {
       dispatch({

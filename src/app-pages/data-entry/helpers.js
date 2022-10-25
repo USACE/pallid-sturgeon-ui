@@ -14,13 +14,13 @@ export const createBendsDropdownOptions = data => {
   if (!data) return [];
 
   return data.map(d => {
-    const { bendNumber, description, id, lowerRiverMile, upperRiverMile } = d;
+    const { description, bendNumber, lowerRiverMile, upperRiverMile } = d;
 
     if (!description) return null;
 
     return {
-      value: id,
-      text: `${bendNumber} - ${description} - ${lowerRiverMile}/${upperRiverMile}`,
+      value: bendNumber,
+      text: `${description} - ${lowerRiverMile}/${upperRiverMile}`,
     };
   }).filter(e => e);
 };

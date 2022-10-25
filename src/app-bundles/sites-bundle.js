@@ -94,11 +94,11 @@ export default {
     });
   },
 
-  doPostNewSite: (payload) => ({ dispatch, store, apiPost }) => {
+  doPostNewSite: (params, payload) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'SITES_POST_START' });
     const toastId = toast.loading('Saving new site...');
 
-    const url = '/psapi/siteDataEntry';
+    const url = `/psapi/siteDataEntry${queryFromObject(params)}`;
 
     apiPost(url, payload, (err, _body) => {
       if (!err) {

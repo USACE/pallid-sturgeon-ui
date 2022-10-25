@@ -133,8 +133,6 @@ export default {
     store.doDomainFieldOfficesFetch();
     store.doDomainProjectsFetch();
     store.doDomainSeasonsFetch();
-    store.doDomainSegmentsFetch();
-    store.doDomainBendsFetch();
     store.doDomainSampleUnitTypesFetch();
   },
 
