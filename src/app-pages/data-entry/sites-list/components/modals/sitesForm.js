@@ -30,7 +30,6 @@ const SitesFormModal = connect(
   'selectDomains',
   'selectSitesData',
   'selectUserRole',
-  'selectDomainsBends',
   ({
     doDomainBendsFetch,
     doDomainSegmentsFetch,
@@ -40,7 +39,6 @@ const SitesFormModal = connect(
     domains,
     sitesData,
     userRole,
-    domainsBends,
     edit,
     id
   }) => {
@@ -163,7 +161,7 @@ const SitesFormModal = connect(
                   name='segmentId'
                   placeholder='Select segment...'
                   value={state['segmentId']}
-                  // handleInputChange={value => handleSelect('segmentId', value)}
+                  // handleInputChange={value => setSegmentFilter(value)}
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
                   items={createDropdownOptions(segments)}
                   isRequired
@@ -197,7 +195,7 @@ const SitesFormModal = connect(
                   name='bend'
                   placeholder='Select bend...'
                   value={Number(state['bend']) || ''}
-                  // handleInputChange={value => `${value} test`}
+                  // handleInputChange={value => setBendFilter(value)}
                   onChange={(_, __, value) => handleSelect('bend', value)}
                   items={createBendsDropdownOptions(bends)}
                   isRequired
@@ -205,7 +203,6 @@ const SitesFormModal = connect(
               </div>
             </Row>
             <Row>
-              
               <div className='col-6'>
                 <SelectCustomLabel
                   label='Bend R/N'

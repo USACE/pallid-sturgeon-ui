@@ -2,6 +2,8 @@ import React from 'react';
 import Select from 'app-components/select/select';
 import FilterSelect from 'app-components/filter-select';
 
+import '../../../dataentry.scss';
+
 export const Row = ({ children, className }) => (
   <div className={`d-flex align-items-center w-100 mt-3 pb-3 ${className}`}>
     {children}
@@ -44,7 +46,7 @@ export const TextArea = ({ value, name, label, onChange, rowCount = 3, className
   );
 };
 
-export const SelectCustomLabel = ({ name, label, options, value, onChange, helperText, helperDirection, className, defaultValue, isRequired, isDisabled = false }) => {
+export const SelectCustomLabel = ({ name, label, options, value, onChange, helperText, helperDirection, className, defaultValue, isRequired, isDisabled = false, isLoading = false }) => {
   const showRequired = isRequired && !value;
 
   if (helperText) {
@@ -61,13 +63,16 @@ export const SelectCustomLabel = ({ name, label, options, value, onChange, helpe
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
-        <Select id={name} name={name} options={options} value={value} onChange={onChange} className={showRequired ? 'is-invalid' : ''} defaultOption={defaultValue} isDisabled={isDisabled} />
+        <div className={`d-flex flex-${helperDirection} w-100`}>
+          <Select id={name} name={name} options={options} value={value} onChange={onChange} className={showRequired ? 'is-invalid' : ''} defaultOption={defaultValue} isDisabled={isDisabled} />
+          {isLoading && <div className='loader m-0 ml-2'></div>}
+        </div>
       </>
     );
   }
 };
 
-export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, handleInputChange, placeholder, helperText, helperDirection, className, isRequired, isDisabled = false }) => {
+export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, handleInputChange, placeholder, helperText, helperDirection, className, ref, isRequired, isDisabled = false }) => {
   const showRequired = isRequired && !value;
 
   if (helperText) {
@@ -75,7 +80,7 @@ export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, h
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
         <div className={`d-flex flex-${helperDirection} w-100`}>
-          <FilterSelect id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
+          <FilterSelect ref={ref} id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
           <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'}><i>{helperText}</i></p>
         </div>
       </>
@@ -84,7 +89,7 @@ export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, h
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
-        <FilterSelect id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
+        <FilterSelect ref={ref} id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
       </>
     );
   }
