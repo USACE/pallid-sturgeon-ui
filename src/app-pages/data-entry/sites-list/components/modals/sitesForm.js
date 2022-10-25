@@ -45,9 +45,9 @@ const SitesFormModal = connect(
     const { projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
 
-    const [office, setOffice] = useState(userRole.officeCode);
+    const [office, setOffice] = useState(userRole ? userRole.officeCode : '');
     const [segment, setSegment] = useState(0);
-    const [bend, setBend] = useState();
+    const [bend, setBend] = useState(null);
 
     const handleChange = e => {
       dispatch({
@@ -133,11 +133,11 @@ const SitesFormModal = connect(
                 <SelectCustomLabel
                   label='Field Office'
                   name='fieldoffice'
-                  defaultValue={userRole.officeCode === 'ZZ' ? '' : userRole.officeCode}
+                  defaultValue={office === 'ZZ' || office === '' ? '' : office}
                   value={state['fieldoffice']}
                   onChange={val => handleSelect('fieldoffice', val)}
                   options={fieldOfficeOptions}
-                  isDisabled={userRole.role !== 'ADMINISTRATOR'}
+                  isDisabled={userRole ? (userRole.role !== 'ADMINISTRATOR') : false}
                   isRequired
                 />
               </div>
@@ -145,11 +145,11 @@ const SitesFormModal = connect(
                 <SelectCustomLabel
                   label='Project'
                   name='projectId'
-                  defaultValue={userRole.role === 'ADMINISTRATOR' ? '' : userRole.projectCode}
+                  defaultValue={userRole ? (userRole.role === 'ADMINISTRATOR' ? '' : userRole.projectCode) : ''}
                   onChange={val => handleSelect('projectId', val)}
                   value={Number(state['projectId'])}
                   options={createDropdownOptions(projects)}
-                  isDisabled={userRole.role !== 'ADMINISTRATOR'}
+                  isDisabled={userRole ? (userRole.role !== 'ADMINISTRATOR') : false}
                   isRequired
                 />
               </div>

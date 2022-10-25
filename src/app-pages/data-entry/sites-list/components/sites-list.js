@@ -71,8 +71,10 @@ const SitesList = connect(
     }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter]);
 
     useEffect(() => {
-      doDomainSegmentsFetch({ office: userRole.officeCode });
-    }, [userRole.officeCode]);
+      if (userRole.officeCode) {
+        doDomainSegmentsFetch({ office: userRole.officeCode });
+      }
+    }, []);
 
     useEffect(() => {
       doDomainBendsFetch({ segment: segmentValue });
