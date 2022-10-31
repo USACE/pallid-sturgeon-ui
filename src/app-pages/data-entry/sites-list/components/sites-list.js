@@ -16,6 +16,7 @@ import '../../dataentry.scss';
 
 const SitesList = connect(
   'doDomainBendsFetch',
+  'doDomainSeasonsFetch',
   'doDomainSegmentsFetch',
   'doModalOpen',
   'doUpdateSiteParams',
@@ -25,6 +26,7 @@ const SitesList = connect(
   'selectUserRole',
   ({
     doDomainBendsFetch,
+    doDomainSeasonsFetch,
     doDomainSegmentsFetch,
     doModalOpen,
     doUpdateSiteParams,
@@ -79,6 +81,10 @@ const SitesList = connect(
     useEffect(() => {
       doDomainBendsFetch({ segment: segmentValue });
     }, [segmentValue]);
+
+    useEffect(() => {
+      doDomainSeasonsFetch({ project: projectFilter });
+    }, [projectFilter]);
 
     return (
       <>
@@ -156,12 +162,12 @@ const SitesList = connect(
             <div className='form-group'>
               <FilterSelect
                 ref={bendRef}
-                isDisabled={!yearFilter}
-                label='Select Bend'
+                isDisabled
+                label='Select Sample Unit'
                 handleInputChange={value => setBendFilter(value)}
                 onChange={(_, __, val) => setBendValue(val)}
                 value={bendFilter}
-                placeholder='Bend...'
+                placeholder='Sample Unit...'
                 items={createBendsDropdownOptions(bends)}
               />
             </div>

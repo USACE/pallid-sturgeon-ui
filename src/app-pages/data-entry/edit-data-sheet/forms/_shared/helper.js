@@ -1,4 +1,7 @@
 import React from 'react';
+import ReactTooltip from 'react-tooltip';
+
+import Icon from 'app-components/icon';
 import Select from 'app-components/select/select';
 import FilterSelect from 'app-components/filter-select';
 
@@ -19,7 +22,7 @@ export const Input = ({ name, label, className, helperText, helperDirection = 'c
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
         <div className={`d-flex flex-${helperDirection} w-100`}>
           <input className={`form-control w-100 mt-1${showRequired ? ' is-invalid' : ''}`} id={name} name={name} disabled={isDisabled} value={value} onChange={onChange} type={type} step={step} placeholder={placeholder} />
-          <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'} style={{fontSize: 'smaller'}} ><i>{helperText}</i></p>
+          <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'} style={{ fontSize: 'smaller' }} ><i>{helperText}</i></p>
         </div>
       </>
     );
@@ -41,7 +44,7 @@ export const TextArea = ({ value, name, label, onChange, rowCount = 3, className
   return (
     <>
       {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
-      <textarea rows={rowCount} className={`form-control w-100${showRequired ? ' is-invalid' : ''}`} id={name} name={name} onChange={onChange} value={displayValue} disabled={isDisabled}/>
+      <textarea rows={rowCount} className={`form-control w-100${showRequired ? ' is-invalid' : ''}`} id={name} name={name} onChange={onChange} value={displayValue} disabled={isDisabled} />
     </>
   );
 };
@@ -72,13 +75,28 @@ export const SelectCustomLabel = ({ name, label, options, value, onChange, helpe
   }
 };
 
-export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, handleInputChange, placeholder, helperText, helperDirection, className, ref, isRequired, isDisabled = false }) => {
+export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, handleInputChange, placeholder, helperText, helperDirection, className, ref, helpIcon, isRequired, isDisabled = false }) => {
   const showRequired = isRequired && !value;
 
   if (helperText) {
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
+        {helpIcon && (
+          <>
+            <Icon
+              icon='help-circle-outline'
+              data-tip
+              data-for='dl-help'
+              style={{ fontSize: '15px', marginBottom: '8px' }}
+            />
+            <ReactTooltip id='dl-help' effect='solid' place='bottom'>
+              <span>
+                {helpIcon}
+              </span>
+            </ReactTooltip>
+          </>
+        )}
         <div className={`d-flex flex-${helperDirection} w-100`}>
           <FilterSelect ref={ref} id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
           <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'}><i>{helperText}</i></p>
@@ -89,6 +107,21 @@ export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, h
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
+        {helpIcon && (
+          <>
+            <Icon
+              icon='help-circle-outline'
+              data-tip
+              data-for='dl-help'
+              style={{ fontSize: '15px', marginBottom: '8px' }}
+            />
+            <ReactTooltip id='dl-help' effect='solid' place='bottom'>
+              <span>
+                {helpIcon}
+              </span>
+            </ReactTooltip>
+          </>
+        )}
         <FilterSelect ref={ref} id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
       </>
     );

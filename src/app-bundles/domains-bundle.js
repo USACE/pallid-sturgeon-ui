@@ -95,10 +95,11 @@ export default {
     });
   },
 
-  doDomainSeasonsFetch: () => ({ dispatch, apiGet }) => {
+  doDomainSeasonsFetch: (params) => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_SEASONS_START' });
 
-    const url = '/psapi/seasons';
+    const url = `/psapi/seasons${queryFromObject(params)}`;
+
 
     apiGet(url, (_err, body) => {
       dispatch({

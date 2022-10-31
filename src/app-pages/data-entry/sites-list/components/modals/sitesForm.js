@@ -1,11 +1,13 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import { connect } from 'redux-bundler-react';
-import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
+import ReactTooltip from 'react-tooltip';
 
+import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
 import { Input, Row, SelectCustomLabel, FilterSelectCustomLabel, TextArea } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { createDropdownOptions, createBendsDropdownOptions, createCustomCodeDropdownOptions } from 'app-pages/data-entry/helpers';
-import { fieldOfficeOptions } from '../_shared/helper';
+import { fieldOfficeOptions, sampleUnitTypeProject1 } from '../_shared/helper';
 import { dropdownYearsToNow } from 'utils';
+import Icon from 'app-components/icon';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -23,6 +25,7 @@ const reducer = (state, action) => {
 
 const SitesFormModal = connect(
   'doDomainBendsFetch',
+  'doDomainSeasonsFetch',
   'doDomainSegmentsFetch',
   'doPostNewSite',
   'doNewSiteLoadData',
@@ -32,6 +35,7 @@ const SitesFormModal = connect(
   'selectUserRole',
   ({
     doDomainBendsFetch,
+    doDomainSeasonsFetch,
     doDomainSegmentsFetch,
     doPostNewSite,
     doNewSiteLoadData,
@@ -46,8 +50,10 @@ const SitesFormModal = connect(
     const [state, dispatch] = useReducer(reducer, {});
 
     const [office, setOffice] = useState(userRole ? userRole.officeCode : '');
+    const [project, setProject] = useState(0);
     const [segment, setSegment] = useState(0);
     const [bend, setBend] = useState(null);
+    const [sampleUnitType, setSampleUnitType] = useState('');
 
     const handleChange = e => {
       dispatch({
@@ -66,6 +72,12 @@ const SitesFormModal = connect(
       }
       if (field==='bend') {
         setBend(val);
+      }
+      if (field==='projectId') {
+        setProject(val);
+      }
+      if (field==='sampleUnitType') {
+        setSampleUnitType(val);
       }
       dispatch({
         type: 'UPDATE_INPUT',
@@ -89,7 +101,7 @@ const SitesFormModal = connect(
       if (edit) {
         doUpdateSite(state);
       } else {
-        doPostNewSite({ bend: bend, segment: segment }, state);
+        doPostNewSite({ code: bend, sampleUnitType: sampleUnitType, segment: segment }, state);
       }
     };
 
@@ -108,10 +120,21 @@ const SitesFormModal = connect(
     }, [doNewSiteLoadData]);
 
     useEffect(() => {
-      doDomainBendsFetch({ segment: segment });
-      doDomainSegmentsFetch({ office: office });
-    }, [segment, office]);
+      if (sampleUnitType !== 'S') {
+        doDomainBendsFetch({ sampleUnitType: sampleUnitType, segment: segment });
+      } else {
+        handleSelect('bend', 0);
+      }
+    }, [sampleUnitType]);
 
+    useEffect(() => {
+      doDomainSegmentsFetch({ office: office });
+    }, [office]);
+
+    useEffect(() => {
+      doDomainSeasonsFetch({ project: project });
+    }, [project]);
+    
     return (
       <ModalContent size='lg'>
         <ModalHeader title={edit ? 'Update Site' : 'Create New Site'} />
@@ -165,7 +188,17 @@ const SitesFormModal = connect(
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
                   items={createDropdownOptions(segments)}
                   isRequired
+                  helpIcon={(
+                    <>
+                      Two ways to select option:
+                      <ol>
+                        <li>Click on input box and select option from dropdown, or </li>
+                        <li>Search for option by typing in the box.</li>
+                      </ol>
+                    </>
+                  )}
                 />
+                
               </div>
               <div className='col-6'>
                 <SelectCustomLabel
@@ -185,7 +218,7 @@ const SitesFormModal = connect(
                   name='sampleUnitType'
                   onChange={val => handleSelect('sampleUnitType', val)}
                   value={state['sampleUnitType']}
-                  options={createCustomCodeDropdownOptions(sampleUnitTypes)}
+                  options={project === 1 ? sampleUnitTypeProject1 : createCustomCodeDropdownOptions(sampleUnitTypes)}
                   isRequired
                 />
               </div>
@@ -194,11 +227,21 @@ const SitesFormModal = connect(
                   label='Sample Unit'
                   name='bend'
                   placeholder='Select bend...'
-                  value={Number(state['bend']) || ''}
+                  value={(Number(state['bend']) || '')}
                   // handleInputChange={value => setBendFilter(value)}
                   onChange={(_, __, value) => handleSelect('bend', value)}
                   items={createBendsDropdownOptions(bends)}
-                  isRequired
+                  isRequired={sampleUnitType !== 'S'}
+                  isDisabled={sampleUnitType === 'S'}
+                  helpIcon={(
+                    <>
+                      Two ways to select option:
+                      <ol>
+                        <li>Click on input box and select option from dropdown, or </li>
+                        <li>Search for option by typing in the box.</li>
+                      </ol>
+                    </>
+                  )}
                 />
               </div>
             </Row>
