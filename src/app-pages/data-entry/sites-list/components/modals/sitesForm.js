@@ -131,24 +131,22 @@ const SitesFormModal = connect(
       doNewSiteLoadData();
     }, [doNewSiteLoadData]);
 
-    // When the user updates the sample unit type and/or segment
     useEffect(() => {
       clearSampleUnit();
       if (sampleUnitType !== 'S') {
         doDomainBendsFetch({ sampleUnitType: sampleUnitType, segment: segment });
-      } else {
+      } 
+      if (sampleUnitType === 'S') {
         handleSelect('bend', 0);
       }
     }, [segment, sampleUnitType]);
 
-    // When the user updates their field office (ADMINs ONLY)
     useEffect(() => {
       clearSegments();
       clearSampleUnit();
       doDomainSegmentsFetch({ office: office });
     }, [office]);
 
-    // When the use updates their project (ADMINs ONLY)
     useEffect(() => {
       doDomainSeasonsFetch({ project: project });
     }, [project]);
