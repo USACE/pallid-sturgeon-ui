@@ -10,3 +10,8 @@ export const fieldOfficeOptions = [ // Excluding 'ZZ'
   { value: 'KC', text: 'KC - USACE Kansas City District' },
   { value: 'MI', text: 'MI - Missouri Department of Conservation Missisippi River' },
 ];
+
+export const sampleUnitTypeProject1 = [
+  { value: 'B', text: 'B - Bend' }, 
+  { value: 'S', text: 'S - Segment' }
+];

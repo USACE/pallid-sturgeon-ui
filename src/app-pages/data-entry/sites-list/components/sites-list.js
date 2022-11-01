@@ -7,24 +7,33 @@ import Icon from 'app-components/icon';
 import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
 import SitesListTable from './sites-list-table';
+import SitesFormModal from './modals/sitesForm';
+
 import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 import { dropdownYearsToNow } from 'utils';
-import SitesFormModal from './modals/sitesForm';
 
 import '../../dataentry.scss';
 
 const SitesList = connect(
+  'doDomainBendsFetch',
+  'doDomainSeasonsFetch',
+  'doDomainSegmentsFetch',
   'doModalOpen',
   'doUpdateSiteParams',
   'doSetSitesPagination',
   'selectDomains',
   'selectSitesTotalResults',
+  'selectUserRole',
   ({
+    doDomainBendsFetch,
+    doDomainSeasonsFetch,
+    doDomainSegmentsFetch,
     doModalOpen,
     doUpdateSiteParams,
     doSetSitesPagination,
     domains,
     sitesTotalResults,
+    userRole,
   }) => {
     const { projects, seasons, bends, segments } = domains;
 
@@ -60,9 +69,22 @@ const SitesList = connect(
         segmentCode: segmentValue,
         projectCode: projectFilter,
       };
-
       doUpdateSiteParams(params);
     }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter]);
+
+    useEffect(() => {
+      if (userRole.officeCode) {
+        doDomainSegmentsFetch({ office: userRole.officeCode });
+      }
+    }, []);
+
+    useEffect(() => {
+      doDomainBendsFetch({ segment: segmentValue });
+    }, [segmentValue]);
+
+    useEffect(() => {
+      doDomainSeasonsFetch({ project: projectFilter });
+    }, [projectFilter]);
 
     return (
       <>
@@ -140,12 +162,12 @@ const SitesList = connect(
             <div className='form-group'>
               <FilterSelect
                 ref={bendRef}
-                isDisabled={!yearFilter}
-                label='Select Bend'
+                isDisabled
+                label='Select Sample Unit'
                 handleInputChange={value => setBendFilter(value)}
                 onChange={(_, __, val) => setBendValue(val)}
                 value={bendFilter}
-                placeholder='Bend...'
+                placeholder='Sample Unit...'
                 items={createBendsDropdownOptions(bends)}
               />
             </div>

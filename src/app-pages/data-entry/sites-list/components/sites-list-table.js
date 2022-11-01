@@ -45,18 +45,16 @@ const SitesListTable = connect(
               siteIdCellRenderer: SiteIdCellRenderer
             }}
           >
-            <AgGridColumn field='siteId' cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: true }} />
+            <AgGridColumn field='siteId' headerName='Site ID' cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: true }} />
             <AgGridColumn field='year' />
-            <AgGridColumn field='fieldoffice' />
-            <AgGridColumn field='projectId' />
-            <AgGridColumn field='segmentId' />
+            <AgGridColumn field='fieldoffice' headerName='Field Office' />
+            <AgGridColumn field='projectId' headerName='Project' />
+            <AgGridColumn field='segmentId' headerName='Segment' />
             <AgGridColumn field='season' />
-            <AgGridColumn field='bend' headerName='Sample Unit' cellStyle={cellStyle} cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: false }} />
             <AgGridColumn field='sampleUnitType' headerName='Sample Unit Type' />
+            <AgGridColumn field='bend' headerName='Sample Unit' cellStyle={cellStyle} cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: false }} />
             <AgGridColumn field='bendrn' headerName='Bend R/N' />
-            <AgGridColumn field='bendRiverMile' />
-            <AgGridColumn field='complete' />
-            <AgGridColumn field='approved' />
+            <AgGridColumn field='brmId' headerName='BRM ID' />
             <AgGridColumn field='editInitials' />
             <AgGridColumn field='last_edit_comment' />
             <AgGridColumn field='uploadedBy' />

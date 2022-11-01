@@ -14,13 +14,13 @@ export const createBendsDropdownOptions = data => {
   if (!data) return [];
 
   return data.map(d => {
-    const { description, id, lowerRiverMile, upperRiverMile } = d;
+    const { description, code, lowerRiverMile, upperRiverMile } = d;
 
     if (!description) return null;
 
     return {
-      value: id,
-      text: `${description} - ${lowerRiverMile}/${upperRiverMile}`,
+      value: code,
+      text: `${code} - ${description} - ${lowerRiverMile}/${upperRiverMile}`,
     };
   }).filter(e => e);
 };
@@ -81,4 +81,16 @@ export const createStructureModOptions = data => {
     text: opt.description,
     value: opt.code,
   }));
+};
+
+export const createCustomCodeDropdownOptions = data => {
+  if (!data) return [];
+
+  return data.map(d => {
+    const { code, description } = d;
+    return {
+      value: code,
+      text: `${code} - ${description}`,
+    };
+  });
 };

@@ -51,16 +51,10 @@ export default {
     store.doSitesFetch();
   },
 
+  // @TODO: Potentially remove this
   doNewSiteLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_NEW_SITE_INIT_DATA' });
-
-    store.doDomainProjectsFetch();
-    store.doDomainSeasonsFetch();
-    store.doDomainSegmentsFetch();
-    store.doDomainBendsFetch();
     store.doDomainBendRnFetch();
-    store.doDomainFieldOfficesFetch();
-    store.doDomainSampleUnitTypesFetch();
   },
 
   doSitesFetch: (data) => ({ dispatch, store, apiGet }) => {
@@ -94,11 +88,11 @@ export default {
     });
   },
 
-  doPostNewSite: (payload) => ({ dispatch, store, apiPost }) => {
+  doPostNewSite: (params, payload) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'SITES_POST_START' });
     const toastId = toast.loading('Saving new site...');
 
-    const url = '/psapi/siteDataEntry';
+    const url = `/psapi/siteDataEntry${queryFromObject(params)}`;
 
     apiPost(url, payload, (err, _body) => {
       if (!err) {
