@@ -1,13 +1,13 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer, useState, useRef } from 'react';
 import { connect } from 'redux-bundler-react';
-import ReactTooltip from 'react-tooltip';
 
+import FilterSelect from 'app-components/filter-select';
 import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
-import { Input, Row, SelectCustomLabel, FilterSelectCustomLabel, TextArea } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { Input, Row, SelectCustomLabel, TextArea } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { createDropdownOptions, createBendsDropdownOptions, createCustomCodeDropdownOptions } from 'app-pages/data-entry/helpers';
 import { fieldOfficeOptions, sampleUnitTypeProject1 } from '../_shared/helper';
 import { dropdownYearsToNow } from 'utils';
-import Icon from 'app-components/icon';
+
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -50,10 +50,14 @@ const SitesFormModal = connect(
     const [state, dispatch] = useReducer(reducer, {});
 
     const [office, setOffice] = useState(userRole ? userRole.officeCode : '');
-    const [project, setProject] = useState(0);
-    const [segment, setSegment] = useState(0);
-    const [bend, setBend] = useState(null);
+    const [project, setProject] = useState(userRole ? userRole.projectCode : '');
     const [sampleUnitType, setSampleUnitType] = useState('');
+
+    const [segment, setSegment] = useState(0);
+    const segRef = useRef();
+
+    const [bend, setBend] = useState(null);
+    const bendRef = useRef();
 
     const handleChange = e => {
       dispatch({
@@ -105,6 +109,14 @@ const SitesFormModal = connect(
       }
     };
 
+    const clearSegments = () => {
+      segRef.current.clear();
+    };
+
+    const clearSampleUnit = () => {
+      bendRef.current.clear();
+    };
+
     useEffect(() => {
       if (edit) {
         const filteredData = sitesData.filter(item => item.siteId === id);
@@ -119,22 +131,28 @@ const SitesFormModal = connect(
       doNewSiteLoadData();
     }, [doNewSiteLoadData]);
 
+    // When the user updates the sample unit type and/or segment
     useEffect(() => {
+      clearSampleUnit();
       if (sampleUnitType !== 'S') {
         doDomainBendsFetch({ sampleUnitType: sampleUnitType, segment: segment });
       } else {
         handleSelect('bend', 0);
       }
-    }, [sampleUnitType]);
+    }, [segment, sampleUnitType]);
 
+    // When the user updates their field office (ADMINs ONLY)
     useEffect(() => {
+      clearSegments();
+      clearSampleUnit();
       doDomainSegmentsFetch({ office: office });
     }, [office]);
 
+    // When the use updates their project (ADMINs ONLY)
     useEffect(() => {
       doDomainSeasonsFetch({ project: project });
     }, [project]);
-    
+
     return (
       <ModalContent size='lg'>
         <ModalHeader title={edit ? 'Update Site' : 'Create New Site'} />
@@ -168,7 +186,7 @@ const SitesFormModal = connect(
                 <SelectCustomLabel
                   label='Project'
                   name='projectId'
-                  defaultValue={userRole ? (userRole.role === 'ADMINISTRATOR' ? '' : userRole.projectCode) : ''}
+                  defaultValue={userRole ? userRole.projectCode : ''}
                   onChange={val => handleSelect('projectId', val)}
                   value={Number(state['projectId'])}
                   options={createDropdownOptions(projects)}
@@ -179,26 +197,30 @@ const SitesFormModal = connect(
             </Row>
             <Row>
               <div className='col-6'>
-                <FilterSelectCustomLabel
+                <FilterSelect
+                  ref={segRef}
                   label='Segment'
-                  name='segmentId'
+                  labelClassName='mr-2 mb-0 w-25'
                   placeholder='Select segment...'
                   value={state['segmentId']}
-                  // handleInputChange={value => setSegmentFilter(value)}
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
                   items={createDropdownOptions(segments)}
-                  isRequired
-                  helpIcon={(
+                  hasHelperIcon
+                  helperIconId='sampleUnitType'
+                  helperContent={(
                     <>
+                      Must select <b>Field Office</b> to see Segment options. <br></br>
                       Two ways to select option:
                       <ol>
                         <li>Click on input box and select option from dropdown, or </li>
                         <li>Search for option by typing in the box.</li>
                       </ol>
+                      Click the 'x' button to clear the input field.
                     </>
                   )}
+                  hasClearButton
+                  isRequired
                 />
-                
               </div>
               <div className='col-6'>
                 <SelectCustomLabel
@@ -223,25 +245,29 @@ const SitesFormModal = connect(
                 />
               </div>
               <div className='col-8'>
-                <FilterSelectCustomLabel
+                <FilterSelect
+                  ref={bendRef}
                   label='Sample Unit'
-                  name='bend'
-                  placeholder='Select bend...'
+                  placeholder='Select sample unit...'
                   value={(Number(state['bend']) || '')}
-                  // handleInputChange={value => setBendFilter(value)}
                   onChange={(_, __, value) => handleSelect('bend', value)}
                   items={createBendsDropdownOptions(bends)}
-                  isRequired={sampleUnitType !== 'S'}
                   isDisabled={sampleUnitType === 'S'}
-                  helpIcon={(
+                  hasHelperIcon
+                  helperIconId='sampleUnit'
+                  helperContent={(
                     <>
+                      Must select <b>Segment</b> and <b>Sample Unit Type</b> to see Sample Unit options. <br></br>
                       Two ways to select option:
                       <ol>
                         <li>Click on input box and select option from dropdown, or </li>
                         <li>Search for option by typing in the box.</li>
                       </ol>
+                      Click the 'x' button to clear the input field.
                     </>
                   )}
+                  hasClearButton
+                  isRequired
                 />
               </div>
             </Row>

@@ -53,14 +53,7 @@ export default {
 
   doNewSiteLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_NEW_SITE_INIT_DATA' });
-
-    store.doDomainProjectsFetch();
-    store.doDomainSeasonsFetch();
-    store.doDomainSegmentsFetch();
-    store.doDomainBendsFetch();
     store.doDomainBendRnFetch();
-    store.doDomainFieldOfficesFetch();
-    store.doDomainSampleUnitTypesFetch();
   },
 
   doSitesFetch: (data) => ({ dispatch, store, apiGet }) => {
