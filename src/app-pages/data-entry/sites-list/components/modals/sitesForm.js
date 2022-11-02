@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer, useState, useRef } from 'react';
 import { connect } from 'redux-bundler-react';
 
-import FilterSelect from 'app-components/filter-select';
+import FilterSelect from 'app-components/filter-select/filter-select';
 import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
 import { Input, Row, SelectCustomLabel, TextArea } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { createDropdownOptions, createBendsDropdownOptions, createCustomCodeDropdownOptions } from 'app-pages/data-entry/helpers';
@@ -158,6 +158,12 @@ const SitesFormModal = connect(
         <ModalHeader title={edit ? 'Update Site' : 'Create New Site'} />
         <section className='modal-body'>
           <div className='container-fluid'>
+            {edit && (
+              <>
+                <p>Please complete the following fields to create a new site.</p>
+                <p><b>Note:</b> Some dropdown options are dependent from other fields.</p>
+              </>
+            )}
             <Row>
               <div className='col-2'>
                 <SelectCustomLabel
@@ -190,8 +196,9 @@ const SitesFormModal = connect(
                   onChange={val => handleSelect('projectId', val)}
                   value={Number(state['projectId'])}
                   options={createDropdownOptions(projects)}
+                  isLoading={projects && (projects.length === 0)}
                   isDisabled={userRole ? (userRole.role !== 'ADMINISTRATOR') : false}
-                  isRequired
+                  isRequired                
                 />
               </div>
             </Row>
@@ -206,7 +213,7 @@ const SitesFormModal = connect(
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
                   items={createDropdownOptions(segments)}
                   hasHelperIcon
-                  helperIconId='sampleUnitType'
+                  helperIconId='segment'
                   helperContent={(
                     <>
                       Must select <b>Field Office</b> to see Segment options. <br></br>
@@ -219,6 +226,8 @@ const SitesFormModal = connect(
                     </>
                   )}
                   hasClearButton
+                  isDisabled={!office}
+                  isLoading={segments && (segments.length === 0)}
                   isRequired
                 />
               </div>
@@ -229,6 +238,14 @@ const SitesFormModal = connect(
                   onChange={val => handleSelect('season', val)}
                   value={state['season']}
                   options={createDropdownOptions(seasons)}
+                  hasHelperIcon
+                  helperIconId='season'
+                  helperContent={(
+                    <>
+                      Must select <b>Project</b> to see Season options.
+                    </>
+                  )}
+                  isLoading={seasons && (seasons.length === 0)}
                   isRequired
                 />
               </div>
@@ -241,6 +258,14 @@ const SitesFormModal = connect(
                   onChange={val => handleSelect('sampleUnitType', val)}
                   value={state['sampleUnitType']}
                   options={project === 1 ? sampleUnitTypeProject1 : createCustomCodeDropdownOptions(sampleUnitTypes)}
+                  hasHelperIcon
+                  helperIconId='sampleUnitType'
+                  helperContent={(
+                    <>
+                      Must select <b>Project</b> to see Sample Unit Type options. <br></br>
+                      If the option '<b>Segment</b>' is selected, then the Sample Unit field will disable and default to <b>0</b>.
+                    </>
+                  )}
                   isRequired
                 />
               </div>

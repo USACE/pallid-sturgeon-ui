@@ -1,0 +1,14 @@
+@import '../../style/variables';
+
+.input-group-append {
+  margin-left: 5px;
+}
+
+.input-group-text {
+  display: flex;
+  color: #7b8a8b;
+  background-color: #ecf0f1;
+  border: 1px solid #ced4da;
+  height: 30px !important;
+  width: 40px !important;
+}

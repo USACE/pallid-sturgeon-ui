@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
-import FilterSelect from 'app-components/filter-select';
+import FilterSelect from 'app-components/filter-select/filter-select';
 import Icon from 'app-components/icon';
 import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
