@@ -3,7 +3,7 @@ import ReactTooltip from 'react-tooltip';
 
 import Icon from 'app-components/icon';
 import Select from 'app-components/select/select';
-import FilterSelect from 'app-components/filter-select';
+import FilterSelect from 'app-components/filter-select/filter-select';
 
 import '../../../dataentry.scss';
 
@@ -49,13 +49,28 @@ export const TextArea = ({ value, name, label, onChange, rowCount = 3, className
   );
 };
 
-export const SelectCustomLabel = ({ name, label, options, value, onChange, helperText, helperDirection, className, defaultValue, isRequired, isDisabled = false, isLoading = false }) => {
+export const SelectCustomLabel = ({ name, label, options, value, onChange, helperText, helperDirection, hasHelperIcon, helperIconId, helperContent, className, defaultValue, isRequired, isDisabled = false, isLoading = false }) => {
   const showRequired = isRequired && !value;
 
   if (helperText) {
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
+        {hasHelperIcon && (
+          <>
+            <Icon
+              icon='help-circle-outline'
+              data-tip
+              data-for={helperIconId}
+              style={{ fontSize: '15px', marginBottom: '8px' }}
+            />
+            <ReactTooltip id={helperIconId} effect='solid' place='bottom'>
+              <span>
+                {helperContent}
+              </span>
+            </ReactTooltip>
+          </>
+        )}
         <div className={`d-flex flex-${helperDirection} w-100`}>
           <Select id={name} name={name} options={options} value={value} onChange={onChange} className={showRequired ? 'is-invalid' : ''} defaultOption={defaultValue} isDisabled={isDisabled} />
           <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'}><i>{helperText}</i></p>
@@ -66,6 +81,21 @@ export const SelectCustomLabel = ({ name, label, options, value, onChange, helpe
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
+        {hasHelperIcon && (
+          <>
+            <Icon
+              icon='help-circle-outline'
+              data-tip
+              data-for={helperIconId}
+              style={{ fontSize: '15px', marginBottom: '8px' }}
+            />
+            <ReactTooltip id={helperIconId} effect='solid' place='bottom'>
+              <span>
+                {helperContent}
+              </span>
+            </ReactTooltip>
+          </>
+        )}
         <div className={`d-flex flex-${helperDirection} w-100`}>
           <Select id={name} name={name} options={options} value={value} onChange={onChange} className={showRequired ? 'is-invalid' : ''} defaultOption={defaultValue} isDisabled={isDisabled} />
           {isLoading && <div className='loader m-0 ml-2'></div>}
@@ -75,28 +105,13 @@ export const SelectCustomLabel = ({ name, label, options, value, onChange, helpe
   }
 };
 
-export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, handleInputChange, placeholder, helperText, helperDirection, className, ref, helpIcon, isRequired, isDisabled = false }) => {
+export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, handleInputChange, placeholder, helperText, helperDirection, className, ref, isRequired, isDisabled = false }) => {
   const showRequired = isRequired && !value;
 
   if (helperText) {
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
-        {helpIcon && (
-          <>
-            <Icon
-              icon='help-circle-outline'
-              data-tip
-              data-for='dl-help'
-              style={{ fontSize: '15px', marginBottom: '8px' }}
-            />
-            <ReactTooltip id='dl-help' effect='solid' place='bottom'>
-              <span>
-                {helpIcon}
-              </span>
-            </ReactTooltip>
-          </>
-        )}
         <div className={`d-flex flex-${helperDirection} w-100`}>
           <FilterSelect ref={ref} id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
           <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'}><i>{helperText}</i></p>
@@ -107,21 +122,6 @@ export const FilterSelectCustomLabel = ({ name, label, items, value, onChange, h
     return (
       <>
         {label && <label htmlFor={name} className={`mr-2 mb-0 w-25${className}`}><small>{label}</small></label>}
-        {helpIcon && (
-          <>
-            <Icon
-              icon='help-circle-outline'
-              data-tip
-              data-for='dl-help'
-              style={{ fontSize: '15px', marginBottom: '8px' }}
-            />
-            <ReactTooltip id='dl-help' effect='solid' place='bottom'>
-              <span>
-                {helpIcon}
-              </span>
-            </ReactTooltip>
-          </>
-        )}
         <FilterSelect ref={ref} id={name} name={name} items={items} value={value} onChange={onChange} handleInputChange={handleInputChange} className={showRequired ? 'is-invalid' : ''} placeholder={placeholder} isDisabled={isDisabled} />
       </>
     );

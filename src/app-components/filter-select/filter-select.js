@@ -3,10 +3,13 @@ import React, { useEffect, useState, forwardRef, useImperativeHandle, useRef } f
 import ReactTooltip from 'react-tooltip';
 import isEqual from 'lodash.isequal';
 
-import Dropdown from './dropdown';
-import Icon from './icon';
-import usePrevious from '../customHooks/usePrevious';
+import Dropdown from '../dropdown';
+import Icon from '../icon';
+import usePrevious from '../../customHooks/usePrevious';
 import { classArray } from 'utils';
+
+import './filter-select.scss';
+import '../../app-pages/data-entry/dataentry.scss';
 
 const getDisplay = elem => {
   const { value, text } = elem;
@@ -42,6 +45,7 @@ const FilterSelect = ({
   hasHelperIcon = false,
   helperContent = null,
   helperIconId,
+  isLoading,
   ...customProps
 }, ref) => {
   const [filteredList, setFilteredList] = useState(items);
@@ -137,6 +141,7 @@ const FilterSelect = ({
                 </span>
               </div>
             )}
+            {isLoading && <div className='loader m-0 ml-2'></div>}
           </div>
         )}
       >
