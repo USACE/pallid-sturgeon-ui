@@ -158,7 +158,7 @@ const SitesFormModal = connect(
         <ModalHeader title={edit ? 'Update Site' : 'Create New Site'} />
         <section className='modal-body'>
           <div className='container-fluid'>
-            {edit && (
+            {!edit && (
               <>
                 <p>Please complete the following fields to create a new site.</p>
                 <p><b>Note:</b> Some dropdown options are dependent from other fields.</p>
