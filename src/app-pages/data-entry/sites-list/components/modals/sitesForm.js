@@ -133,11 +133,13 @@ const SitesFormModal = connect(
 
     useEffect(() => {
       clearSampleUnit();
-      if (sampleUnitType !== 'S') {
-        doDomainBendsFetch({ sampleUnitType: sampleUnitType, segment: segment });
-      } 
-      if (sampleUnitType === 'S') {
-        handleSelect('bend', 0);
+      if (segment && sampleUnitType) {
+        if (sampleUnitType !== 'S') {
+          doDomainBendsFetch({ sampleUnitType: sampleUnitType, segment: segment });
+        } 
+        if (sampleUnitType === 'S') {
+          handleSelect('bend', 0);
+        }
       }
     }, [segment, sampleUnitType]);
 

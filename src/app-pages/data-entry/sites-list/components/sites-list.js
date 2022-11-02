@@ -15,7 +15,7 @@ import { dropdownYearsToNow } from 'utils';
 import '../../dataentry.scss';
 
 const SitesList = connect(
-  'doDomainBendsFetch',
+  // 'doDomainBendsFetch',
   'doDomainSeasonsFetch',
   'doDomainSegmentsFetch',
   'doModalOpen',
@@ -25,7 +25,7 @@ const SitesList = connect(
   'selectSitesTotalResults',
   'selectUserRole',
   ({
-    doDomainBendsFetch,
+    // doDomainBendsFetch,
     doDomainSeasonsFetch,
     doDomainSegmentsFetch,
     doModalOpen,
@@ -37,7 +37,7 @@ const SitesList = connect(
   }) => {
     const { projects, seasons, bends, segments } = domains;
 
-    const [yearFilter, setYearFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState('2023');
     const [projectFilter, setProjectFilter] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
 
@@ -78,9 +78,9 @@ const SitesList = connect(
       }
     }, []);
 
-    useEffect(() => {
-      doDomainBendsFetch({ segment: segmentValue });
-    }, [segmentValue]);
+    // useEffect(() => {
+    //   doDomainBendsFetch({ segment: segmentValue });
+    // }, [segmentValue]);
 
     useEffect(() => {
       doDomainSeasonsFetch({ project: projectFilter });
@@ -95,6 +95,7 @@ const SitesList = connect(
               placeholderText='Select year...'
               onChange={value => setYearFilter(value)}
               value={yearFilter}
+              defaultOption='2023'
               options={dropdownYearsToNow(2011)}
             />
           </div>
