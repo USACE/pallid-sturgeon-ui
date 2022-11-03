@@ -51,7 +51,6 @@ export default {
     store.doSitesFetch();
   },
 
-  // @TODO: Potentially remove this
   doNewSiteLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_NEW_SITE_INIT_DATA' });
     store.doDomainBendRnFetch();

@@ -127,7 +127,7 @@ export default {
   doDomainBendsFetch: (params) => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_BENDS_START' });
 
-    const url = `/psapi/bends${queryFromObject(params)}`;
+    const url = `/psapi/sampleUnit${queryFromObject(params)}`;
 
     apiGet(url, (_err, body) => {
       dispatch({
@@ -152,10 +152,10 @@ export default {
     });
   },
 
-  doDomainFieldOfficesFetch: () => ({ dispatch, apiGet }) => {
+  doDomainFieldOfficesFetch: (params) => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_FIELD_OFFICES_START' });
 
-    const url = '/psapi/fieldOffices';
+    const url = `/psapi/fieldOffices${queryFromObject(params)}`;
 
     apiGet(url, (_err, body) => {
       dispatch({
