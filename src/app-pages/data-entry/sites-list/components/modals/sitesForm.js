@@ -5,7 +5,7 @@ import FilterSelect from 'app-components/filter-select/filter-select';
 import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
 import { Input, Row, SelectCustomLabel, TextArea } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { createDropdownOptions, createBendsDropdownOptions, createCustomCodeDropdownOptions } from 'app-pages/data-entry/helpers';
-import { fieldOfficeOptions, sampleUnitTypeProject1 } from '../_shared/helper';
+import { sampleUnitTypeProject1 } from '../_shared/helper';
 import { dropdownYearsToNow } from 'utils';
 
 
@@ -25,20 +25,22 @@ const reducer = (state, action) => {
 
 const SitesFormModal = connect(
   'doDomainBendsFetch',
+  'doDomainBendRnFetch',
+  'doDomainFieldOfficesFetch',
   'doDomainSeasonsFetch',
   'doDomainSegmentsFetch',
   'doPostNewSite',
-  'doNewSiteLoadData',
   'doUpdateSite',
   'selectDomains',
   'selectSitesData',
   'selectUserRole',
   ({
     doDomainBendsFetch,
+    doDomainBendRnFetch,
+    doDomainFieldOfficesFetch,
     doDomainSeasonsFetch,
     doDomainSegmentsFetch,
     doPostNewSite,
-    doNewSiteLoadData,
     doUpdateSite,
     domains,
     sitesData,
@@ -46,7 +48,7 @@ const SitesFormModal = connect(
     edit,
     id
   }) => {
-    const { projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
+    const { fieldOffices, projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
 
     const [office, setOffice] = useState(userRole ? userRole.officeCode : '');
@@ -128,26 +130,24 @@ const SitesFormModal = connect(
     }, [edit]);
 
     useEffect(() => {
-      doNewSiteLoadData();
-    }, [doNewSiteLoadData]);
+      doDomainFieldOfficesFetch();
+      doDomainBendRnFetch();
+    }, []);
 
     useEffect(() => {
       clearSampleUnit();
       if (segment && sampleUnitType) {
-        if (sampleUnitType !== 'S') {
-          doDomainBendsFetch({ sampleUnitType: sampleUnitType, segment: segment });
-        } 
-        if (sampleUnitType === 'S') {
-          handleSelect('bend', 0);
-        }
+        doDomainBendsFetch({ sampleUnitType: sampleUnitType, segment: segment });
       }
     }, [segment, sampleUnitType]);
 
     useEffect(() => {
       clearSegments();
       clearSampleUnit();
-      doDomainSegmentsFetch({ office: office });
-    }, [office]);
+      if (office && project) {
+        doDomainSegmentsFetch({ office: office, project: project });
+      }
+    }, [office, project]);
 
     useEffect(() => {
       doDomainSeasonsFetch({ project: project });
@@ -183,7 +183,7 @@ const SitesFormModal = connect(
                   defaultValue={office === 'ZZ' || office === '' ? '' : office}
                   value={state['fieldoffice']}
                   onChange={val => handleSelect('fieldoffice', val)}
-                  options={fieldOfficeOptions}
+                  options={createDropdownOptions(fieldOffices)}
                   isDisabled={userRole ? (userRole.role !== 'ADMINISTRATOR') : false}
                   isRequired
                 />
@@ -216,7 +216,7 @@ const SitesFormModal = connect(
                   helperIconId='segment'
                   helperContent={(
                     <>
-                      Must select <b>Field Office</b> to see Segment options. <br></br>
+                      Must select <b>Field Office</b> and <b>Project</b> to see Segment options. <br></br>
                       Two ways to select option:
                       <ol>
                         <li>Click on input box and select option from dropdown, or </li>
@@ -263,7 +263,6 @@ const SitesFormModal = connect(
                   helperContent={(
                     <>
                       Must select <b>Project</b> to see Sample Unit Type options. <br></br>
-                      If the option '<b>Segment</b>' is selected, then the Sample Unit field will disable and default to <b>0</b>.
                     </>
                   )}
                   isRequired
@@ -274,10 +273,9 @@ const SitesFormModal = connect(
                   ref={bendRef}
                   label='Sample Unit'
                   placeholder='Select sample unit...'
-                  value={(Number(state['bend']) || '')}
+                  value={state['bend']}
                   onChange={(_, __, value) => handleSelect('bend', value)}
                   items={createBendsDropdownOptions(bends)}
-                  isDisabled={sampleUnitType === 'S'}
                   hasHelperIcon
                   helperIconId='sampleUnit'
                   helperContent={(
@@ -292,7 +290,7 @@ const SitesFormModal = connect(
                     </>
                   )}
                   hasClearButton
-                  isRequired
+                  isRequired={bend !== 0}
                 />
               </div>
             </Row>

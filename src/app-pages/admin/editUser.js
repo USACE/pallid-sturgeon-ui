@@ -12,6 +12,7 @@ import RoleFilter from 'app-components/role-filter';
 import { NoRoleAccessMessage } from './helper';
 
 export default connect(
+  'doDomainFieldOfficesFetch',
   'doFetchUsers',
   'doFetchRoles',
   'doUpdateRoleOffice',
@@ -19,6 +20,7 @@ export default connect(
   'selectRoles',
   'selectDomains',
   ({
+    doDomainFieldOfficesFetch,
     doFetchUsers,
     doFetchRoles,
     doUpdateRoleOffice,
@@ -29,6 +31,7 @@ export default connect(
     const { projects, fieldOffices } = domains;
 
     useEffect(() => {
+      doDomainFieldOfficesFetch({ showAll: true });
       doFetchUsers();
       doFetchRoles();
     }, []);

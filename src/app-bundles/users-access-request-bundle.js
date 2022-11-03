@@ -61,7 +61,7 @@ const userAccessRequestBundle = {
           },
         });
         store.doDomainProjectsFetch();
-        store.doDomainFieldOfficesFetch();
+        store.doDomainFieldOfficesFetch({ showAll: true });
       }
     });
   },
