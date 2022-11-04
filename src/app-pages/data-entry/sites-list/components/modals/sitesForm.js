@@ -184,6 +184,7 @@ const SitesFormModal = connect(
                   value={state['fieldoffice']}
                   onChange={val => handleSelect('fieldoffice', val)}
                   options={createDropdownOptions(fieldOffices)}
+                  isLoading={fieldOffices && (fieldOffices.length === 0)}
                   isDisabled={userRole ? (userRole.role !== 'ADMINISTRATOR') : false}
                   isRequired
                 />

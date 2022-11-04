@@ -20,7 +20,7 @@ export const createBendsDropdownOptions = data => {
 
     return {
       value: sampleUnit,
-      text: `${sampleUnit} - ${description}`,
+      text: description,
     };
   }).filter(e => e);
 };
