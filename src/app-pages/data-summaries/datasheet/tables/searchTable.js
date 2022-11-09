@@ -20,8 +20,12 @@ const SearchTable = ({ doFetchAllDatasheet, rowData = [] }) => (
     />
     <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
       <AgGridReact rowData={rowData}>
+        <AgGridColumn field='year' sortable unSortIcon />
         <AgGridColumn field='seId' sortable unSortIcon />
         <AgGridColumn field='searchDate' sortable unSortIcon />
+        <AgGridColumn field='projectId' sortable unSortIcon />
+        <AgGridColumn field='segmentId' sortable unSortIcon />
+        <AgGridColumn field='season' sortable unSortIcon />
         <AgGridColumn field='recorder' sortable unSortIcon />
         <AgGridColumn field='searchTypeCode' sortable unSortIcon />
         <AgGridColumn field='startTime' sortable unSortIcon />
@@ -30,9 +34,6 @@ const SearchTable = ({ doFetchAllDatasheet, rowData = [] }) => (
         <AgGridColumn field='stopTime' sortable unSortIcon />
         <AgGridColumn field='stopLattitude' sortable unSortIcon />
         <AgGridColumn field='stopLongitude' sortable unSortIcon />
-        <AgGridColumn field='seFid' sortable unSortIcon />
-        <AgGridColumn field='dsId' sortable unSortIcon />
-        <AgGridColumn field='siteFid' sortable unSortIcon />
         <AgGridColumn field='temp' sortable unSortIcon />
         <AgGridColumn field='conductivity' sortable unSortIcon />
       </AgGridReact>
