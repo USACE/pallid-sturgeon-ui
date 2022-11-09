@@ -69,12 +69,12 @@ export default {
     const uriValues = Object.values(uris);
     const { tab, ...params } = store.selectDatasheetParams();
     const size = store.selectDatasheetPageSize();
-    const number = store.selectDatasheetPageNumber();
+    const page = store.selectDatasheetPageNumber();
 
     const query = queryFromObject({
       ...params,
       size,
-      number,
+      page,
     });
 
     const url = `/psapi${uriValues[tab]}${query}`;
