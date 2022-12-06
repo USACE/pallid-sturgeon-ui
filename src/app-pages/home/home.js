@@ -16,14 +16,13 @@ const Home = connect(
   }) => (
     <>
       <Hero />
-      {(!userRole && authRoles.length > 1) && (
+      {((!userRole && authRoles) && (authRoles.length > 1)) && (
         <Accounts accounts={authRoles} />
       )}
       {userRole && (<>
         {/* @TODO: Remove text */}
         <p className='user-text'>Logged in as: <b>{authData ? authData.name : ''}</b></p>
         <p className='role-text'>({ authRoles && userRole ? authRoles[0].role + ' - ' + userRole.officeCode + ' - Project ' + userRole.projectCode : ''})</p>
-        {/* <p className='role-text'>({ userRole ? userRole.officeCode : ''})</p> */}
         <HomeReports />
       </>)}
     </>

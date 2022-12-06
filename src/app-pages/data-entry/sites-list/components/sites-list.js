@@ -19,12 +19,14 @@ const SitesList = connect(
   'doSetSitesPagination',
   'selectDomains',
   'selectSitesTotalResults',
+  'selectUserRole',
   ({
     doModalOpen,
     doUpdateSiteParams,
     doSetSitesPagination,
     domains,
     sitesTotalResults,
+    userRole,
   }) => {
     const { projects, seasons, bends, segments } = domains;
 
@@ -59,6 +61,7 @@ const SitesList = connect(
         seasonCode: seasonFilter,
         segmentCode: segmentValue,
         projectCode: projectFilter,
+        id: userRole.id,
       };
 
       doUpdateSiteParams(params);

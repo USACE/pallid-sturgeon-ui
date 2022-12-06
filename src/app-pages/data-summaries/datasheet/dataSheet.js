@@ -26,6 +26,7 @@ export default connect(
   'doUpdateDatasheetParams',
   'selectDomains',
   'selectDatasheetData',
+  'selectUserRole',
   ({
     doDatasheetFetch,
     doDatasheetLoadData,
@@ -33,6 +34,7 @@ export default connect(
     doUpdateDatasheetParams,
     domains,
     datasheetData,
+    userRole,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
     const [yearFilter, setYearFilter] = useState('');
@@ -77,6 +79,7 @@ export default connect(
         fromDate: fromDateFilter,
         toDate: toDateFilter,
         approved: approvalFilter,
+        id: userRole.id,
       };
       doUpdateDatasheetParams(params);
     }, [yearFilter, monthFilter, projectFilter, seasonFilter, currentTab, approvalFilter, doUpdateDatasheetParams]);
