@@ -21,7 +21,7 @@ class Keycloak {
       const interval = (expiresIn - 60) * 1000;
       if (interval <= 0) {
         console.log(`Warning: Invalid Refresh Interval of ${interval} computed for token that expires in ${expiresIn}`);
-        return 900 * 1000; //use default of 15 minutes
+        return 3600 * 1000; //use default of 60 minutes
       }
       return interval;
     }

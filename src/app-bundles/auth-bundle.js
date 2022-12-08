@@ -35,7 +35,7 @@ export default {
       realm: keycloakRealm,
       client: keycloakClient,
       redirectUrl: redirectUrl,
-      refreshInterval: 30,
+      refreshInterval: 120,
       sessionEndWarning: 120,
       onAuthenticate: (token) => {
         store.doAuthUpdate(token);
