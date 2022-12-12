@@ -99,7 +99,7 @@ const NavBar = connect(
                   <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
                 </RoleFilter>
                 <RoleFilter
-                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN']}>
+                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
                   <NavItem href={administrationLinks}>Admin</NavItem>
                 </RoleFilter>
                 <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>

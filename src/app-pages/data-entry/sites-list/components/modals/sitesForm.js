@@ -29,30 +29,36 @@ const SitesFormModal = connect(
   'doDomainFieldOfficesFetch',
   'doDomainSeasonsFetch',
   'doDomainSegmentsFetch',
+  'doFetchUsers',
   'doPostNewSite',
   'doUpdateSite',
   'selectDomains',
   'selectSitesData',
   'selectUserRole',
+  'selectUsersData',
   ({
     doDomainBendsFetch,
     doDomainBendRnFetch,
     doDomainFieldOfficesFetch,
     doDomainSeasonsFetch,
     doDomainSegmentsFetch,
+    doFetchUsers,
     doPostNewSite,
     doUpdateSite,
     domains,
     sitesData,
     userRole,
+    usersData,
     edit,
     id
   }) => {
     const { fieldOffices, projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
 
-    const [office, setOffice] = useState(userRole ? userRole.officeCode : '');
-    const [project, setProject] = useState(userRole ? userRole.projectCode : '');
+    const user = usersData.find(user => userRole.userId === user.id);
+
+    const [office, setOffice] = useState(user ? user.officeCode : '');
+    const [project, setProject] = useState(user ? user.projectCode : '');
     const [sampleUnitType, setSampleUnitType] = useState('');
 
     const [segment, setSegment] = useState(0);
@@ -132,6 +138,7 @@ const SitesFormModal = connect(
     useEffect(() => {
       doDomainFieldOfficesFetch();
       doDomainBendRnFetch();
+      doFetchUsers();
     }, []);
 
     useEffect(() => {
@@ -185,7 +192,7 @@ const SitesFormModal = connect(
                   onChange={val => handleSelect('fieldoffice', val)}
                   options={createDropdownOptions(fieldOffices)}
                   isLoading={fieldOffices && (fieldOffices.length === 0)}
-                  isDisabled={userRole ? (userRole.role !== 'ADMINISTRATOR') : false}
+                  isDisabled={user ? (user.role !== 'ADMINISTRATOR') : false}
                   isRequired
                 />
               </div>
@@ -193,12 +200,12 @@ const SitesFormModal = connect(
                 <SelectCustomLabel
                   label='Project'
                   name='projectId'
-                  defaultValue={userRole ? userRole.projectCode : ''}
+                  defaultValue={user ? user.projectCode : ''}
                   onChange={val => handleSelect('projectId', val)}
                   value={Number(state['projectId'])}
                   options={createDropdownOptions(projects)}
                   isLoading={projects && (projects.length === 0)}
-                  isDisabled={userRole ? (userRole.role !== 'ADMINISTRATOR') : false}
+                  isDisabled={user ? (user.role !== 'ADMINISTRATOR') : false}
                   isRequired                
                 />
               </div>

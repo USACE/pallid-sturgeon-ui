@@ -13,6 +13,7 @@ import { NoRoleAccessMessage } from './helper';
 
 export default connect(
   'doDomainFieldOfficesFetch',
+  'doDomainProjectsFetch',
   'doFetchUsers',
   'doFetchRoles',
   'doUpdateRoleOffice',
@@ -21,6 +22,7 @@ export default connect(
   'selectDomains',
   ({
     doDomainFieldOfficesFetch,
+    doDomainProjectsFetch,
     doFetchUsers,
     doFetchRoles,
     doUpdateRoleOffice,
@@ -30,15 +32,18 @@ export default connect(
   }) => {
     const { projects, fieldOffices } = domains;
 
+    console.log(domains);
+
     useEffect(() => {
       doDomainFieldOfficesFetch({ showAll: true });
+      doDomainProjectsFetch();
       doFetchUsers();
       doFetchRoles();
     }, []);
 
     return (
       <RoleFilter
-        allowRoles={['ADMINISTRATOR']}
+        allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}
         alt={() => <NoRoleAccessMessage className='p-2' />}>
         <div className='container-fluid'>
           <div className='container-fluid'>
