@@ -7,8 +7,9 @@ import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import FieldOfficeEditor from 'common/gridCellEditors/fieldOfficeEditor';
 import RolesEditor from 'common/gridCellEditors/rolesEditor,';
 import ProjectEditor from 'common/gridCellEditors/projectEditor';
-import { rolesList, fieldOfficeList, projectCodeList } from './helper';
 import RoleFilter from 'app-components/role-filter';
+
+import { rolesList, fieldOfficeList, projectCodeList } from './helper';
 import { NoRoleAccessMessage } from './helper';
 
 export default connect(
@@ -32,8 +33,6 @@ export default connect(
   }) => {
     const { projects, fieldOffices } = domains;
 
-    console.log(domains);
-
     useEffect(() => {
       doDomainFieldOfficesFetch({ showAll: true });
       doDomainProjectsFetch();
@@ -43,7 +42,7 @@ export default connect(
 
     return (
       <RoleFilter
-        allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}
+        allowRoles={['ADMINISTRATOR']}
         alt={() => <NoRoleAccessMessage className='p-2' />}>
         <div className='container-fluid'>
           <div className='container-fluid'>

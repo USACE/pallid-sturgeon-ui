@@ -3,8 +3,9 @@ import { connect } from 'redux-bundler-react';
 
 import Icon from '../icon';
 import NavItem from './navItem';
-import { classArray } from 'utils';
 import RoleFilter from 'app-components/role-filter';
+
+import { classArray } from 'utils';
 
 import './navigation.scss';
 
@@ -99,7 +100,7 @@ const NavBar = connect(
                   <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
                 </RoleFilter>
                 <RoleFilter
-                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
+                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN']}>
                   <NavItem href={administrationLinks}>Admin</NavItem>
                 </RoleFilter>
                 <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
