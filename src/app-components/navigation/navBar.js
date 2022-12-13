@@ -3,8 +3,9 @@ import { connect } from 'redux-bundler-react';
 
 import Icon from '../icon';
 import NavItem from './navItem';
-import { classArray } from 'utils';
 import RoleFilter from 'app-components/role-filter';
+
+import { classArray } from 'utils';
 
 import './navigation.scss';
 

@@ -7,12 +7,14 @@ import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import FieldOfficeEditor from 'common/gridCellEditors/fieldOfficeEditor';
 import RolesEditor from 'common/gridCellEditors/rolesEditor,';
 import ProjectEditor from 'common/gridCellEditors/projectEditor';
-import { rolesList, fieldOfficeList, projectCodeList } from './helper';
 import RoleFilter from 'app-components/role-filter';
+
+import { rolesList, fieldOfficeList, projectCodeList } from './helper';
 import { NoRoleAccessMessage } from './helper';
 
 export default connect(
   'doDomainFieldOfficesFetch',
+  'doDomainProjectsFetch',
   'doFetchUsers',
   'doFetchRoles',
   'doUpdateRoleOffice',
@@ -21,6 +23,7 @@ export default connect(
   'selectDomains',
   ({
     doDomainFieldOfficesFetch,
+    doDomainProjectsFetch,
     doFetchUsers,
     doFetchRoles,
     doUpdateRoleOffice,
@@ -32,6 +35,7 @@ export default connect(
 
     useEffect(() => {
       doDomainFieldOfficesFetch({ showAll: true });
+      doDomainProjectsFetch();
       doFetchUsers();
       doFetchRoles();
     }, []);

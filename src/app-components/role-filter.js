@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 export const isUserAllowed = (userRole, allowRoles = []) => {
@@ -24,14 +24,23 @@ export const isUserAllowed = (userRole, allowRoles = []) => {
 };
 
 export default connect(
+  'doFetchUsers',
+  'selectUsersData',
   'selectUserRole',
   ({
+    doFetchUsers,
+    usersData,
     userRole,
     allowRoles = [],
     alt = null,
     children,
   }) => {
-    const showChildren = isUserAllowed(userRole, allowRoles);
+    const user = usersData.find(user => userRole.userId === user.id);
+    const showChildren = isUserAllowed(user, allowRoles);
+
+    useEffect(() => {
+      doFetchUsers();
+    }, []);
 
     if (showChildren) {
       return <>{children}</>;
