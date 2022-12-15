@@ -31,8 +31,6 @@ const usersBundle = {
         dispatch({ type: 'USERS_FETCH_ERROR', payload: err});
       } else {
         dispatch({ type: 'UPDATE_USERS', payload: body});
-        store.doDomainProjectsFetch();
-        store.doDomainFieldOfficesFetch();
       }
     });
 

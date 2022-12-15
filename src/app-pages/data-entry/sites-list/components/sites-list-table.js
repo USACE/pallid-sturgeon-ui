@@ -3,16 +3,21 @@ import { connect } from 'redux-bundler-react';
 import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
 import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 
-import DownloadAsCSV from 'app-components/downloadAsCSV';
+import Button from 'app-components/button';
+import Icon from 'app-components/icon';
 import SiteIdCellRenderer from 'common/gridCellRenderers/siteIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const SitesListTable = connect(
+  'doFetchExportsSites',
   'selectSitesData',
+  'selectSitesParams',
   ({
+    doFetchExportsSites,
     sitesData,
+    sitesParams,
   }) => {
     const cellStyle = (params) => ({
       backgroundColor: params.data.bkgColor,
@@ -20,8 +25,16 @@ const SitesListTable = connect(
 
     return (
       <div className='pt-3'>
-        <DownloadAsCSV filePrefix='site-table' content={sitesData} />
-        <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
+        <Button
+          size='small'
+          variant='info'
+          text='Export to CSV'
+          icon={<Icon icon='download' />}
+          onClick={() => doFetchExportsSites(sitesParams)}
+          isOutline
+          isDisabled={sitesData.length === 0}
+        />
+        <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             rowHeight={35}
             defaultColDef={{
@@ -32,18 +45,16 @@ const SitesListTable = connect(
               siteIdCellRenderer: SiteIdCellRenderer
             }}
           >
-            <AgGridColumn field='siteId' cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: true }} />
+            <AgGridColumn field='siteId' headerName='Site ID' cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: true }} />
             <AgGridColumn field='year' />
-            <AgGridColumn field='fieldoffice' />
-            <AgGridColumn field='projectId' />
-            <AgGridColumn field='segmentId' />
+            <AgGridColumn field='fieldoffice' headerName='Field Office' />
+            <AgGridColumn field='projectId' headerName='Project' />
+            <AgGridColumn field='segmentId' headerName='Segment' />
             <AgGridColumn field='season' />
-            <AgGridColumn field='bend' headerName='Sample Unit' cellStyle={cellStyle} cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: false }} />
             <AgGridColumn field='sampleUnitType' headerName='Sample Unit Type' />
+            <AgGridColumn field='bend' headerName='Sample Unit' cellStyle={cellStyle} cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: false }} />
             <AgGridColumn field='bendrn' headerName='Bend R/N' />
-            <AgGridColumn field='bendRiverMile' />
-            <AgGridColumn field='complete' />
-            <AgGridColumn field='approved' />
+            <AgGridColumn field='brmId' headerName='BRM ID' />
             <AgGridColumn field='editInitials' />
             <AgGridColumn field='last_edit_comment' />
             <AgGridColumn field='uploadedBy' />

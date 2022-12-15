@@ -2,18 +2,22 @@ import React, { useState, useRef, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
-import FilterSelect from 'app-components/filter-select';
+import FilterSelect from 'app-components/filter-select/filter-select';
 import Icon from 'app-components/icon';
 import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
 import SitesListTable from './sites-list-table';
+import SitesFormModal from './modals/sitesForm';
+
 import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 import { dropdownYearsToNow } from 'utils';
-import SitesFormModal from './modals/sitesForm';
 
 import '../../dataentry.scss';
 
 const SitesList = connect(
+  // 'doDomainBendsFetch',
+  'doDomainSeasonsFetch',
+  'doDomainSegmentsFetch',
   'doModalOpen',
   'doUpdateSiteParams',
   'doSetSitesPagination',
@@ -21,6 +25,9 @@ const SitesList = connect(
   'selectSitesTotalResults',
   'selectUserRole',
   ({
+    // doDomainBendsFetch,
+    doDomainSeasonsFetch,
+    doDomainSegmentsFetch,
     doModalOpen,
     doUpdateSiteParams,
     doSetSitesPagination,
@@ -30,7 +37,7 @@ const SitesList = connect(
   }) => {
     const { projects, seasons, bends, segments } = domains;
 
-    const [yearFilter, setYearFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState('2023');
     const [projectFilter, setProjectFilter] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
 
@@ -63,9 +70,22 @@ const SitesList = connect(
         projectCode: projectFilter,
         id: userRole.id,
       };
-
       doUpdateSiteParams(params);
     }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter]);
+
+    useEffect(() => {
+      if (userRole.officeCode) {
+        doDomainSegmentsFetch({ office: userRole.officeCode });
+      }
+    }, []);
+
+    // useEffect(() => {
+    //   doDomainBendsFetch({ segment: segmentValue });
+    // }, [segmentValue]);
+
+    useEffect(() => {
+      doDomainSeasonsFetch({ project: projectFilter });
+    }, [projectFilter]);
 
     return (
       <>
@@ -76,6 +96,7 @@ const SitesList = connect(
               placeholderText='Select year...'
               onChange={value => setYearFilter(value)}
               value={yearFilter}
+              defaultOption='2023'
               options={dropdownYearsToNow(2011)}
             />
           </div>
@@ -143,12 +164,12 @@ const SitesList = connect(
             <div className='form-group'>
               <FilterSelect
                 ref={bendRef}
-                isDisabled={!yearFilter}
-                label='Select Bend'
+                isDisabled
+                label='Select Sample Unit'
                 handleInputChange={value => setBendFilter(value)}
                 onChange={(_, __, val) => setBendValue(val)}
                 value={bendFilter}
-                placeholder='Bend...'
+                placeholder='Sample Unit...'
                 items={createBendsDropdownOptions(bends)}
               />
             </div>

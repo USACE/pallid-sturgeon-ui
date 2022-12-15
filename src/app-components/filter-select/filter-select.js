@@ -1,11 +1,15 @@
 
 import React, { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
+import ReactTooltip from 'react-tooltip';
 import isEqual from 'lodash.isequal';
 
-import Dropdown from './dropdown';
-import Icon from './icon';
-import usePrevious from '../customHooks/usePrevious';
+import Dropdown from '../dropdown';
+import Icon from '../icon';
+import usePrevious from '../../customHooks/usePrevious';
 import { classArray } from 'utils';
+
+import './filter-select.scss';
+import '../../app-pages/data-entry/dataentry.scss';
 
 const getDisplay = elem => {
   const { value, text } = elem;
@@ -32,11 +36,16 @@ const FilterSelect = ({
   label = '',
   hasClearButton = false,
   isDisabled = false,
+  isRequired = false,
   onChange = null,
   handleInputChange = null,
   value = '',
   className,
   labelClassName,
+  hasHelperIcon = false,
+  helperContent = null,
+  helperIconId,
+  isLoading,
   ...customProps
 }, ref) => {
   const [filteredList, setFilteredList] = useState(items);
@@ -44,6 +53,7 @@ const FilterSelect = ({
   const previousVal = usePrevious(inputVal);
   const previousItems = usePrevious(items);
   const inputRef = useRef();
+  const showRequired = isRequired && !value;
 
   const dropdownClasses = classArray([
     label && 'mt-1',
@@ -92,6 +102,21 @@ const FilterSelect = ({
       {label && (
         <label className={labelClassName}><small>{label}</small></label>
       )}
+      {hasHelperIcon && (
+        <>
+          <Icon
+            icon='help-circle-outline'
+            data-tip
+            data-for={helperIconId}
+            style={{ fontSize: '15px', marginBottom: '8px' }}
+          />
+          <ReactTooltip id={helperIconId} effect='solid' place='bottom'>
+            <span>
+              {helperContent}
+            </span>
+          </ReactTooltip>
+        </>
+      )}
       <Dropdown.Menu
         dropdownClass={dropdownClasses}
         customContent={(
@@ -99,10 +124,11 @@ const FilterSelect = ({
             <input
               disabled={isDisabled}
               ref={inputRef}
-              className={`form-control ${dropdownClasses}`}
+              className={showRequired ? 'form-control is-invalid' : 'form-control'}
               placeholder={placeholder}
               onChange={e => handleChange(e.target.value)}
               value={!!handleInputChange ? value : inputVal}
+              required={isRequired}
             />
             {hasClearButton && (
               <div className='input-group-append'>
@@ -115,6 +141,7 @@ const FilterSelect = ({
                 </span>
               </div>
             )}
+            {isLoading && <div className='loader m-0 ml-2'></div>}
           </div>
         )}
       >

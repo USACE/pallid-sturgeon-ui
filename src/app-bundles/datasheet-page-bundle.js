@@ -1,3 +1,5 @@
+import { toast } from 'react-toastify';
+import { tSuccess } from 'common/toast/toastHelper';
 import { queryFromObject } from 'utils';
 
 export default {
@@ -67,12 +69,12 @@ export default {
     const uriValues = Object.values(uris);
     const { tab, ...params } = store.selectDatasheetParams();
     const size = store.selectDatasheetPageSize();
-    const number = store.selectDatasheetPageNumber();
+    const page = store.selectDatasheetPageNumber();
 
     const query = queryFromObject({
       ...params,
       size,
-      number,
+      page,
     });
 
     const url = `/psapi${uriValues[tab]}${query}`;
@@ -94,7 +96,8 @@ export default {
   },
 
   doFetchAllDatasheet: (filePrefix) => ({ dispatch, store, apiFetch }) => {
-    dispatch({ type: 'DATASHEET_ALL_MISSOURI_FETCH_START' });
+    dispatch({ type: 'DATASHEET_ALL_FETCH_START' });
+    const toastId = toast.loading('Generating .xlsx file. One moment...');
 
     const uris = {
       missouriRiverData: '/missouriFullDataSummary',
@@ -102,7 +105,7 @@ export default {
       suppData: '/suppFullDataSummary',
       telemetryData: '/telemetryFullDataSummary',
       procedureData: '/procedureFullDataSummary',
-      searchData: '/searchFulLDataSummary',
+      searchData: '/searchFullDataSummary',
     };
 
     const uriKeys = Object.keys(uris);
@@ -125,6 +128,7 @@ export default {
         document.body.appendChild(a);
         a.click();
         a.remove();
+        tSuccess(toastId, 'File Generated!');
       });
   },
 

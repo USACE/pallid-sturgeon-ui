@@ -37,7 +37,7 @@ export default connect(
     userRole,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const [yearFilter, setYearFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState('2022');
     const [monthFilter, setMonthFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
     const [approvalFilter, setApprovalFilter] = useState('');
@@ -226,25 +226,25 @@ export default connect(
             <TabContainer
               tabs={[
                 {
-                  title: 'Missouri River',
+                  title: `Missouri River (${missouriRiverData.totalCount ? missouriRiverData.totalCount : '0'})`,
                   content: <MissouriRiverTable rowData={missouriRiverData.items} />,
                 }, {
-                  title: 'Fish',
+                  title: `Fish (${fishData.totalCount ? fishData.totalCount : '0'})`,
                   content: <FishTable rowData={fishData.items} />,
                 }, {
-                  title: 'Supplemental',
+                  title: `Supplemental (${suppData.totalCount ? suppData.totalCount : '0'})`,
                   content: <SupplementalTable rowData={suppData.items} />,
                 },
                 { 
-                  title: 'Telemetry', 
+                  title: `Telemetry (${telemetryData.totalCount ? telemetryData.totalCount : '0'})`, 
                   content: <TelemetryTable rowData={telemetryData.items} />,
                 },
                 { 
-                  title: 'Procedure', 
+                  title: `Procedure (${procedureData.totalCount ? procedureData.totalCount : '0'})`, 
                   content: <ProcedureTable rowData={procedureData.items} />,
                 },
                 { 
-                  title: 'Search Effort', 
+                  title: `Search Effort (${searchData.totalCount ? searchData.totalCount : '0'})`, 
                   content: <SearchTable rowData={searchData.items} />
                 },
               ]}

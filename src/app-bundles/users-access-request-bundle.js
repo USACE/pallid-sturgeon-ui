@@ -61,7 +61,7 @@ const userAccessRequestBundle = {
           },
         });
         store.doDomainProjectsFetch();
-        store.doDomainFieldOfficesFetch();
+        store.doDomainFieldOfficesFetch({ showAll: true });
       }
     });
   },
@@ -97,6 +97,7 @@ const userAccessRequestBundle = {
       if (!err) {
         dispatch({ type: 'USER_ROLE_OFFICE_UPDATE_FINISHED' });
         store.doFetchUsers();
+        store.doUpdateUrl('/');
       } else {
         dispatch({ type: 'USER_ROLE_OFFICE_UPDATE_ERROR', payload: err });
       }

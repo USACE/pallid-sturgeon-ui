@@ -14,13 +14,13 @@ export const createBendsDropdownOptions = data => {
   if (!data) return [];
 
   return data.map(d => {
-    const { description, id, lowerRiverMile, upperRiverMile } = d;
+    const { description, sampleUnit } = d;
 
     if (!description) return null;
 
     return {
-      value: id,
-      text: `${description} - ${lowerRiverMile}/${upperRiverMile}`,
+      value: sampleUnit,
+      text: description,
     };
   }).filter(e => e);
 };
@@ -90,4 +90,16 @@ export const createAccountsOptions = data => {
     text: 'Field Office: ' + opt.officeCode + ' - Project: ' + opt.projectCode,
     value: opt.id,
   }));
+};
+
+export const createCustomCodeDropdownOptions = data => {
+  if (!data) return [];
+
+  return data.map(d => {
+    const { code, description } = d;
+    return {
+      value: code,
+      text: `${code} - ${description}`,
+    };
+  });
 };
