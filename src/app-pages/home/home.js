@@ -6,11 +6,9 @@ import Accounts from './components/accounts/accounts';
 import HomeReports from './components/homeReports/homeReports';
 
 const Home = connect(
-  'selectAuthData',
   'selectAuthRoles',
   'selectUserRole',
   ({
-    authData,
     authRoles,
     userRole,
   }) => (
@@ -19,12 +17,7 @@ const Home = connect(
       {((!userRole && authRoles) && (authRoles.length > 1)) && (
         <Accounts accounts={authRoles} />
       )}
-      {userRole && (<>
-        {/* @TODO: Remove text */}
-        <p className='user-text'>Logged in as: <b>{authData ? authData.name : ''}</b></p>
-        <p className='role-text'>({ authRoles && userRole ? authRoles[0].role + ' - ' + userRole.officeCode + ' - Project ' + userRole.projectCode : ''})</p>
-        <HomeReports />
-      </>)}
+      {userRole && (<HomeReports />)}
     </>
   )
 );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
+import Dropdown from 'app-components/dropdown';
 import Icon from '../icon';
 import NavItem from './navItem';
 import RoleFilter from 'app-components/role-filter';
@@ -34,17 +35,32 @@ const utilityLinks = [
   '/error-log',
 ];
 
+const projectMap = {
+  1: 'PSPA',
+  2: 'HAMP',
+};
+
 const NavBar = connect(
   'doAuthenticate',
   'selectAuthLoggedIn',
+  'selectAuthData',
+  'selectAuthRoles',
+  'selectUserRole',
   'selectPathname',
+  'selectUsersData',
   ({
     doAuthenticate,
     authLoggedIn,
+    authData,
+    authRoles,
+    userRole,
     pathname,
+    usersData,
   }) => {
     const [show, setShow] = useState(false);
     const isHome = pathname === '/';
+    const user = userRole ? usersData.find(user => userRole.id === user.id) : {};
+
     const navClasses = classArray([
       'navbar',
       'navbar-expand-lg',
@@ -103,7 +119,23 @@ const NavBar = connect(
                   allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN']}>
                   <NavItem href={administrationLinks}>Admin</NavItem>
                 </RoleFilter>
-                <NavItem href={['/logout']} icon={<Icon icon='logout' />} className='vl'>Logout</NavItem>
+                <li className='nav-item vl'>
+                  <Dropdown.Menu
+                    withToggleArrow={false}
+                    menuClass='dropdown-menu-left'
+                    buttonClass='btn-small p-0 nav-dropdown-button'
+                    buttonContent={(
+                      <span className='nav-link user'>
+                        {authData && (authData.name + ' (' + authRoles[0].role + ')')}<br></br>
+                        {userRole && (user.officeCode + ' - Project ' + user.projectCode + ' - ' + projectMap[userRole.projectCode])}
+                        <>&nbsp;</>
+                        <Icon icon='menu-down' />
+                      </span>
+                    )}
+                  >
+                    <Dropdown.Item href='/logout'><Icon icon='logout' /> Logout</Dropdown.Item>
+                  </Dropdown.Menu>
+                </li>
               </RoleFilter>
             ) : (
               <NavItem handler={() => doAuthenticate()}>Login</NavItem>
