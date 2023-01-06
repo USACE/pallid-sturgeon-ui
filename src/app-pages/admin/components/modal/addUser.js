@@ -1,9 +1,9 @@
-import React, { useEffect, useReducer, useState, useRef } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
 import { Row, SelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { createDropdownOptions, createFieldOfficeIdDropdownOptions } from 'app-pages/data-entry/helpers';
+import { createDropdownOptions, createFieldOfficeIdDropdownOptions, createUsersOptions } from 'app-pages/data-entry/helpers';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -22,13 +22,21 @@ const reducer = (state, action) => {
 const AddUserFormModal = connect(
   'doDomainFieldOfficesFetch',
   'doDomainProjectsFetch',
+  'doFetchUsersList',
+  'doFetchUsers',
+  'doRoleOfficeUpdate',
   'selectDomainsFieldOffices',
   'selectDomainsProjects',
+  'selectUsersList',
   ({
     doDomainFieldOfficesFetch,
     doDomainProjectsFetch,
+    doFetchUsersList,
+    doFetchUsers,
+    doRoleOfficeUpdate,
     domainsFieldOffices,
     domainsProjects,
+    usersList,
   }) => {
     const [state, dispatch] = useReducer(reducer, {});
 
@@ -40,13 +48,24 @@ const AddUserFormModal = connect(
       });
     };
 
+    const doSave = () => {
+      // Isolate user to get user's role
+      const user = usersList.find(u => parseInt(state['userId']) === parseInt(u.userId));
+
+      doRoleOfficeUpdate({
+        userId: parseInt(state['userId']),
+        roleId: parseInt(user.roleId),
+        officeId: parseInt(state['officeId']),
+        projectCode: state['projectCode'],
+      }, doFetchUsers());
+    };
+
     useEffect(() => {
       doDomainFieldOfficesFetch();
       doDomainProjectsFetch();
+      doFetchUsersList();
     }, []);
-
-    console.log(state);
-
+  
     return (
       <ModalContent size='lg'>
         <ModalHeader title='Add Account to Existing User' />
@@ -57,6 +76,9 @@ const AddUserFormModal = connect(
               <SelectCustomLabel
                 name='userId'
                 label='Select User'
+                value={state['userId']}
+                options={createUsersOptions(usersList)}
+                onChange={val => handleSelect('userId', val)}
                 isRequired
               />
             </div>
@@ -64,19 +86,21 @@ const AddUserFormModal = connect(
           <Row>
             <div className='col-6'>
               <SelectCustomLabel
-                name='fieldoffice'
+                name='officeId'
                 label='Field Office'
+                value={state['officeId']}
                 options={createFieldOfficeIdDropdownOptions(domainsFieldOffices)}
-                onChange={val => handleSelect('fieldoffice', val)}
+                onChange={val => handleSelect('officeId', val)}
                 isRequired
               />
             </div>
             <div className='col-6'>
               <SelectCustomLabel
-                name='projectId'
+                name='projectCode'
                 label='Project'
+                value={state['projectCode']}
                 options={createDropdownOptions(domainsProjects)}
-                onChange={val => handleSelect('projectId', val)}
+                onChange={val => handleSelect('projectCode', val)}
                 isRequired
               />
             </div>
@@ -84,7 +108,8 @@ const AddUserFormModal = connect(
         </section>
         <ModalFooter
           showCancelButton
-          saveIsDisabled={true}
+          // saveIsDisabled={true}
+          onSave={doSave}
         />
       </ModalContent>
     );

@@ -62,7 +62,6 @@ export default connect(
                   text='Add Account to Existing User'
                   icon={<Icon icon='account-plus' />}
                   handleClick={() => doModalOpen(AddUserFormModal)}
-                  isDisabled={true}
                 />
                 <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
                   <AgGridReact

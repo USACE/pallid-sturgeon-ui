@@ -1,3 +1,8 @@
+export const projectMap = {
+  1: 'PSPA',
+  2: 'HAMP',
+};
+
 export const createDropdownOptions = data => {
   if (!data) return [];
 
@@ -77,7 +82,7 @@ export const createStructureFlowOptions = data => {
 export const createStructureModOptions = data => {
   if (!data) return [];
 
-  return data.map((opt, index) => ({
+  return data.map(opt => ({
     text: opt.description,
     value: opt.code,
   }));
@@ -86,9 +91,18 @@ export const createStructureModOptions = data => {
 export const createAccountsOptions = data => {
   if (!data) return [];
 
-  return data.map((opt, index) => ({
-    text: 'Field Office: ' + opt.officeCode + ' - Project: ' + opt.projectCode,
+  return data.map(opt => ({
+    text: 'Field Office: ' + opt.officeCode + ' - Project: ' + opt.projectCode + ' - ' + projectMap[opt.projectCode],
     value: opt.id,
+  }));
+};
+
+export const createUsersOptions = data => {
+  if (!data) return [];
+
+  return data.map(opt => ({
+    text: opt.firstName + ' ' + opt.lastName + ' (' + opt.userName + ')',
+    value: opt.userId,
   }));
 };
 

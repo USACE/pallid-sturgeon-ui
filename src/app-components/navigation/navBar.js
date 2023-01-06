@@ -7,6 +7,7 @@ import NavItem from './navItem';
 import RoleFilter from 'app-components/role-filter';
 
 import { classArray } from 'utils';
+import { projectMap } from 'app-pages/data-entry/helpers';
 
 import './navigation.scss';
 
@@ -34,11 +35,6 @@ const dataEntryLinks = [
 const utilityLinks = [
   '/error-log',
 ];
-
-const projectMap = {
-  1: 'PSPA',
-  2: 'HAMP',
-};
 
 const NavBar = connect(
   'doAuthenticate',
@@ -126,7 +122,8 @@ const NavBar = connect(
                     buttonClass='btn-small p-0 nav-dropdown-button'
                     buttonContent={(
                       <span className='nav-link user'>
-                        {authData && (authData.name + ' (' + authRoles[0].role + ')')}<br></br>
+                        {/* @TODO: If backend is disconeected, write message */}
+                        {(authData && authRoles) && (authData.name + ' (' + authRoles[0].role + ')')}<br></br>
                         {userRole && (user.officeCode + ' - Project ' + user.projectCode + ' - ' + projectMap[userRole.projectCode])}
                         <>&nbsp;</>
                         <Icon icon='menu-down' />
