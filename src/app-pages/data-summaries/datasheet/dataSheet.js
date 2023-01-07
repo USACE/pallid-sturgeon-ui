@@ -26,7 +26,6 @@ export default connect(
   'doUpdateDatasheetParams',
   'selectDomains',
   'selectDatasheetData',
-  'selectUserRole',
   ({
     doDatasheetFetch,
     doDatasheetLoadData,
@@ -34,7 +33,6 @@ export default connect(
     doUpdateDatasheetParams,
     domains,
     datasheetData,
-    userRole,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
     const [yearFilter, setYearFilter] = useState('2022');
@@ -79,7 +77,6 @@ export default connect(
         fromDate: fromDateFilter,
         toDate: toDateFilter,
         approved: approvalFilter,
-        id: userRole.id,
       };
       doUpdateDatasheetParams(params);
     }, [yearFilter, monthFilter, projectFilter, seasonFilter, currentTab, approvalFilter, doUpdateDatasheetParams]);
@@ -226,25 +223,25 @@ export default connect(
             <TabContainer
               tabs={[
                 {
-                  title: 'Missouri River',
+                  title: `Missouri River (${missouriRiverData.totalCount ? missouriRiverData.totalCount : '0'})`,
                   content: <MissouriRiverTable rowData={missouriRiverData.items} />,
                 }, {
-                  title: 'Fish',
+                  title: `Fish (${fishData.totalCount ? fishData.totalCount : '0'})`,
                   content: <FishTable rowData={fishData.items} />,
                 }, {
-                  title: 'Supplemental',
+                  title: `Supplemental (${suppData.totalCount ? suppData.totalCount : '0'})`,
                   content: <SupplementalTable rowData={suppData.items} />,
                 },
                 { 
-                  title: 'Telemetry', 
+                  title: `Telemetry (${telemetryData.totalCount ? telemetryData.totalCount : '0'})`, 
                   content: <TelemetryTable rowData={telemetryData.items} />,
                 },
                 { 
-                  title: 'Procedure', 
+                  title: `Procedure (${procedureData.totalCount ? procedureData.totalCount : '0'})`, 
                   content: <ProcedureTable rowData={procedureData.items} />,
                 },
                 { 
-                  title: 'Search Effort', 
+                  title: `Search Effort (${searchData.totalCount ? searchData.totalCount : '0'})`, 
                   content: <SearchTable rowData={searchData.items} />
                 },
               ]}
