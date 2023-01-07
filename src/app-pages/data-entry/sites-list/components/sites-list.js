@@ -68,7 +68,6 @@ const SitesList = connect(
         seasonCode: seasonFilter,
         segmentCode: segmentValue,
         projectCode: projectFilter,
-        id: userRole.id,
       };
       doUpdateSiteParams(params);
     }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter]);

@@ -4,7 +4,6 @@ const usersBundle = {
   getReducer: () => {
     const initialData = {
       data: [],
-      users: [],
     };
 
     return (state = initialData, { type, payload }) => {
@@ -14,11 +13,6 @@ const usersBundle = {
             ...state,
             data: payload,
           };
-        case 'UPDATE_USERS_LIST':
-          return {
-            ...state,
-            users: payload,
-          };
         default:
           return state;
       }
@@ -27,10 +21,8 @@ const usersBundle = {
 
   selectUsers: state =>  state.userBundles,
   selectUsersData: state => state.userBundles.data,
-  selectUsersList: state => state.userBundles.users,
 
-  // Fetch All User Accounts
-  doFetchUsers: () => ({ dispatch, apiGet }) => {
+  doFetchUsers: () => ({ dispatch, apiGet, store }) => {
     dispatch({ type: 'USERS_FETCH_START'});
     const uri = '/psapi/users';
 
@@ -43,22 +35,6 @@ const usersBundle = {
     });
 
     dispatch({ type: 'USERS_FETCH_FINISHED'});
-  },
-
-  // Fetch All Unique Users
-  doFetchUsersList: () => ({ dispatch, apiGet }) => {
-    dispatch({ type: 'USERS_LIST_FETCH_START'});
-    const uri = '/psapi/userList';
-
-    apiGet(uri, (err, body) => {
-      if (err) {
-        dispatch({ type: 'USERS_LIST_FETCH_ERROR', payload: err});
-      } else {
-        dispatch({ type: 'UPDATE_USERS_LIST', payload: body});
-      }
-    });
-
-    dispatch({ type: 'USERS_LIST_FETCH_FINISHED'});
   },
 };
 

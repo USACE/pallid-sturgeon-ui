@@ -55,7 +55,7 @@ const SitesFormModal = connect(
     const { fieldOffices, projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
     const [state, dispatch] = useReducer(reducer, {});
 
-    const user = usersData.find(user => userRole.id === user.id);
+    const user = usersData.find(user => userRole.userId === user.id);
 
     const [office, setOffice] = useState(user ? user.officeCode : '');
     const [project, setProject] = useState(user ? user.projectCode : '');

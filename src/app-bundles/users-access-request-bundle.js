@@ -91,7 +91,7 @@ const userAccessRequestBundle = {
     const { id, roleId, officeId, projectCode } = userRoleOfficeData;
 
     const url = '/psapi/userRoleOffice';
-    const payload = { id: parseInt(id), roleId: parseInt(roleId), officeId: parseInt(officeId), projectCode: projectCode };
+    const payload = { userId: parseInt(id), roleId: parseInt(roleId), officeId: parseInt(officeId), projectCode: projectCode };
 
     apiPut(url, payload, (err, _body) => {
       if (!err) {
