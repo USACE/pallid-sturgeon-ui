@@ -2,9 +2,12 @@ import React, { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
+import AddUserFormModal from './components/modal/addUser';
+import Button from 'app-components/button';
 import Card from 'app-components/card';
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import FieldOfficeEditor from 'common/gridCellEditors/fieldOfficeEditor';
+import Icon from 'app-components/icon';
 import RolesEditor from 'common/gridCellEditors/rolesEditor,';
 import ProjectEditor from 'common/gridCellEditors/projectEditor';
 import RoleFilter from 'app-components/role-filter';
@@ -17,6 +20,7 @@ export default connect(
   'doDomainProjectsFetch',
   'doFetchUsers',
   'doFetchRoles',
+  'doModalOpen',
   'doUpdateRoleOffice',
   'selectUsersData',
   'selectRoles',
@@ -26,6 +30,7 @@ export default connect(
     doDomainProjectsFetch,
     doFetchUsers,
     doFetchRoles,
+    doModalOpen,
     doUpdateRoleOffice,
     usersData,
     roles,
@@ -50,6 +55,14 @@ export default connect(
             <Card className='mt-3'>
               <Card.Header text='User List' />
               <Card.Body>
+                <Button
+                  isOutline
+                  size='small'
+                  variant='info'
+                  text='Add Account to Existing User'
+                  icon={<Icon icon='account-plus' />}
+                  handleClick={() => doModalOpen(AddUserFormModal)}
+                />
                 <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
                   <AgGridReact
                     suppressClickEdit
