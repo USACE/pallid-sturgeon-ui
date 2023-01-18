@@ -52,6 +52,7 @@ const FishDsTable = connect(
   }) => {
     const gridRef = useRef();
     const { siteId } = sitesData[0];
+    const lastRow = dataEntryFishData.items[dataEntryFishData.totalCount - 1];
     const initialState = {
       mrId: dataEntryLastParams.mrId
     };
@@ -60,12 +61,14 @@ const FishDsTable = connect(
       gridRef.current.api.applyTransaction({ add: [{}] });
     }, []);
 
-    const copyLastRow = useCallback(() => {
-      const lastRow = dataEntryFishData.items[dataEntryFishData.totalCount - 1];
-      delete lastRow['fid'];
-      delete lastRow['uploadedBy'];
-      gridRef.current.api.applyTransaction({ add: [lastRow] });
-    }, []);
+    const copyLastRow = () => {
+      const row = {...lastRow};
+      if (row) {
+        delete row['fid'];
+        delete row['uploadedBy'];
+        gridRef.current.api.applyTransaction({ add: [row] });
+      }
+    };
 
     useEffect(() => {
       doDomainsFtPrefixesFetch();
