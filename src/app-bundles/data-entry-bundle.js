@@ -150,6 +150,8 @@ export default {
     });
   },
 
+  // DATA ENTRY FETCHES
+
   doFetchMoRiverDataEntry: (params, callback = null) => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = toast.loading('Finding datasheet...');
@@ -333,6 +335,8 @@ export default {
     });
   },
 
+  // DATA ENTRY INSERTS
+
   doSaveMoRiverDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
     dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
@@ -441,6 +445,8 @@ export default {
     });
   },
 
+  // DATA ENTRY UPDATES
+
   doUpdateMoRiverDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
     dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
@@ -545,6 +551,26 @@ export default {
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
+      }
+    });
+  },
+
+  // DATA ENTRY DELETES
+
+  doDeleteFishDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
+    dispatch({ type: 'FISH_DATA_ENTRY_DELETE_START' });
+    const toastId = toast.loading('Saving fish datasheet...');
+
+    const url = `/psapi/fishDataEntry/${id}`;
+
+    apiDelete(url, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, 'Datasheet successfully deleted!');
+        dispatch({ type: 'FISH_DATA_ENTRY_DELETE_FINISHED' });
+        store.doFetchFishDataEntry(store.selectDataEntryLastParams(), store.doUpdateUrl('/sites-list/datasheet/fish'));
+      } else {
+        dispatch({ type: 'FISH_DATA_ENTRY_DELETE_ERROR', payload: err });
+        tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
       }
     });
   },

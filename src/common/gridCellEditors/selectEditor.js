@@ -1,9 +1,11 @@
 import React, { useState, forwardRef, useImperativeHandle} from 'react';
 
-import Select from 'app-components/select';
+import { SelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
-const SpeciesEditor = forwardRef(({
+const SelectEditor = forwardRef(({
   value,
+  options,
+  isRequired
 }, ref) => {
   const [selectedValue, setSelectedValue] = useState(value);
 
@@ -13,21 +15,15 @@ const SpeciesEditor = forwardRef(({
   }));
 
   return (
-    <Select
-      title='Edit Species'
+    <SelectCustomLabel
+      title='Select option...'
       value={selectedValue}
       onChange={v => setSelectedValue(v)}
-      defaultOption={value}
-      options={[
-        { value: 'USG' },
-        { value: 'SNSG' },
-        { value: 'BLCF' },
-        { value: 'CNCF' },
-        { value: 'FHCF' },
-        { value: 'FWDM' },
-      ]}
+      defaultValue={value}
+      options={options}
+      isRequired={isRequired}
     />
   );
 });
 
-export default SpeciesEditor;
+export default SelectEditor;

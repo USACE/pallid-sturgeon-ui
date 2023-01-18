@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
+import ConfirmDelete from 'common/modals/confirmDelete';
 
 const EditCellRenderer = (props) => {
-  const { api, columnApi, rowIndex } = props;
-
+  const { api, columnApi, rowIndex, data, type, doModalOpen } = props;
   const [isEditing, setIsEditing] = useState(false);
 
   const saveChangesToRow = () => {
@@ -17,6 +17,25 @@ const EditCellRenderer = (props) => {
   const cancelRowEdits = () => {
     api.stopEditing(true);
     setIsEditing(false);
+  };
+
+  const getType = () => {
+    switch (type) {
+      case 'missouriRiver':
+        return data.mrId;
+      case 'fish':
+        return data.fid;
+      case 'supplemental':
+        return data.sId;
+      case 'searchEffort':
+        return data.seId;
+      case 'telemetry':
+        return data.tId;
+      case 'procedure':
+        return data.pId;
+      default:
+        return <>Unknown data type.</>;
+    }
   };
 
   useEffect(() => {
@@ -47,14 +66,25 @@ const EditCellRenderer = (props) => {
           />
         </div>
       ) : (
-        <Button
-          isOutline
-          size='small'
-          variant='info'
-          title='Edit Site'
-          icon={<Icon icon='pencil' />}
-          handleClick={() => setIsEditing(true)}
-        />
+        <div className='btn-group'>
+          <Button
+            isOutline
+            size='small'
+            variant='info'
+            title='Edit'
+            icon={<Icon icon='pencil' />}
+            handleClick={() => setIsEditing(true)}
+          />
+          <Button
+            isOutline
+            size='small'
+            variant='danger'
+            className='ml-1'
+            title='Delete'
+            icon={<Icon icon='trash-can-outline' />}
+            handleClick={() => doModalOpen(ConfirmDelete, { value: getType(), data: data, type: type })}
+          />
+        </div> 
       )}
     </>
   );

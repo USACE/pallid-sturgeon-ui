@@ -23,6 +23,10 @@ const MissouriDsTable = connect(
       backgroundColor: params.data.bkgColor,
     });
 
+    const suppCellStyle = (params) => ({
+      backgroundColor: params.data.suppBkgColor,
+    });
+
     return (
       <>
         <Button
@@ -55,13 +59,18 @@ const MissouriDsTable = connect(
               mrIdCellRenderer: MrIdCellRenderer
             }}
           >
+            <AgGridColumn field='fishCount' headerName='Fish Datasheet' cellStyle={fishCellStyle} cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'mrId', uri: '/sites-list/datasheet/fish'}} sortable unSortIcon />
+            <AgGridColumn field='suppCount' headerName='Supplemental Datasheet' cellStyle={suppCellStyle} width={200} sortable unSortIcon />
+            <AgGridColumn field='procCount' headerName='Procedure Datasheet' width={200} sortable unSortIcon />
             <AgGridColumn field='mrId' headerName='MR ID' cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit'}} sortable unSortIcon />
-            <AgGridColumn field='mrFid' headerName='MR FID' sortable unSortIcon />
-            <AgGridColumn field='fishCount' headerName='Fish Entries #' cellStyle={fishCellStyle} cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'mrId', uri: '/sites-list/datasheet/fish'}} sortable unSortIcon />
-            <AgGridColumn field='subsample' />
-            <AgGridColumn field='subsamplepass' />
-            <AgGridColumn field='conductivity' sortable unSortIcon />
-            <AgGridColumn field='checkedby' sortable unSortIcon />
+            <AgGridColumn field='mrFid' headerName='Field ID' sortable unSortIcon />
+            <AgGridColumn field='setDateTime' headerName='Date' sortable unSortIcon />
+            <AgGridColumn field='subsample' sortable unSortIcon />
+            <AgGridColumn field='gear' headerName='Gear Code' sortable unSortIcon />
+            <AgGridColumn field='recorder' headerName='Recorder' sortable unSortIcon />
+            <AgGridColumn field='checkby' headerName='Checked?' sortable unSortIcon />
+            {/* @TDOD: Check with Tisha on approved field. */}
+            <AgGridColumn headerName='Approved?' sortable unSortIcon />
           </AgGridReact>
         </div>
       </>
