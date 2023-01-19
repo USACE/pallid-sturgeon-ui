@@ -46,6 +46,7 @@ const SiteDatasheet = connect(
         <Card>
           <Card.Header text='Datasheet Workflows' />
           <Card.Body>
+            <p>Select any tab to view Missouri River or Search Effort datasheet data for Site ID: {siteId}. Click on the datasheet ID number to view/edit data and any related data.</p>
             <TabContainer
               tabs={[
                 {

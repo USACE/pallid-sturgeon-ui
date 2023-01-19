@@ -45,25 +45,25 @@ const FindDataSheet = connect(
 
       switch(dataSheetType) {
         case 'fish':
-          doFetchFishDataEntry(params, doUpdateUrl('/sites-list/datasheet/fish-edit'));
+          doFetchFishDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/fish-edit'), true);
           break;
         case 'supplemental':
-          doFetchSupplementalDataEntry(params, doUpdateUrl('/sites-list/datasheet/supplemental-edit'));
+          doFetchSupplementalDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/supplemental-edit'), true);
           break;
         case 'missouriRiver':
-          doFetchMoRiverDataEntry(params, doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'));
+          doFetchMoRiverDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
           break;
         case 'searchEffort':
-          doFetchSearchDataEntry(params, doUpdateUrl('/sites-list/datasheet/searchEffort-edit'));
+          doFetchSearchDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'), true);
           break;
         case 'telemetry':
-          doFetchTelemetryDataEntry(params, doUpdateUrl('/sites-list/datasheet/telemetry-edit'));
+          doFetchTelemetryDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/telemetry-edit'), true);
           break;
         case 'procedures':
-          doFetchProcedureDataEntry(params, doUpdateUrl('/sites-list/datasheet/procedure-edit'));
+          doFetchProcedureDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/procedure-edit'), true);
           break;
         default:
-          console.log('select a datasheet type');
+          console.log('Select a datasheet type');
           break;
       }
     };

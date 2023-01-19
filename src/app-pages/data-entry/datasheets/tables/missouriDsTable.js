@@ -59,17 +59,20 @@ const MissouriDsTable = connect(
               mrIdCellRenderer: MrIdCellRenderer
             }}
           >
-            <AgGridColumn field='fishCount' headerName='Fish Datasheet' cellStyle={fishCellStyle} cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'mrId', uri: '/sites-list/datasheet/fish'}} sortable unSortIcon />
-            <AgGridColumn field='suppCount' headerName='Supplemental Datasheet' cellStyle={suppCellStyle} width={200} sortable unSortIcon />
-            <AgGridColumn field='procCount' headerName='Procedure Datasheet' width={200} sortable unSortIcon />
-            <AgGridColumn field='mrId' headerName='MR ID' cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit'}} sortable unSortIcon />
-            <AgGridColumn field='mrFid' headerName='Field ID' sortable unSortIcon />
+            <AgGridColumn field='mrId' headerName='MR ID' width={100} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'missouriRiver'}} sortable unSortIcon />
+            <AgGridColumn field='fishCount' headerName='Fish' width={130} cellStyle={fishCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'fish'}} sortable unSortIcon />
+            {/* @TODO: check with tisha if supp count is correct for mr_id */}
+            <AgGridColumn field='suppCount' headerName='Supplemental' width={130} cellStyle={suppCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'supplemental'}} sortable unSortIcon />
+            {/* @TODO: procedure data entry count for mr_id */}
+            <AgGridColumn field='procCount' headerName='Procedure' width={130} sortable unSortIcon />
+            <AgGridColumn field='mrFid' headerName='Field ID' width={170} resizable sortable unSortIcon />
+            {/* @TODO: create DateRenderer */}
             <AgGridColumn field='setDateTime' headerName='Date' sortable unSortIcon />
             <AgGridColumn field='subsample' sortable unSortIcon />
             <AgGridColumn field='gear' headerName='Gear Code' sortable unSortIcon />
             <AgGridColumn field='recorder' headerName='Recorder' sortable unSortIcon />
             <AgGridColumn field='checkby' headerName='Checked?' sortable unSortIcon />
-            {/* @TDOD: Check with Tisha on approved field. */}
+            {/* @TODO: Check with Tisha on approved field. */}
             <AgGridColumn headerName='Approved?' sortable unSortIcon />
           </AgGridReact>
         </div>

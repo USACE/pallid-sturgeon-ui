@@ -20,7 +20,7 @@ const SearchIdCellRenderer = connect(
         variant='link'
         className='p-0 mb-1'
         text={value}
-        handleClick={() => doFetchSearchDataEntry(params, doUpdateUrl(uri))}
+        handleClick={() => doFetchSearchDataEntry(params, () => doUpdateUrl(uri), false)}
       />
     );
   });
