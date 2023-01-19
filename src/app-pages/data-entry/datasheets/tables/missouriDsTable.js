@@ -14,11 +14,11 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const MissouriDsTable = connect(
   'doUpdateUrl',
+  'selectMoriverSitesDatasheetData',
   ({
     doUpdateUrl,
-    rowData = [],
+    moriverSitesDatasheetData,
   }) => {
-
     const fishCellStyle = (params) => ({
       backgroundColor: params.data.bkgColor,
     });
@@ -49,7 +49,7 @@ const MissouriDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowHeight={35}
-            rowData={rowData}
+            rowData={moriverSitesDatasheetData}
             defaultColDef={{
               width: 150,
             }}

@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
@@ -7,6 +7,8 @@ import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import { searchTypeOptions } from './_shared/selectHelper';
 import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
 import Approval from 'app-pages/data-entry/datasheets/components/approval';
+import TabContainer from 'app-components/tab/tabContainer';
+import TelemetryDsTable from 'app-pages/data-entry/datasheets/tables/telemetryDsTable';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -23,20 +25,25 @@ const reducer = (state, action) => {
 };
 
 const SearchEffortForm = connect(
+  'doSearchEffortDatasheetLoadData',
   'doFetchSearchDataEntry',
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'selectDataEntryData',
   'selectSitesData',
+  'selectDataEntryTelemetryDataTotalCount',
   ({
+    doSearchEffortDatasheetLoadData,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     dataEntryData,
     sitesData,
+    dataEntryTelemetryDataTotalCount,
     edit
   }) => {
     const initialState = {};
     const [state, dispatch] = useReducer(reducer, initialState);
+    const [currentTab, setCurrentTab] = useState(0);
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
     const handleChange = e => {
@@ -79,6 +86,13 @@ const SearchEffortForm = connect(
       }
     };
 
+    useEffect(() => {
+      if (dataEntryData.seId) {
+        doSearchEffortDatasheetLoadData(dataEntryData.seId);
+      }
+    }, [dataEntryData.seId]);
+
+
     const saveIsDisabled = !(
       // !!state['searchDate'] &&
       !!state['recorder'] &&
@@ -109,7 +123,7 @@ const SearchEffortForm = connect(
       <>
         <Row>
           <div className='col-9'>
-            <h4>{edit ? 'Edit' : 'Create'} Search Effort Datasheet</h4>
+            <h4>{edit ? '' : 'Create'} Search Effort Datasheet {edit ? `Overview (ID: ${dataEntryData['seId']})` : ''}</h4>
           </div>
         </Row>
         {/* Top Level Info */}
@@ -119,73 +133,90 @@ const SearchEffortForm = connect(
         <Approval />
         {/* Form Fields */}
         <Card className='mt-3'>
-          <Card.Header text='Search Effort Datasheet Form' />
+          <Card.Header text='Search Effort and Related Data' />
           <Card.Body>
-            <Row>
-              <div className='col-2'>
-                <Input name='searchDate' label='Search Date' type='date' value={state['searchDate'] ? state['searchDate'].split('T')[0] : ''}  onChange={handleChange} isRequired isDisabled />
-              </div>
-              <div className='col-2'>
-                <Input name='recorder' label='Recorder Initials' value={state['recorder']} onChange={handleChange} isRequired />
-              </div>
-              <div className='col-2'>
-                <SelectCustomLabel
-                  name='searchTypeCode'
-                  label='Search Type'
-                  options={searchTypeOptions}
-                  value={state['searchTypeCode']}
-                  onChange={val => handleSelect('searchTypeCode', val)}
-                  isRequired
-                />
-              </div>
-              <div className='col-2'>
-                <Input name='temp' label='Temp (c)' type='number' value={state['temp'] || ''} onChange={handleFloat} />
-              </div>
-              <div className='col-2'>
-                <Input name='conductivity' label='Conductivity' type='number' value={state['conductivity'] || ''} onChange={handleNumber} />
-              </div>
-            </Row>
-            <Row>
-              <div className='col-2'>
-                <Input name='startTime' label='Start Time (hh:mm:ss)' value={state['startTime']} onChange={handleChange} isRequired />
-              </div>
-              <div className='col-2'>
-                <Input name='startLatitude' type='number' label='Start Latitude' value={state['startLatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
-              </div>
-              <div className='col-2'>
-                <Input name='startLongitude' type='number' label='Start Longitude' value={state['startLongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
-              </div>
-              <div className='col-2'>
-                <Input name='stopTime' label='Stop Time (hh:mm:ss)' value={state['stopTime']} onChange={handleChange} isRequired />
-              </div>
-              <div className='col-2'>
-                <Input name='stopLatitude' type='number' label='Stop Latitude' value={state['stopLatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
-              </div>
-              <div className='col-2'>
-                <Input name='stopLongitude' type='number' label='Stop Longitude' value={state['stopLongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
-              </div>
-            </Row>
-            {edit && (<Row>
-              <div className='col-5'>
-                <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} isRequired={edit} />
-              </div>
-              <div className='col-2'>
-                <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
-              </div>
-            </Row>)}
-            <Row>
-              <div className='col-2 offset-10'>
-                <div className='float-right'>
-                  <Button
-                    size='small'
-                    variant='success'
-                    text={edit ? 'Apply Changes' : 'Save'}
-                    handleClick={() => doSave()}
-                    isDisabled={saveIsDisabled}
-                  />
-                </div>
-              </div>
-            </Row>
+            <p>Select any tab to view Search Effort and Telemetry datasheet data for Search Effort ID: {dataEntryData.seId} </p>
+            <TabContainer
+              tabs={[
+                {
+                  title: 'Search Effort',
+                  content: (
+                    <>
+                      <Row>
+                        <div className='col-2'>
+                          <Input name='searchDate' label='Search Date' type='date' value={state['searchDate'] ? state['searchDate'].split('T')[0] : ''}  onChange={handleChange} isRequired isDisabled />
+                        </div>
+                        <div className='col-2'>
+                          <Input name='recorder' label='Recorder Initials' value={state['recorder']} onChange={handleChange} isRequired />
+                        </div>
+                        <div className='col-2'>
+                          <SelectCustomLabel
+                            name='searchTypeCode'
+                            label='Search Type'
+                            options={searchTypeOptions}
+                            value={state['searchTypeCode']}
+                            onChange={val => handleSelect('searchTypeCode', val)}
+                            isRequired
+                          />
+                        </div>
+                        <div className='col-2'>
+                          <Input name='temp' label='Temp (c)' type='number' value={state['temp'] || ''} onChange={handleFloat} />
+                        </div>
+                        <div className='col-2'>
+                          <Input name='conductivity' label='Conductivity' type='number' value={state['conductivity'] || ''} onChange={handleNumber} />
+                        </div>
+                      </Row>
+                      <Row>
+                        <div className='col-2'>
+                          <Input name='startTime' label='Start Time (hh:mm:ss)' value={state['startTime']} onChange={handleChange} isRequired />
+                        </div>
+                        <div className='col-2'>
+                          <Input name='startLatitude' type='number' label='Start Latitude' value={state['startLatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
+                        </div>
+                        <div className='col-2'>
+                          <Input name='startLongitude' type='number' label='Start Longitude' value={state['startLongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
+                        </div>
+                        <div className='col-2'>
+                          <Input name='stopTime' label='Stop Time (hh:mm:ss)' value={state['stopTime']} onChange={handleChange} isRequired />
+                        </div>
+                        <div className='col-2'>
+                          <Input name='stopLatitude' type='number' label='Stop Latitude' value={state['stopLatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
+                        </div>
+                        <div className='col-2'>
+                          <Input name='stopLongitude' type='number' label='Stop Longitude' value={state['stopLongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
+                        </div>
+                      </Row>
+                      {edit && (<Row>
+                        <div className='col-5'>
+                          <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} isRequired={edit} />
+                        </div>
+                        <div className='col-2'>
+                          <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
+                        </div>
+                      </Row>)}
+                      <Row>
+                        <div className='col-2 offset-10'>
+                          <div className='float-right'>
+                            <Button
+                              size='small'
+                              variant='success'
+                              text={edit ? 'Apply Changes' : 'Save'}
+                              handleClick={() => doSave()}
+                              isDisabled={saveIsDisabled}
+                            />
+                          </div>
+                        </div>
+                      </Row>
+                    </>
+                  ),
+                },
+                {
+                  title: `Telemetry (${dataEntryTelemetryDataTotalCount})`,
+                  content: (<><TelemetryDsTable /></>)
+                }
+              ]}
+              onTabChange={(_str, ind) => setCurrentTab(ind)}
+            />
           </Card.Body>
         </Card>
       </>

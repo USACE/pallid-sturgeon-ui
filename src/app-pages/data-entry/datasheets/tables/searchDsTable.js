@@ -12,9 +12,10 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const SearchDsTable = connect(
   'doUpdateUrl',
+  'selectSearchEffortSitesDatasheetData',
   ({
     doUpdateUrl,
-    rowData = []
+    searchEffortSitesDatasheetData,
   }) => (
     <>
       <Button
@@ -37,7 +38,7 @@ const SearchDsTable = connect(
       <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
         <AgGridReact
           rowHeight={35}
-          rowData={rowData}
+          rowData={searchEffortSitesDatasheetData}
           defaultColDef={{
             width: 150,
           }}
@@ -47,13 +48,13 @@ const SearchDsTable = connect(
           }}
         >
           <AgGridColumn field='seId' headerName='Search ID' cellRenderer='searchIdCellRenderer'  cellRendererParams={{ uri: '/sites-list/datasheet/searchEffort-edit'}} sortable unSortIcon />
-          <AgGridColumn
+          {/* <AgGridColumn
             field='telemetryEntries'
             headerName='Telemetry Entries'
             width={150}
             cellRenderer='telemetryIdCellRenderer'
             cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/telemetry' }}
-          />
+          /> */}
           <AgGridColumn field='searchTypeCode' sortable unSortIcon />
           <AgGridColumn field='startTime' sortable unSortIcon />
           <AgGridColumn field='startLatitude' sortable unSortIcon />

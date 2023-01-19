@@ -20,7 +20,10 @@ export default {
         totalCount: 0,
       },
       searchData: [],
-      telemetryData: {},
+      telemetryData: {
+        items: [],
+        totalCount: 0,
+      },
       headerData: {},
       totalCount: 0,
       activeType: '',
@@ -29,6 +32,7 @@ export default {
 
     return (state = initialData, { type, payload }) => {
       switch (type) {
+        // Fetch
         case 'MO_RIVER_DATA_ENTRY_FETCH_START':
         case 'FISH_DATA_ENTRY_FETCH_START':
           return {
@@ -52,7 +56,8 @@ export default {
             ...state,
             lastParams: payload,
           };
-        
+
+        // Data Update
         case 'DATA_ENTRY_UPDATED_DATA':
           return {
             ...state,
@@ -60,7 +65,6 @@ export default {
             totalCount: payload.data.totalCount,
             activeType: payload.type,
           };
-
         case 'DATA_ENTRY_UPDATE_FISH_DATA':
           return {
             ...state,
@@ -93,7 +97,10 @@ export default {
         case 'DATA_ENTRY_UPDATE_TELEMETRY_DATA':
           return {
             ...state,
-            telemetryData: payload,
+            telemetryData: {
+              items: payload.items,
+              totalCount: payload.totalCount,
+            },
           };
 
         case 'DATA_ENTRY_UPDATE_ACTIVE_TYPE':
@@ -118,6 +125,7 @@ export default {
   selectDataEntryProcedure: state => state.dataEntry.procedureData,
   selectDataEntryProcedureTotalCount: state => state.dataEntry.procedureData.totalCount,
   selectDataEntryTelemetryData: state => state.dataEntry.telemetryData,
+  selectDataEntryTelemetryDataTotalCount: state => state.dataEntry.telemetryData.totalCount,
   selectDataEntrySearchData: state => state.dataEntry.searchData,
   selectDataEntryTotalCount: state => state.dataEntry.totalCount,
   selectDataEntryActiveType: state => state.dataEntry.activeType,
@@ -148,6 +156,25 @@ export default {
       });
       dispatch({ type: 'FETCH_HEADER_DATA_FINISHED' });
     });
+  },
+
+  doMoRiverDatasheetLoadData: (id) => ({ dispatch, store }) => {
+    dispatch({ type: 'LOADING_MORIVER_DATA_ENTRY_INIT_DATA' });
+    // Load data
+    store.doFetchFishDataEntry({ mrId: id });
+    store.doFetchSupplementalDataEntry({ mrId: id });
+    store.doFetchProcedureDataEntry({ mrId: id });
+    // Load supporting data
+    store.doDomainsFtPrefixesFetch();
+    store.doDomainsMrFetch();
+    store.doDomainsOtolithFetch();
+    store.doDomainsSpeciesFetch();
+  },
+
+  doSearchEffortDatasheetLoadData: (id) => ({ dispatch, store }) => {
+    dispatch({ type: 'LOADING_SEARCH_EFFORT_DATA_ENTRY_INIT_DATA' });
+    // Load data
+    store.doFetchTelemetryDataEntry({ seId: id });
   },
 
   // DATA ENTRY FETCHES
@@ -312,14 +339,11 @@ export default {
     apiGet(url, (err, body) => {
       if (!err) {
         dispatch({
-          type: 'DATA_ENTRY_UPDATED_DATA',
-          payload: {
-            data: body,
-            type: 'telemetry',
-          },
+          type: 'DATA_ENTRY_UPDATE_TELEMETRY_DATA',
+          payload: body,
         });
 
-        if (store.selectDataEntryTotalCount() === 0) {
+        if (store.selectDataEntryTelemetryDataTotalCount() === 0) {
           tWarning(toastId, 'No Telemetry datasheets found. Add a data entry.');
         } else {
           tSuccess(toastId, 'Datasheet found!');

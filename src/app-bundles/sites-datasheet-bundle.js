@@ -7,9 +7,15 @@ const sitesDatasheetBundle = {
     const initialData = {
       pageSize: 50,
       pageNumber: 0,
-      totalResults: 0,
       params: {},
-      data: {},
+      missouriRiver: {
+        data: [],
+        totalCount: 0,
+      },
+      searchEffort: {
+        data: [],
+        totalCount: 0,
+      },
     };
 
     return (state = initialData, { type, payload }) => {
@@ -25,12 +31,20 @@ const sitesDatasheetBundle = {
             pageSize: payload.pageSize,
             pageNumber: payload.pageNumber,
           };
-        case 'UPDATE_SITES_DATASHEET':
+        case 'UPDATE_MORIVER_SITES_DATASHEET':
           return {
             ...state,
-            data: {
-              ...state.data,
-              [payload.key]: payload.data,
+            missouriRiver: {
+              data: payload.items,
+              totalCount: payload.totalCount
+            }
+          };
+        case 'UPDATE_SEARCH_EFFORT_SITES_DATASHEET':
+          return {
+            ...state,
+            searchEffort: {
+              data: payload.items,
+              totalCount: payload.totalCount
             }
           };
         default:
@@ -42,21 +56,23 @@ const sitesDatasheetBundle = {
   selectSitesDatasheet: state => state.sitesDatasheet,
   selectSitesDatasheetPageSize: state => state.sitesDatasheet.pageSize,
   selectSitesDatasheetPageNumber: state => state.sitesDatasheet.pageNumber,
-  selectSitesDatasheetTotalResults: state => state.sitesDatasheet.totalResults,
   selectSitesDatasheetParams: state => state.sitesDatasheet.params,
-  selectSitesDatasheetData: state => state.sitesDatasheet.data,
+  selectMoriverSitesDatasheetData: state => state.sitesDatasheet.missouriRiver.data,
+  selectSearchEffortSitesDatasheetData: state => state.sitesDatasheet.searchEffort.data,
+  selectMoriverSitesDatasheetTotalResults: state => state.sitesDatasheet.missouriRiver.totalCount,
+  selectSearchEffortSitesDatasheetTotalResults: state => state.sitesDatasheet.searchEffort.totalCount,
 
-  doFetchSitesDatasheets: () => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'SITES_DATASHEET_FETCH_DATA_START' });
+  doSitesDatasheetLoadData: () => ({ dispatch, store }) => {
+    dispatch({ type: 'LOADING_SITES_DATASHEETS_INIT_DATA' });
+    // Load data
+    store.doFetchMoRiverSitesDatasheets();
+    store.doFetchSearchEffortSitesDatasheets();
+  },
 
-    const uris = {
-      missouriRiverData: '/missouriDatasheets',
-      searchData: '/searchDatasheets',
-    };
+  doFetchMoRiverSitesDatasheets: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'MORIVER_SITES_DATASHEETS_FETCH_START' });
 
-    const uriKeys = Object.keys(uris);
-    const uriValues = Object.values(uris);
-    const { tab, ...params } = store.selectSitesDatasheetParams();
+    const { ...params } = store.selectSitesDatasheetParams();
     const size = store.selectSitesDatasheetPageSize();
     const number = store.selectSitesDatasheetPageNumber();
 
@@ -66,20 +82,39 @@ const sitesDatasheetBundle = {
       number,
     });
 
-    const url = `/psapi${uriValues[tab]}${query}`;
+    const url = `/psapi/missouriDatasheets${query}`;
 
-    apiGet(url, (_err, body) => {
-      if (!_err) {
-        dispatch({
-          type: 'UPDATE_SITES_DATASHEET',
-          payload: {
-            key: uriKeys[tab],
-            data: body,
-          }
-        });
-        dispatch({ type: 'SITES_DATASHEET_FETCH_DATA_FINISHED' });
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({ type: 'UPDATE_MORIVER_SITES_DATASHEET', payload: body });
+        dispatch({ type: 'MORIVER_SITES_DATASHEETS_FETCH_FINISHED' });
       } else {
-        dispatch({ type: 'SITES_DATASHEET_FETCH_DATA_ERROR', payload: _err });
+        dispatch({ type: 'MORIVER_SITES_DATASHEETS_FETCH_ERROR', payload: err });
+      }
+    });
+  },
+
+  doFetchSearchEffortSitesDatasheets: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'SEARCH_EFFORT_SITES_DATASHEETS_FETCH_START' });
+
+    const { ...params } = store.selectSitesDatasheetParams();
+    const size = store.selectSitesDatasheetPageSize();
+    const number = store.selectSitesDatasheetPageNumber();
+
+    const query = queryFromObject({
+      ...params,
+      size,
+      number,
+    });
+    
+    const url = `/psapi/searchDatasheets${query}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({ type: 'UPDATE_SEARCH_EFFORT_SITES_DATASHEET', payload: body });
+        dispatch({ type: 'SEARCH_EFFORT_SITES_DATASHEETS_FETCH_FINISHED' });
+      } else {
+        dispatch({ type: 'SEARCH_EFFORT_SITES_DATASHEETS_FETCH_ERROR', payload: err });
       }
     });
   },
@@ -90,7 +125,6 @@ const sitesDatasheetBundle = {
 
   doUpdateSitesDatasheetParams: (params) => ({ dispatch, store }) => {
     dispatch({ type: 'UPDATE_SITES_DATASHEET_PARAMS', payload: params });
-    store.doFetchSitesDatasheets();
   },
 
 };
