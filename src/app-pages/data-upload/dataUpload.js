@@ -147,18 +147,13 @@ export default connect(
         <Card className='mt-3'>
           <Card.Header text='Upload Session Logs' />
           <Card.Body>
-            {uploadLogs.length ? <>
-              <div>{`Date Created: ${uploadLogs[0].dateCreated.split('T')[0]}`}</div>
-              <div className='text log'>{uploadLogs[0].debugText}</div>
-              <div className='text log'>{uploadLogs[1].debugText}</div>
-              <div className='text log'>{uploadLogs[2].debugText}</div>
-              <div className='text log'>{uploadLogs[3].debugText}</div>
-              <div className='text log'>{uploadLogs[4].debugText}</div>
-              <div className='text log'>{uploadLogs[5].debugText}</div>
-              <div className='text log'>{uploadLogs[6].debugText}</div>
-              <div className='text log'>{uploadLogs[7].debugText}</div>
-              <div className='text log'>{uploadLogs[8].debugText}</div>
-              <div className='text log'>{uploadLogs[9].debugText}</div></> 
+            {uploadLogs.length ? (
+              <>
+                <div>{`Date Created: ${uploadLogs[0].dateCreated.split('T')[0]}`}</div>
+                {uploadLogs.map((log, index) => (
+                  <div key={index} className='text log'>{log.debugText}</div>
+                ))} 
+              </>)
               : <div className='text'>No logs to report</div> }
           </Card.Body>
         </Card>
