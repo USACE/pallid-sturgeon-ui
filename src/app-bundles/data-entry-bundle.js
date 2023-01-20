@@ -376,7 +376,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchFishDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/fish'));
+        store.doFetchFishDataEntry(params);
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -486,7 +486,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchFishDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/fish'));
+        store.doFetchFishDataEntry(params);
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
@@ -578,7 +578,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully deleted!');
         dispatch({ type: 'FISH_DATA_ENTRY_DELETE_FINISHED' });
-        store.doFetchFishDataEntry(store.selectDataEntryLastParams(), store.doUpdateUrl('/sites-list/datasheet/fish'));
+        store.doFetchFishDataEntry(store.selectDataEntryLastParams());
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_DELETE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');

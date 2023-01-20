@@ -27,20 +27,23 @@ const SuppDsTable = connect(
         <Button
           isOutline
           size='small'
-          variant='info'
-          text='Export as CSV'
-          icon={<Icon icon='download' />}
-          // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+          variant='success'
+          text='Add Supplemental Datasheet'
+          title='Add Supplemental Datasheet'
+          icon={<Icon icon='plus' />}
+          handleClick={() => doUpdateUrl('/sites-list/datasheet/supplemental-create')}
+          isDisabled
+          // isDisabled={totalCount > 0}
         />
         <Button
           isOutline
           size='small'
           variant='info'
-          text='Create Supplemental Datasheet'
-          title='Create Supplemental Datasheet'
+          text='Export as CSV'
+          icon={<Icon icon='download' />}
           className='float-right mr-2'
-          handleClick={() => doUpdateUrl('/sites-list/datasheet/supplemental-create')}
-          isDisabled={totalCount > 0}
+          isDisabled
+          // handleClick={() => doFetchAllDatasheet('search-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact

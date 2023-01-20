@@ -19,27 +19,29 @@ const ProcedureDsTable = connect(
     sitesData
   }) => {
     const { items, totalCount } = dataEntryProcedure;
-    const { siteId } = sitesData[0];
 
     return (
       <div className='container-fluid overflow-auto'>
         <Button
           isOutline
           size='small'
-          variant='info'
-          text='Export as CSV'
-          icon={<Icon icon='download' />}
-          // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+          variant='success'
+          text='Add Procedure Datasheet'
+          title='Add Procedure Datasheet'
+          icon={<Icon icon='plus' />}
+          handleClick={() => doUpdateUrl('/sites-list/datasheet/procedure-create')}
+          isDisabled
+          // isDisabled={totalCount > 0}
         />
         <Button
           isOutline
           size='small'
           variant='info'
-          text='Create Procedure Datasheet'
-          title='Create Procedure Datasheet'
+          text='Export as CSV'
+          icon={<Icon icon='download' />}
           className='float-right mr-2'
-          handleClick={() => doUpdateUrl('/sites-list/datasheet/procedure-create')}
-          isDisabled={totalCount > 0}
+          isDisabled
+          // handleClick={() => doFetchAllDatasheet('search-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
