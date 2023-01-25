@@ -124,6 +124,7 @@ const ProcedureForm = connect(
     };
 
     const saveIsDisabled = !(
+      !!state['procedureDate'] &&
       !!state['purpose'] &&
       !!state['newRadioTagNum'] &&
       !!state['newFreqId'] &&
@@ -180,27 +181,6 @@ const ProcedureForm = connect(
       }
     }, [edit, dataEntryProcedure]);
 
-    // @TODO: consolidate statements if possible
-    useEffect(() => {
-      if (dataEntryProcedure.items[0].siteId) {
-        handleSelect('antibioticInjection', dataEntryProcedure.items[0].antibioticInjection.Int64);
-        handleSelect('bloodSample', dataEntryProcedure.items[0].bloodSample.Int64);
-        handleSelect('dstReimplant', dataEntryProcedure.items[0].dstReimplant.Int64);
-        handleSelect('dstSerialNum', dataEntryProcedure.items[0].dstSerialNum.Int64);
-        handleSelect('eggSample', dataEntryProcedure.items[0].eggSample.Int64);
-        handleSelect('expectedSpawnYear', dataEntryProcedure.items[0].expectedSpawnYear.Int64);
-        handleSelect('newFreqId', dataEntryProcedure.items[0].newFreqId.Int64);
-        handleSelect('newRadioTagNum', dataEntryProcedure.items[0].newRadioTagNum.Int64);
-        handleSelect('oldFrequencyId', dataEntryProcedure.items[0].oldFrequencyId.Int64);
-        handleSelect('oldRadioTagNum', dataEntryProcedure.items[0].oldRadioTagNum.Int64);
-        handleSelect('pDorsal', dataEntryProcedure.items[0].pDorsal.Int64);
-        handleSelect('pLeft', dataEntryProcedure.items[0].pLeft.Int64);
-        handleSelect('pVentral', dataEntryProcedure.items[0].pVentral.Int64);
-        handleSelect('procedureDate', dataEntryProcedure.items[0].procedureDate.String);
-        handleSelect('ultrasoundGonadLength', dataEntryProcedure.items[0].ultrasoundGonadLength.Float64);
-      }
-    }, [dataEntryProcedure]);
-
     return (
       <>
         <Row>
@@ -234,6 +214,7 @@ const ProcedureForm = connect(
                   type='date' 
                   value={state['procedureDate'] ? state['procedureDate'].split('T')[0] : ''} 
                   onChange={handleChange} 
+                  isRequired
                 />
               </div>
               <div className='col-2'>

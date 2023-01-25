@@ -105,15 +105,6 @@ const SearchEffortForm = connect(
       }
     }, [edit, dataEntryData]);
 
-    // Handle Null Data Objects
-    useEffect(() => {
-      if (dataEntryData.temp) {
-        handleSelect('temp', dataEntryData.temp.Float64);
-        handleSelect('conductivity', dataEntryData.conductivity.Float64);
-        handleSelect('searchDay', dataEntryData.searchDay.Int64);
-      }
-    }, [dataEntryData]);
-
     return (
       <>
         <Row>

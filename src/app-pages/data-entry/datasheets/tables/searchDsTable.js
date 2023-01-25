@@ -63,8 +63,8 @@ const SearchDsTable = connect(
           <AgGridColumn field='stopTime' sortable unSortIcon />
           <AgGridColumn field='stopLatitude' sortable unSortIcon />
           <AgGridColumn field='stopLongitude' sortable unSortIcon />
-          <AgGridColumn field='temp' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
-          <AgGridColumn field='conductivity' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
+          <AgGridColumn field='temp' sortable unSortIcon />
+          <AgGridColumn field='conductivity' sortable unSortIcon />
           <AgGridColumn field='recorder' sortable unSortIcon />
           <AgGridColumn field='editInitials' sortable unSortIcon />
           <AgGridColumn field='lastEditComment' sortable unSortIcon />

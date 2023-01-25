@@ -25,13 +25,13 @@ const reducer = (state, action) => {
 const TelemetryForm = connect(
   'doSaveTelemetryDataEntry',
   'doUpdateTelemetryDataEntry',
-  'selectDataEntryData',
+  'selectDataEntryTelemetryData',
   'selectDataEntryLastParams',
   'selectSitesData',
   ({
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
-    dataEntryData,
+    dataEntryTelemetryData,
     dataEntryLastParams,
     sitesData,
     edit
@@ -96,10 +96,10 @@ const TelemetryForm = connect(
       if (edit) {
         dispatch({
           type: 'INITIALIZE_FORM',
-          payload: dataEntryData,
+          payload: dataEntryTelemetryData.items[0],
         });
       }
-    }, [edit, dataEntryData]);
+    }, [edit, dataEntryTelemetryData]);
 
     return (
       <>
