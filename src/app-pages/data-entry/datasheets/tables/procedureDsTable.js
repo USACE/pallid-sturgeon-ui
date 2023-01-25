@@ -12,6 +12,7 @@ import ProcedureIdCellRenderer from 'common/gridCellRenderers/procedureIdCellRen
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import NullRenderer from 'common/gridCellRenderers/nullRenderer';
 
 const ProcedureDsTable = connect(
   'doUpdateUrl',
@@ -67,6 +68,7 @@ const ProcedureDsTable = connect(
                 }}
                 frameworkComponents={{
                   procedureIdCellRenderer: ProcedureIdCellRenderer,
+                  nullRenderer: NullRenderer,
                 }}
               >
                 <AgGridColumn field='id' headerName='Procedure ID' cellRenderer='procedureIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/procedure-edit' }} sortable unSortIcon />

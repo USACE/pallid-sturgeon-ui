@@ -115,6 +115,12 @@ const FishForm = connect(
     }, [edit, dataEntryFishData]);
 
     useEffect(() => {
+      if (dataEntryFishData.items[0].condition) {
+        handleSelect('condition', dataEntryFishData.items[0].condition.Float64);
+      }
+    }, [dataEntryFishData]);
+
+    useEffect(() => {
       doDomainsFtPrefixesFetch();
       doDomainsMrFetch();
       doDomainsOtolithFetch();

@@ -6,6 +6,7 @@ import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 import SiteIdCellRenderer from 'common/gridCellRenderers/siteIdCellRenderer';
+import NullRenderer from 'common/gridCellRenderers/nullRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -42,7 +43,8 @@ const SitesListTable = connect(
             }}
             rowData={sitesData}
             frameworkComponents={{
-              siteIdCellRenderer: SiteIdCellRenderer
+              siteIdCellRenderer: SiteIdCellRenderer,
+              nullRenderer: NullRenderer
             }}
           >
             <AgGridColumn field='siteId' headerName='Site ID' cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: true }} />

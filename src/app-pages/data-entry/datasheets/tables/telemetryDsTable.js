@@ -12,19 +12,19 @@ import TelemetryIdCellRenderer from 'common/gridCellRenderers/telemetryIdCellRen
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import NullRenderer from 'common/gridCellRenderers/nullRenderer';
 // tableId = 4604 For testing
 
 const TelemetryDsTable = connect(
   'doUpdateUrl',
-  'selectDataEntryData',
-  'selectDataEntryLastParams',
-  'selectDataEntry',
   'selectSitesData',
+  'selectDataEntryTelemetryData',
   ({
     doUpdateUrl,
-    dataEntry,
     sitesData,
+    dataEntryTelemetryData,
   }) => {
+    const { items } = dataEntryTelemetryData;
     const { siteId } = sitesData[0];
 
     return (
@@ -66,9 +66,10 @@ const TelemetryDsTable = connect(
                   width: 100,
                 }}
                 rowHeight={35}
-                rowData={dataEntry.data}
+                rowData={items}
                 frameworkComponents={{
                   telemetryIdCellRenderer: TelemetryIdCellRenderer,
+                  nullRenderer: NullRenderer,
                 }}
               >
                 <AgGridColumn field='tId' headerName='Telemetry ID' cellRenderer='telemetryIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/telemetry-edit' }} sortable unSortIcon />

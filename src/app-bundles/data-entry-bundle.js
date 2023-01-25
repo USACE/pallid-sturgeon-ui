@@ -20,7 +20,10 @@ export default {
         totalCount: 0,
       },
       searchData: [],
-      telemetryData: {},
+      telemetryData: {
+        items: [],
+        totalCount: 0,
+      },
       headerData: {},
       totalCount: 0,
       activeType: '',
@@ -93,7 +96,10 @@ export default {
         case 'DATA_ENTRY_UPDATE_TELEMETRY_DATA':
           return {
             ...state,
-            telemetryData: payload,
+            telemetryData: {
+              items: payload.items,
+              totalCount: payload.totalCount,
+            },
           };
 
         case 'DATA_ENTRY_UPDATE_ACTIVE_TYPE':
@@ -111,13 +117,19 @@ export default {
 
   selectDataEntry: state => state.dataEntry,
   selectDataEntryData: state => state.dataEntry.data.length ? state.dataEntry.data[0] : {},
+
   selectDataEntryFishData: state => state.dataEntry.fishData,
   selectDataEntryFishTotalCount: state => state.dataEntry.fishData.totalCount,
+
   selectDataEntrySupplemental: state => state.dataEntry.supplementalData,
   selectDataEntrySupplementalTotalCount: state => state.dataEntry.supplementalData.totalCount,
+
   selectDataEntryProcedure: state => state.dataEntry.procedureData,
   selectDataEntryProcedureTotalCount: state => state.dataEntry.procedureData.totalCount,
+
   selectDataEntryTelemetryData: state => state.dataEntry.telemetryData,
+  selectDataEntryTelemetryTotalCount: state => state.dataEntry.telemetryData.totalCount,
+
   selectDataEntrySearchData: state => state.dataEntry.searchData,
   selectDataEntryTotalCount: state => state.dataEntry.totalCount,
   selectDataEntryActiveType: state => state.dataEntry.activeType,
@@ -310,11 +322,8 @@ export default {
     apiGet(url, (err, body) => {
       if (!err) {
         dispatch({
-          type: 'DATA_ENTRY_UPDATED_DATA',
-          payload: {
-            data: body,
-            type: 'telemetry',
-          },
+          type: 'DATA_ENTRY_UPDATE_TELEMETRY_DATA',
+          payload: body,
         });
 
         if (store.selectDataEntryTotalCount() === 0) {
