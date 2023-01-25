@@ -132,7 +132,7 @@ const MissouriRiverForm = connect(
     };
 
     const saveIsDisabled = !(
-      // !!state['setdate'] &&
+      !!state['setdate'] &&
       !!state['subsample'] &&
       !!state['subsamplepass'] &&
       !!state['subsamplen'] &&
@@ -170,6 +170,8 @@ const MissouriRiverForm = connect(
       }
     }, [edit, dataEntryData]);
 
+    console.log(state);
+
     return (
       <>
         <div className='row'>
@@ -188,14 +190,12 @@ const MissouriRiverForm = connect(
           <Card.Body>
             <Row>
               <div className='col-2'>
-                {/* TODO: figure out date format */}
                 <Input 
                   label='Setdate' 
                   name='setdate' 
                   type='date' 
                   value={state['setdate'] ? state['setdate'].split('T')[0] : ''}
                   onChange={handleChange}
-                  isDisabled 
                   isRequired 
                 />
               </div>

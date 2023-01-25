@@ -9,6 +9,7 @@ import TelemetryIdCellRenderer from 'common/gridCellRenderers/telemetryIdCellRen
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import NullRenderer from 'common/gridCellRenderers/nullRenderer';
 
 const SearchDsTable = connect(
   'doUpdateUrl',
@@ -44,6 +45,7 @@ const SearchDsTable = connect(
           frameworkComponents={{
             searchIdCellRenderer: SearchIdCellRenderer,
             telemetryIdCellRenderer: TelemetryIdCellRenderer,
+            nullRenderer: NullRenderer,
           }}
         >
           <AgGridColumn field='seId' headerName='Search ID' cellRenderer='searchIdCellRenderer'  cellRendererParams={{ uri: '/sites-list/datasheet/searchEffort-edit'}} sortable unSortIcon />
@@ -61,8 +63,8 @@ const SearchDsTable = connect(
           <AgGridColumn field='stopTime' sortable unSortIcon />
           <AgGridColumn field='stopLatitude' sortable unSortIcon />
           <AgGridColumn field='stopLongitude' sortable unSortIcon />
-          <AgGridColumn field='temp' sortable unSortIcon />
-          <AgGridColumn field='conductivity' sortable unSortIcon />
+          <AgGridColumn field='temp' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
+          <AgGridColumn field='conductivity' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
           <AgGridColumn field='recorder' sortable unSortIcon />
           <AgGridColumn field='editInitials' sortable unSortIcon />
           <AgGridColumn field='lastEditComment' sortable unSortIcon />

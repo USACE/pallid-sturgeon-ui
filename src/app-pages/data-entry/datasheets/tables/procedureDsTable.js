@@ -12,6 +12,7 @@ import ProcedureIdCellRenderer from 'common/gridCellRenderers/procedureIdCellRen
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import NullRenderer from 'common/gridCellRenderers/nullRenderer';
 
 const ProcedureDsTable = connect(
   'doUpdateUrl',
@@ -67,6 +68,7 @@ const ProcedureDsTable = connect(
                 }}
                 frameworkComponents={{
                   procedureIdCellRenderer: ProcedureIdCellRenderer,
+                  nullRenderer: NullRenderer,
                 }}
               >
                 <AgGridColumn field='id' headerName='Procedure ID' cellRenderer='procedureIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/procedure-edit' }} sortable unSortIcon />
@@ -74,33 +76,33 @@ const ProcedureDsTable = connect(
                 <AgGridColumn field='fFid' resizable sortable unSortIcon />
                 <AgGridColumn field='mrFid' resizable sortable unSortIcon  />
                 <AgGridColumn field='purpose' sortable unSortIcon />
-                <AgGridColumn field='procedureDate' sortable unSortIcon />
+                <AgGridColumn field='procedureDate' cellRenderer='nullRenderer' cellRendererParams={{ type: 'str' }} sortable unSortIcon />
                 <AgGridColumn field='procedureStartTime' sortable unSortIcon />
                 <AgGridColumn field='procedureEndTime' sortable unSortIcon />
                 <AgGridColumn field='procedureBy' sortable unSortIcon />
-                <AgGridColumn field='antibioticInjection' sortable unSortIcon />
-                <AgGridColumn field='pDorsal' sortable unSortIcon />
-                <AgGridColumn field='pVentral' sortable unSortIcon />
-                <AgGridColumn field='pLeft' sortable unSortIcon />
-                <AgGridColumn field='oldRadioTagNum' sortable unSortIcon />
-                <AgGridColumn field='oldFrequencyId' sortable unSortIcon />
-                <AgGridColumn field='dstSerialNum' sortable unSortIcon />
+                <AgGridColumn field='antibioticInjection' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
+                <AgGridColumn field='pDorsal' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
+                <AgGridColumn field='pVentral' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
+                <AgGridColumn field='pLeft' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
+                <AgGridColumn field='oldRadioTagNum' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
+                <AgGridColumn field='oldFrequencyId'cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }}  sortable unSortIcon />
+                <AgGridColumn field='dstSerialNum' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
                 <AgGridColumn field='dstStartDate' sortable unSortIcon />
                 <AgGridColumn field='dstStartTime' sortable unSortIcon />
-                <AgGridColumn field='dstReimplant' sortable unSortIcon />
-                <AgGridColumn field='newRadioTagNum' sortable unSortIcon />
-                <AgGridColumn field='newFreqId' sortable unSortIcon />
+                <AgGridColumn field='dstReimplant' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
+                <AgGridColumn field='newRadioTagNum' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
+                <AgGridColumn field='newFreqId' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
                 <AgGridColumn field='sexCode' sortable unSortIcon />
-                <AgGridColumn field='bloodSample' sortable unSortIcon />
-                <AgGridColumn field='eggSample' sortable unSortIcon />
+                <AgGridColumn field='bloodSample' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
+                <AgGridColumn field='eggSample' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
                 <AgGridColumn field='comments' resizable sortable unSortIcon />
                 <AgGridColumn field='fishHealthComment' resizable sortable unSortIcon />
                 <AgGridColumn field='evalLocation' sortable unSortIcon />
                 <AgGridColumn field='spawnStatus' sortable unSortIcon />
                 <AgGridColumn field='visualReproStatus' sortable unSortIcon />
                 <AgGridColumn field='ultrasoundReproStatus' sortable unSortIcon />
-                <AgGridColumn field='expectedSpawnYear' sortable unSortIcon />
-                <AgGridColumn field='ultrasoundGonadLength' sortable unSortIcon />
+                <AgGridColumn field='expectedSpawnYear' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} sortable unSortIcon />
+                <AgGridColumn field='ultrasoundGonadLength' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
                 <AgGridColumn field='gonadCondition' sortable unSortIcon />
                 <AgGridColumn field='editInitials' sortable unSortIcon />
                 <AgGridColumn field='lastEditComment' resizable sortable unSortIcon />

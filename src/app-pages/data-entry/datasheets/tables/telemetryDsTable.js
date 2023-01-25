@@ -12,19 +12,19 @@ import TelemetryIdCellRenderer from 'common/gridCellRenderers/telemetryIdCellRen
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import NullRenderer from 'common/gridCellRenderers/nullRenderer';
 // tableId = 4604 For testing
 
 const TelemetryDsTable = connect(
   'doUpdateUrl',
-  'selectDataEntryData',
-  'selectDataEntryLastParams',
-  'selectDataEntry',
   'selectSitesData',
+  'selectDataEntryTelemetryData',
   ({
     doUpdateUrl,
-    dataEntry,
     sitesData,
+    dataEntryTelemetryData,
   }) => {
+    const { items } = dataEntryTelemetryData;
     const { siteId } = sitesData[0];
 
     return (
@@ -66,9 +66,10 @@ const TelemetryDsTable = connect(
                   width: 100,
                 }}
                 rowHeight={35}
-                rowData={dataEntry.data}
+                rowData={items}
                 frameworkComponents={{
                   telemetryIdCellRenderer: TelemetryIdCellRenderer,
+                  nullRenderer: NullRenderer,
                 }}
               >
                 <AgGridColumn field='tId' headerName='Telemetry ID' cellRenderer='telemetryIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/telemetry-edit' }} sortable unSortIcon />
@@ -77,18 +78,18 @@ const TelemetryDsTable = connect(
                 <AgGridColumn field='captureLatitude' sortable unSortIcon />
                 <AgGridColumn field='captureLongitude' sortable unSortIcon />
                 <AgGridColumn field='captureDate' headerName='Capture Time' sortable unSortIcon />
-                <AgGridColumn field='conductivity' sortable unSortIcon />
-                <AgGridColumn field='depth' sortable unSortIcon />
+                <AgGridColumn field='conductivity' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
+                <AgGridColumn field='depth' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
                 <AgGridColumn field='frequencyIdCode' sortable unSortIcon />
-                <AgGridColumn field='gravel' sortable unSortIcon />
+                <AgGridColumn field='gravel' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
                 <AgGridColumn field='macroId' sortable unSortIcon />
                 <AgGridColumn field='mesoId' sortable unSortIcon />
-                <AgGridColumn field='positionConfidence' sortable unSortIcon />
+                <AgGridColumn field='positionConfidence' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
                 <AgGridColumn field='radioTagNum' sortable unSortIcon />
-                <AgGridColumn field='sand' sortable unSortIcon />
-                <AgGridColumn field='silt' sortable unSortIcon />
-                <AgGridColumn field='temp' sortable unSortIcon />
-                <AgGridColumn field='turbidity' sortable unSortIcon />
+                <AgGridColumn field='sand' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
+                <AgGridColumn field='silt' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
+                <AgGridColumn field='temp' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
+                <AgGridColumn field='turbidity' cellRenderer='nullRenderer' cellRendererParams={{ type: 'float' }} sortable unSortIcon />
                 <AgGridColumn field='comments' sortable unSortIcon />
                 <AgGridColumn field='uploadedBy' sortable unSortIcon />
                 <AgGridColumn field='editInitials' sortable unSortIcon />

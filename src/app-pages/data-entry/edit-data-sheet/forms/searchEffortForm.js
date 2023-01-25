@@ -80,7 +80,7 @@ const SearchEffortForm = connect(
     };
 
     const saveIsDisabled = !(
-      // !!state['searchDate'] &&
+      !!state['searchDate'] &&
       !!state['recorder'] &&
       !!state['searchTypeCode'] &&
       !!state['startTime'] &&
@@ -105,6 +105,15 @@ const SearchEffortForm = connect(
       }
     }, [edit, dataEntryData]);
 
+    // Handle Null Data Objects
+    useEffect(() => {
+      if (dataEntryData.temp) {
+        handleSelect('temp', dataEntryData.temp.Float64);
+        handleSelect('conductivity', dataEntryData.conductivity.Float64);
+        handleSelect('searchDay', dataEntryData.searchDay.Int64);
+      }
+    }, [dataEntryData]);
+
     return (
       <>
         <Row>
@@ -123,7 +132,14 @@ const SearchEffortForm = connect(
           <Card.Body>
             <Row>
               <div className='col-2'>
-                <Input name='searchDate' label='Search Date' type='date' value={state['searchDate'] ? state['searchDate'].split('T')[0] : ''}  onChange={handleChange} isRequired isDisabled />
+                <Input 
+                  name='searchDate' 
+                  label='Search Date' 
+                  type='date' 
+                  value={state['searchDate'] ? state['searchDate'].split('T')[0] : ''}  
+                  onChange={handleChange} 
+                  isRequired
+                />
               </div>
               <div className='col-2'>
                 <Input name='recorder' label='Recorder Initials' value={state['recorder']} onChange={handleChange} isRequired />

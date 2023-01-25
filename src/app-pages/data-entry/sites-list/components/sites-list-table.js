@@ -6,6 +6,7 @@ import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 import SiteIdCellRenderer from 'common/gridCellRenderers/siteIdCellRenderer';
+import NullRenderer from 'common/gridCellRenderers/nullRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -42,7 +43,8 @@ const SitesListTable = connect(
             }}
             rowData={sitesData}
             frameworkComponents={{
-              siteIdCellRenderer: SiteIdCellRenderer
+              siteIdCellRenderer: SiteIdCellRenderer,
+              nullRenderer: NullRenderer
             }}
           >
             <AgGridColumn field='siteId' headerName='Site ID' cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: true }} />
@@ -54,7 +56,7 @@ const SitesListTable = connect(
             <AgGridColumn field='sampleUnitType' headerName='Sample Unit Type' />
             <AgGridColumn field='bend' headerName='Sample Unit' cellStyle={cellStyle} cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: false }} />
             <AgGridColumn field='bendrn' headerName='Bend R/N' />
-            <AgGridColumn field='brmId' headerName='BRM ID' />
+            <AgGridColumn field='brmId' headerName='BRM ID' cellRenderer='nullRenderer' cellRendererParams={{ type: 'int' }} />
             <AgGridColumn field='editInitials' />
             <AgGridColumn field='last_edit_comment' />
             <AgGridColumn field='uploadedBy' />
