@@ -170,8 +170,6 @@ const MissouriRiverForm = connect(
       }
     }, [edit, dataEntryData]);
 
-    console.log(state);
-
     return (
       <>
         <div className='row'>
