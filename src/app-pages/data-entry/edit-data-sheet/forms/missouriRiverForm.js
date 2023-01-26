@@ -147,6 +147,14 @@ const MissouriRiverForm = connect(
       (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
+    const formatDate = dateStr => {
+      const subStr = 'T';
+      if (dateStr.includes(subStr)) {
+        return dateStr.split('T')[0];
+      }
+      return dateStr;
+    };
+
     useEffect(() => {
       if (edit) {
         dispatch({
@@ -154,6 +162,12 @@ const MissouriRiverForm = connect(
           payload: dataEntryData,
         });
 
+        // Format Date
+        if (dataEntryData.setdate) {
+          handleSelect('setdate', formatDate(dataEntryData.setdate));
+        }
+
+        // Set state of checkboxes
         if (dataEntryData['noTurbidity'] === 'Y') {
           setIsNoTurbidity(true);
         } else {

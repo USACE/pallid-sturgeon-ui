@@ -135,6 +135,14 @@ const ProcedureForm = connect(
       (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
+    const formatDate = dateStr => {
+      const subStr = 'T';
+      if (dateStr.includes(subStr)) {
+        return dateStr.split('T')[0];
+      }
+      return dateStr;
+    };
+
     useEffect(() => {
       if (edit) {
         dispatch({
@@ -142,6 +150,14 @@ const ProcedureForm = connect(
           payload: dataEntryProcedure.items[0],
         });
         
+        // Format Date
+        if (dataEntryProcedure.items[0].procedureDate.includes('T')) {
+          handleSelect('procedureDate', formatDate(dataEntryProcedure.items[0].procedureDate));
+        }
+        if (dataEntryProcedure.items[0].dstStartDate.includes('T')) {
+          handleSelect('dstStartDate', formatDate(dataEntryProcedure.items[0].dstStartDate));
+        }
+
         // @TODO: consolidate statements if possible
         if (dataEntryProcedure.items[0].dstReimplant === 1) {
           setIsDstReimplant(true);
@@ -249,6 +265,8 @@ const ProcedureForm = connect(
                   label='DST Start Date' 
                   type='date' 
                   value={state['dstStartDate'] ? state['dstStartDate'].split('T')[0] : ''}
+                  onChange={handleChange}
+                  isRequired
                 />
               </div>
               <div className='col-2'>
