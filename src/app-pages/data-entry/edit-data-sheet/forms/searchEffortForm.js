@@ -92,12 +92,25 @@ const SearchEffortForm = connect(
       (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
+    const formatDate = dateStr => {
+      const subStr = 'T';
+      if (dateStr.includes(subStr)) {
+        return dateStr.split('T')[0];
+      }
+      return dateStr;
+    };
+
     useEffect(() => {
       if (edit) {
         dispatch({
           type: 'INITIALIZE_FORM',
           payload: dataEntryData,
         });
+
+        // Format Date
+        if (dataEntryData.searchDate) {
+          handleSelect('searchDate', formatDate(dataEntryData.searchDate));
+        }
       } else {
         handleSelect('siteId', siteId);
         // @TODO: Investigate where dsId comes from
