@@ -20,10 +20,8 @@ const TelemetryDsTable = connect(
   'doSaveTelemetryDataEntry',
   'doUpdateTelemetryDataEntry',
   'doUpdateUrl',
-  'selectDataEntry',
   'selectSitesData',
   'selectDataEntryTelemetryData',
-  'selectDataEntryLastParams',
   ({
     doModalOpen,
     doSaveTelemetryDataEntry,
@@ -33,7 +31,10 @@ const TelemetryDsTable = connect(
     dataEntryTelemetryData,
     dataEntryLastParams
   }) => {
+    const { items } = dataEntryTelemetryData;
+    const { siteId } = sitesData[0];
     const gridRef = useRef();
+
     // const lastRow = dataEntryFishData.items[dataEntryFishData.totalCount - 1];
     // const initialState = {
     //   seId: dataEntryLastParams.seId
@@ -51,7 +52,7 @@ const TelemetryDsTable = connect(
     //     gridRef.current.api.applyTransaction({ add: [row] });
     //   }
     // };
-
+    
     return (
       <div className='container-fluid overflow-auto'>
         <Button
@@ -105,7 +106,7 @@ const TelemetryDsTable = connect(
             // onRowValueChanged={({ data }) => !data.fid ? doSaveFishDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId }) : doUpdateFishDataEntry(data, { mrId: dataEntryLastParams.mrId })}
             // onRowValueChanged={({ data }) => !data.tId ? doS : 'doUpdate'}
             rowHeight={35}
-            rowData={dataEntryTelemetryData.items}
+            rowData={items}
             frameworkComponents={{
               telemetryIdCellRenderer: TelemetryIdCellRenderer,
               editCellRenderer: EditCellRenderer,

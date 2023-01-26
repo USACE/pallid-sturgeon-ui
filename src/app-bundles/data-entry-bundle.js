@@ -19,6 +19,7 @@ export default {
         items: [],
         totalCount: 0,
       },
+      searchData: [],
       telemetryData: {
         items: [],
         totalCount: 0,
@@ -110,14 +111,19 @@ export default {
 
   selectDataEntry: state => state.dataEntry,
   selectDataEntryData: state => state.dataEntry.data.length ? state.dataEntry.data[0] : {},
+
   selectDataEntryFishData: state => state.dataEntry.fishData,
   selectDataEntryFishTotalCount: state => state.dataEntry.fishData.totalCount,
+
   selectDataEntrySupplemental: state => state.dataEntry.supplementalData,
   selectDataEntrySupplementalTotalCount: state => state.dataEntry.supplementalData.totalCount,
+
   selectDataEntryProcedure: state => state.dataEntry.procedureData,
   selectDataEntryProcedureTotalCount: state => state.dataEntry.procedureData.totalCount,
+
   selectDataEntryTelemetryData: state => state.dataEntry.telemetryData,
-  selectDataEntryTelemetryDataTotalCount: state => state.dataEntry.telemetryData.totalCount,
+  selectDataEntryTelemetryTotalCount: state => state.dataEntry.telemetryData.totalCount,
+
   selectDataEntrySearchData: state => state.dataEntry.searchData,
   selectDataEntryTotalCount: state => state.dataEntry.totalCount,
   selectDataEntryLastParams: state => state.dataEntry.lastParams,

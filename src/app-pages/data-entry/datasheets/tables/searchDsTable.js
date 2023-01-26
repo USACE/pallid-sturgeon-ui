@@ -9,6 +9,7 @@ import TelemetryIdCellRenderer from 'common/gridCellRenderers/telemetryIdCellRen
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import NullRenderer from 'common/gridCellRenderers/nullRenderer';
 
 const SearchDsTable = connect(
   'doUpdateUrl',
@@ -45,6 +46,7 @@ const SearchDsTable = connect(
           frameworkComponents={{
             searchIdCellRenderer: SearchIdCellRenderer,
             telemetryIdCellRenderer: TelemetryIdCellRenderer,
+            nullRenderer: NullRenderer,
           }}
         >
           <AgGridColumn field='seId' headerName='Search ID' cellRenderer='searchIdCellRenderer'  cellRendererParams={{ uri: '/sites-list/datasheet/searchEffort-edit'}} sortable unSortIcon />

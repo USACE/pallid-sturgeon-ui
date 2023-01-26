@@ -146,7 +146,7 @@ const MissouriRiverForm = connect(
     };
 
     const saveIsDisabled = !(
-      // !!state['setdate'] &&
+      !!state['setdate'] &&
       !!state['subsample'] &&
       !!state['subsamplepass'] &&
       !!state['subsamplen'] &&
@@ -161,6 +161,14 @@ const MissouriRiverForm = connect(
       (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
+    const formatDate = dateStr => {
+      const subStr = 'T';
+      if (dateStr.includes(subStr)) {
+        return dateStr.split('T')[0];
+      }
+      return dateStr;
+    };
+
     useEffect(() => {
       if (edit) {
         dispatch({
@@ -168,6 +176,12 @@ const MissouriRiverForm = connect(
           payload: dataEntryData,
         });
 
+        // Format Date
+        if (dataEntryData.setdate) {
+          handleSelect('setdate', formatDate(dataEntryData.setdate));
+        }
+
+        // Set state of checkboxes
         if (dataEntryData['noTurbidity'] === 'Y') {
           setIsNoTurbidity(true);
         } else {
@@ -215,14 +229,12 @@ const MissouriRiverForm = connect(
                     <>
                       <Row>
                         <div className='col-2'>
-                          {/* TODO: figure out date format */}
                           <Input 
                             label='Setdate' 
                             name='setdate' 
                             type='date' 
                             value={state['setdate'] ? state['setdate'].split('T')[0] : ''}
                             onChange={handleChange}
-                            isDisabled 
                             isRequired 
                           />
                         </div>

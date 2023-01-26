@@ -94,7 +94,7 @@ const SearchEffortForm = connect(
 
 
     const saveIsDisabled = !(
-      // !!state['searchDate'] &&
+      !!state['searchDate'] &&
       !!state['recorder'] &&
       !!state['searchTypeCode'] &&
       !!state['startTime'] &&
@@ -106,12 +106,25 @@ const SearchEffortForm = connect(
       (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
+    const formatDate = dateStr => {
+      const subStr = 'T';
+      if (dateStr.includes(subStr)) {
+        return dateStr.split('T')[0];
+      }
+      return dateStr;
+    };
+
     useEffect(() => {
       if (edit) {
         dispatch({
           type: 'INITIALIZE_FORM',
           payload: dataEntryData,
         });
+
+        // Format Date
+        if (dataEntryData.searchDate) {
+          handleSelect('searchDate', formatDate(dataEntryData.searchDate));
+        }
       } else {
         handleSelect('siteId', siteId);
         // @TODO: Investigate where dsId comes from
@@ -144,7 +157,7 @@ const SearchEffortForm = connect(
                     <>
                       <Row>
                         <div className='col-2'>
-                          <Input name='searchDate' label='Search Date' type='date' value={state['searchDate'] ? state['searchDate'].split('T')[0] : ''}  onChange={handleChange} isRequired isDisabled />
+                          <Input name='searchDate' label='Search Date' type='date' value={state['searchDate'] ? state['searchDate'].split('T')[0] : ''}  onChange={handleChange} isRequired />
                         </div>
                         <div className='col-2'>
                           <Input name='recorder' label='Recorder Initials' value={state['recorder']} onChange={handleChange} isRequired />
