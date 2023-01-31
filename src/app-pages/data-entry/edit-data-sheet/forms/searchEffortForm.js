@@ -31,14 +31,14 @@ const SearchEffortForm = connect(
   'doUpdateSearchDataEntry',
   'selectDataEntryData',
   'selectSitesData',
-  'selectDataEntryTelemetryDataTotalCount',
+  'selectDataEntryTelemetryTotalCount',
   ({
     doSearchEffortDatasheetLoadData,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     dataEntryData,
     sitesData,
-    dataEntryTelemetryDataTotalCount,
+    dataEntryTelemetryTotalCount,
     edit
   }) => {
     const initialState = {};
@@ -224,7 +224,7 @@ const SearchEffortForm = connect(
                   ),
                 },
                 {
-                  title: `Telemetry (${dataEntryTelemetryDataTotalCount})`,
+                  title: `Telemetry (${dataEntryTelemetryTotalCount})`,
                   content: (<><TelemetryDsTable /></>)
                 }
               ]}

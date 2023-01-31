@@ -32,6 +32,7 @@ const MissouriRiverForm = connect(
   'doMoRiverDatasheetLoadData',
   'doSaveMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
+  'doUpdateCurrentTab',
   'doDomainsMesoFetch',
   'doDomainsStructureFlowFetch',
   'doDomainsStructureModFetch',
@@ -47,10 +48,12 @@ const MissouriRiverForm = connect(
   'selectDataEntryFishTotalCount',
   'selectDataEntrySupplementalTotalCount',
   'selectDataEntryProcedureTotalCount',
+  'selectCurrentTab',
   ({
     doMoRiverDatasheetLoadData,
     doSaveMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
+    doUpdateCurrentTab,
     doDomainsMesoFetch,
     doDomainsStructureFlowFetch,
     doDomainsStructureModFetch,
@@ -66,6 +69,7 @@ const MissouriRiverForm = connect(
     dataEntryFishTotalCount,
     dataEntrySupplementalTotalCount,
     dataEntryProcedureTotalCount,
+    currentTab,
     edit,
   }) => {
     const initialState = {
@@ -73,7 +77,7 @@ const MissouriRiverForm = connect(
       noVelocity: 'N'
     };
     const [state, dispatch] = useReducer(reducer, edit ? {} : initialState);
-    const [currentTab, setCurrentTab] = useState(0);
+    // const [currentTab, setCurrentTab] = useState(0);
     const [isNoTurbidity, setIsNoTurbidity] = useState(false);
     const [isNoVelocity, setIsNoVelocity] = useState(false);
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
@@ -713,7 +717,8 @@ const MissouriRiverForm = connect(
                   content: <><ProcedureDsTable /></>
                 },
               ]}
-              onTabChange={(_str, ind) => setCurrentTab(ind)}
+              // onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}
+              // onTabChange={(_str, ind) => console.log('ind: ', currentTab)}
             />
             
           </Card.Body>

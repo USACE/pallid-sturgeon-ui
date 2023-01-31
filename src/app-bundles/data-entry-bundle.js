@@ -7,6 +7,7 @@ export default {
   getReducer: () => {
     const initialData = {
       data: [],
+      totalCount: 0,
       fishData: {
         items: [],
         totalCount: 0,
@@ -19,14 +20,13 @@ export default {
         items: [],
         totalCount: 0,
       },
-      searchData: [],
       telemetryData: {
         items: [],
         totalCount: 0,
       },
       headerData: {},
-      totalCount: 0,
       lastParams: {},
+      currentTab: 0,
     };
 
     return (state = initialData, { type, payload }) => {
@@ -48,8 +48,7 @@ export default {
             ...state,
             lastParams: payload,
           };
-       
-        case 'SEARCH_DATA_ENTRY_FETCH_START':
+
         case 'TELEMETRY_DATA_ENTRY_FETCH_START':
           return {
             ...state,
@@ -103,6 +102,11 @@ export default {
 
         case 'UPDATED_HEADER_DATA':
           return { ...state, headerData: payload };
+        case 'UPDATE_CURRENT_TAB':
+          return {
+            ...state,
+            currentTab: payload,
+          };
         default:
           return state;
       }
@@ -111,6 +115,10 @@ export default {
 
   selectDataEntry: state => state.dataEntry,
   selectDataEntryData: state => state.dataEntry.data.length ? state.dataEntry.data[0] : {},
+  selectDataEntryLastParams: state => state.dataEntry.lastParams,
+  selectHeaderData: state => state.dataEntry.headerData,
+  selectCurrentTab: state => state.dataEntry.currentTab,
+  selectDataEntryTotalCount: state => state.dataEntry.totalCount,
 
   selectDataEntryFishData: state => state.dataEntry.fishData,
   selectDataEntryFishTotalCount: state => state.dataEntry.fishData.totalCount,
@@ -123,11 +131,6 @@ export default {
 
   selectDataEntryTelemetryData: state => state.dataEntry.telemetryData,
   selectDataEntryTelemetryTotalCount: state => state.dataEntry.telemetryData.totalCount,
-
-  selectDataEntrySearchData: state => state.dataEntry.searchData,
-  selectDataEntryTotalCount: state => state.dataEntry.totalCount,
-  selectDataEntryLastParams: state => state.dataEntry.lastParams,
-  selectHeaderData: state => state.dataEntry.headerData,
 
   doDataEntryLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_DATA_ENTRY_INIT_DATA' });
@@ -336,7 +339,7 @@ export default {
           payload: body,
         });
 
-        if (store.selectDataEntryTelemetryDataTotalCount() === 0) {
+        if (store.selectDataEntryTelemetryTotalCount() === 0) {
           if (ignoreToast) { tWarning(toastId, 'No Telemetry datasheet(s) found.'); }
         } else {
           if (ignoreToast) { tSuccess(toastId, 'Telemetry datasheet(s) found!'); }
@@ -590,5 +593,12 @@ export default {
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
       }
     });
+  },
+
+  // TABS
+
+  doUpdateCurrentTab: (tab) => ({ dispatch }) => {
+    dispatch({ type: 'UPDATE_CURRENT_TAB_START' });
+    dispatch({ type: 'UPDATE_CURRENT_TAB', payload: tab });
   },
 };

@@ -14,6 +14,7 @@ import TextEditor from 'common/gridCellEditors/textEditor';
 
 import { baitOptions, finCurlOptions, raySpineOptions, scaleOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 import { createDropdownOptions, createMesoOptions } from 'app-pages/data-entry/helpers';
+import SuppLinkCellRenderer from 'common/gridCellRenderers/suppLinkCellRenderer';
 
 const FishDsTable = connect(
   'doUpdateFishDataEntry',
@@ -106,6 +107,7 @@ const FishDsTable = connect(
               textEditor: TextEditor,
               fishIdCellRenderer: FishIdCellRenderer,
               suppIdCellRenderer: SuppIdCellRenderer,
+              suppLinkCellRenderer: SuppLinkCellRenderer
             }}
           >
             <AgGridColumn
@@ -120,22 +122,14 @@ const FishDsTable = connect(
               }}
               editable={false}
             />
-            <AgGridColumn 
-              field='fid' 
-              headerName='Fish ID' 
-              editable={false}
-              // cellRenderer='fishIdCellRenderer' 
-              // cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/fish-edit' }} 
-            />
+            <AgGridColumn field='fid' headerName='Fish ID' editable={false} />
             <AgGridColumn field='ffid' headerName='Field ID' width={200} resizable sortable unSortIcon />
-            {/* <AgGridColumn
-                  field='suppEntries'
-                  headerName='Supp Entries'
-                  width={130}
-                  cellRenderer='suppIdCellRenderer'
-                  cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/supplemental' }} 
-                  editable={false}
-                /> */}
+            <AgGridColumn
+              headerName='Supp Link'
+              width={130}
+              cellRenderer='suppLinkCellRenderer'
+              editable={false}
+            />
             <AgGridColumn field='panelHook' headerName='Panel Hook' />
             <AgGridColumn field='species' cellEditor='selectEditor' cellEditorParams={{ options: createMesoOptions(domainsSpecies), isRequired: true }} />
             <AgGridColumn field='length' cellEditor='numberEditor' />
@@ -144,7 +138,7 @@ const FishDsTable = connect(
             <AgGridColumn field='ftPrefix' headerName='FT Prefix' cellEditor='selectEditor' cellEditorParams={{ options: createMesoOptions(domainsFtPrefixes), isRequired: false }} />
             <AgGridColumn field='mR' headerName='M/R' cellEditor='selectEditor' cellEditorParams={{ options: createMesoOptions(domainsMr), isRequired: false }} />
             <AgGridColumn field='ftnum' headerName='Genetics Vial #' />
-            <AgGridColumn field='condition' cellEditor='numberEditor' />
+            <AgGridColumn field='condition' cellEditor='numberEditor' editable={false} />
             <AgGridColumn field='finCurl' cellEditor='selectEditor' cellEditorParams={{ options: finCurlOptions, isRequired: false }} />
             <AgGridColumn field='otolith' cellEditor='selectEditor' cellEditorParams={{ options: createDropdownOptions(domainsOtolith), isRequired: false }} />
             <AgGridColumn field='raySpine' headerName='Ray Spine' cellEditor='selectEditor' cellEditorParams={{ options: raySpineOptions, isRequired: false }} />

@@ -25,7 +25,7 @@ const TabContainer = ({
   changeTabDelay = 0,
   ...customProps
 }) => {
-  const [tabIndex, setTabIndex] = useState(defaultTab);
+  const [tabIndex, setTabIndex] = useState(1);
   const [isDisabled, setIsDisabled] = useState(false);
 
   const changeTab = (title, index) => {
