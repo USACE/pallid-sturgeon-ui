@@ -36,6 +36,8 @@ const FishDsTable = connect(
     domainsMr,
     domainsOtolith,
     dataEntryLastParams,
+    setIsAddRow,
+    setRowId,
   }) => {
     const gridRef = useRef();
     const lastRow = dataEntryFishData.items[dataEntryFishData.totalCount - 1];
@@ -125,9 +127,14 @@ const FishDsTable = connect(
             <AgGridColumn field='fid' headerName='Fish ID' editable={false} />
             <AgGridColumn field='ffid' headerName='Field ID' width={200} resizable sortable unSortIcon />
             <AgGridColumn
+              field='supplink'
               headerName='Supp Link'
               width={130}
               cellRenderer='suppLinkCellRenderer'
+              cellRendererParams={{
+                setIsAddRow: setIsAddRow,
+                setRowId: setRowId,
+              }}
               editable={false}
             />
             <AgGridColumn field='panelHook' headerName='Panel Hook' />

@@ -5,21 +5,33 @@ import { SelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_s
 const SelectEditor = forwardRef(({
   value,
   options,
-  isRequired
+  isRequired,
+  type,
 }, ref) => {
   const [selectedValue, setSelectedValue] = useState(value);
 
   useImperativeHandle(ref, () => ({
-    getValue: () => selectedValue,
+    getValue: () => valueType(),
     isCancelBeforeStart: () => false,
   }));
+
+  const valueType = () => {
+    switch (type) {
+      case 'number':
+        return parseInt(selectedValue);
+      case 'float':
+        return parseFloat(selectedValue);
+      default:
+        return selectedValue;
+    }
+  };
 
   return (
     <SelectCustomLabel
       title='Select option...'
-      value={selectedValue}
+      value={valueType()}
       onChange={v => setSelectedValue(v)}
-      defaultValue={value}
+      defaultValue={valueType()}
       options={options}
       isRequired={isRequired}
     />

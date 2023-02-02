@@ -6,9 +6,13 @@ import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
 const ConfirmDelete = connect(
   'doModalClose',
   'doDeleteFishDataEntry',
+  'doDeleteTelemetryDataEntry',
+  'doDeleteSupplementalDataEntry',
   ({
     doModalClose,
     doDeleteFishDataEntry,
+    doDeleteTelemetryDataEntry,
+    doDeleteSupplementalDataEntry,
     value,
     data,
     type
@@ -36,6 +40,10 @@ const ConfirmDelete = connect(
       switch (type) {
         case 'fish':
           return doDeleteFishDataEntry(value);
+        case 'supplemental':
+          return doDeleteSupplementalDataEntry(data.sid);
+        case 'telemetry':
+          return doDeleteTelemetryDataEntry(value);
         default:
           return <>Unknown data type.</>;
       }
@@ -48,7 +56,7 @@ const ConfirmDelete = connect(
           <div className='container-fluid'>
             Are you sure you want to delete?
             <div className='pt-2'>
-              <div><b>{getTypeText()} Data Entry ID: </b><i>{value}</i></div>
+              <div><b>{getTypeText()} Data Entry ID: </b><i>{value || data.sid}</i></div>
               <div><b>Uploaded By: </b><i>{data.uploadedBy}</i></div>
             </div>
           </div>

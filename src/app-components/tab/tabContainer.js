@@ -25,7 +25,7 @@ const TabContainer = ({
   changeTabDelay = 0,
   ...customProps
 }) => {
-  const [tabIndex, setTabIndex] = useState(1);
+  const [tabIndex, setTabIndex] = useState(defaultTab);
   const [isDisabled, setIsDisabled] = useState(false);
 
   const changeTab = (title, index) => {
@@ -39,6 +39,12 @@ const TabContainer = ({
       setTimeout(() => setIsDisabled(false), changeTabDelay);
     }
   }, [isDisabled, setIsDisabled]);
+
+  useEffect(() => {
+    if (defaultTab !== tabIndex) {
+      setTabIndex(defaultTab);
+    }
+  }, [defaultTab]);
 
   return (
     <div {...customProps}>

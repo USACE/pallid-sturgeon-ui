@@ -4,11 +4,13 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
+
 import TelemetryIdCellRenderer from 'common/gridCellRenderers/telemetryIdCellRenderer';
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import SelectEditor from 'common/gridCellEditors/selectEditor';
 import NumberEditor from 'common/gridCellEditors/numberEditor';
 import TextEditor from 'common/gridCellEditors/textEditor';
+import FloatEditor from 'common/gridCellEditors/floatEditor';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -22,6 +24,7 @@ const TelemetryDsTable = connect(
   'doUpdateUrl',
   'selectSitesData',
   'selectDataEntryTelemetryData',
+  'selectDataEntryLastParams',
   ({
     doModalOpen,
     doSaveTelemetryDataEntry,
@@ -35,23 +38,23 @@ const TelemetryDsTable = connect(
     const { siteId } = sitesData[0];
     const gridRef = useRef();
 
-    // const lastRow = dataEntryFishData.items[dataEntryFishData.totalCount - 1];
-    // const initialState = {
-    //   seId: dataEntryLastParams.seId
-    // };
+    const lastRow = dataEntryTelemetryData.items[dataEntryTelemetryData.totalCount - 1];
+    const initialState = {
+      seId: dataEntryLastParams.seId
+    };
 
     const addRow = useCallback(() => {
       gridRef.current.api.applyTransaction({ add: [{}] });
     }, []);
 
-    // const copyLastRow = () => {
-    //   const row = {...lastRow};
-    //   if (row) {
-    //     delete row['fid'];
-    //     delete row['uploadedBy'];
-    //     gridRef.current.api.applyTransaction({ add: [row] });
-    //   }
-    // };
+    const copyLastRow = () => {
+      const row = {...lastRow};
+      if (row) {
+        delete row['tId'];
+        delete row['uploadedBy'];
+        gridRef.current.api.applyTransaction({ add: [row] });
+      }
+    };
     
     return (
       <div className='container-fluid overflow-auto'>
@@ -72,7 +75,7 @@ const TelemetryDsTable = connect(
           title='Copy Last Row'
           className='ml-1'
           icon={<Icon icon='content-copy' />}
-          // handleClick={copyLastRow}
+          handleClick={copyLastRow}
         />
         <Button
           isOutline
@@ -103,8 +106,7 @@ const TelemetryDsTable = connect(
               lockPinned: true,
             }}
             editType='fullRow'
-            // onRowValueChanged={({ data }) => !data.fid ? doSaveFishDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId }) : doUpdateFishDataEntry(data, { mrId: dataEntryLastParams.mrId })}
-            // onRowValueChanged={({ data }) => !data.tId ? doS : 'doUpdate'}
+            onRowValueChanged={({ data }) => !data.tId ? doSaveTelemetryDataEntry({...initialState ,...data}, { seId: dataEntryLastParams.seId }) : doUpdateTelemetryDataEntry(data, { seId: dataEntryLastParams.seId })}
             rowHeight={35}
             rowData={items}
             frameworkComponents={{
@@ -113,6 +115,7 @@ const TelemetryDsTable = connect(
               selectEditor: SelectEditor,
               numberEditor: NumberEditor,
               textEditor: TextEditor,
+              floatEditor: FloatEditor,
             }}
           >
             <AgGridColumn
@@ -130,28 +133,27 @@ const TelemetryDsTable = connect(
             <AgGridColumn 
               field='tId' 
               headerName='Telemetry ID' 
-              // cellRenderer='telemetryIdCellRenderer' 
-              // cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/telemetry-edit' }} 
               sortable 
               unSortIcon 
+              editable={false}
             />
             <AgGridColumn field='tFid' sortable unSortIcon />
-            <AgGridColumn field='seId' headerName='Search Effort ID' sortable unSortIcon />
-            <AgGridColumn field='captureLatitude' sortable unSortIcon />
-            <AgGridColumn field='captureLongitude' sortable unSortIcon />
+            <AgGridColumn field='bend' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='radioTagNum' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='frequencyIdCode' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
             <AgGridColumn field='captureDate' headerName='Capture Time' sortable unSortIcon />
-            <AgGridColumn field='conductivity' sortable unSortIcon />
-            <AgGridColumn field='depth' sortable unSortIcon />
-            <AgGridColumn field='frequencyIdCode' sortable unSortIcon />
-            <AgGridColumn field='gravel' sortable unSortIcon />
-            <AgGridColumn field='macroId' sortable unSortIcon />
+            <AgGridColumn field='captureLatitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='captureLongitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='positionConfidence' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
             <AgGridColumn field='mesoId' sortable unSortIcon />
-            <AgGridColumn field='positionConfidence' sortable unSortIcon />
-            <AgGridColumn field='radioTagNum' sortable unSortIcon />
-            <AgGridColumn field='sand' sortable unSortIcon />
-            <AgGridColumn field='silt' sortable unSortIcon />
-            <AgGridColumn field='temp' sortable unSortIcon />
-            <AgGridColumn field='turbidity' sortable unSortIcon />
+            <AgGridColumn field='depth' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='macroId' sortable unSortIcon />
+            <AgGridColumn field='temp' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='conductivity' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='turbidity' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='silt' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='sand' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='gravel' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='comments' sortable unSortIcon />
             <AgGridColumn field='editInitials' sortable unSortIcon />
             <AgGridColumn field='lastEditComment' sortable unSortIcon />

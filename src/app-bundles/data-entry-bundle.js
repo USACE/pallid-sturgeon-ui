@@ -48,7 +48,11 @@ export default {
             ...state,
             lastParams: payload,
           };
-
+        case 'SEARCH_DATA_ENTRY_FETCH_START':
+          return {
+            ...state,
+            lastParams: payload,
+          };
         case 'TELEMETRY_DATA_ENTRY_FETCH_START':
           return {
             ...state,
@@ -403,7 +407,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchSupplementalDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/supplemental'));
+        store.doFetchSupplementalDataEntry(params);
       } else {
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -457,7 +461,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchTelemetryDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/telemetry'));
+        store.doFetchTelemetryDataEntry(params);
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -513,7 +517,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchSupplementalDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/supplemental'));
+        store.doFetchSupplementalDataEntry(params);
       } else {
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
@@ -567,7 +571,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchTelemetryDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/telemetry'));
+        store.doFetchTelemetryDataEntry(params);
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -579,17 +583,53 @@ export default {
 
   doDeleteFishDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
     dispatch({ type: 'FISH_DATA_ENTRY_DELETE_START' });
-    const toastId = toast.loading('Saving fish datasheet...');
+    const toastId = toast.loading(`Deleting fish datasheet ID: ${id}...`);
 
     const url = `/psapi/fishDataEntry/${id}`;
 
     apiDelete(url, (err, _body) => {
       if (!err) {
-        tSuccess(toastId, 'Datasheet successfully deleted!');
+        tSuccess(toastId, `Fish datasheet ID: ${id} successfully deleted!`);
         dispatch({ type: 'FISH_DATA_ENTRY_DELETE_FINISHED' });
         store.doFetchFishDataEntry(store.selectDataEntryLastParams());
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_DELETE_ERROR', payload: err });
+        tError(toastId, `Error deleting fish datasheet ID: ${id}. Please try again.`);
+      }
+    });
+  },
+
+  doDeleteSupplementalDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
+    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_DELETE_START' });
+    const toastId = toast.loading(`Deleting supplemental datasheet ID: ${id}...`);
+
+    const url = `/psapi/supplementalDataEntry/${id}`;
+
+    apiDelete(url, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, `Supplemental datasheet ID: ${id} successfully deleted!`);
+        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_DELETE_FINISHED' });
+        store.doFetchSupplementalDataEntry(store.selectDataEntryLastParams());
+      } else {
+        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_DELETE_ERROR', payload: err });
+        tError(toastId, `Error deleting supplemental datasheet ID: ${id}. Please try again.`);
+      }
+    });
+  },
+
+  doDeleteTelemetryDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
+    dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_START' });
+    const toastId = toast.loading(`Deleting telemetry datasheet ID: ${id}...`);
+
+    const url = `/psapi/telemetryDataEntry/${id}`;
+
+    apiDelete(url, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, 'Datasheet successfully deleted!');
+        dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_FINISHED' });
+        store.doFetchTelemetryDataEntry(store.selectDataEntryLastParams());
+      } else {
+        dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
       }
     });

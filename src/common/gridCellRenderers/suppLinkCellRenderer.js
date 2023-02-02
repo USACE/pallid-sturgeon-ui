@@ -10,10 +10,20 @@ const SuppLinkCellRenderer = connect(
   ({
     doUpdateCurrentTab,
     dataEntrySupplemental,
-    data
+    data,
+    setIsAddRow,
+    setRowId,
   }) => {
     const fId = data.fid; 
     const hasSuppData = !!dataEntrySupplemental.items.filter(data => data.fid === fId).length;
+
+    const handleAddRow = (add) => {
+      doUpdateCurrentTab(2);
+      if (add) {
+        setIsAddRow(true);
+        setRowId(fId);
+      }
+    };
 
     return (
       <>
@@ -25,7 +35,7 @@ const SuppLinkCellRenderer = connect(
             title='Associated Supplemental Data Entries'
             text={'View Data'}
             icon={<Icon icon='dots-horizontal' />}
-            handleClick={() => doUpdateCurrentTab(2)}
+            handleClick={() => handleAddRow(false)}
           />
         ) : (
           <Button
@@ -35,7 +45,7 @@ const SuppLinkCellRenderer = connect(
             title='Associated Supplemental Data Entries'
             text={'Add Data'}
             icon={<Icon icon='plus' />}
-          // handleClick={() => doFetchSupplementalDataEntry({ fId: fId }, () => doUpdateCurrentTab(2))}
+            handleClick={() => handleAddRow(true)}
           />
         )}
         
