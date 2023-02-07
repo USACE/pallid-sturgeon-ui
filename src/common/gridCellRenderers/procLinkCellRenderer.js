@@ -10,23 +10,46 @@ const ProcLinkCellRenderer = connect(
   ({
     doUpdateCurrentTab,
     dataEntryProcedure,
-    data
+    data,
+    setIsAddRow,
+    setRowId,
   }) => {
     const fId = data.fid;
-    // const params = paramType === 'tableId' ? { tableId: value } : { fId: data.fid };
-    console.log(fId);
+    const sId = data.sid;
+    const hasProcData = !!dataEntryProcedure.items.filter(data => data.sid === sId).length;
+
+    const handleAddRow = (add) => {
+      doUpdateCurrentTab(3);
+      if (add) {
+        setIsAddRow(true);
+        setRowId({ fid: fId, sid: sId });
+      }
+    };
 
     return (
       <>
-        <Button
-          isOutline
-          size='small'
-          variant='info'
-          title='Associated Supplemental Data Entries'
-          text={'View Data'}
-          icon={<Icon icon='dots-horizontal' />}
-          // handleClick={() => doUpdateCurrentTab(2)}
-        />
+        {hasProcData ? (
+          <Button
+            isOutline
+            size='small'
+            variant='info'
+            title='Associated Procedure Data Entries'
+            text={'View Data'}
+            icon={<Icon icon='dots-horizontal' />}
+            handleClick={() => handleAddRow(false)}
+          />
+        ) : (
+          <Button
+            isOutline
+            size='small'
+            variant='success'
+            title='Associated Procedure Data Entries'
+            text={'Add Data'}
+            icon={<Icon icon='plus' />}
+            handleClick={() => handleAddRow(true)}
+          />
+        )}
+        
       </>
     );
   });

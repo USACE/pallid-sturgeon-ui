@@ -4,7 +4,7 @@ import { Input } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper
 
 const TextEditor = forwardRef(({
   value,
-  isRequired
+  isRequired = false
 }, ref) => {
   const [selectedValue, setSelectedValue] = useState(value);
 

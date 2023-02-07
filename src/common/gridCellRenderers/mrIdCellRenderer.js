@@ -6,14 +6,22 @@ import Button from 'app-components/button';
 const MrIdCellRenderer = connect(
   'doFetchMoRiverDataEntry',
   'doUpdateUrl',
+  'doUpdateCurrentTab',
   ({
     doFetchMoRiverDataEntry,
     doUpdateUrl,
+    doUpdateCurrentTab,
     uri,
     data,
-    type
+    type,
+    tab = 0,
   }) => {
     const params = { tableId: data.mrId };
+
+    const handleChange = () => {
+      doUpdateCurrentTab(tab);
+      doFetchMoRiverDataEntry(params, () => doUpdateUrl(uri), false);
+    };
 
     const getTypeText = () => {
       switch (type) {
@@ -23,12 +31,6 @@ const MrIdCellRenderer = connect(
           return data.fishCount;
         case 'supplemental':
           return data.suppCount;
-        // case 'searchEffort':
-        //   return <>Search Effort</>;
-        // case 'telemetry':
-        //   return <>Telemetry</>;
-        // case 'procedure':
-        //   return <>Procedure</>;
         default:
           return <>Unknown data type.</>;
       }
@@ -40,7 +42,7 @@ const MrIdCellRenderer = connect(
         variant='link'
         className='p-0 mb-1'
         text={getTypeText()}
-        handleClick={() => doFetchMoRiverDataEntry(params, () => doUpdateUrl(uri), false)}
+        handleClick={handleChange}
       />
     );
   });

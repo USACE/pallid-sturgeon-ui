@@ -77,8 +77,13 @@ const MissouriRiverForm = connect(
       noVelocity: 'N'
     };
     const [state, dispatch] = useReducer(reducer, edit ? {} : initialState);
-    const [isAddRow, setIsAddRow] = useState(false);
-    const [rowId, setRowId] = useState(null);
+
+    const [isAddSuppRow, setIsAddSuppRow] = useState(false);
+    const [suppRowId, setSuppRowId] = useState(null);
+
+    const [isAddProcRow, setIsAddProcRow] = useState(false);
+    const [procRowId, setProcRowId] = useState(null);
+
     const [isNoTurbidity, setIsNoTurbidity] = useState(false);
     const [isNoVelocity, setIsNoVelocity] = useState(false);
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
@@ -707,15 +712,15 @@ const MissouriRiverForm = connect(
                 },
                 {
                   title: `Fish (${dataEntryFishTotalCount})`,
-                  content: (<><FishDsTable setIsAddRow={setIsAddRow} setRowId={setRowId} /></>),
+                  content: (<><FishDsTable setIsAddRow={setIsAddSuppRow} setRowId={setSuppRowId} /></>),
                 },
                 {
                   title: `Supplemental (${dataEntrySupplementalTotalCount})`,
-                  content: <><SuppDsTable isAddRow={isAddRow} rowId={rowId} /></>
+                  content: <><SuppDsTable isAddRow={isAddSuppRow} rowId={suppRowId} setIsAddRow={setIsAddProcRow} setRowId={setProcRowId} /></>
                 },
                 {
                   title: `Procedure (${dataEntryProcedureTotalCount})`,
-                  content: <><ProcedureDsTable /></>
+                  content: <><ProcedureDsTable isAddRow={isAddProcRow} rowId={procRowId} /></>
                 },
               ]}
               onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}

@@ -5,8 +5,8 @@ import { SelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_s
 const SelectEditor = forwardRef(({
   value,
   options,
-  isRequired,
-  type,
+  isRequired = false,
+  type = 'string',
 }, ref) => {
   const [selectedValue, setSelectedValue] = useState(value);
 

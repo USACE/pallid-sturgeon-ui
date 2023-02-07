@@ -425,7 +425,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchProcedureDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/procedure'));
+        store.doFetchProcedureDataEntry(params);
       } else {
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -535,7 +535,7 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doFetchProcedureDataEntry(params, store.doUpdateUrl('/sites-list/datasheet/procedure'));
+        store.doFetchProcedureDataEntry(params);
       } else {
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
@@ -553,7 +553,6 @@ export default {
       if (!err) {
         tSuccess(toastId, 'Datasheet successfully updated!');
         dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_FINISHED' });
-        store.doUpdateUrl('/sites-list/datasheet');
       } else {
         dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_ERROR', payload: err });
         tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -613,6 +612,24 @@ export default {
       } else {
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_DELETE_ERROR', payload: err });
         tError(toastId, `Error deleting supplemental datasheet ID: ${id}. Please try again.`);
+      }
+    });
+  },
+
+  doDeleteProcedureDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
+    dispatch({ type: 'PROCEDURE_DATA_ENTRY_DELETE_START' });
+    const toastId = toast.loading(`Deleting procedure datasheet ID: ${id}...`);
+
+    const url = `/psapi/procedureDataEntry/${id}`;
+
+    apiDelete(url, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, `Procedure datasheet ID: ${id} successfully deleted!`);
+        dispatch({ type: 'PROCEDURE_DATA_ENTRY_DELETE_FINISHED' });
+        store.doFetchProcedureDataEntry({sid: id});
+      } else {
+        dispatch({ type: 'PROCEDURE_DATA_ENTRY_DELETE_ERROR', payload: err });
+        tError(toastId, `Error deleting procedure datasheet ID: ${id}. Please try again.`);
       }
     });
   },

@@ -5,7 +5,6 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 
-import TelemetryIdCellRenderer from 'common/gridCellRenderers/telemetryIdCellRenderer';
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import SelectEditor from 'common/gridCellEditors/selectEditor';
 import NumberEditor from 'common/gridCellEditors/numberEditor';
@@ -22,7 +21,6 @@ const TelemetryDsTable = connect(
   'doSaveTelemetryDataEntry',
   'doUpdateTelemetryDataEntry',
   'doUpdateUrl',
-  'selectSitesData',
   'selectDataEntryTelemetryData',
   'selectDataEntryLastParams',
   ({
@@ -30,12 +28,10 @@ const TelemetryDsTable = connect(
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
     doUpdateUrl,
-    sitesData,
     dataEntryTelemetryData,
     dataEntryLastParams
   }) => {
     const { items } = dataEntryTelemetryData;
-    const { siteId } = sitesData[0];
     const gridRef = useRef();
 
     const lastRow = dataEntryTelemetryData.items[dataEntryTelemetryData.totalCount - 1];
@@ -85,6 +81,7 @@ const TelemetryDsTable = connect(
           title='Create Telemetry Datasheet'
           className='ml-1'
           handleClick={() => doUpdateUrl('/sites-list/datasheet/telemetry-create')}
+          isDisabled
         />
         <Button
           isOutline
@@ -110,7 +107,6 @@ const TelemetryDsTable = connect(
             rowHeight={35}
             rowData={items}
             frameworkComponents={{
-              telemetryIdCellRenderer: TelemetryIdCellRenderer,
               editCellRenderer: EditCellRenderer,
               selectEditor: SelectEditor,
               numberEditor: NumberEditor,

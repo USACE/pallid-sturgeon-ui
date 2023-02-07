@@ -5,9 +5,7 @@ import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 
-import FishIdCellRenderer from 'common/gridCellRenderers/fishIdCellRenderer';
 import SelectEditor from 'common/gridCellEditors/selectEditor';
-import SuppIdCellRenderer from 'common/gridCellRenderers/suppIdCellRenderer';
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import NumberEditor from 'common/gridCellEditors/numberEditor';
 import TextEditor from 'common/gridCellEditors/textEditor';
@@ -107,8 +105,6 @@ const FishDsTable = connect(
               selectEditor: SelectEditor,
               numberEditor: NumberEditor,
               textEditor: TextEditor,
-              fishIdCellRenderer: FishIdCellRenderer,
-              suppIdCellRenderer: SuppIdCellRenderer,
               suppLinkCellRenderer: SuppLinkCellRenderer
             }}
           >

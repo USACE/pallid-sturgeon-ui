@@ -6,7 +6,6 @@ import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
-import FishIdCellRenderer from 'common/gridCellRenderers/fishIdCellRenderer';
 import MrIdCellRenderer from 'common/gridCellRenderers/mrIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
@@ -55,14 +54,12 @@ const MissouriDsTable = connect(
             }}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
-              fishIdCellRenderer: FishIdCellRenderer,
               mrIdCellRenderer: MrIdCellRenderer
             }}
           >
             <AgGridColumn field='mrId' headerName='MR ID' width={100} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'missouriRiver'}} sortable unSortIcon />
-            <AgGridColumn field='fishCount' headerName='Fish' width={130} cellStyle={fishCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'fish'}} sortable unSortIcon />
-            {/* @TODO: check with tisha if supp count is correct for mr_id */}
-            <AgGridColumn field='suppCount' headerName='Supplemental' width={130} cellStyle={suppCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'supplemental'}} sortable unSortIcon />
+            <AgGridColumn field='fishCount' headerName='Fish' width={130} cellStyle={fishCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'fish', tab: 1}} sortable unSortIcon />
+            <AgGridColumn field='suppCount' headerName='Supplemental' width={130} cellStyle={suppCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'supplemental', tab: 2}} sortable unSortIcon />
             {/* @TODO: procedure data entry count for mr_id */}
             <AgGridColumn field='procCount' headerName='Procedure' width={130} sortable unSortIcon />
             <AgGridColumn field='mrFid' headerName='Field ID' width={170} resizable sortable unSortIcon />

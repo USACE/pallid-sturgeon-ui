@@ -8,11 +8,13 @@ const ConfirmDelete = connect(
   'doDeleteFishDataEntry',
   'doDeleteTelemetryDataEntry',
   'doDeleteSupplementalDataEntry',
+  'doDeleteProcedureDataEntry',
   ({
     doModalClose,
     doDeleteFishDataEntry,
     doDeleteTelemetryDataEntry,
     doDeleteSupplementalDataEntry,
+    doDeleteProcedureDataEntry,
     value,
     data,
     type
@@ -42,6 +44,8 @@ const ConfirmDelete = connect(
           return doDeleteFishDataEntry(value);
         case 'supplemental':
           return doDeleteSupplementalDataEntry(data.sid);
+        case 'procedure':
+          return doDeleteProcedureDataEntry(data.sid);
         case 'telemetry':
           return doDeleteTelemetryDataEntry(value);
         default:

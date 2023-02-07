@@ -4,9 +4,8 @@ import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
+
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
-import SuppIdCellRenderer from 'common/gridCellRenderers/suppIdCellRenderer';
-import ProcedureIdCellRenderer from 'common/gridCellRenderers/procedureIdCellRenderer';
 import ProcLinkCellRenderer from 'common/gridCellRenderers/procLinkCellRenderer';
 import TextEditor from 'common/gridCellEditors/textEditor';
 import SelectEditor from 'common/gridCellEditors/selectEditor';
@@ -22,21 +21,20 @@ const SuppDsTable = connect(
   'doSaveSupplementalDataEntry',
   'doUpdateSupplementalDataEntry',
   'selectDataEntrySupplemental',
-  'selectSitesData',
   'selectDataEntryLastParams',
   ({
     doModalOpen,
     doSaveSupplementalDataEntry,
     doUpdateSupplementalDataEntry,
     dataEntrySupplemental,
-    sitesData,
     dataEntryLastParams,
     isAddRow,
-    rowId
+    rowId,
+    setIsAddRow,
+    setRowId,
   }) => {
     const gridRef = useRef();
-    const { items, totalCount } = dataEntrySupplemental;
-    const { siteId } = sitesData[0];
+    const { items } = dataEntrySupplemental;
 
     const initialState = {
       mrId: dataEntryLastParams.mrId
@@ -78,8 +76,6 @@ const SuppDsTable = connect(
             onRowValueChanged={({ data }) => !data.sid ? doSaveSupplementalDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId }) : doUpdateSupplementalDataEntry(data, { mrId: dataEntryLastParams.mrId })}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
-              procedureIdCellRenderer: ProcedureIdCellRenderer,
-              suppIdCellRenderer: SuppIdCellRenderer,
               procLinkCellRenderer: ProcLinkCellRenderer,
               textEditor: TextEditor,
               selectEditor: SelectEditor,
@@ -102,17 +98,20 @@ const SuppDsTable = connect(
             <AgGridColumn field='fid' headerName='Fish ID' editable={false} sortable unSortIcon />
             <AgGridColumn field='complete' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
             <AgGridColumn field='fFid' cellEditor='textEditor' resizable sortable unSortIcon />
-            <AgGridColumn field='checkby' headerName='Checked' cellEditor='textEditor' sortable unSortIcon />
-            <AgGridColumn field='approved' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
-            <AgGridColumn field='speciesId' headerName='Species' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn 
               field='proclink' 
               headerName='Proc Link' 
               width={130} 
               cellRenderer='procLinkCellRenderer' 
+              cellRendererParams={{
+                setIsAddRow: setIsAddRow,
+                setRowId: setRowId,
+              }}
               editable={false}
-              // cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/procedure' }} 
             />
+            <AgGridColumn field='checkby' headerName='Checked' cellEditor='textEditor' sortable unSortIcon />
+            <AgGridColumn field='approved' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
+            <AgGridColumn field='speciesId' headerName='Species' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='recorder' cellEditor='textEditor' sortable unSortIcon />
             <AgGridColumn field='tagnumber' cellEditor='textEditor' sortable unSortIcon />
             <AgGridColumn field='pitrn' headerName='PIT' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} sortable unSortIcon />
