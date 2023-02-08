@@ -39,13 +39,13 @@ const SearchDsTable = connect(
           rowHeight={35}
           rowData={searchEffortSitesDatasheetData}
           defaultColDef={{
-            width: 150,
+            width: 100,
           }}
           frameworkComponents={{
             searchIdCellRenderer: SearchIdCellRenderer,
           }}
         >
-          <AgGridColumn field='seId' headerName='Search ID' cellRenderer='searchIdCellRenderer'  cellRendererParams={{ uri: '/sites-list/datasheet/searchEffort-edit'}} sortable unSortIcon />
+          <AgGridColumn field='seId' headerName='SE ID' cellRenderer='searchIdCellRenderer'  cellRendererParams={{ uri: '/sites-list/datasheet/searchEffort-edit'}} sortable unSortIcon />
           {/* <AgGridColumn
             field='telemetryEntries'
             headerName='Telemetry Entries'
@@ -53,20 +53,19 @@ const SearchDsTable = connect(
             cellRenderer='telemetryIdCellRenderer'
             cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/telemetry' }}
           /> */}
-          <AgGridColumn field='searchTypeCode' sortable unSortIcon />
+          <AgGridColumn field='searchTypeCode' width={150} sortable unSortIcon />
           <AgGridColumn field='startTime' sortable unSortIcon />
-          <AgGridColumn field='startLatitude' sortable unSortIcon />
-          <AgGridColumn field='startLongitude' sortable unSortIcon />
+          <AgGridColumn field='startLatitude' width={150} sortable unSortIcon />
+          <AgGridColumn field='startLongitude' width={150} sortable unSortIcon />
           <AgGridColumn field='stopTime' sortable unSortIcon />
-          <AgGridColumn field='stopLatitude' sortable unSortIcon />
-          <AgGridColumn field='stopLongitude' sortable unSortIcon />
+          <AgGridColumn field='stopLatitude' width={150} sortable unSortIcon />
+          <AgGridColumn field='stopLongitude' width={150} sortable unSortIcon />
           <AgGridColumn field='temp' sortable unSortIcon />
-          <AgGridColumn field='conductivity' sortable unSortIcon />
+          <AgGridColumn field='conductivity' width={125} sortable unSortIcon />
           <AgGridColumn field='recorder' sortable unSortIcon />
-          <AgGridColumn field='editInitials' sortable unSortIcon />
-          <AgGridColumn field='lastEditComment' sortable unSortIcon />
-          <AgGridColumn field='lastUpdated' sortable unSortIcon />
-          <AgGridColumn field='uploadedBy' sortable unSortIcon />
+          <AgGridColumn field='editInitials' width={125} sortable unSortIcon />
+          <AgGridColumn field='lastEditComment' width={200} sortable unSortIcon />
+          <AgGridColumn field='uploadedBy' width={200} sortable unSortIcon />
         </AgGridReact>
       </div>
     </>

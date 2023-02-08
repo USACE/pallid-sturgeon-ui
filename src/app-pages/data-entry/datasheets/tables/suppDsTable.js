@@ -68,7 +68,7 @@ const SuppDsTable = connect(
             rowHeight={35}
             rowData={items}
             defaultColDef={{
-              width: 150,
+              width: 100,
               editable: true,
               lockPinned: true,
             }}
@@ -113,7 +113,7 @@ const SuppDsTable = connect(
             <AgGridColumn field='approved' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
             <AgGridColumn field='speciesId' headerName='Species' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='recorder' cellEditor='textEditor' sortable unSortIcon />
-            <AgGridColumn field='tagnumber' cellEditor='textEditor' sortable unSortIcon />
+            <AgGridColumn field='tagnumber' cellEditor='textEditor' width={125} sortable unSortIcon />
             <AgGridColumn field='pitrn' headerName='PIT' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} sortable unSortIcon />
             <AgGridColumn field='cwtyn' headerName='CWT' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions, isRequired: true }} unSortIcon />
             <AgGridColumn field='dangler' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions, isRequired: true }} sortable unSortIcon />
@@ -125,16 +125,16 @@ const SuppDsTable = connect(
             <AgGridColumn field='elcolor' headerName='EL Color' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
             <AgGridColumn field='erhv' headerName='ER H/V/X' cellEditor='selectEditor' cellEditorParams={{ options: HVXOptions }} sortable unSortIcon />
             <AgGridColumn field='ercolor' headerName='ER Color' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
-            <AgGridColumn field='genetic' headerName='Genetic Y/N' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions }} sortable unSortIcon />
+            <AgGridColumn field='genetic' headerName='Genetic Y/N' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions }} width={125} sortable unSortIcon />
             {/* @TODO: Do we need the following fields? */}
-            <AgGridColumn field='geneticNeeds' cellEditor='textEditor' sortable unSortIcon />
-            <AgGridColumn field='geneticsVialNumber' cellEditor='textEditor' sortable unSortIcon />
-            <AgGridColumn field='otherTagInfo' cellEditor='textEditor' sortable unSortIcon />
+            <AgGridColumn field='geneticNeeds' cellEditor='textEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='geneticsVialNumber' headerName='Genetics Vial #' cellEditor='textEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='otherTagInfo' cellEditor='textEditor' width={200} sortable unSortIcon />
             <AgGridColumn field='anal' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='archive' cellEditor='numberEditor' sortable unSortIcon />
-            <AgGridColumn field='broodstock' cellEditor='numberEditor' sortable unSortIcon />
-            <AgGridColumn field='hatchWild' cellEditor='numberEditor' sortable unSortIcon />
-            <AgGridColumn field='hatcheryOrigin' cellEditor='textEditor' sortable unSortIcon />
+            <AgGridColumn field='broodstock' cellEditor='numberEditor' width={125} sortable unSortIcon />
+            <AgGridColumn field='hatchWild' cellEditor='numberEditor' width={125} sortable unSortIcon />
+            <AgGridColumn field='hatcheryOrigin' cellEditor='textEditor' width={150} sortable unSortIcon />
             <AgGridColumn field='head' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='inter' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='lIb' cellEditor='numberEditor' sortable unSortIcon />
@@ -142,11 +142,11 @@ const SuppDsTable = connect(
             <AgGridColumn field='mIb' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='rIb' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='rOb' cellEditor='numberEditor' sortable unSortIcon />
-            <AgGridColumn field='mouthwidth' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='mouthwidth' cellEditor='numberEditor' width={125} sortable unSortIcon />
             <AgGridColumn field='recapture' cellEditor='textEditor' sortable unSortIcon />
-            <AgGridColumn field='lastEditComment' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
-            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
-            <AgGridColumn field='uploadedBy' sortable unSortIcon editable={false} />
+            <AgGridColumn field='lastEditComment' cellEditor='textEditor' width={200} cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} width={125} sortable unSortIcon />
+            <AgGridColumn field='uploadedBy' width={150} sortable unSortIcon editable={false} />
           </AgGridReact>
         </div>
       </div>

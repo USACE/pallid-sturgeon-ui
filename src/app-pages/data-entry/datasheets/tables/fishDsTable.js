@@ -134,14 +134,29 @@ const FishDsTable = connect(
               editable={false}
             />
             <AgGridColumn field='panelHook' headerName='Panel Hook' />
-            <AgGridColumn field='species' cellEditor='selectEditor' cellEditorParams={{ options: createMesoOptions(domainsSpecies), isRequired: true }} />
+            <AgGridColumn 
+              field='species' 
+              cellEditor='selectEditor' 
+              cellEditorParams={{ 
+                options: createMesoOptions(domainsSpecies), 
+                isRequired: true 
+              }} 
+            />
             <AgGridColumn field='length' cellEditor='numberEditor' />
             <AgGridColumn field='weight' cellEditor='numberEditor' />
             <AgGridColumn field='countF' headerName='Count' cellEditor='numberEditor' />
-            <AgGridColumn field='ftPrefix' headerName='FT Prefix' cellEditor='selectEditor' cellEditorParams={{ options: createMesoOptions(domainsFtPrefixes), isRequired: false }} />
+            <AgGridColumn 
+              field='ftPrefix' 
+              headerName='FT Prefix' 
+              cellEditor='selectEditor' 
+              cellEditorParams={{ 
+                options: createMesoOptions(domainsFtPrefixes), 
+                isRequired: false 
+              }} 
+            />
             <AgGridColumn field='mR' headerName='M/R' cellEditor='selectEditor' cellEditorParams={{ options: createMesoOptions(domainsMr), isRequired: false }} />
             <AgGridColumn field='ftnum' headerName='Floy Tag' />
-            <AgGridColumn field='geneticsVialNumber' headerName='Genetics Vial #' />
+            <AgGridColumn field='geneticsVialNumber' width={125} headerName='Genetics Vial #' />
             <AgGridColumn field='condition' cellEditor='numberEditor' editable={false} />
             <AgGridColumn field='finCurl' cellEditor='selectEditor' cellEditorParams={{ options: finCurlOptions, isRequired: false }} />
             <AgGridColumn field='otolith' cellEditor='selectEditor' cellEditorParams={{ options: createDropdownOptions(domainsOtolith), isRequired: false }} />
@@ -151,8 +166,8 @@ const FishDsTable = connect(
             <AgGridColumn headerName='RSD' cellEditor='numberEditor' editable={false} />
             <AgGridColumn field='bait' cellEditor='selectEditor' cellEditorParams={{ options: baitOptions, isRequired: false }} />
             <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} />
-            <AgGridColumn field='lastEditComment' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} resizable />
-            <AgGridColumn field='uploadedBy' editable={false} />
+            <AgGridColumn field='lastEditComment' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} width={200} resizable />
+            <AgGridColumn field='uploadedBy' width={150} resizable editable={false} />
           </AgGridReact>
         </div>
       </div>

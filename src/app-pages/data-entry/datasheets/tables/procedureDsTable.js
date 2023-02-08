@@ -12,9 +12,11 @@ import FloatEditor from 'common/gridCellEditors/floatEditor';
 import DateEditor from 'common/gridCellEditors/dateEditor';
 
 import { evalLocationsOptions, frequencyIdOptions, purposeOptions, sexOptions, spawnEvaluationOptions, visualAssessmentOptions, YNNumOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
+import { dateFormatter } from 'common/gridHelpers/ag-grid-helper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+
 
 const ProcedureDsTable = connect(
   'doModalOpen',
@@ -93,7 +95,7 @@ const ProcedureDsTable = connect(
             rowHeight={35}
             rowData={items}
             defaultColDef={{
-              width: 150,
+              width: 100,
               editable: true,
               lockPinned: true,
             }}
@@ -122,63 +124,65 @@ const ProcedureDsTable = connect(
             />
             <AgGridColumn 
               field='id' 
-              headerName='Procedure ID' 
+              headerName='P ID' 
               sortable 
               unSortIcon 
               editable={false}
             />
-            <AgGridColumn field='sid' headerName='Supp ID' sortable unSortIcon editable={false} />
-            <AgGridColumn field='fid' headerName='Fish ID' sortable unSortIcon editable={false} />
+            <AgGridColumn field='sid' headerName='S ID' sortable unSortIcon editable={false} />
+            <AgGridColumn field='fid' headerName='F ID' sortable unSortIcon editable={false} />
             <AgGridColumn field='fFid' resizable sortable unSortIcon />
             <AgGridColumn field='mrFid' resizable sortable unSortIcon  />
             <AgGridColumn field='purpose' cellEditor='selectEditor' cellEditorParams={{ options: purposeOptions, isRequired: true }} sortable unSortIcon />
             <AgGridColumn field='procedureDate' 
               cellEditor='dateEditor' 
               cellEditorParams={{ isRequired: true }} 
-              valueGetter={params => params.data.procedureDate ? params.data.procedureDate.split('T')[0] : ''}
+              valueGetter={params => dateFormatter(params.data.procedureDate)}
+              width={150}
               sortable 
               unSortIcon 
             />
-            <AgGridColumn field='procedureStartTime' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
-            <AgGridColumn field='procedureEndTime' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
-            <AgGridColumn field='procedureBy' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='procedureStartTime' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} width={175} sortable unSortIcon />
+            <AgGridColumn field='procedureEndTime' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} width={175} sortable unSortIcon />
+            <AgGridColumn field='procedureBy' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} width={150} sortable unSortIcon />
             {/* @TODO: Change Y/N cell editor to checkbox */}
-            <AgGridColumn field='antibioticInjection' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
+            <AgGridColumn field='antibioticInjection' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} width={150} sortable unSortIcon />
             <AgGridColumn field='pDorsal' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
             <AgGridColumn field='pVentral' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
             <AgGridColumn field='pLeft'cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }}  sortable unSortIcon />
-            <AgGridColumn field='oldRadioTagNum' cellEditor='numberEditor' sortable unSortIcon />
-            <AgGridColumn field='oldFrequencyId' cellEditor='selectEditor' cellEditorParams={{ options: frequencyIdOptions, type: 'number' }} sortable unSortIcon />
-            <AgGridColumn field='dstSerialNum' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='oldRadioTagNum' headerName='Old Radio Tag #' cellEditor='numberEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='oldFrequencyId' cellEditor='selectEditor' cellEditorParams={{ options: frequencyIdOptions, type: 'number' }} width={150} sortable unSortIcon />
+            <AgGridColumn field='dstSerialNum' headerName='DST Serial #' cellEditor='numberEditor' width={125} sortable unSortIcon />
             <AgGridColumn 
               field='dstStartDate' 
               cellEditor='dateEditor' 
               cellEditorParams={{ isRequired: true }} 
-              valueGetter={params => params.data.dstStartDate ? params.data.dstStartDate.split('T')[0] : ''}
+              valueGetter={params => dateFormatter(params.data.dstStartDate)}
+              width={125}
               sortable 
               unSortIcon 
             />
-            <AgGridColumn field='dstStartTime' cellEditor='textEditor' sortable unSortIcon />
-            <AgGridColumn field='dstReimplant' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
-            <AgGridColumn field='newRadioTagNum' cellEditor='numberEditor' sortable unSortIcon />
-            <AgGridColumn field='newFreqId' cellEditor='selectEditor' cellEditorParams={{ options: frequencyIdOptions, type: 'number' }} sortable unSortIcon />
+            <AgGridColumn field='dstStartTime' headerName='DST Start Time' cellEditor='textEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='dstReimplant' headerName='DST Reimplant' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} width={125} sortable unSortIcon />
+            <AgGridColumn field='newRadioTagNum' headerName='New Radio Tag #' cellEditor='numberEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='newFreqId' headerName='New Frequency Id' cellEditor='selectEditor' cellEditorParams={{ options: frequencyIdOptions, type: 'number' }} width={150} sortable unSortIcon />
             <AgGridColumn field='sexCode' cellEditor='selectEditor' cellEditorParams={{ options: sexOptions }} sortable unSortIcon />
             {/* Blood sample not on the original form? */}
-            <AgGridColumn field='bloodSample' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon /> 
+            <AgGridColumn field='bloodSample' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} width={125} sortable unSortIcon /> 
             {/* @TODO: Change egg sample Y/N cell editor to checkbox */}
-            <AgGridColumn field='eggSample' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
-            <AgGridColumn field='comments' cellEditor='textEditor' resizable sortable unSortIcon />
-            <AgGridColumn field='fishHealthComment' cellEditor='textEditor' resizable sortable unSortIcon />
-            <AgGridColumn field='evalLocation' cellEditor='selectEditor' cellEditorParams={{ options: evalLocationsOptions }} sortable unSortIcon />
-            <AgGridColumn field='spawnStatus' cellEditor='selectEditor' cellEditorParams={{ options: spawnEvaluationOptions }} sortable unSortIcon />
-            <AgGridColumn field='visualReproStatus' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} sortable unSortIcon />
-            <AgGridColumn field='ultrasoundReproStatus' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }}sortable unSortIcon />
-            <AgGridColumn field='expectedSpawnYear' cellEditor='numberEditor' sortable unSortIcon />
-            <AgGridColumn field='ultrasoundGonadLength' cellEditor='numberEditor' sortable unSortIcon />
-            <AgGridColumn field='gonadCondition' cellEditor='textEditor' sortable unSortIcon />
-            <AgGridColumn field='lastEditComment' cellEditor='textEditor' cellEditorParams={{ isRequired: true}} resizable sortable unSortIcon />
-            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true}} sortable unSortIcon />
-            <AgGridColumn field='uploadedBy' sortable unSortIcon editable={false} />
+            <AgGridColumn field='eggSample' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} width={125} sortable unSortIcon />
+            <AgGridColumn field='comments' cellEditor='textEditor' width={200} resizable sortable unSortIcon />
+            <AgGridColumn field='fishHealthComment' cellEditor='textEditor' width={200} resizable sortable unSortIcon />
+            <AgGridColumn field='evalLocation' cellEditor='selectEditor' cellEditorParams={{ options: evalLocationsOptions }} width={125} sortable unSortIcon />
+            <AgGridColumn field='spawnStatus' cellEditor='selectEditor' cellEditorParams={{ options: spawnEvaluationOptions }} width={125} sortable unSortIcon />
+            <AgGridColumn field='visualReproStatus' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} width={150} sortable unSortIcon />
+            <AgGridColumn field='ultrasoundReproStatus' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} width={200} sortable unSortIcon />
+            <AgGridColumn field='expectedSpawnYear' cellEditor='numberEditor' width={175} sortable unSortIcon />
+            <AgGridColumn field='ultrasoundGonadLength' cellEditor='numberEditor' width={175} sortable unSortIcon />
+            <AgGridColumn field='gonadCondition' cellEditor='textEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='lastEditComment' cellEditor='textEditor' cellEditorParams={{ isRequired: true}} width={200} resizable sortable unSortIcon />
+            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true}} width={125} sortable unSortIcon />
+            <AgGridColumn field='uploadedBy' width={200} sortable unSortIcon editable={false} />
           </AgGridReact>
         </div>
       </div>

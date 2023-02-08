@@ -19,8 +19,6 @@ export const nameFormatter = params => {
   return value.replace(',', ', ');
 };
 
-export const dataFormatter = params => {
-  console.log(params);
-};
+export const dateFormatter = date => date ? date.split('T')[0] : '';
 
 export const rowDataGetter = params => params.data;

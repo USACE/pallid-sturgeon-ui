@@ -10,6 +10,7 @@ import MrIdCellRenderer from 'common/gridCellRenderers/mrIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import { dateFormatter } from 'common/gridHelpers/ag-grid-helper';
 
 const MissouriDsTable = connect(
   'doUpdateUrl',
@@ -64,7 +65,7 @@ const MissouriDsTable = connect(
             <AgGridColumn field='procCount' headerName='Procedure' width={130} sortable unSortIcon />
             <AgGridColumn field='mrFid' headerName='Field ID' width={170} resizable sortable unSortIcon />
             {/* @TODO: create DateRenderer */}
-            <AgGridColumn field='setDateTime' headerName='Date' sortable unSortIcon />
+            <AgGridColumn field='setDateTime' headerName='Date' valueGetter={params => dateFormatter(params.data.setDateTime)} sortable unSortIcon />
             <AgGridColumn field='subsample' sortable unSortIcon />
             <AgGridColumn field='gear' headerName='Gear Code' sortable unSortIcon />
             <AgGridColumn field='recorder' headerName='Recorder' sortable unSortIcon />

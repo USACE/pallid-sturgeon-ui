@@ -126,33 +126,33 @@ const TelemetryDsTable = connect(
             />
             <AgGridColumn 
               field='tId' 
-              headerName='Telemetry ID' 
+              headerName='T ID' 
               sortable 
               unSortIcon 
               editable={false}
             />
             <AgGridColumn field='tFid' sortable unSortIcon />
             <AgGridColumn field='bend' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='radioTagNum' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
-            <AgGridColumn field='frequencyIdCode' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
-            <AgGridColumn field='captureDate' headerName='Capture Time' sortable unSortIcon />
-            <AgGridColumn field='captureLatitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
-            <AgGridColumn field='captureLongitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
-            <AgGridColumn field='positionConfidence' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='radioTagNum' headerName='Radio Tag #' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} width={125} sortable unSortIcon />
+            <AgGridColumn field='frequencyIdCode' headerName='Frequency Id' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} width={125} sortable unSortIcon />
+            <AgGridColumn field='captureDate' headerName='Capture Time' width={125} sortable unSortIcon />
+            <AgGridColumn field='captureLatitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} width={150} sortable unSortIcon />
+            <AgGridColumn field='captureLongitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} width={150} sortable unSortIcon />
+            <AgGridColumn field='positionConfidence' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} width={175} sortable unSortIcon />
             <AgGridColumn field='mesoId' sortable unSortIcon />
             <AgGridColumn field='depth' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='macroId' sortable unSortIcon />
             <AgGridColumn field='temp' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='conductivity' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='conductivity' cellEditor='floatEditor' width={125} sortable unSortIcon />
             <AgGridColumn field='turbidity' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='silt' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='sand' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='gravel' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='comments' sortable unSortIcon />
-            <AgGridColumn field='editInitials' sortable unSortIcon />
-            <AgGridColumn field='lastEditComment' sortable unSortIcon />
+            <AgGridColumn field='comments' width={200} sortable unSortIcon />
+            <AgGridColumn field='editInitials' width={125} sortable unSortIcon />
+            <AgGridColumn field='lastEditComment' width={200} sortable unSortIcon />
             <AgGridColumn field='checkby' sortable unSortIcon />
-            <AgGridColumn field='uploadedBy' sortable unSortIcon editable={false} />
+            <AgGridColumn field='uploadedBy' width={200} sortable unSortIcon editable={false} />
           </AgGridReact>
         </div>
       </div>
