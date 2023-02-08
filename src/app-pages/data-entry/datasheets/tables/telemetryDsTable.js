@@ -20,14 +20,12 @@ const TelemetryDsTable = connect(
   'doModalOpen',
   'doSaveTelemetryDataEntry',
   'doUpdateTelemetryDataEntry',
-  'doUpdateUrl',
   'selectDataEntryTelemetryData',
   'selectDataEntryLastParams',
   ({
     doModalOpen,
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
-    doUpdateUrl,
     dataEntryTelemetryData,
     dataEntryLastParams
   }) => {
@@ -73,7 +71,7 @@ const TelemetryDsTable = connect(
           icon={<Icon icon='content-copy' />}
           handleClick={copyLastRow}
         />
-        <Button
+        {/* <Button
           isOutline
           size='small'
           variant='info'
@@ -82,7 +80,7 @@ const TelemetryDsTable = connect(
           className='ml-1'
           handleClick={() => doUpdateUrl('/sites-list/datasheet/telemetry-create')}
           isDisabled
-        />
+        /> */}
         <Button
           isOutline
           size='small'
