@@ -626,7 +626,7 @@ export default {
       if (!err) {
         tSuccess(toastId, `Procedure datasheet ID: ${id} successfully deleted!`);
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_DELETE_FINISHED' });
-        store.doFetchProcedureDataEntry({sid: id});
+        store.doFetchProcedureDataEntry(store.selectDataEntryLastParams());
       } else {
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_DELETE_ERROR', payload: err });
         tError(toastId, `Error deleting procedure datasheet ID: ${id}. Please try again.`);

@@ -45,9 +45,22 @@ const ConfirmDelete = connect(
         case 'supplemental':
           return doDeleteSupplementalDataEntry(data.sid);
         case 'procedure':
-          return doDeleteProcedureDataEntry(data.sid);
+          return doDeleteProcedureDataEntry(data.id);
         case 'telemetry':
           return doDeleteTelemetryDataEntry(value);
+        default:
+          return <>Unknown data type.</>;
+      }
+    };
+
+    const getTypeValue = () => {
+      switch (type) {
+        case 'fish' || 'telemetry':
+          return value;
+        case 'supplemental':
+          return data.sid;
+        case 'procedure':
+          return data.id;
         default:
           return <>Unknown data type.</>;
       }
@@ -60,7 +73,7 @@ const ConfirmDelete = connect(
           <div className='container-fluid'>
             Are you sure you want to delete?
             <div className='pt-2'>
-              <div><b>{getTypeText()} Data Entry ID: </b><i>{value || data.sid}</i></div>
+              <div><b>{getTypeText()} Data Entry ID: </b><i>{getTypeValue()}</i></div>
               <div><b>Uploaded By: </b><i>{data.uploadedBy}</i></div>
             </div>
           </div>

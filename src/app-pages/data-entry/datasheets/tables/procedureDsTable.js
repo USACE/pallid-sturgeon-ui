@@ -20,14 +20,12 @@ const ProcedureDsTable = connect(
   'doModalOpen',
   'doSaveProcedureDataEntry',
   'doUpdateProcedureDataEntry',
-  'doUpdateUrl',
   'selectDataEntryProcedure',
   'selectDataEntryLastParams',
   ({
     doModalOpen,
     doSaveProcedureDataEntry,
     doUpdateProcedureDataEntry,
-    doUpdateUrl,
     dataEntryProcedure,
     dataEntryLastParams,
     isAddRow,
@@ -40,6 +38,26 @@ const ProcedureDsTable = connect(
       gridRef.current.api.applyTransaction({ add: [{ fid: id.fid, sid: id.sid }] });
     }, []);
 
+    const onRowValueChanged = (data) => {
+      if (!data.id) {
+        doSaveProcedureDataEntry(data, { mrId: dataEntryLastParams.mrId });
+      } else {
+        // Format date fields before submitting data
+        setDates(data.sid);
+        doUpdateProcedureDataEntry(data, { mrId: dataEntryLastParams.mrId });
+      }
+    };
+
+    const setDates = useCallback((id) => {
+      const rowNode = gridRef.current.api.getRowNode(String(id));
+      if (rowNode.data.procedureDate) {
+        rowNode.setDataValue('procedureDate', rowNode.data.procedureDate.split('T')[0]);
+      }
+      if (rowNode.data.dstStartDate) {
+        rowNode.setDataValue('dstStartDate', rowNode.data.dstStartDate.split('T')[0]);
+      }
+    }, []);
+
     useEffect(() => {
       if (isAddRow) {
         addRow(rowId);
@@ -48,7 +66,7 @@ const ProcedureDsTable = connect(
 
     return (
       <div className='container-fluid overflow-auto'>
-        <Button
+        {/* <Button
           isOutline
           size='small'
           variant='success'
@@ -57,19 +75,19 @@ const ProcedureDsTable = connect(
           icon={<Icon icon='plus' />}
           handleClick={() => doUpdateUrl('/sites-list/datasheet/procedure-create')}
           isDisabled
-        />
+        /> */}
         <Button
           isOutline
           size='small'
           variant='info'
           text='Export as CSV'
           icon={<Icon icon='download' />}
-          className='float-right mr-2'
           isDisabled
           // handleClick={() => doFetchAllDatasheet('search-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
+            getRowNodeId={params => String(params.sid)}
             ref={gridRef}
             suppressClickEdit
             rowHeight={35}
@@ -80,7 +98,7 @@ const ProcedureDsTable = connect(
               lockPinned: true,
             }}
             editType='fullRow'
-            onRowValueChanged={({ data }) => !data.id ? doSaveProcedureDataEntry(data, { mrId: dataEntryLastParams.mrId }) : doUpdateProcedureDataEntry(data, { mrId: dataEntryLastParams.mrId })}
+            onRowValueChanged={({ data }) => onRowValueChanged(data)}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
               numberEditor: NumberEditor,
@@ -117,6 +135,7 @@ const ProcedureDsTable = connect(
             <AgGridColumn field='procedureDate' 
               cellEditor='dateEditor' 
               cellEditorParams={{ isRequired: true }} 
+              valueGetter={params => params.data.procedureDate ? params.data.procedureDate.split('T')[0] : ''}
               sortable 
               unSortIcon 
             />
@@ -131,7 +150,14 @@ const ProcedureDsTable = connect(
             <AgGridColumn field='oldRadioTagNum' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='oldFrequencyId' cellEditor='selectEditor' cellEditorParams={{ options: frequencyIdOptions, type: 'number' }} sortable unSortIcon />
             <AgGridColumn field='dstSerialNum' cellEditor='numberEditor' sortable unSortIcon />
-            <AgGridColumn field='dstStartDate' cellEditor='dateEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn 
+              field='dstStartDate' 
+              cellEditor='dateEditor' 
+              cellEditorParams={{ isRequired: true }} 
+              valueGetter={params => params.data.dstStartDate ? params.data.dstStartDate.split('T')[0] : ''}
+              sortable 
+              unSortIcon 
+            />
             <AgGridColumn field='dstStartTime' cellEditor='textEditor' sortable unSortIcon />
             <AgGridColumn field='dstReimplant' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
             <AgGridColumn field='newRadioTagNum' cellEditor='numberEditor' sortable unSortIcon />
@@ -150,9 +176,8 @@ const ProcedureDsTable = connect(
             <AgGridColumn field='expectedSpawnYear' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='ultrasoundGonadLength' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='gonadCondition' cellEditor='textEditor' sortable unSortIcon />
-            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true}} sortable unSortIcon />
             <AgGridColumn field='lastEditComment' cellEditor='textEditor' cellEditorParams={{ isRequired: true}} resizable sortable unSortIcon />
-            <AgGridColumn field='lastUpdated' sortable unSortIcon editable={false} />
+            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true}} sortable unSortIcon />
             <AgGridColumn field='uploadedBy' sortable unSortIcon editable={false} />
           </AgGridReact>
         </div>
