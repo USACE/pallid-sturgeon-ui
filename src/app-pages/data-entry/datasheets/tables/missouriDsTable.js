@@ -6,21 +6,25 @@ import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
-import FishIdCellRenderer from 'common/gridCellRenderers/fishIdCellRenderer';
 import MrIdCellRenderer from 'common/gridCellRenderers/mrIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import { dateFormatter } from 'common/gridHelpers/ag-grid-helper';
 
 const MissouriDsTable = connect(
   'doUpdateUrl',
+  'selectMoriverSitesDatasheetData',
   ({
     doUpdateUrl,
-    rowData = [],
+    moriverSitesDatasheetData,
   }) => {
-
     const fishCellStyle = (params) => ({
       backgroundColor: params.data.bkgColor,
+    });
+
+    const suppCellStyle = (params) => ({
+      backgroundColor: params.data.suppBkgColor,
     });
 
     return (
@@ -45,23 +49,29 @@ const MissouriDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowHeight={35}
-            rowData={rowData}
+            rowData={moriverSitesDatasheetData}
             defaultColDef={{
               width: 150,
             }}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
-              fishIdCellRenderer: FishIdCellRenderer,
               mrIdCellRenderer: MrIdCellRenderer
             }}
           >
-            <AgGridColumn field='mrId' headerName='MR ID' cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit'}} sortable unSortIcon />
-            <AgGridColumn field='mrFid' headerName='MR FID' sortable unSortIcon />
-            <AgGridColumn field='fishCount' headerName='Fish Entries #' cellStyle={fishCellStyle} cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'mrId', uri: '/sites-list/datasheet/fish'}} sortable unSortIcon />
-            <AgGridColumn field='subsample' />
-            <AgGridColumn field='subsamplepass' />
-            <AgGridColumn field='conductivity' sortable unSortIcon />
-            <AgGridColumn field='checkedby' sortable unSortIcon />
+            <AgGridColumn field='mrId' headerName='MR ID' width={100} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'missouriRiver'}} sortable unSortIcon />
+            <AgGridColumn field='fishCount' headerName='Fish' width={130} cellStyle={fishCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'fish', tab: 1}} sortable unSortIcon />
+            <AgGridColumn field='suppCount' headerName='Supplemental' width={130} cellStyle={suppCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'supplemental', tab: 2}} sortable unSortIcon />
+            {/* @TODO: procedure data entry count for mr_id */}
+            <AgGridColumn field='procCount' headerName='Procedure' width={130} sortable unSortIcon />
+            <AgGridColumn field='mrFid' headerName='Field ID' width={170} resizable sortable unSortIcon />
+            {/* @TODO: create DateRenderer */}
+            <AgGridColumn field='setDateTime' headerName='Date' valueGetter={params => dateFormatter(params.data.setDateTime)} sortable unSortIcon />
+            <AgGridColumn field='subsample' sortable unSortIcon />
+            <AgGridColumn field='gear' headerName='Gear Code' sortable unSortIcon />
+            <AgGridColumn field='recorder' headerName='Recorder' sortable unSortIcon />
+            <AgGridColumn field='checkby' headerName='Checked?' sortable unSortIcon />
+            {/* @TODO: Check with Tisha on approved field. */}
+            <AgGridColumn headerName='Approved?' sortable unSortIcon />
           </AgGridReact>
         </div>
       </>

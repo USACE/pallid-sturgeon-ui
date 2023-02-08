@@ -1,118 +1,154 @@
-import React from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import Button from 'app-components/button';
-import Card from 'app-components/card';
 import Icon from 'app-components/icon';
-import { Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import DataHeader from '../components/dataHeader';
-import Approval from '../components/approval';
-import SuppIdCellRenderer from 'common/gridCellRenderers/suppIdCellRenderer';
-import ProcedureIdCellRenderer from 'common/gridCellRenderers/procedureIdCellRenderer';
+
+import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
+import ProcLinkCellRenderer from 'common/gridCellRenderers/procLinkCellRenderer';
+import TextEditor from 'common/gridCellEditors/textEditor';
+import SelectEditor from 'common/gridCellEditors/selectEditor';
+import NumberEditor from 'common/gridCellEditors/numberEditor';
+
+import { HVXOptions, ScuteOptions, visualAssessmentOptions, YNNumOptions, YNTextOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const SuppDsTable = connect(
-  'doUpdateUrl',
+  'doModalOpen',
+  'doSaveSupplementalDataEntry',
+  'doUpdateSupplementalDataEntry',
   'selectDataEntrySupplemental',
-  'selectSitesData',
+  'selectDataEntryLastParams',
   ({
-    doUpdateUrl,
+    doModalOpen,
+    doSaveSupplementalDataEntry,
+    doUpdateSupplementalDataEntry,
     dataEntrySupplemental,
-    sitesData,
+    dataEntryLastParams,
+    isAddRow,
+    rowId,
+    setIsAddRow,
+    setRowId,
   }) => {
-    const { items, totalCount } = dataEntrySupplemental;
-    const { siteId } = sitesData[0];
-    
+    const gridRef = useRef();
+    const { items } = dataEntrySupplemental;
+
+    const initialState = {
+      mrId: dataEntryLastParams.mrId
+    };
+
+    const addRow = useCallback((fid) => {
+      gridRef.current.api.applyTransaction({ add: [{ fid: fid }] });
+    }, []);
+
+    useEffect(() => {
+      if (isAddRow) {
+        addRow(rowId);
+      }
+    }, [isAddRow]);
+
     return (
       <div className='container-fluid overflow-auto'>
-        <Row>
-          <div className='col-8'>
-            <h4>Supplemental Datasheet</h4>
-          </div>
-        </Row>
-        {/* Top Level Info */}
-        <DataHeader id={siteId} />
-        {/* Approval */}
-        {/* @TODO: include component props */}
-        <Approval />
-        <Card className='mt-3'>
-          <Card.Header text='Supplemental Datasheet(s)' />
-          <Card.Body>
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              text='Export as CSV'
-              icon={<Icon icon='download' />}
-            // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+        <Button
+          isOutline
+          size='small'
+          variant='info'
+          text='Export as CSV'
+          icon={<Icon icon='download' />}
+          isDisabled
+          // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+        />
+        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
+          <AgGridReact
+            ref={gridRef}
+            suppressClickEdit
+            rowHeight={35}
+            rowData={items}
+            defaultColDef={{
+              width: 100,
+              editable: true,
+              lockPinned: true,
+            }}
+            editType='fullRow'
+            onRowValueChanged={({ data }) => !data.sid ? doSaveSupplementalDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId }) : doUpdateSupplementalDataEntry(data, { mrId: dataEntryLastParams.mrId })}
+            frameworkComponents={{
+              editCellRenderer: EditCellRenderer,
+              procLinkCellRenderer: ProcLinkCellRenderer,
+              textEditor: TextEditor,
+              selectEditor: SelectEditor,
+              numberEditor: NumberEditor,
+            }}
+          >
+            <AgGridColumn
+              field='Actions'
+              width={100}
+              pinned
+              lockPosition
+              cellRenderer='editCellRenderer'
+              cellRendererParams={{ 
+                type: 'supplemental',
+                doModalOpen: doModalOpen,
+              }}
+              editable={false}
             />
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              text='Create Supplemental Datasheet'
-              title='Create Supplemental Datasheet'
-              className='float-right mr-2'
-              handleClick={() => doUpdateUrl('/sites-list/datasheet/supplemental-create')}
-              isDisabled={totalCount > 0}
+            <AgGridColumn field='sid' headerName='S ID' editable={false} sortable unSortIcon />
+            <AgGridColumn field='fid' headerName='Fish ID' editable={false} sortable unSortIcon />
+            <AgGridColumn field='complete' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
+            <AgGridColumn field='fFid' cellEditor='textEditor' resizable sortable unSortIcon />
+            <AgGridColumn 
+              field='proclink' 
+              headerName='Proc Link' 
+              width={130} 
+              cellRenderer='procLinkCellRenderer' 
+              cellRendererParams={{
+                setIsAddRow: setIsAddRow,
+                setRowId: setRowId,
+              }}
+              editable={false}
             />
-            <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '300px' }}>
-              <AgGridReact
-                rowHeight={35}
-                rowData={items}
-                defaultColDef={{
-                  width: 150,
-                }}
-                frameworkComponents={{
-                  procedureIdCellRenderer: ProcedureIdCellRenderer,
-                  suppIdCellRenderer: SuppIdCellRenderer,
-                }}
-              >
-                <AgGridColumn field='sid' headerName='Supplemental ID' cellRenderer='suppIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/supplemental-edit' }} sortable unSortIcon />
-                <AgGridColumn field='fid' headerName='Fish ID' sortable unSortIcon />
-                <AgGridColumn field='fFid' resizable sortable unSortIcon />
-                <AgGridColumn field='mrId' sortable unSortIcon  />
-                <AgGridColumn field='procEntries' headerName='Procedure Entries' width={130} cellRenderer='procedureIdCellRenderer' cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/procedure' }} />
-                <AgGridColumn field='tagnumber' sortable unSortIcon />
-                <AgGridColumn field='pitrn' sortable unSortIcon />
-                <AgGridColumn field='cwtyn' sortable unSortIcon />
-                <AgGridColumn field='dangler' sortable unSortIcon />
-                <AgGridColumn field='scuteloc' sortable unSortIcon />
-                <AgGridColumn field='scutenum' sortable unSortIcon />
-                <AgGridColumn field='scuteloc2' sortable unSortIcon />
-                <AgGridColumn field='scutenum2' sortable unSortIcon />
-                <AgGridColumn field='elcolor' sortable unSortIcon />
-                <AgGridColumn field='elhv' sortable unSortIcon />
-                <AgGridColumn field='ercolor' sortable unSortIcon />
-                <AgGridColumn field='erhv' sortable unSortIcon />
-                <AgGridColumn field='genetic' sortable unSortIcon />
-                <AgGridColumn field='geneticNeeds' sortable unSortIcon />
-                <AgGridColumn field='geneticsVialNumber' sortable unSortIcon />
-                <AgGridColumn field='otherTagInfo' sortable unSortIcon />
-                <AgGridColumn field='anal' sortable unSortIcon />
-                <AgGridColumn field='archive' sortable unSortIcon />
-                <AgGridColumn field='broodstock' sortable unSortIcon />
-                <AgGridColumn field='hatchWild' sortable unSortIcon />
-                <AgGridColumn field='hatcheryOrigin' sortable unSortIcon />
-                <AgGridColumn field='head' sortable unSortIcon />
-                <AgGridColumn field='inter' sortable unSortIcon />
-                <AgGridColumn field='lIb' sortable unSortIcon />
-                <AgGridColumn field='lOb' sortable unSortIcon />
-                <AgGridColumn field='mIb' sortable unSortIcon />
-                <AgGridColumn field='rIb' sortable unSortIcon />
-                <AgGridColumn field='rOb' sortable unSortIcon />
-                <AgGridColumn field='mouthwidth' sortable unSortIcon />
-                <AgGridColumn field='recapture' sortable unSortIcon />
-                <AgGridColumn field='lastEditComment' sortable unSortIcon />
-                <AgGridColumn field='editInitials' sortable unSortIcon />
-                <AgGridColumn field='uploadedBy' sortable unSortIcon />
-              </AgGridReact>
-            </div>
-          </Card.Body>
-        </Card>
+            <AgGridColumn field='checkby' headerName='Checked' cellEditor='textEditor' sortable unSortIcon />
+            <AgGridColumn field='approved' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
+            <AgGridColumn field='speciesId' headerName='Species' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='recorder' cellEditor='textEditor' sortable unSortIcon />
+            <AgGridColumn field='tagnumber' cellEditor='textEditor' width={125} sortable unSortIcon />
+            <AgGridColumn field='pitrn' headerName='PIT' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} sortable unSortIcon />
+            <AgGridColumn field='cwtyn' headerName='CWT' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions, isRequired: true }} unSortIcon />
+            <AgGridColumn field='dangler' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions, isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='scuteloc' headerName='Scute' cellEditor='selectEditor' cellEditorParams={{ options: ScuteOptions }} sortable unSortIcon />
+            <AgGridColumn field='scutenum' headerName='Scute #' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='scuteloc2' headerName='Scute 2' cellEditor='selectEditor' cellEditorParams={{ options: ScuteOptions }} sortable unSortIcon />
+            <AgGridColumn field='scutenum2' headerName='Scute # 2' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='elhv' headerName='EL H/V/X' cellEditor='selectEditor' cellEditorParams={{ options: HVXOptions }} sortable unSortIcon />
+            <AgGridColumn field='elcolor' headerName='EL Color' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='erhv' headerName='ER H/V/X' cellEditor='selectEditor' cellEditorParams={{ options: HVXOptions }} sortable unSortIcon />
+            <AgGridColumn field='ercolor' headerName='ER Color' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='genetic' headerName='Genetic Y/N' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions }} width={125} sortable unSortIcon />
+            {/* @TODO: Do we need the following fields? */}
+            <AgGridColumn field='geneticNeeds' cellEditor='textEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='geneticsVialNumber' headerName='Genetics Vial #' cellEditor='textEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='otherTagInfo' cellEditor='textEditor' width={200} sortable unSortIcon />
+            <AgGridColumn field='anal' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='archive' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='broodstock' cellEditor='numberEditor' width={125} sortable unSortIcon />
+            <AgGridColumn field='hatchWild' cellEditor='numberEditor' width={125} sortable unSortIcon />
+            <AgGridColumn field='hatcheryOrigin' cellEditor='textEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='head' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='inter' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='lIb' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='lOb' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='mIb' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='rIb' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='rOb' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='mouthwidth' cellEditor='numberEditor' width={125} sortable unSortIcon />
+            <AgGridColumn field='recapture' cellEditor='textEditor' sortable unSortIcon />
+            <AgGridColumn field='lastEditComment' cellEditor='textEditor' width={200} cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} width={125} sortable unSortIcon />
+            <AgGridColumn field='uploadedBy' width={150} sortable unSortIcon editable={false} />
+          </AgGridReact>
+        </div>
       </div>
     );
   });
