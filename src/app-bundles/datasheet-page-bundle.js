@@ -9,6 +9,30 @@ export default {
       pageSize: 50,
       pageNumber: 0,
       totalResults: 0,
+      missouriRiver: {
+        data: [],
+        totalCount: 0,
+      },
+      fish: {
+        data: [],
+        totalCount: 0,
+      },
+      supplemental: {
+        data: [],
+        totalCount: 0,
+      },
+      procedure: {
+        data: [],
+        totalCount: 0,
+      },
+      searchEffort: {
+        data: [],
+        totalCount: 0,
+      },
+      telemetry: {
+        data: [],
+        totalCount: 0,
+      },
       params: {},
       data: {},
     };
@@ -26,12 +50,52 @@ export default {
             pageSize: payload.pageSize,
             pageNumber: payload.pageNumber,
           };
-        case 'DATASHEETS_UPDATED_DATA':
+        case 'UPDATE_MORIVER_DATA_SUMMARY_DATA':
           return {
             ...state,
-            data: {
-              ...state.data,
-              [payload.key]: payload.data,
+            missouriRiver: {
+              data: payload.items,
+              totalCount: payload.totalCount
+            }
+          };
+        case 'UPDATE_FISH_DATA_SUMMARY_DATA':
+          return {
+            ...state,
+            fish: {
+              data: payload.items,
+              totalCount: payload.totalCount
+            }
+          };
+        case 'UPDATE_SUPP_DATA_SUMMARY_DATA':
+          return {
+            ...state,
+            supplemental: {
+              data: payload.items,
+              totalCount: payload.totalCount
+            }
+          };
+        case 'UPDATE_PROCEDURE_DATA_SUMMARY_DATA':
+          return {
+            ...state,
+            procedure: {
+              data: payload.items,
+              totalCount: payload.totalCount
+            }
+          };
+        case 'UPDATE_SEARCH_DATA_SUMMARY_DATA':
+          return {
+            ...state,
+            searchEffort: {
+              data: payload.items,
+              totalCount: payload.totalCount
+            }
+          };
+        case 'UPDATE_TELEMETRY_DATA_SUMMARY_DATA':
+          return {
+            ...state,
+            telemetry: {
+              data: payload.items,
+              totalCount: payload.totalCount
             }
           };
         default:
@@ -45,29 +109,32 @@ export default {
   selectDatasheetPageNumber: state => state.datasheet.pageNumber,
   selectDatasheetTotalResults: state => state.datasheet.totalResults,
   selectDatasheetParams: state => state.datasheet.params,
+
   selectDatasheetData: state => state.datasheet.data,
+  selectMissouriDataSummary: state => state.datasheet.missouriRiver,
+  selectFishDataSummary: state => state.datasheet.fish,
+  selectSuppDataSummary: state => state.datasheet.supplemental,
+
+  doDataSummaryLoadData: () => ({ dispatch, store }) => {
+    dispatch({ type: 'LOADING_DATA_SUMMARY_INIT_DATA' });
+    // Load data
+    store.doFetchMoRiverDataSummary();
+    store.doFetchFishDataSummary();
+    store.doFetchSuppDataSummary();
+  },
 
   doDatasheetLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_DATASHEET_INIT_DATA' });
-    store.doDomainProjectsFetch();
-    store.doDomainSeasonsFetch();
+    // Loading supporting data
+    store.doDomainsYearsFetch();
+    store.doDomainProjectsFetch(store.selectUserRole().projectCode);
+    store.doDomainSeasonsFetch({ project: store.selectUserRole().projectCode });
   },
+  
+  doFetchMoRiverDataSummary: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'MORIVER_DATA_SUMMARY_FETCH_START' });
 
-  doDatasheetFetch: () => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
-
-    const uris = {
-      missouriRiverData: '/missouriDataSummary',
-      fishData: '/fishDataSummary',
-      suppData: '/suppDataSummary',
-      telemetryData: '/telemetryDataSummary',
-      procedureData: '/procedureDataSummary',
-      searchData: '/searchDataSummary',
-    };
-
-    const uriKeys = Object.keys(uris);
-    const uriValues = Object.values(uris);
-    const { tab, ...params } = store.selectDatasheetParams();
+    const { ...params } = store.selectDatasheetParams();
     const size = store.selectDatasheetPageSize();
     const page = store.selectDatasheetPageNumber();
 
@@ -77,23 +144,109 @@ export default {
       page,
     });
 
-    const url = `/psapi${uriValues[tab]}${query}`;
+    const url = `/psapi/missouriDataSummary${query}`;
 
-    apiGet(url, (_err, body) => {
-      if (!_err) {
-        dispatch({
-          type: 'DATASHEETS_UPDATED_DATA',
-          payload: {
-            key: uriKeys[tab],
-            data: body,
-          }
-        });
-        dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({ type: 'UPDATE_MORIVER_DATA_SUMMARY_DATA', payload: body });
+        dispatch({ type: 'MORIVER_DATA_SUMMARY_FETCH_FINISHED' });
       } else {
-        dispatch({ type: 'DATASHEET_FETCH_DATA_ERROR', payload: _err });
+        dispatch({ type: 'MORIVER_DATA_SUMMARY_FETCH_ERROR', payload: err });
       }
     });
   },
+
+  doFetchFishDataSummary: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'FISH_DATA_SUMMARY_FETCH_START' });
+
+    const { ...params } = store.selectDatasheetParams();
+    const size = store.selectDatasheetPageSize();
+    const page = store.selectDatasheetPageNumber();
+
+    const query = queryFromObject({
+      ...params,
+      size,
+      page,
+    });
+
+    const url = `/psapi/fishDataSummary${query}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({ type: 'UPDATE_FISH_DATA_SUMMARY_DATA', payload: body });
+        dispatch({ type: 'FISH_DATA_SUMMARY_FETCH_FINISHED' });
+      } else {
+        dispatch({ type: 'FISH_DATA_SUMMARY_FETCH_ERROR', payload: err });
+      }
+    });
+  },
+
+  doFetchSuppDataSummary: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'SUPP_DATA_SUMMARY_FETCH_START' });
+
+    const { ...params } = store.selectDatasheetParams();
+    const size = store.selectDatasheetPageSize();
+    const page = store.selectDatasheetPageNumber();
+
+    const query = queryFromObject({
+      ...params,
+      size,
+      page,
+    });
+
+    const url = `/psapi/suppDataSummary${query}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({ type: 'UPDATE_SUPP_DATA_SUMMARY_DATA', payload: body });
+        dispatch({ type: 'SUPP_DATA_SUMMARY_FETCH_FINISHED' });
+      } else {
+        dispatch({ type: 'SUPP_DATA_SUMMARY_FETCH_ERROR', payload: err });
+      }
+    });
+  },
+
+  // doDatasheetFetch: () => ({ dispatch, store, apiGet }) => {
+  //   dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
+
+  //   const uris = {
+  //     missouriRiverData: '/missouriDataSummary',
+  //     fishData: '/fishDataSummary',
+  //     suppData: '/suppDataSummary',
+  //     telemetryData: '/telemetryDataSummary',
+  //     procedureData: '/procedureDataSummary',
+  //     searchData: '/searchDataSummary',
+  //   };
+
+  //   const uriKeys = Object.keys(uris);
+  //   const uriValues = Object.values(uris);
+  //   const { tab, ...params } = store.selectDatasheetParams();
+  //   const size = store.selectDatasheetPageSize();
+  //   const page = store.selectDatasheetPageNumber();
+
+  //   const query = queryFromObject({
+  //     ...params,
+  //     size,
+  //     page,
+  //   });
+
+  //   const url = `/psapi${uriValues[tab]}${query}`;
+
+  //   apiGet(url, (_err, body) => {
+  //     if (!_err) {
+  //       dispatch({
+  //         type: 'DATASHEETS_UPDATED_DATA',
+  //         payload: {
+  //           key: uriKeys[tab],
+  //           data: body,
+  //         }
+  //       });
+  //       dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
+  //     } else {
+  //       dispatch({ type: 'DATASHEET_FETCH_DATA_ERROR', payload: _err });
+  //     }
+  //   });
+  // },
 
   doFetchAllDatasheet: (filePrefix) => ({ dispatch, store, apiFetch }) => {
     dispatch({ type: 'DATASHEET_ALL_FETCH_START' });
@@ -134,11 +287,11 @@ export default {
 
   doSetDatasheetPagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
     dispatch({ type: 'SET_DATASHEET_PAGINATION', payload: { pageSize, pageNumber }});
-    store.doDatasheetFetch();
+    // store.doDatasheetFetch();
   },
 
   doUpdateDatasheetParams: (params) => ({ dispatch, store }) => {
     dispatch({ type: 'UPDATE_DATASHEET_PARAMS', payload: params });
-    store.doDatasheetFetch();
+    store.doDataSummaryLoadData();
   },
 };

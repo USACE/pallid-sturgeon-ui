@@ -21,6 +21,7 @@ export default {
       otolith: [],
       setsite1: [],
       setsite2: [],
+      years: [],
     };
 
     return (state = initialData, { type, payload }) => {
@@ -57,6 +58,8 @@ export default {
           return { ...state, setsite1: payload };
         case 'DOMAIN_UPDATED_SET_SITE_2':
           return { ...state, setsite2: payload };
+        case 'DOMAIN_UPDATED_YEARS':
+          return { ...state, years: payload };
         default:
           return state;
       }
@@ -80,13 +83,15 @@ export default {
   selectDomainsOtolith: state => state.domains.otolith,
   selectDomainsSetSite1: state => state.domains.setsite1,
   selectDomainsSetSite2: state => state.domains.setsite2,
+  selectDomainsYears: state => state.domains.years,
 
-  doDomainProjectsFetch: () => ({ dispatch, apiGet }) => {
+  doDomainProjectsFetch: (project = null) => ({ dispatch, apiGet }) => {
     dispatch({ type: 'DOMAIN_FETCH_PROJECTS_START' });
 
     const url = '/psapi/projects';
+    const urlFilter = `/psapi/projectsFilter${queryFromObject({project: project})}`;
 
-    apiGet(url, (_err, body) => {
+    apiGet(project !== null ? urlFilter : url, (_err, body) => {
       dispatch({
         type: 'DOMAIN_UPDATED_PROJECTS',
         payload: body,
@@ -303,6 +308,20 @@ export default {
         payload: body,
       });
       dispatch({ type: 'DOMAIN_FETCH_SET_SITE_2_FINISHED' });
+    });
+  },
+
+  doDomainsYearsFetch: () => ({ dispatch, apiGet }) => {
+    dispatch({ type: 'DOMAIN_FETCH_YEARS_START' });
+
+    const url = '/psapi/years';
+
+    apiGet(url, (_err, body) => {
+      dispatch({
+        type: 'DOMAIN_UPDATED_YEARS',
+        payload: body,
+      });
+      dispatch({ type: 'DOMAIN_FETCH_YEARS_FINISHED' });
     });
   },
 };

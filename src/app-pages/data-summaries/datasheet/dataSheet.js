@@ -15,27 +15,34 @@ import TelemetryTable from './tables/telemetryTable';
 import SearchTable from './tables/searchTable';
 
 import { createDropdownOptions } from './datasheetHelpers';
-import { dropdownYearsToNow } from 'utils';
 
 import '../data-summary.scss';
 
 export default connect(
   'doDatasheetFetch',
   'doDatasheetLoadData',
+  'doDataSummaryLoadData',
   'doSetDatasheetPagination',
   'doUpdateDatasheetParams',
   'selectDomains',
   'selectDatasheetData',
+  'selectDatasheet',
+  'selectDomainsYears',
+  'selectUserRole',
   ({
     doDatasheetFetch,
     doDatasheetLoadData,
+    doDataSummaryLoadData,
     doSetDatasheetPagination,
     doUpdateDatasheetParams,
     domains,
     datasheetData,
+    datasheet,
+    domainsYears,
+    userRole,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const [yearFilter, setYearFilter] = useState('2022');
+    const [yearFilter, setYearFilter] = useState('');
     const [monthFilter, setMonthFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState('');
     const [approvalFilter, setApprovalFilter] = useState('');
@@ -45,14 +52,6 @@ export default connect(
     const [toDateFilter, setToDateFilter] = useState('');
 
     const { projects, seasons } = domains;
-    const { 
-      missouriRiverData = {}, 
-      fishData = {}, 
-      suppData = {}, 
-      telemetryData = {},
-      procedureData = {}, 
-      searchData = {},
-    } = datasheetData;
 
     const tabs = ['missouriRiverData', 'fishData',  'suppData', 'telemetryData', 'procedureData', 'searchData'];
 
@@ -83,7 +82,8 @@ export default connect(
 
     useEffect(() => {
       doDatasheetLoadData();
-    }, [doDatasheetLoadData]);
+      doDataSummaryLoadData();
+    }, [doDatasheetLoadData, doDataSummaryLoadData]);
 
     return (
       <div className='container-fluid'>
@@ -99,7 +99,7 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={val => setYearFilter(val)}
                   value={yearFilter}
-                  options={dropdownYearsToNow()}
+                  options={domainsYears.map(item => ({ value: item.year }))}
                   defaultOption={new Date().getFullYear()}
                 />
               </div>
@@ -112,7 +112,8 @@ export default connect(
                   onChange={val => setProjectFilter(val)}
                   value={projectFilter}
                   options={createDropdownOptions(projects)}
-                  isDisabled
+                  defaultOption={userRole.projectCode === '2' ? 2 : null} 
+                  isDisabled={userRole.projectCode === '2'} 
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
@@ -205,7 +206,7 @@ export default connect(
                 size='small'
                 className='mr-2'
                 text='Apply Filters'
-                handleClick={() => doDatasheetFetch()}
+                handleClick={() => doDataSummaryLoadData()}
               />
               <Button
                 isOutline
@@ -223,26 +224,26 @@ export default connect(
             <TabContainer
               tabs={[
                 {
-                  title: `Missouri River (${missouriRiverData.totalCount ? missouriRiverData.totalCount : '0'})`,
-                  content: <MissouriRiverTable rowData={missouriRiverData.items} />,
+                  title: `Missouri River (${datasheet.missouriRiver.totalCount})`,
+                  content: <MissouriRiverTable />,
                 }, {
-                  title: `Fish (${fishData.totalCount ? fishData.totalCount : '0'})`,
-                  content: <FishTable rowData={fishData.items} />,
+                  title: `Fish (${datasheet.fish.totalCount})`,
+                  content: <FishTable />,
                 }, {
-                  title: `Supplemental (${suppData.totalCount ? suppData.totalCount : '0'})`,
-                  content: <SupplementalTable rowData={suppData.items} />,
+                  title: `Supplemental (${datasheet.supplemental.totalCount})`,
+                  content: <SupplementalTable />,
                 },
                 { 
-                  title: `Telemetry (${telemetryData.totalCount ? telemetryData.totalCount : '0'})`, 
-                  content: <TelemetryTable rowData={telemetryData.items} />,
+                  title: 'Procedure ()', 
+                  content: <ProcedureTable />,
                 },
                 { 
-                  title: `Procedure (${procedureData.totalCount ? procedureData.totalCount : '0'})`, 
-                  content: <ProcedureTable rowData={procedureData.items} />,
+                  title: 'Search Effort ()', 
+                  content: <SearchTable />
                 },
                 { 
-                  title: `Search Effort (${searchData.totalCount ? searchData.totalCount : '0'})`, 
-                  content: <SearchTable rowData={searchData.items} />
+                  title: 'Telemetry ()', 
+                  content: <TelemetryTable />,
                 },
               ]}
               onTabChange={(_str, ind) => setCurrentTab(ind)}
