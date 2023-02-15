@@ -114,6 +114,9 @@ export default {
   selectMissouriDataSummary: state => state.datasheet.missouriRiver,
   selectFishDataSummary: state => state.datasheet.fish,
   selectSuppDataSummary: state => state.datasheet.supplemental,
+  selectProcedureDataSummary: state => state.datasheet.procedure,
+  selectSearchDataSummary: state => state.datasheet.searchEffort,
+  selectTelemetryDataSummary: state => state.datasheet.telemetry,
 
   doDataSummaryLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_DATA_SUMMARY_INIT_DATA' });
@@ -121,6 +124,9 @@ export default {
     store.doFetchMoRiverDataSummary();
     store.doFetchFishDataSummary();
     store.doFetchSuppDataSummary();
+    store.doFetchSearchDataSummary();
+    store.doFetchTelemetryDataSummary();
+    store.doFetchProcedureDataSummary();
   },
 
   doDatasheetLoadData: () => ({ dispatch, store }) => {
@@ -202,6 +208,81 @@ export default {
         dispatch({ type: 'SUPP_DATA_SUMMARY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'SUPP_DATA_SUMMARY_FETCH_ERROR', payload: err });
+      }
+    });
+  },
+
+  doFetchProcedureDataSummary: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'PROCEDURE_DATA_SUMMARY_FETCH_START' });
+
+    const { ...params } = store.selectDatasheetParams();
+    const size = store.selectDatasheetPageSize();
+    const page = store.selectDatasheetPageNumber();
+
+    const query = queryFromObject({
+      ...params,
+      size,
+      page,
+    });
+
+    const url = `/psapi/procedureDataSummary${query}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({ type: 'UPDATE_PROCEDURE_DATA_SUMMARY_DATA', payload: body });
+        dispatch({ type: 'PROCEDURE_DATA_SUMMARY_FETCH_FINISHED' });
+      } else {
+        dispatch({ type: 'PROCEDURE_DATA_SUMMARY_FETCH_ERROR', payload: err });
+      }
+    });
+  },
+
+  doFetchSearchDataSummary: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'SEARCH_DATA_SUMMARY_FETCH_START' });
+
+    const { ...params } = store.selectDatasheetParams();
+    const size = store.selectDatasheetPageSize();
+    const page = store.selectDatasheetPageNumber();
+
+    const query = queryFromObject({
+      ...params,
+      size,
+      page,
+    });
+
+    const url = `/psapi/searchDataSummary${query}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({ type: 'UPDATE_SEARCH_DATA_SUMMARY_DATA', payload: body });
+        dispatch({ type: 'SEARCH_DATA_SUMMARY_FETCH_FINISHED' });
+      } else {
+        dispatch({ type: 'SEARCH_DATA_SUMMARY_FETCH_ERROR', payload: err });
+      }
+    });
+  },
+
+  doFetchTelemetryDataSummary: () => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'TELEMETRY_DATA_SUMMARY_FETCH_START' });
+
+    const { ...params } = store.selectDatasheetParams();
+    const size = store.selectDatasheetPageSize();
+    const page = store.selectDatasheetPageNumber();
+
+    const query = queryFromObject({
+      ...params,
+      size,
+      page,
+    });
+
+    const url = `/psapi/telemetryDataSummary${query}`;
+
+    apiGet(url, (err, body) => {
+      if (!err) {
+        dispatch({ type: 'UPDATE_TELEMETRY_DATA_SUMMARY_DATA', payload: body });
+        dispatch({ type: 'TELEMETRY_DATA_SUMMARY_FETCH_FINISHED' });
+      } else {
+        dispatch({ type: 'TELEMETRY_DATA_SUMMARY_FETCH_ERROR', payload: err });
       }
     });
   },

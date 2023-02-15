@@ -234,15 +234,15 @@ export default connect(
                   content: <SupplementalTable />,
                 },
                 { 
-                  title: 'Procedure ()', 
+                  title: `Procedure (${datasheet.procedure.totalCount})`, 
                   content: <ProcedureTable />,
                 },
                 { 
-                  title: 'Search Effort ()', 
+                  title: `Search Effort (${datasheet.searchEffort.totalCount})`, 
                   content: <SearchTable />
                 },
                 { 
-                  title: 'Telemetry ()', 
+                  title: `Telemetry (${datasheet.telemetry.totalCount})`, 
                   content: <TelemetryTable />,
                 },
               ]}
