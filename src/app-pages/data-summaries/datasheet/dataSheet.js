@@ -15,11 +15,11 @@ import TelemetryTable from './tables/telemetryTable';
 import SearchTable from './tables/searchTable';
 
 import { createDropdownOptions } from './datasheetHelpers';
+import { SelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import '../data-summary.scss';
 
 export default connect(
-  'doDatasheetFetch',
   'doDatasheetLoadData',
   'doDataSummaryLoadData',
   'doSetDatasheetPagination',
@@ -30,7 +30,6 @@ export default connect(
   'selectDomainsYears',
   'selectUserRole',
   ({
-    doDatasheetFetch,
     doDatasheetLoadData,
     doDataSummaryLoadData,
     doSetDatasheetPagination,
@@ -42,9 +41,9 @@ export default connect(
     userRole,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const [yearFilter, setYearFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
     const [monthFilter, setMonthFilter] = useState('');
-    const [projectFilter, setProjectFilter] = useState('');
+    const [projectFilter, setProjectFilter] = useState(userRole ? userRole.projectCode : '');
     const [approvalFilter, setApprovalFilter] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState('');
@@ -92,34 +91,34 @@ export default connect(
           <Card.Body>
             <div className='row'>
               <div className='col-md-3 col-xs-12'>
-                <label><small>Select Year</small></label>
-                <Select
-                  showPlaceholderWhileValid
+                <SelectCustomLabel
+                  label='Select a Year'
+                  // showPlaceholderWhileValid
                   placeholderText='Select a Year...'
                   className='d-block mt-1 mb-2'
                   onChange={val => setYearFilter(val)}
                   value={yearFilter}
-                  options={domainsYears.map(item => ({ value: item.year }))}
-                  defaultOption={new Date().getFullYear()}
+                  options={domainsYears && domainsYears.map(item => ({ value: item.year }))}
+                  defaultValue={new Date().getFullYear()}
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
-                <label><small>Select Project</small></label>
-                <Select
-                  showPlaceholderWhileValid
+                <SelectCustomLabel
+                  label='Select Project'
+                  // showPlaceholderWhileValid
                   placeholderText='Select a Project...'
                   className='d-block mt-1 mb-2'
                   onChange={val => setProjectFilter(val)}
                   value={projectFilter}
                   options={createDropdownOptions(projects)}
-                  defaultOption={userRole.projectCode === '2' ? 2 : null} 
-                  isDisabled={userRole.projectCode === '2'} 
+                  defaultValue={userRole && (userRole.projectCode === '2' ? 2 : userRole.projectCode)} 
+                  isDisabled={userRole && (userRole.projectCode === '2')} 
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
-                <label><small>Approval</small></label>
-                <Select
-                  showPlaceholderWhileValid
+                <SelectCustomLabel
+                  label='Approval'
+                  // showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setApprovalFilter(val)}
                   value={approvalFilter}
@@ -174,7 +173,6 @@ export default connect(
                     { value: 11, text: 'November' },
                     { value: 12, text: 'December' },
                   ]}
-                  isDisabled
                 />
               </div>
               <div className='col-md-6 col-xs-12'>

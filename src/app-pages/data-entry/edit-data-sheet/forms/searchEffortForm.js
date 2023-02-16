@@ -127,8 +127,7 @@ const SearchEffortForm = connect(
         }
       } else {
         handleSelect('siteId', siteId);
-        // @TODO: Investigate where dsId comes from
-        handleSelect('dsId', 123123);
+        handleSelect('dsId', 1);
       }
     }, [edit, dataEntryData]);
 
