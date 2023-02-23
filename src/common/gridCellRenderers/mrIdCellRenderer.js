@@ -31,6 +31,8 @@ const MrIdCellRenderer = connect(
           return data.fishCount;
         case 'supplemental':
           return data.suppCount;
+        case 'procedure':
+          return data.procCount;
         default:
           return <>Unknown data type.</>;
       }

@@ -337,9 +337,9 @@ export default {
       missouriRiverData: '/missouriFullDataSummary',
       fishData: '/fishFullDataSummary',
       suppData: '/suppFullDataSummary',
-      telemetryData: '/telemetryFullDataSummary',
       procedureData: '/procedureFullDataSummary',
       searchData: '/searchFullDataSummary',
+      telemetryData: '/telemetryFullDataSummary',
     };
 
     const uriKeys = Object.keys(uris);

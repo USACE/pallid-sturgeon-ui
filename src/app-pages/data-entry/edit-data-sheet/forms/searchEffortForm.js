@@ -29,21 +29,25 @@ const SearchEffortForm = connect(
   'doFetchSearchDataEntry',
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
+  'doUpdateCurrentTab',
   'selectDataEntryData',
   'selectSitesData',
   'selectDataEntryTelemetryTotalCount',
+  'selectCurrentTab',
   ({
     doSearchEffortDatasheetLoadData,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
+    doUpdateCurrentTab,
     dataEntryData,
     sitesData,
     dataEntryTelemetryTotalCount,
+    currentTab,
     edit
   }) => {
     const initialState = {};
     const [state, dispatch] = useReducer(reducer, initialState);
-    const [currentTab, setCurrentTab] = useState(0);
+    // const [currentTab, setCurrentTab] = useState(0);
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
     const handleChange = e => {
@@ -227,7 +231,8 @@ const SearchEffortForm = connect(
                   content: (<><TelemetryDsTable /></>)
                 }
               ]}
-              onTabChange={(_str, ind) => setCurrentTab(ind)}
+              onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}
+              defaultTab={currentTab}
             />
           </Card.Body>
         </Card>

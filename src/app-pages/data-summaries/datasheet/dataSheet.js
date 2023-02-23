@@ -46,7 +46,7 @@ export default connect(
     const [projectFilter, setProjectFilter] = useState(userRole ? userRole.projectCode : '');
     const [approvalFilter, setApprovalFilter] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
-    const [speciesFilter, setSpeciesFilter] = useState('');
+    const [speciesFilter, setSpeciesFilter] = useState(1);
     const [fromDateFilter, setFromDateFilter] = useState('');
     const [toDateFilter, setToDateFilter] = useState('');
 
@@ -65,6 +65,18 @@ export default connect(
       setToDateFilter('');
     };
 
+    const formatDate = dateString => {
+      const year = dateString.split('-')[0];
+      const month = dateString.split('-')[1];
+      const day = dateString.split('-')[2];
+
+      if (year === '' || month === '' || day === '') {
+        return '';
+      }
+
+      return month + '/' + day + '/' + year;
+    };
+
     useEffect(() => {
       const params = {
         tab: currentTab,
@@ -72,12 +84,13 @@ export default connect(
         month: monthFilter,
         project: projectFilter,
         season: seasonFilter,
-        fromDate: fromDateFilter,
-        toDate: toDateFilter,
+        fromDate: formatDate(fromDateFilter),
+        toDate: formatDate(toDateFilter),
         approved: approvalFilter,
+        spice: speciesFilter,
       };
       doUpdateDatasheetParams(params);
-    }, [yearFilter, monthFilter, projectFilter, seasonFilter, currentTab, approvalFilter, doUpdateDatasheetParams]);
+    }, [currentTab, yearFilter, monthFilter, projectFilter, seasonFilter, approvalFilter, speciesFilter, fromDateFilter, toDateFilter, doUpdateDatasheetParams]);
 
     useEffect(() => {
       doDatasheetLoadData();
@@ -143,12 +156,15 @@ export default connect(
               <div className='col-md-2 col-xs-4'>
                 <label><small>Select Species</small></label>
                 <Select
-                  isDisabled
                   showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setSpeciesFilter(val)}
                   value={speciesFilter}
-                  options={[]}
+                  options={[
+                    { value: 1, text: '1 - All Species' },
+                    { value: 2, text: '2 - PDSG' },
+                    { value: 3, text: '3 - All Sturgeon' },
+                  ]}
                 />
               </div>
               <div className='col-md-2 col-xs-4'>
@@ -185,7 +201,6 @@ export default connect(
                   className='form-control mt-1 mr-2 date-input'
                   value={fromDateFilter}
                   onChange={e => setFromDateFilter(e.target.value)}
-                  disabled
                 />
                 -
                 <input
@@ -193,7 +208,6 @@ export default connect(
                   className='form-control mt-1 ml-2 date-input'
                   value={toDateFilter}
                   onChange={e => setToDateFilter(e.target.value)}
-                  disabled
                 />
               </div>
             </div>
