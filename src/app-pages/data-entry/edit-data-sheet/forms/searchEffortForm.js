@@ -96,7 +96,6 @@ const SearchEffortForm = connect(
       }
     }, [dataEntryData.seId]);
 
-
     const saveIsDisabled = !(
       !!state['searchDate'] &&
       !!state['recorder'] &&
