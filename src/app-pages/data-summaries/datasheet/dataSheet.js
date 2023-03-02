@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
+import ReactTooltip from 'react-tooltip';
 
+import Icon from 'app-components/icon';
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import Pagination from 'app-components/pagination/pagination';
@@ -15,56 +17,65 @@ import TelemetryTable from './tables/telemetryTable';
 import SearchTable from './tables/searchTable';
 
 import { createDropdownOptions } from './datasheetHelpers';
-import { dropdownYearsToNow } from 'utils';
+import { SelectCustomLabel } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import '../data-summary.scss';
 
 export default connect(
-  'doDatasheetFetch',
   'doDatasheetLoadData',
+  'doDataSummaryLoadData',
   'doSetDatasheetPagination',
   'doUpdateDatasheetParams',
   'selectDomains',
   'selectDatasheetData',
+  'selectDatasheet',
+  'selectDomainsYears',
+  'selectUserRole',
   ({
-    doDatasheetFetch,
     doDatasheetLoadData,
+    doDataSummaryLoadData,
     doSetDatasheetPagination,
     doUpdateDatasheetParams,
     domains,
     datasheetData,
+    datasheet,
+    domainsYears,
+    userRole,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const [yearFilter, setYearFilter] = useState('2022');
+    const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
     const [monthFilter, setMonthFilter] = useState('');
-    const [projectFilter, setProjectFilter] = useState('');
+    const [projectFilter, setProjectFilter] = useState(userRole ? userRole.projectCode : '');
     const [approvalFilter, setApprovalFilter] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
-    const [speciesFilter, setSpeciesFilter] = useState('');
+    const [speciesFilter, setSpeciesFilter] = useState(1);
     const [fromDateFilter, setFromDateFilter] = useState('');
     const [toDateFilter, setToDateFilter] = useState('');
 
     const { projects, seasons } = domains;
-    const { 
-      missouriRiverData = {}, 
-      fishData = {}, 
-      suppData = {}, 
-      telemetryData = {},
-      procedureData = {}, 
-      searchData = {},
-    } = datasheetData;
 
     const tabs = ['missouriRiverData', 'fishData',  'suppData', 'telemetryData', 'procedureData', 'searchData'];
 
     const clearAllFilters = () => {
       setYearFilter('');
       setMonthFilter('');
-      setProjectFilter('');
       setApprovalFilter('');
       setSeasonFilter('');
       setSpeciesFilter('');
       setFromDateFilter('');
       setToDateFilter('');
+    };
+
+    const formatDate = dateString => {
+      const year = dateString.split('-')[0];
+      const month = dateString.split('-')[1];
+      const day = dateString.split('-')[2];
+
+      if (year === '' || month === '' || day === '') {
+        return '';
+      }
+
+      return month + '/' + day + '/' + year;
     };
 
     useEffect(() => {
@@ -74,16 +85,18 @@ export default connect(
         month: monthFilter,
         project: projectFilter,
         season: seasonFilter,
-        fromDate: fromDateFilter,
-        toDate: toDateFilter,
+        fromDate: formatDate(fromDateFilter),
+        toDate: formatDate(toDateFilter),
         approved: approvalFilter,
+        spice: speciesFilter,
       };
       doUpdateDatasheetParams(params);
-    }, [yearFilter, monthFilter, projectFilter, seasonFilter, currentTab, approvalFilter, doUpdateDatasheetParams]);
+    }, [currentTab, yearFilter, monthFilter, projectFilter, seasonFilter, approvalFilter, speciesFilter, fromDateFilter, toDateFilter, doUpdateDatasheetParams]);
 
     useEffect(() => {
       doDatasheetLoadData();
-    }, [doDatasheetLoadData]);
+      doDataSummaryLoadData();
+    }, [doDatasheetLoadData, doDataSummaryLoadData]);
 
     return (
       <div className='container-fluid'>
@@ -92,33 +105,34 @@ export default connect(
           <Card.Body>
             <div className='row'>
               <div className='col-md-3 col-xs-12'>
-                <label><small>Select Year</small></label>
-                <Select
-                  showPlaceholderWhileValid
+                <SelectCustomLabel
+                  label='Select a Year'
+                  // showPlaceholderWhileValid
                   placeholderText='Select a Year...'
                   className='d-block mt-1 mb-2'
                   onChange={val => setYearFilter(val)}
                   value={yearFilter}
-                  options={dropdownYearsToNow()}
-                  defaultOption={new Date().getFullYear()}
+                  options={domainsYears && domainsYears.map(item => ({ value: item.year }))}
+                  defaultValue={new Date().getFullYear()}
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
-                <label><small>Select Project</small></label>
-                <Select
-                  showPlaceholderWhileValid
+                <SelectCustomLabel
+                  label='Select Project'
+                  // showPlaceholderWhileValid
                   placeholderText='Select a Project...'
                   className='d-block mt-1 mb-2'
                   onChange={val => setProjectFilter(val)}
                   value={projectFilter}
                   options={createDropdownOptions(projects)}
-                  isDisabled
+                  defaultValue={userRole && (userRole.projectCode === '2' ? 2 : userRole.projectCode)} 
+                  isDisabled={userRole && (userRole.projectCode === '2')} 
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
-                <label><small>Approval</small></label>
-                <Select
-                  showPlaceholderWhileValid
+                <SelectCustomLabel
+                  label='Approval'
+                  // showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setApprovalFilter(val)}
                   value={approvalFilter}
@@ -142,17 +156,44 @@ export default connect(
               </div>
               <div className='col-md-2 col-xs-4'>
                 <label><small>Select Species</small></label>
+                <Icon
+                  icon='help-circle-outline'
+                  data-tip
+                  data-for='helpSpecies'
+                  style={{ fontSize: '15px', marginBottom: '8px' }}
+                />
+                <ReactTooltip id='helpSpecies' effect='solid' place='bottom'>
+                  <span>
+                    The Species filter will <b>only apply</b> to the Missouri River, Fish, Supplemental, and Procedure datasheets.
+                  </span>
+                </ReactTooltip>
                 <Select
-                  isDisabled
                   showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setSpeciesFilter(val)}
                   value={speciesFilter}
-                  options={[]}
+                  defaultOption={1}
+                  options={[
+                    { value: 1, text: '1 - All Species' },
+                    { value: 2, text: '2 - PDSG' },
+                    { value: 3, text: '3 - All Sturgeon' },
+                  ]}
                 />
               </div>
               <div className='col-md-2 col-xs-4'>
                 <label><small>Select Month</small></label>
+                <Icon
+                  icon='help-circle-outline'
+                  data-tip
+                  data-for='helpMonth'
+                  style={{ fontSize: '15px', marginBottom: '8px' }}
+                />
+                <ReactTooltip id='helpMonth' effect='solid' place='bottom'>
+                  <span>
+                    The Month and Date Range filters will filter by <b>Set Date</b> for Missouri River, Fish, Supplemental, and Procedure datasheets, 
+                    <br></br> and <b>Search Date</b> for Search Effort and Telemetry datasheets.
+                  </span>
+                </ReactTooltip>
                 <Select
                   showPlaceholderWhileValid
                   placeholderText='Select a Month...'
@@ -173,7 +214,6 @@ export default connect(
                     { value: 11, text: 'November' },
                     { value: 12, text: 'December' },
                   ]}
-                  isDisabled
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
@@ -186,7 +226,6 @@ export default connect(
                   className='form-control mt-1 mr-2 date-input'
                   value={fromDateFilter}
                   onChange={e => setFromDateFilter(e.target.value)}
-                  disabled
                 />
                 -
                 <input
@@ -194,7 +233,6 @@ export default connect(
                   className='form-control mt-1 ml-2 date-input'
                   value={toDateFilter}
                   onChange={e => setToDateFilter(e.target.value)}
-                  disabled
                 />
               </div>
             </div>
@@ -205,7 +243,7 @@ export default connect(
                 size='small'
                 className='mr-2'
                 text='Apply Filters'
-                handleClick={() => doDatasheetFetch()}
+                handleClick={() => doDataSummaryLoadData()}
               />
               <Button
                 isOutline
@@ -223,26 +261,26 @@ export default connect(
             <TabContainer
               tabs={[
                 {
-                  title: `Missouri River (${missouriRiverData.totalCount ? missouriRiverData.totalCount : '0'})`,
-                  content: <MissouriRiverTable rowData={missouriRiverData.items} />,
+                  title: `Missouri River (${datasheet.missouriRiver.totalCount})`,
+                  content: <MissouriRiverTable />,
                 }, {
-                  title: `Fish (${fishData.totalCount ? fishData.totalCount : '0'})`,
-                  content: <FishTable rowData={fishData.items} />,
+                  title: `Fish (${datasheet.fish.totalCount})`,
+                  content: <FishTable />,
                 }, {
-                  title: `Supplemental (${suppData.totalCount ? suppData.totalCount : '0'})`,
-                  content: <SupplementalTable rowData={suppData.items} />,
+                  title: `Supplemental (${datasheet.supplemental.totalCount})`,
+                  content: <SupplementalTable />,
                 },
                 { 
-                  title: `Telemetry (${telemetryData.totalCount ? telemetryData.totalCount : '0'})`, 
-                  content: <TelemetryTable rowData={telemetryData.items} />,
+                  title: `Procedure (${datasheet.procedure.totalCount})`, 
+                  content: <ProcedureTable />,
                 },
                 { 
-                  title: `Procedure (${procedureData.totalCount ? procedureData.totalCount : '0'})`, 
-                  content: <ProcedureTable rowData={procedureData.items} />,
+                  title: `Search Effort (${datasheet.searchEffort.totalCount})`, 
+                  content: <SearchTable />
                 },
                 { 
-                  title: `Search Effort (${searchData.totalCount ? searchData.totalCount : '0'})`, 
-                  content: <SearchTable rowData={searchData.items} />
+                  title: `Telemetry (${datasheet.telemetry.totalCount})`, 
+                  content: <TelemetryTable />,
                 },
               ]}
               onTabChange={(_str, ind) => setCurrentTab(ind)}
