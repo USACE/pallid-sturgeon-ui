@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
+import ReactTooltip from 'react-tooltip';
 
+import Icon from 'app-components/icon';
 import Button from 'app-components/button';
 import Card from 'app-components/card';
 import Pagination from 'app-components/pagination/pagination';
@@ -57,7 +59,6 @@ export default connect(
     const clearAllFilters = () => {
       setYearFilter('');
       setMonthFilter('');
-      setProjectFilter('');
       setApprovalFilter('');
       setSeasonFilter('');
       setSpeciesFilter('');
@@ -155,11 +156,23 @@ export default connect(
               </div>
               <div className='col-md-2 col-xs-4'>
                 <label><small>Select Species</small></label>
+                <Icon
+                  icon='help-circle-outline'
+                  data-tip
+                  data-for='helpSpecies'
+                  style={{ fontSize: '15px', marginBottom: '8px' }}
+                />
+                <ReactTooltip id='helpSpecies' effect='solid' place='bottom'>
+                  <span>
+                    The Species filter will <b>only apply</b> to the Missouri River, Fish, Supplemental, and Procedure datasheets.
+                  </span>
+                </ReactTooltip>
                 <Select
                   showPlaceholderWhileValid
                   className='d-block mt-1 mb-2'
                   onChange={val => setSpeciesFilter(val)}
                   value={speciesFilter}
+                  defaultOption={1}
                   options={[
                     { value: 1, text: '1 - All Species' },
                     { value: 2, text: '2 - PDSG' },
@@ -169,6 +182,18 @@ export default connect(
               </div>
               <div className='col-md-2 col-xs-4'>
                 <label><small>Select Month</small></label>
+                <Icon
+                  icon='help-circle-outline'
+                  data-tip
+                  data-for='helpMonth'
+                  style={{ fontSize: '15px', marginBottom: '8px' }}
+                />
+                <ReactTooltip id='helpMonth' effect='solid' place='bottom'>
+                  <span>
+                    The Month and Date Range filters will filter by <b>Set Date</b> for Missouri River, Fish, Supplemental, and Procedure datasheets, 
+                    <br></br> and <b>Search Date</b> for Search Effort and Telemetry datasheets.
+                  </span>
+                </ReactTooltip>
                 <Select
                   showPlaceholderWhileValid
                   placeholderText='Select a Month...'

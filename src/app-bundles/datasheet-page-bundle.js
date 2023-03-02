@@ -35,6 +35,7 @@ export default {
       },
       params: {},
       data: {},
+      currentTab: 0,
     };
 
     return (state = initialData, { type, payload }) => {
@@ -43,6 +44,11 @@ export default {
           return {
             ...state,
             params: payload,
+          };
+        case 'UPDATE_DATASHEET_CURRENT_TAB':
+          return {
+            ...state,
+            currentTab: payload,
           };
         case 'SET_DATASHEET_PAGINATION':
           return {
@@ -269,6 +275,8 @@ export default {
     const size = store.selectDatasheetPageSize();
     const page = store.selectDatasheetPageNumber();
 
+    delete params.spice;
+
     const query = queryFromObject({
       ...params,
       size,
@@ -346,6 +354,10 @@ export default {
     const uriValues = Object.values(uris);
     const { tab, ...params } = store.selectDatasheetParams();
 
+    if (filePrefix === 'telemetry-datasheet') {
+      delete params.spice;
+    }
+
     const query = queryFromObject({
       ...params,
     });
@@ -374,5 +386,9 @@ export default {
   doUpdateDatasheetParams: (params) => ({ dispatch, store }) => {
     dispatch({ type: 'UPDATE_DATASHEET_PARAMS', payload: params });
     store.doDataSummaryLoadData();
+  },
+
+  doUpdateDatasheetCurrentTab: (payload) => ({ dispatch }) => {
+    dispatch({ type: 'UPDATE_DATASHEET_CURRENT_TAB', payload: payload });
   },
 };
