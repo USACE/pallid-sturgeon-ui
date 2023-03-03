@@ -6,21 +6,41 @@ import Button from 'app-components/button';
 const SearchIdCellRenderer = connect(
   'doFetchSearchDataEntry',
   'doUpdateUrl',
+  'doUpdateCurrentTab',
   ({
     doFetchSearchDataEntry,
     doUpdateUrl,
+    doUpdateCurrentTab,
     uri,
-    value,
+    data,
+    type,
+    tab
   }) => {
-    const params = { tableId: value };
+    const params = { tableId: data.seId };
+
+    const handleChange = () => {
+      doUpdateCurrentTab(tab);
+      doFetchSearchDataEntry(params, () => doUpdateUrl(uri), false);
+    };
+
+    const getTypeText = () => {
+      switch (type) {
+        case 'searchEffort':
+          return data.seId;
+        case 'telemetry':
+          return data.telemetryCount;
+        default:
+          return <>Unknown data type.</>;
+      }
+    };
 
     return (
       <Button
         size='small'
         variant='link'
         className='p-0 mb-1'
-        text={value}
-        handleClick={() => doFetchSearchDataEntry(params, doUpdateUrl(uri))}
+        text={getTypeText()}
+        handleClick={handleChange}
       />
     );
   });

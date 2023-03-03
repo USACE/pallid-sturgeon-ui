@@ -536,3 +536,25 @@ export const visualAssessmentOptions = [
   { value: 'R' },
   { value: 'N' },
 ];
+
+export const YNNumOptions = [
+  { text: 'Y', value: 1 },
+  { text: 'N', value: 0 },
+];
+
+export const YNTextOptions = [
+  { text: 'Y' },
+  { text: 'N' },
+];
+
+export const ScuteOptions = [
+  { value: 'N' },
+  { value: 'R' },
+  { value: 'L' },
+];
+
+export const HVXOptions = [
+  { value: 'N' },
+  { value: 'R' },
+  { value: 'L' },
+];

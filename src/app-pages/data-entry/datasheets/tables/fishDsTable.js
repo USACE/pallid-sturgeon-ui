@@ -1,104 +1,175 @@
-import React from 'react';
+import React, { useCallback, useRef } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 
 import Button from 'app-components/button';
-import Card from 'app-components/card';
 import Icon from 'app-components/icon';
-import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
-import Approval from 'app-pages/data-entry/datasheets/components/approval';
-import FishIdCellRenderer from 'common/gridCellRenderers/fishIdCellRenderer';
-import SpeciesEditor from 'common/gridCellEditors/speciesEditor';
-import SuppIdCellRenderer from 'common/gridCellRenderers/suppIdCellRenderer';
-import { Row } from '../../edit-data-sheet/forms/_shared/helper';
+
+import SelectEditor from 'common/gridCellEditors/selectEditor';
+import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
+import NumberEditor from 'common/gridCellEditors/numberEditor';
+import TextEditor from 'common/gridCellEditors/textEditor';
+
+import { baitOptions, finCurlOptions, raySpineOptions, scaleOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
+import { createDropdownOptions, createMesoOptions } from 'app-pages/data-entry/helpers';
+import SuppLinkCellRenderer from 'common/gridCellRenderers/suppLinkCellRenderer';
 
 const FishDsTable = connect(
-  'doUpdateUrl',
+  'doUpdateFishDataEntry',
+  'doSaveFishDataEntry',
+  'doModalOpen',
   'selectDataEntryFishData',
-  'selectSitesData',
+  'selectDomainsSpecies',
+  'selectDomainsFtPrefixes',
+  'selectDomainsMr',
+  'selectDomainsOtolith',
+  'selectDataEntryLastParams',
   ({
-    doUpdateUrl,
+    doUpdateFishDataEntry,
+    doSaveFishDataEntry,
+    doModalOpen,
     dataEntryFishData,
-    sitesData,
+    domainsSpecies,
+    domainsFtPrefixes,
+    domainsMr,
+    domainsOtolith,
+    dataEntryLastParams,
+    setIsAddRow,
+    setRowId,
   }) => {
-    const { items } = dataEntryFishData;
-    const { siteId } = sitesData[0];
+    const gridRef = useRef();
+    const lastRow = dataEntryFishData.items[dataEntryFishData.totalCount - 1];
+    const initialState = {
+      mrId: dataEntryLastParams.mrId
+    };
+
+    const addRow = useCallback(() => {
+      gridRef.current.api.applyTransaction({ add: [{}] });
+    }, []);
+
+    const copyLastRow = () => {
+      const row = {...lastRow};
+      if (row) {
+        delete row['fid'];
+        delete row['uploadedBy'];
+        gridRef.current.api.applyTransaction({ add: [row] });
+      }
+    };
 
     return (
       <div className='container-fluid overflow-auto'>
-        <Row>
-          <div className='col-8'>
-            <h4>Fish Datasheets</h4>
-          </div>
-        </Row>
-        {/* Top Level Info */}
-        <DataHeader id={siteId} />
-        {/* Approval */}
-        {/* @TODO: include component props */}
-        <Approval />
-        {/* Fish Data Table */}
-        <Card className='mt-3'>
-          <Card.Header text='Fish Datasheets' />
-          <Card.Body>
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              text='Export as CSV'
-              icon={<Icon icon='download' />}
-            // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+        <Button
+          isOutline
+          size='small'
+          variant='success'
+          text='Add Row'
+          className='ml-1'
+          icon={<Icon icon='plus' />}
+          handleClick={addRow}
+        />
+        <Button
+          isOutline
+          size='small'
+          variant='secondary'
+          text='Copy Last Row'
+          title='Copy Last Row'
+          className='ml-1'
+          icon={<Icon icon='content-copy' />}
+          handleClick={copyLastRow}
+        />
+        <Button
+          isOutline
+          size='small'
+          variant='info'
+          text='Export as CSV'
+          className='float-right ml-1'
+          icon={<Icon icon='download' />}
+          isDisabled
+          handleClick={() => doFetchAllDatasheet('fish-datasheet')}
+        />
+        <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
+          <AgGridReact
+            ref={gridRef}
+            suppressClickEdit
+            defaultColDef={{
+              width: 100,
+              editable: true,
+              lockPinned: true,
+            }}
+            editType='fullRow'
+            onRowValueChanged={({ data }) => !data.fid ? doSaveFishDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId }) : doUpdateFishDataEntry(data, { mrId: dataEntryLastParams.mrId })}
+            rowHeight={35}
+            rowData={dataEntryFishData.items}
+            frameworkComponents={{
+              editCellRenderer: EditCellRenderer,
+              selectEditor: SelectEditor,
+              numberEditor: NumberEditor,
+              textEditor: TextEditor,
+              suppLinkCellRenderer: SuppLinkCellRenderer
+            }}
+          >
+            <AgGridColumn
+              field='Actions'
+              width={100}
+              pinned
+              lockPosition
+              cellRenderer='editCellRenderer'
+              cellRendererParams={{ 
+                type: 'fish',
+                doModalOpen: doModalOpen,
+              }}
+              editable={false}
             />
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              text='Create Fish Datasheet'
-              title='Create Fish Datasheet'
-              className='float-right mr-2'
-              handleClick={() => doUpdateUrl('/sites-list/datasheet/fish-create')}
+            <AgGridColumn field='fid' headerName='Fish ID' editable={false} />
+            <AgGridColumn field='ffid' headerName='Field ID' width={200} resizable sortable unSortIcon />
+            <AgGridColumn
+              field='supplink'
+              headerName='Supp Link'
+              width={130}
+              cellRenderer='suppLinkCellRenderer'
+              cellRendererParams={{
+                setIsAddRow: setIsAddRow,
+                setRowId: setRowId,
+              }}
+              editable={false}
             />
-            <div className='ag-theme-balham mt-2' style={{ height: '300px', width: '100%' }}>
-              <AgGridReact
-                defaultColDef={{
-                  width: 100,
-                }}
-                rowHeight={35}
-                rowData={items}
-                frameworkComponents={{
-                  speciesEditor: SpeciesEditor,
-                  fishIdCellRenderer: FishIdCellRenderer,
-                  suppIdCellRenderer: SuppIdCellRenderer,
-                }}
-              >
-                <AgGridColumn field='fid' headerName='Fish ID' cellRenderer='fishIdCellRenderer' cellRendererParams={{ paramType: 'tableId', uri: '/sites-list/datasheet/fish-edit' }} />
-                <AgGridColumn field='ffid' headerName='Field ID' width={150} resizable sortable unSortIcon />
-                <AgGridColumn
-                  field='suppEntries'
-                  headerName='Supp Entries'
-                  width={130}
-                  cellRenderer='suppIdCellRenderer'
-                  cellRendererParams={{ paramType: 'fId', uri: '/sites-list/datasheet/supplemental' }} 
-                />
-                <AgGridColumn field='panelHook' headerName='Panel Hook' />
-                <AgGridColumn field='species' cellEditor='speciesEditor' />
-                <AgGridColumn field='length' />
-                <AgGridColumn field='weight' />
-                <AgGridColumn field='countF' headerName='Count' />
-                <AgGridColumn field='ftPrefix' headerName='FT Prefix' />
-                <AgGridColumn field='mR' headerName='M/R' />
-                <AgGridColumn field='ftnum' headerName='Genetics Vial #' />
-                <AgGridColumn field='finCurl' />
-                <AgGridColumn field='otolith' />
-                <AgGridColumn field='raySpine' headerName='Ray Spine' />
-                <AgGridColumn field='scale' />
-                <AgGridColumn field='bait' />
-                <AgGridColumn field='editInitials' />
-                <AgGridColumn field='lastEditComment' />
-                <AgGridColumn field='uploadedBy' />
-              </AgGridReact>
-            </div>
-          </Card.Body>
-        </Card>
+            <AgGridColumn field='panelHook' headerName='Panel Hook' />
+            <AgGridColumn 
+              field='species' 
+              cellEditor='selectEditor' 
+              cellEditorParams={{ 
+                options: createMesoOptions(domainsSpecies), 
+                isRequired: true 
+              }} 
+            />
+            <AgGridColumn field='length' cellEditor='numberEditor' />
+            <AgGridColumn field='weight' cellEditor='numberEditor' />
+            <AgGridColumn field='countF' headerName='Count' cellEditor='numberEditor' />
+            <AgGridColumn 
+              field='ftPrefix' 
+              headerName='FT Prefix' 
+              cellEditor='selectEditor' 
+              cellEditorParams={{ 
+                options: createMesoOptions(domainsFtPrefixes), 
+                isRequired: false 
+              }} 
+            />
+            <AgGridColumn field='mR' headerName='M/R' cellEditor='selectEditor' cellEditorParams={{ options: createMesoOptions(domainsMr), isRequired: false }} />
+            <AgGridColumn field='ftnum' headerName='Floy Tag' />
+            <AgGridColumn field='geneticsVialNumber' width={125} headerName='Genetics Vial #' />
+            <AgGridColumn field='condition' cellEditor='numberEditor' editable={false} />
+            <AgGridColumn field='finCurl' cellEditor='selectEditor' cellEditorParams={{ options: finCurlOptions, isRequired: false }} />
+            <AgGridColumn field='otolith' cellEditor='selectEditor' cellEditorParams={{ options: createDropdownOptions(domainsOtolith), isRequired: false }} />
+            <AgGridColumn field='raySpine' headerName='Ray Spine' cellEditor='selectEditor' cellEditorParams={{ options: raySpineOptions, isRequired: false }} />
+            <AgGridColumn headerName='KN' cellEditor='numberEditor' editable={false} />
+            <AgGridColumn field='scale' cellEditor='selectEditor' cellEditorParams={{ options: scaleOptions, isRequired: false }} />
+            <AgGridColumn headerName='RSD' cellEditor='numberEditor' editable={false} />
+            <AgGridColumn field='bait' cellEditor='selectEditor' cellEditorParams={{ options: baitOptions, isRequired: false }} />
+            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} />
+            <AgGridColumn field='lastEditComment' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} width={200} resizable />
+            <AgGridColumn field='uploadedBy' width={150} resizable editable={false} />
+          </AgGridReact>
+        </div>
       </div>
     );
   }

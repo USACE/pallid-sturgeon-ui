@@ -9,52 +9,53 @@ import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
 
 const SiteDatasheet = connect(
+  'doSitesDatasheetLoadData',
   'doUpdateSitesDatasheetParams',
-  'selectSitesDatasheetData',
   'selectSitesData',
+  'selectMoriverSitesDatasheetTotalResults',
+  'selectSearchEffortSitesDatasheetTotalResults',
   ({
+    doSitesDatasheetLoadData,
     doUpdateSitesDatasheetParams,
-    sitesDatasheetData,
     sitesData,
+    moriverSitesDatasheetTotalResults,
+    searchEffortSitesDatasheetTotalResults,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
     const { siteId } = sitesData[0];
 
-    const {
-      missouriRiverData = {},
-      searchData = {},
-    } = sitesDatasheetData;
+    useEffect(() => {
+      const params = { siteId: siteId };
+      doUpdateSitesDatasheetParams(params);
+    }, [siteId, currentTab, doUpdateSitesDatasheetParams]);
 
     useEffect(() => {
-      const params = {
-        tab: currentTab,
-        siteId: siteId
-      };
-      doUpdateSitesDatasheetParams(params);
-    }, [currentTab, doUpdateSitesDatasheetParams]);
+      doSitesDatasheetLoadData();
+    }, [siteId, currentTab]);
 
     return (
       <div className='container-fluid'>
         <div className='row'>
           <div className='col-7'>
-            <h4>Datasheets</h4>
+            <h4>Datasheets for Site ID: {siteId}</h4>
           </div>
         </div>
         {/* Top Level Info */}
         <DataHeader id={siteId} />
         {/* Tab Container */}
         <Card>
-          <Card.Header text='Datasheets' />
+          <Card.Header text='Datasheet Workflows' />
           <Card.Body>
+            <p>Select any tab to view Missouri River or Search Effort datasheet data for Site ID: {siteId}. Click on the datasheet ID number to view/edit data and any related data.</p>
             <TabContainer
               tabs={[
                 {
-                  title: `Missouri River (${missouriRiverData.totalCount ? missouriRiverData.totalCount : '0'})`,
-                  content: <MissouriDsTable rowData={missouriRiverData.items} />,
+                  title: `Missouri River (${moriverSitesDatasheetTotalResults})`,
+                  content: <MissouriDsTable />,
                 },
                 {
-                  title: `Search Effort (${searchData.totalCount ? searchData.totalCount : '0'})`,
-                  content: <SearchDsTable rowData={searchData.items} />
+                  title: `Search Effort (${searchEffortSitesDatasheetTotalResults})`,
+                  content: <SearchDsTable />
                 },
               ]}
               onTabChange={(_str, ind) => setCurrentTab(ind)}

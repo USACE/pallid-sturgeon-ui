@@ -6,23 +6,48 @@ import Button from 'app-components/button';
 const MrIdCellRenderer = connect(
   'doFetchMoRiverDataEntry',
   'doUpdateUrl',
+  'doUpdateCurrentTab',
   ({
     doFetchMoRiverDataEntry,
     doUpdateUrl,
+    doUpdateCurrentTab,
     uri,
-    value,
+    data,
+    type,
+    tab = 0,
   }) => {
-    const params = { tableId: value };
+    const params = { tableId: data.mrId };
+
+    const handleChange = () => {
+      doUpdateCurrentTab(tab);
+      doFetchMoRiverDataEntry(params, () => doUpdateUrl(uri), false);
+    };
+
+    const getTypeText = () => {
+      switch (type) {
+        case 'missouriRiver':
+          return data.mrId;
+        case 'fish':
+          return data.fishCount;
+        case 'supplemental':
+          return data.suppCount;
+        case 'procedure':
+          return data.procCount;
+        default:
+          return <>Unknown data type.</>;
+      }
+    };
 
     return (
       <Button
         size='small'
         variant='link'
         className='p-0 mb-1'
-        text={value}
-        handleClick={() => doFetchMoRiverDataEntry(params, doUpdateUrl(uri))}
+        text={getTypeText()}
+        handleClick={handleChange}
       />
     );
   });
 
 export default MrIdCellRenderer;
+

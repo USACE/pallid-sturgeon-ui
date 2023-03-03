@@ -124,6 +124,7 @@ const ProcedureForm = connect(
     };
 
     const saveIsDisabled = !(
+      !!state['procedureDate'] &&
       !!state['purpose'] &&
       !!state['newRadioTagNum'] &&
       !!state['newFreqId'] &&
@@ -134,6 +135,14 @@ const ProcedureForm = connect(
       (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
+    const formatDate = dateStr => {
+      const subStr = 'T';
+      if (dateStr.includes(subStr)) {
+        return dateStr.split('T')[0];
+      }
+      return dateStr;
+    };
+
     useEffect(() => {
       if (edit) {
         dispatch({
@@ -141,6 +150,14 @@ const ProcedureForm = connect(
           payload: dataEntryProcedure.items[0],
         });
         
+        // Format Date
+        if (dataEntryProcedure.items[0].procedureDate.includes('T')) {
+          handleSelect('procedureDate', formatDate(dataEntryProcedure.items[0].procedureDate));
+        }
+        if (dataEntryProcedure.items[0].dstStartDate.includes('T')) {
+          handleSelect('dstStartDate', formatDate(dataEntryProcedure.items[0].dstStartDate));
+        }
+
         // @TODO: consolidate statements if possible
         if (dataEntryProcedure.items[0].dstReimplant === 1) {
           setIsDstReimplant(true);
@@ -208,8 +225,13 @@ const ProcedureForm = connect(
                 />
               </div>
               <div className='col-2'>
-                {/* @TODO: format date */}
-                <Input name='procedureDate' label='Procedure Date' type='date' value={state['procedureDate'] ? state['procedureDate'].split('T')[0] : ''} onChange={handleChange} isDisabled />
+                <Input name='procedureDate' 
+                  label='Procedure Date' 
+                  type='date' 
+                  value={state['procedureDate'] ? state['procedureDate'].split('T')[0] : ''} 
+                  onChange={handleChange} 
+                  isRequired
+                />
               </div>
               <div className='col-2'>
                 <Input name='procedureStartTime' label='Start Time (hh:mm:ss)' value={state['procedureStartTime']} onChange={handleChange} isRequired />
@@ -238,8 +260,14 @@ const ProcedureForm = connect(
                 <Input name='dstSerialNum' label='DST Serial Number' type='number' value={state['dstSerialNum'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
-                {/* @TODO: format date */}
-                <Input name='dstStartDate' label='DST Start Date' type='date' value={state['dstStartDate'] ? state['dstStartDate'].split('T')[0] : ''} isDisabled />
+                <Input 
+                  name='dstStartDate' 
+                  label='DST Start Date' 
+                  type='date' 
+                  value={state['dstStartDate'] ? state['dstStartDate'].split('T')[0] : ''}
+                  onChange={handleChange}
+                  isRequired
+                />
               </div>
               <div className='col-2'>
                 <Input name='dstStartTime' label='DST Start Time (hh:mm:ss)' value={state['dstStartTime']} onChange={handleChange} />

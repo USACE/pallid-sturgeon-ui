@@ -40,6 +40,12 @@ const TabContainer = ({
     }
   }, [isDisabled, setIsDisabled]);
 
+  useEffect(() => {
+    if (defaultTab !== tabIndex) {
+      setTabIndex(defaultTab);
+    }
+  }, [defaultTab]);
+
   return (
     <div {...customProps}>
       <ul className={`nav nav-tabs ${tabListClass}`}>

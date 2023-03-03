@@ -26,15 +26,17 @@ export const isUserAllowed = (userRole, allowRoles = []) => {
 export default connect(
   'doFetchUsers',
   'selectUserRole',
+  'selectUsersData',
   ({
     doFetchUsers,
     userRole,
+    usersData,
     allowRoles = [],
     alt = null,
     children,
   }) => {
-    // const user = usersData.find(user => userRole.userId === user.id);
-    const showChildren = isUserAllowed(userRole, allowRoles);
+    const user = (usersData && userRole) ? usersData.find(user => userRole.userId === user.userId) : {};
+    const showChildren = isUserAllowed(user, allowRoles);
 
     useEffect(() => {
       doFetchUsers();

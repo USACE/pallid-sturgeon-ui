@@ -117,8 +117,10 @@ export default {
             roles: body,
           },
         });
-        if (body.length === 1 && !store.selectUserRole()) {
-          store.doAuthUpdate(body[0].id);
+        if (body) {
+          if (body.length === 1 && !store.selectUserRole()) {
+            store.doAuthUpdate(body[0].id);
+          }
         }
       });
     }

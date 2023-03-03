@@ -42,7 +42,7 @@ const SitesListTable = connect(
             }}
             rowData={sitesData}
             frameworkComponents={{
-              siteIdCellRenderer: SiteIdCellRenderer
+              siteIdCellRenderer: SiteIdCellRenderer,
             }}
           >
             <AgGridColumn field='siteId' headerName='Site ID' cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: true }} />
@@ -54,7 +54,8 @@ const SitesListTable = connect(
             <AgGridColumn field='sampleUnitType' headerName='Sample Unit Type' />
             <AgGridColumn field='bend' headerName='Sample Unit' cellStyle={cellStyle} cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: false }} />
             <AgGridColumn field='bendrn' headerName='Bend R/N' />
-            <AgGridColumn field='brmId' headerName='BRM ID' />
+            {/* @TODO: get bend river mile value */}
+            {/* <AgGridColumn field='brmId' headerName='BRM ID' /> */}
             <AgGridColumn field='editInitials' />
             <AgGridColumn field='last_edit_comment' />
             <AgGridColumn field='uploadedBy' />
