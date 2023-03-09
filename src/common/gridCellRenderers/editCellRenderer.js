@@ -4,12 +4,18 @@ import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 import ConfirmDelete from 'common/modals/confirmDelete';
 
-const EditCellRenderer = (props) => {
-  const { api, columnApi, rowIndex, data, type, doModalOpen } = props;
+const EditCellRenderer = ({ 
+  api, 
+  columnApi, 
+  rowIndex, 
+  data, 
+  type, 
+  doModalOpen,
+  setIsEditingRow
+}) => {
   const [isEditing, setIsEditing] = useState(false);
 
   const saveChangesToRow = () => {
-    // TODO: save changes to API
     api.stopEditing(false);
     setIsEditing(false);
   };
@@ -44,6 +50,12 @@ const EditCellRenderer = (props) => {
       api.startEditingCell({ rowIndex, colKey });
     }
   }, [isEditing, api, rowIndex]);
+
+  useEffect(() => {
+    if (setIsEditingRow) {
+      setIsEditingRow(isEditing);
+    }
+  }, [isEditing]);
 
   return (
     <>

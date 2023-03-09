@@ -37,6 +37,7 @@ const ProcLinkCellRenderer = connect(
             text={'View Data'}
             icon={<Icon icon='dots-horizontal' />}
             handleClick={() => handleAddRow(false)}
+            isDisabled={(data.proclink === undefined || data.proclink === false) ? false : data.proclink}
           />
         ) : (
           <Button
@@ -47,6 +48,7 @@ const ProcLinkCellRenderer = connect(
             text={'Add Data'}
             icon={<Icon icon='plus' />}
             handleClick={() => handleAddRow(true)}
+            isDisabled={(data.proclink === undefined || data.proclink === false) ? false : data.proclink}
           />
         )}
         
