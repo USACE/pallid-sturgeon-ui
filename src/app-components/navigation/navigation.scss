@@ -5,7 +5,8 @@
     font-weight: 600;
     color: $color-gray !important;
 
-    &:hover,&:focus {
+    &:hover,
+    &:focus {
       text-decoration: none !important;
       color: $color-primary-dark !important;
     }
@@ -24,7 +25,8 @@
 .nav-dropdown-button {
   border: 0 !important;
 
-  &:focus,&:active {
+  &:focus,
+  &:active {
     outline: none !important;
     box-shadow: none !important;
   }
@@ -32,7 +34,10 @@
 
 .vl {
   border-left: 1px solid;
-  border-image: linear-gradient(to bottom, rgba(0,0,0,0) 15%,$color-gray 15%,$color-gray 85%,rgba(0,0,0,0) 85%);
+  border-image: linear-gradient(
+    to bottom, rgba(0,0,0,0) 15%,
+    $color-gray 15%,
+    $color-gray 85%,rgba(0,0,0,0) 85%);
   border-image-slice: 1;
 }
 
@@ -54,7 +59,8 @@
       }
     }
 
-    &:hover,&:focus {
+    &:hover,
+    &:focus {
       border-bottom: 3px solid $color-primary;
 
       .nav-link {
@@ -76,9 +82,21 @@
 
 @media screen and (max-width: $medium-screen-width) {
   .navbar-collapse {
-    background: $color-white;
+    background: $color-white !important;
+    border-top: 1px solid $color-primary-light;
     box-shadow: 2px 2px 5px $color-gray;
+    margin-top: 5px;
+    padding-top: 3px;
     z-index: 1000;
+
+    .dropdown {
+      width: 50%;
+
+      .dropdown-menu {
+        margin-top: 0;
+        position: relative;
+      }
+    }
   }
 
   .nav-dropdown-button {
@@ -91,6 +109,6 @@
   }
 
   .dropdown {
-    z-index: 1001;
+    z-index: 1000;
   }
 }

@@ -47,7 +47,7 @@ const NavBar = connect(
     const isHome = pathname === '/';
     const navClasses = classArray([
       'navbar',
-      'navbar-expand-lg',
+      'navbar-expand-xl',
       'navbar-light',
       'fixed-top-banner',
       'bg-white',
@@ -69,7 +69,13 @@ const NavBar = connect(
             Pallid Sturgeon Population Assessment
           </a>
         </div>
-        <button className='navbar-toggler' type='button' aria-expanded='false' aria-label='Toggle navigation' onClick={() => toggleShow()}>
+        <button 
+          className='navbar-toggler' 
+          type='button' 
+          aria-expanded='false' 
+          aria-label='Toggle navigation' 
+          onClick={() => toggleShow()}
+        >
           <span className='navbar-toggler-icon' />
         </button>
         <div className={navCollapseClasses}>
