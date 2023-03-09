@@ -36,6 +36,7 @@ const SuppLinkCellRenderer = connect(
             text={'View Data'}
             icon={<Icon icon='dots-horizontal' />}
             handleClick={() => handleAddRow(false)}
+            isDisabled={(data.supplink === undefined || data.supplink === false) ? false : data.supplink}
           />
         ) : (
           <Button
@@ -46,6 +47,7 @@ const SuppLinkCellRenderer = connect(
             text={'Add Data'}
             icon={<Icon icon='plus' />}
             handleClick={() => handleAddRow(true)}
+            isDisabled={(data.supplink === null || data.supplink === false) ? false : data.supplink}
           />
         )}
         

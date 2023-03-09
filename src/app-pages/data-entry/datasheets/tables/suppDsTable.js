@@ -34,6 +34,7 @@ const SuppDsTable = connect(
     setRowId,
   }) => {
     const gridRef = useRef();
+    const [ isEditingRow, setIsEditingRow ] = useState(false);
     const { items } = dataEntrySupplemental;
 
     const initialState = {
@@ -44,11 +45,35 @@ const SuppDsTable = connect(
       gridRef.current.api.applyTransaction({ add: [{ fid: fid }] });
     }, []);
 
+    const refreshSuppLinkButtons = () => {
+      gridRef.current.api.forEachNode(rowNode => {
+        if (gridRef.current.api.getEditingCells().length > 0) {
+          if (rowNode.rowIndex === gridRef.current.api.getEditingCells()[0].rowIndex) {
+            rowNode.setDataValue('proclink', true);
+          } else {
+            rowNode.setDataValue('proclink', false);
+          }
+        }
+        console.log(rowNode.rowIndex, rowNode.data.proclink);
+      });
+      gridRef.current.api.refreshCells({ columns: ['proclink'] });
+    };
+
     useEffect(() => {
       if (isAddRow) {
         addRow(rowId);
       }
     }, [isAddRow]);
+
+    useEffect(() => {
+      // Reset proclink column values
+      gridRef.current.api.forEachNode(rowNode => {
+        rowNode.setDataValue('proclink', false);
+      });
+      gridRef.current.api.refreshCells({ columns: ['proclink'] });
+      // Find row(s) user is editing and update proclink value
+      refreshSuppLinkButtons();
+    }, [isEditingRow]);
 
     return (
       <div className='container-fluid overflow-auto'>
@@ -91,6 +116,7 @@ const SuppDsTable = connect(
               cellRendererParams={{ 
                 type: 'supplemental',
                 doModalOpen: doModalOpen,
+                setIsEditingRow: setIsEditingRow,
               }}
               editable={false}
             />
