@@ -86,8 +86,6 @@ const FishDsTable = connect(
           text='Export as CSV'
           className='float-right ml-1'
           icon={<Icon icon='download' />}
-          //isDisabled
-          //handleClick={() => doFetchAllDatasheet('fish-datasheet')}
           handleClick={() => doFetchAllDataEntry('fish-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
