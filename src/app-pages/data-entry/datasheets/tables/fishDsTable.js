@@ -15,6 +15,7 @@ import { createDropdownOptions, createMesoOptions } from 'app-pages/data-entry/h
 import SuppLinkCellRenderer from 'common/gridCellRenderers/suppLinkCellRenderer';
 
 const FishDsTable = connect(
+  'doFetchAllDataEntry',
   'doUpdateFishDataEntry',
   'doSaveFishDataEntry',
   'doModalOpen',
@@ -25,6 +26,7 @@ const FishDsTable = connect(
   'selectDomainsOtolith',
   'selectDataEntryLastParams',
   ({
+    doFetchAllDataEntry,
     doUpdateFishDataEntry,
     doSaveFishDataEntry,
     doModalOpen,
@@ -84,8 +86,9 @@ const FishDsTable = connect(
           text='Export as CSV'
           className='float-right ml-1'
           icon={<Icon icon='download' />}
-          isDisabled
-          handleClick={() => doFetchAllDatasheet('fish-datasheet')}
+          //isDisabled
+          //handleClick={() => doFetchAllDatasheet('fish-datasheet')}
+          handleClick={() => doFetchAllDataEntry('fish-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact

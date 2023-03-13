@@ -27,6 +27,7 @@ export default {
       headerData: {},
       lastParams: {},
       currentTab: 0,
+      params: {},
     };
 
     return (state = initialData, { type, payload }) => {
@@ -111,6 +112,11 @@ export default {
             ...state,
             currentTab: payload,
           };
+        case 'UPDATE_DATA_ENTRY_PARAMS':
+          return {
+            ...state,
+            params: payload,
+          };
         default:
           return state;
       }
@@ -123,6 +129,7 @@ export default {
   selectHeaderData: state => state.dataEntry.headerData,
   selectCurrentTab: state => state.dataEntry.currentTab,
   selectDataEntryTotalCount: state => state.dataEntry.totalCount,
+  selectDataEntryParams: state => state.dataEntry.params,
 
   selectDataEntryFishData: state => state.dataEntry.fishData,
   selectDataEntryFishTotalCount: state => state.dataEntry.fishData.totalCount,
@@ -135,6 +142,7 @@ export default {
 
   selectDataEntryTelemetryData: state => state.dataEntry.telemetryData,
   selectDataEntryTelemetryTotalCount: state => state.dataEntry.telemetryData.totalCount,
+
 
   doDataEntryLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_DATA_ENTRY_INIT_DATA' });
@@ -652,10 +660,59 @@ export default {
     });
   },
 
+  doFetchAllDataEntry: (filePrefix) => ({ dispatch, store, apiFetch }) => {
+    console.log('****** doFetchSupplementalDataEntry');
+    dispatch({ type: 'DATA_ENTRY_FETCH_START' });
+    const toastId = toast.loading('Generating .xlsx file. One moment...');
+
+    // FIXME: for testing only - remove
+    const uris = {
+      missouriRiverData: '/moriverDataEntry',
+      fishData: '/fishDataEntry',
+      suppData: '/supplementalDataEntry',
+      procedureData: '/procedureDataEntry',
+    };
+
+    // TODO: backend queries
+    // const uris = {
+    //   missouriRiverData: '/moriverFullDataEntry',
+    //   fishData: '/fishFullDataEntry',
+    //   suppData: '/supplementalFullDataEntry',
+    //   procedureData: '/procedureFullDataEntry',
+    // };
+
+    const uriValues = Object.values(uris);
+    const tab = store.selectCurrentTab();
+
+    const { ...params } = store.selectSitesDatasheetParams();
+    const query = queryFromObject({
+      ...params,
+    });
+
+    const url = `/psapi${uriValues[tab]}${query}`;
+
+    apiFetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filePrefix}-${new Date().toISOString()}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        tSuccess(toastId, 'File Generated!');
+      });
+  },
+
   // TABS
 
   doUpdateCurrentTab: (tab) => ({ dispatch }) => {
     dispatch({ type: 'UPDATE_CURRENT_TAB_START' });
     dispatch({ type: 'UPDATE_CURRENT_TAB', payload: tab });
+  },
+
+  doUpdateDataEntryParams: (params) => ({ dispatch, store }) => {
+    dispatch({ type: 'UPDATE_DATA_ENTRY_PARAMS', payload: params });
   },
 };

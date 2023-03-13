@@ -17,12 +17,14 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const SuppDsTable = connect(
+  'doFetchAllDataEntry',
   'doModalOpen',
   'doSaveSupplementalDataEntry',
   'doUpdateSupplementalDataEntry',
   'selectDataEntrySupplemental',
   'selectDataEntryLastParams',
   ({
+    doFetchAllDataEntry,
     doModalOpen,
     doSaveSupplementalDataEntry,
     doUpdateSupplementalDataEntry,
@@ -58,8 +60,9 @@ const SuppDsTable = connect(
           variant='info'
           text='Export as CSV'
           icon={<Icon icon='download' />}
-          isDisabled
+          // isDisabled
           // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+          handleClick={() => doFetchAllDataEntry('search-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact

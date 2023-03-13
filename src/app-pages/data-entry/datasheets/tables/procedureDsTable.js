@@ -19,12 +19,14 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 
 const ProcedureDsTable = connect(
+  'doFetchAllDataEntry',
   'doModalOpen',
   'doSaveProcedureDataEntry',
   'doUpdateProcedureDataEntry',
   'selectDataEntryProcedure',
   'selectDataEntryLastParams',
   ({
+    doFetchAllDataEntry,
     doModalOpen,
     doSaveProcedureDataEntry,
     doUpdateProcedureDataEntry,
@@ -84,8 +86,9 @@ const ProcedureDsTable = connect(
           variant='info'
           text='Export as CSV'
           icon={<Icon icon='download' />}
-          isDisabled
+          //isDisabled
           // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+          handleClick={() => doFetchAllDataEntry('search-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
