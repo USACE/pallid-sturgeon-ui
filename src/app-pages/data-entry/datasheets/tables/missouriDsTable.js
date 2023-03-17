@@ -67,7 +67,7 @@ const MissouriDsTable = connect(
             <AgGridColumn field='suppCount' headerName='Supplemental' width={130} cellStyle={suppCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'supplemental', tab: 2}} sortable unSortIcon />
             <AgGridColumn field='procCount' headerName='Procedure' width={130} cellStyle={procCellStyle} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'procedure', tab: 3}} sortable unSortIcon />
             <AgGridColumn field='mrFid' headerName='Field ID' width={170} resizable sortable unSortIcon />
-            <AgGridColumn field='setDateTime' headerName='Date' valueGetter={params => dateFormatter(params.data.setDateTime)} sortable unSortIcon />
+            <AgGridColumn field='setdate' headerName='Date' valueGetter={params => dateFormatter(params.data.setdate)} sortable unSortIcon />
             <AgGridColumn field='subsample' sortable unSortIcon />
             <AgGridColumn field='gear' headerName='Gear Code' sortable unSortIcon />
             <AgGridColumn field='recorder' headerName='Recorder' sortable unSortIcon />

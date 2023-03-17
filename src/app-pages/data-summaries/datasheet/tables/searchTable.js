@@ -29,13 +29,23 @@ const SearchTable = connect(
           handleClick={() => doFetchAllDatasheet('search-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact rowData={data}>
+          <AgGridReact 
+            rowData={data}
+            defaultColDef={{
+              width: 150,
+            }}
+          >
             <AgGridColumn field='year' sortable unSortIcon />
-            <AgGridColumn field='seId' headerName='SE Id' sortable unSortIcon />
-            <AgGridColumn field='searchDate' valueGetter={params => dateFormatter(params.data.searchDate)} sortable unSortIcon />
+            <AgGridColumn field='fieldoffice' sortable unSortIcon />
             <AgGridColumn field='projectId' sortable unSortIcon />
             <AgGridColumn field='segmentId' sortable unSortIcon />
             <AgGridColumn field='season' sortable unSortIcon />
+            <AgGridColumn field='bend' sortable unSortIcon />
+            <AgGridColumn field='bendRiverMile' sortable unSortIcon />
+            <AgGridColumn field='bendrn' sortable unSortIcon />
+            <AgGridColumn field='seId' headerName='Search Effort ID' sortable unSortIcon />
+            <AgGridColumn field='searchDate' valueGetter={params => dateFormatter(params.data.searchDate)} sortable unSortIcon />
+            <AgGridColumn field='searchDay' sortable unSortIcon />
             <AgGridColumn field='recorder' sortable unSortIcon />
             <AgGridColumn field='searchTypeCode' sortable unSortIcon />
             <AgGridColumn field='startTime' sortable unSortIcon />
@@ -46,6 +56,7 @@ const SearchTable = connect(
             <AgGridColumn field='stopLongitude' sortable unSortIcon />
             <AgGridColumn field='temp' sortable unSortIcon />
             <AgGridColumn field='conductivity' sortable unSortIcon />
+            <AgGridColumn field='checkby' sortable unSortIcon />
           </AgGridReact>
         </div>
       </>
