@@ -16,12 +16,25 @@ const SuppLinkCellRenderer = connect(
   }) => {
     const fId = data.fid; 
     const hasSuppData = !!dataEntrySupplemental.items.filter(data => data.fid === fId).length;
+    const isNewRow = Object.keys(data).length === 0;    
 
     const handleAddRow = (add) => {
       doUpdateCurrentTab(2);
       if (add) {
         setIsAddRow(true);
         setRowId(fId);
+      }
+    };
+
+    const isButtonDisabled = () => {
+      if (isNewRow || !data.fid) {
+        return true;
+      } else {
+        if (data.supplink === null || data.supplink === undefined || data.supplink === false) {
+          return false;
+        } else {
+          return true;
+        }
       }
     };
 
@@ -36,6 +49,7 @@ const SuppLinkCellRenderer = connect(
             text={'View Data'}
             icon={<Icon icon='dots-horizontal' />}
             handleClick={() => handleAddRow(false)}
+            isDisabled={isButtonDisabled()}
           />
         ) : (
           <Button
@@ -46,6 +60,7 @@ const SuppLinkCellRenderer = connect(
             text={'Add Data'}
             icon={<Icon icon='plus' />}
             handleClick={() => handleAddRow(true)}
+            isDisabled={isButtonDisabled()}
           />
         )}
         

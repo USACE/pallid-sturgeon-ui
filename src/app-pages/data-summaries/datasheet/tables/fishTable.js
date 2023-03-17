@@ -28,9 +28,14 @@ const FishTable = connect(
           handleClick={() => doFetchAllDatasheet('fish-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact rowData={data}>
+          <AgGridReact 
+            rowData={data}
+            defaultColDef={{
+              width: 150,
+            }}
+          >
             <AgGridColumn field='uniqueID' sortable unSortIcon />
-            <AgGridColumn field='fishId' sortable unSortIcon />
+            <AgGridColumn field='fishId' headerName='Fish ID' sortable unSortIcon />
             <AgGridColumn field='year' />
             <AgGridColumn field='fieldOffice' sortable unSortIcon />
             <AgGridColumn field='project' />

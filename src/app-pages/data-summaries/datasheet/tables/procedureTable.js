@@ -28,17 +28,26 @@ const ProcedureTable = connect(
           handleClick={() => doFetchAllDatasheet('procedure-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact rowData={data}>
-            <AgGridColumn headerName='ID' field='id' sortable unSortIcon />
-            <AgGridColumn headerName='UniqueID' field='uniqueId' sortable unSortIcon />
-            <AgGridColumn headerName='Year' field='year' />
-            <AgGridColumn headerName='Field Office' field='fieldOffice' />
-            <AgGridColumn headerName='Project' field='project' />
-            <AgGridColumn headerName='Segment' field='segment' />
-            <AgGridColumn headerName='Season' field='season' />
-            <AgGridColumn headerName='Purpose Code' field='purposeCode' sortable unSortIcon />
-            <AgGridColumn headerName='New Radio Tag Num' field='newRadioTagNum' sortable unSortIcon />
-            <AgGridColumn headerName='New Frequency ID' field='newFrequencyId' sortable unSortIcon />
+          <AgGridReact 
+            rowData={data}
+            defaultColDef={{
+              width: 150,
+            }}
+          >
+            {/* @TODO: Confirm with Coral about the displayed fields vs Apex */}
+            <AgGridColumn field='year' />
+            <AgGridColumn field='fieldOffice' />
+            <AgGridColumn field='project' />
+            <AgGridColumn field='segment' />
+            <AgGridColumn field='season' />
+            <AgGridColumn field='bend' />
+            <AgGridColumn field='bendrn' />
+            <AgGridColumn field='bendRiverMile' />
+            <AgGridColumn headerName='Procedure ID' field='id' sortable unSortIcon />
+            <AgGridColumn headerName='MR ID' field='uniqueId' sortable unSortIcon />
+            <AgGridColumn field='purposeCode' sortable unSortIcon />
+            <AgGridColumn field='newRadioTagNum' sortable unSortIcon />
+            <AgGridColumn field='newFrequencyId' sortable unSortIcon />
             <AgGridColumn headerName='Spawn Code' field='spawnCode' sortable unSortIcon />
             <AgGridColumn headerName='Expected Spawn Year' field='expectedSpawnYear' sortable unSortIcon />
           </AgGridReact>

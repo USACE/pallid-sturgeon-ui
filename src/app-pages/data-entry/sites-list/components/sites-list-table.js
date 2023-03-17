@@ -45,20 +45,19 @@ const SitesListTable = connect(
               siteIdCellRenderer: SiteIdCellRenderer,
             }}
           >
-            <AgGridColumn field='siteId' headerName='Site ID' cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: true }} />
-            <AgGridColumn field='year' />
-            <AgGridColumn field='fieldoffice' headerName='Field Office' />
-            <AgGridColumn field='projectId' headerName='Project' />
-            <AgGridColumn field='segmentId' headerName='Segment' />
-            <AgGridColumn field='season' />
-            <AgGridColumn field='sampleUnitType' headerName='Sample Unit Type' />
-            <AgGridColumn field='bend' headerName='Sample Unit' cellStyle={cellStyle} cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: false }} />
-            <AgGridColumn field='bendrn' headerName='Bend R/N' />
-            {/* @TODO: get bend river mile value */}
-            {/* <AgGridColumn field='brmId' headerName='BRM ID' /> */}
-            <AgGridColumn field='editInitials' />
-            <AgGridColumn field='last_edit_comment' />
-            <AgGridColumn field='uploadedBy' />
+            <AgGridColumn field='siteId' headerName='Site ID' cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: true }} width={100} sortable unSortIcon />
+            <AgGridColumn field='year' width={100} sortable unSortIcon />
+            <AgGridColumn field='fieldoffice' headerName='Field Office' sortable unSortIcon />
+            <AgGridColumn field='projectId' headerName='Project' sortable unSortIcon />
+            <AgGridColumn field='segmentId' headerName='Segment' sortable unSortIcon />
+            <AgGridColumn field='season' sortable unSortIcon />
+            <AgGridColumn field='bend' headerName='Sample Unit' cellStyle={cellStyle} cellRenderer='siteIdCellRenderer' cellRendererParams={{ edit: false }} sortable unSortIcon />
+            <AgGridColumn field='sampleUnitType' headerName='Sample Unit Type' sortable unSortIcon />
+            <AgGridColumn field='bendrn' headerName='Bend R/N' sortable unSortIcon />
+            <AgGridColumn field='bendRiverMile' sortable unSortIcon />
+            <AgGridColumn field='editInitials' sortable unSortIcon />
+            <AgGridColumn field='last_edit_comment' headerName='Last Edit Comment' sortable unSortIcon />
+            <AgGridColumn field='uploadedBy' sortable unSortIcon />
           </AgGridReact>
         </div>
       </div>

@@ -30,8 +30,12 @@ const MissouriRiverTable = connect(
           handleClick={() => doFetchAllDatasheet('missouri-river-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact rowData={data}>
-            <AgGridColumn field='uniqueID' sortable unSortIcon />
+          <AgGridReact 
+            rowData={data}
+            defaultColDef={{
+              width: 150,
+            }}
+          >
             <AgGridColumn field='year' />
             <AgGridColumn field='fieldOffice' sortable unSortIcon />
             <AgGridColumn field='project' />
@@ -42,9 +46,9 @@ const MissouriRiverTable = connect(
             <AgGridColumn field='bendRiverMile' />
             <AgGridColumn field='subsample' />
             <AgGridColumn field='pass' />
+            <AgGridColumn field='uniqueID' sortable unSortIcon />
             <AgGridColumn field='setDate' valueGetter={params => dateFormatter(params.data.setDate)} sortable unSortIcon />
             <AgGridColumn field='conductivity' sortable unSortIcon />
-            <AgGridColumn field='approved' sortable unSortIcon />
             <AgGridColumn field='checkedby' sortable unSortIcon />
           </AgGridReact>
         </div>

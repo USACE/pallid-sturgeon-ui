@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useRef, useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
 
@@ -38,6 +38,7 @@ const FishDsTable = connect(
     setRowId,
   }) => {
     const gridRef = useRef();
+    const [ isEditingRow, setIsEditingRow ] = useState(false);
     const lastRow = dataEntryFishData.items[dataEntryFishData.totalCount - 1];
     const initialState = {
       mrId: dataEntryLastParams.mrId
@@ -55,6 +56,29 @@ const FishDsTable = connect(
         gridRef.current.api.applyTransaction({ add: [row] });
       }
     };
+
+    const refreshSuppLinkButtons = () => {
+      gridRef.current.api.forEachNode(rowNode => {
+        if (gridRef.current.api.getEditingCells().length > 0) {
+          if (rowNode.rowIndex === gridRef.current.api.getEditingCells()[0].rowIndex) {
+            rowNode.setDataValue('supplink', true);
+          } else {
+            rowNode.setDataValue('supplink', false);
+          }
+        }
+      });
+      gridRef.current.api.refreshCells({ columns: ['supplink'] });
+    };
+
+    useEffect(() => {
+      // Reset supplink column values
+      gridRef.current.api.forEachNode(rowNode => {
+        rowNode.setDataValue('supplink', false);
+      });
+      gridRef.current.api.refreshCells({ columns: ['supplink'] });
+      // Find row(s) user is editing and update supplink value
+      refreshSuppLinkButtons();
+    }, [isEditingRow]);
 
     return (
       <div className='container-fluid overflow-auto'>
@@ -117,6 +141,7 @@ const FishDsTable = connect(
               cellRendererParams={{ 
                 type: 'fish',
                 doModalOpen: doModalOpen,
+                setIsEditingRow: setIsEditingRow,
               }}
               editable={false}
             />
