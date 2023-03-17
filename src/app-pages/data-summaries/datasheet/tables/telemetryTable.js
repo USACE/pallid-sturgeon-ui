@@ -28,24 +28,39 @@ const TelemetryTable = connect(
           handleClick={() => doFetchAllDatasheet('telemetry-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact rowData={data}>
-            <AgGridColumn headerName='ID' field='tId' />
-            {/* <AgGridColumn headerName='T FID' field='tFid' />
-        <AgGridColumn headerName='Se ID' field='seId' /> */}
-            {/* <AgGridColumn headerName='UniqueID' field='uniqueId' /> */}
-            <AgGridColumn headerName='Year' field='year' />
-            <AgGridColumn headerName='Field Office' field='fieldOffice' />
-            <AgGridColumn headerName='Project' field='project' />
-            <AgGridColumn headerName='Segment' field='segment' />
-            <AgGridColumn headerName='Season' field='season' />
-            <AgGridColumn headerName='Bend' field='bend' />
-            <AgGridColumn headerName='Radio Tag Number' field='radioTagNum' />
-            <AgGridColumn headerName='Frequency' field='frequencyIdCode' />
-            <AgGridColumn headerName='Capture Time' field='captureTime' />
-            <AgGridColumn headerName='Capture Latitude' field='captureLatitude' />
-            <AgGridColumn headerName='Capture Longitude' field='captureLongitude' />
-            <AgGridColumn headerName='Depth' field='depth' />
-            <AgGridColumn headerName='Conductivity' field='conductivity' sortable unSortIcon />
+          <AgGridReact 
+            rowData={data}
+            defaultColDef={{
+              width: 150,
+            }}
+          >
+            <AgGridColumn field='year' sortable unSortIcon />
+            <AgGridColumn field='fieldOffice' sortable unSortIcon />
+            <AgGridColumn field='project' sortable unSortIcon />
+            <AgGridColumn field='segment' sortable unSortIcon />
+            <AgGridColumn field='season' sortable unSortIcon />
+            <AgGridColumn field='bend' sortable unSortIcon />
+            <AgGridColumn headerName='Telemetry ID' field='tId' sortable unSortIcon />
+            <AgGridColumn headerName='Search Effort ID' field='seId' sortable unSortIcon />
+            <AgGridColumn headerName='Site ID' field='siteId' sortable unSortIcon />
+            <AgGridColumn field='searchDate' sortable unSortIcon />
+            <AgGridColumn field='searchDay' sortable unSortIcon />
+            <AgGridColumn headerName='Radio Tag Number' field='radioTagNum' sortable unSortIcon />
+            <AgGridColumn headerName='Frequency' field='frequencyIdCode' sortable unSortIcon />
+            <AgGridColumn field='captureTime' sortable unSortIcon />
+            <AgGridColumn field='captureLatitude' sortable unSortIcon />
+            <AgGridColumn field='captureLongitude' sortable unSortIcon />
+            <AgGridColumn field='positionConfidence' sortable unSortIcon />
+            <AgGridColumn field='macroId' sortable unSortIcon />
+            <AgGridColumn field='mesoId' sortable unSortIcon />
+            <AgGridColumn field='depth' sortable unSortIcon />
+            <AgGridColumn field='temp' sortable unSortIcon />
+            <AgGridColumn field='conductivity' sortable unSortIcon />
+            <AgGridColumn field='turbidity' sortable unSortIcon />
+            <AgGridColumn field='silt' sortable unSortIcon />
+            <AgGridColumn field='sand' sortable unSortIcon />
+            <AgGridColumn field='gravel' sortable unSortIcon />
+            <AgGridColumn field='comments' sortable unSortIcon />
           </AgGridReact>
         </div>
       </>

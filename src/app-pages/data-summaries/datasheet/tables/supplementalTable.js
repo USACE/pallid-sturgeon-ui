@@ -28,13 +28,17 @@ const SupplementalTable = connect(
           handleClick={() => doFetchAllDatasheet('supplemental-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact rowData={data}>
+          <AgGridReact 
+            rowData={data}
+            defaultColDef={{
+              width: 150,
+            }}
+          >
             <AgGridColumn field='fishCode' />
-            <AgGridColumn field='fishId' sortable unSortIcon />
+            <AgGridColumn field='fishId' headerName='Fish ID' sortable unSortIcon />
             <AgGridColumn field='uniqueID' sortable unSortIcon />
             <AgGridColumn field='year' />
-            <AgGridColumn field='suppId' sortable unSortIcon />
-            <AgGridColumn field='fieldOffice' sortable unSortIcon />
+            <AgGridColumn field='suppId' headerName='Supp ID' sortable unSortIcon />
             <AgGridColumn field='project' />
             <AgGridColumn field='segment' />
             <AgGridColumn field='season' />
@@ -42,7 +46,6 @@ const SupplementalTable = connect(
             <AgGridColumn field='bendrn' headerName='Bend R/N' />
             <AgGridColumn field='bendRiverMile' />
             <AgGridColumn field='hatcheryOrigin' />
-            <AgGridColumn field='turbidity' />
             <AgGridColumn field='checkedby' />
           </AgGridReact>
         </div>

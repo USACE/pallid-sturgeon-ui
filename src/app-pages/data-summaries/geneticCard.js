@@ -144,6 +144,7 @@ export default connect(
                 <AgGridColumn field='broodstock' headerName='Broodstock?' sortable unSortIcon />
                 <AgGridColumn field='hatchwild' headerName='Hatch/Wild?' sortable unSortIcon />
                 <AgGridColumn field='speciesId' headerName='Species Id?' sortable unSortIcon />
+                <AgGridColumn field='archive' sortable unSortIcon />
               </AgGridReact>
               <Pagination
                 className='mt-3'
