@@ -88,6 +88,9 @@ export default connect(
                       pinned
                       lockPosition
                       cellRenderer='editCellRenderer'
+                      cellRendererParams={{
+                        type: 'user',
+                      }}
                       editable={false}
                     />
                     <AgGridColumn field='firstName' editable={false} />
