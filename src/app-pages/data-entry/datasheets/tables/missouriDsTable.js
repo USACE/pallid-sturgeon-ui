@@ -13,9 +13,11 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const MissouriDsTable = connect(
+  'doFetchExportMoriverDataEntries',
   'doUpdateUrl',
   'selectMoriverSitesDatasheetData',
   ({
+    doFetchExportMoriverDataEntries,
     doUpdateUrl,
     moriverSitesDatasheetData,
   }) => {
@@ -39,7 +41,7 @@ const MissouriDsTable = connect(
           variant='info'
           text='Export as CSV'
           icon={<Icon icon='download' />}
-          isDisabled
+          handleClick={() => doFetchExportMoriverDataEntries({ siteID: moriverSitesDatasheetData[0].siteId })}
         />
         <Button
           isOutline

@@ -295,48 +295,6 @@ export default {
     });
   },
 
-  // doDatasheetFetch: () => ({ dispatch, store, apiGet }) => {
-  //   dispatch({ type: 'DATASHEET_FETCH_DATA_START' });
-
-  //   const uris = {
-  //     missouriRiverData: '/missouriDataSummary',
-  //     fishData: '/fishDataSummary',
-  //     suppData: '/suppDataSummary',
-  //     telemetryData: '/telemetryDataSummary',
-  //     procedureData: '/procedureDataSummary',
-  //     searchData: '/searchDataSummary',
-  //   };
-
-  //   const uriKeys = Object.keys(uris);
-  //   const uriValues = Object.values(uris);
-  //   const { tab, ...params } = store.selectDatasheetParams();
-  //   const size = store.selectDatasheetPageSize();
-  //   const page = store.selectDatasheetPageNumber();
-
-  //   const query = queryFromObject({
-  //     ...params,
-  //     size,
-  //     page,
-  //   });
-
-  //   const url = `/psapi${uriValues[tab]}${query}`;
-
-  //   apiGet(url, (_err, body) => {
-  //     if (!_err) {
-  //       dispatch({
-  //         type: 'DATASHEETS_UPDATED_DATA',
-  //         payload: {
-  //           key: uriKeys[tab],
-  //           data: body,
-  //         }
-  //       });
-  //       dispatch({ type: 'DATASHEET_FETCH_DATA_FINISHED' });
-  //     } else {
-  //       dispatch({ type: 'DATASHEET_FETCH_DATA_ERROR', payload: _err });
-  //     }
-  //   });
-  // },
-
   doFetchAllDatasheet: (filePrefix) => ({ dispatch, store, apiFetch }) => {
     dispatch({ type: 'DATASHEET_ALL_FETCH_START' });
     const toastId = toast.loading('Generating .xlsx file. One moment...');
@@ -380,7 +338,6 @@ export default {
 
   doSetDatasheetPagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
     dispatch({ type: 'SET_DATASHEET_PAGINATION', payload: { pageSize, pageNumber }});
-    // store.doDatasheetFetch();
   },
 
   doUpdateDatasheetParams: (params) => ({ dispatch, store }) => {

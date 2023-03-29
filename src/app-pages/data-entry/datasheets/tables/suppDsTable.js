@@ -17,12 +17,14 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 const SuppDsTable = connect(
+  'doFetchExportSuppDataEntries',
   'doModalOpen',
   'doSaveSupplementalDataEntry',
   'doUpdateSupplementalDataEntry',
   'selectDataEntrySupplemental',
   'selectDataEntryLastParams',
   ({
+    doFetchExportSuppDataEntries,
     doModalOpen,
     doSaveSupplementalDataEntry,
     doUpdateSupplementalDataEntry,
@@ -54,7 +56,6 @@ const SuppDsTable = connect(
             rowNode.setDataValue('proclink', false);
           }
         }
-        console.log(rowNode.rowIndex, rowNode.data.proclink);
       });
       gridRef.current.api.refreshCells({ columns: ['proclink'] });
     };
@@ -83,8 +84,7 @@ const SuppDsTable = connect(
           variant='info'
           text='Export as CSV'
           icon={<Icon icon='download' />}
-          isDisabled
-          // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+          handleClick={() => doFetchExportSuppDataEntries({ mrID: dataEntryLastParams.mrId })}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
