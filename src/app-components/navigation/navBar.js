@@ -74,6 +74,9 @@ const NavBar = connect(
 
     const toggleShow = () => setShow(!show);
 
+    console.log('authdata: ', authData);
+    console.log('authRoles: ', authRoles);
+
     return (
       <nav className={navClasses}>
         <div className='navbar-brand'>
@@ -129,7 +132,7 @@ const NavBar = connect(
                     buttonContent={(
                       <span className='nav-link user'>
                         {/* @TODO: If backend is disconeected, write message */}
-                        {(authData && authRoles) && (authData.name + ' (' + authRoles[0].role + ')')}<br></br>
+                        {(authData && (authRoles && authRoles.length > 0)) && (authData.name + ' (' + authRoles[0].role + ')')}<br></br>
                         {userRole && (user.officeCode + ' - Project ' + user.projectCode + ' - ' + projectMap[userRole.projectCode])}
                         <>&nbsp;</>
                         <Icon icon='menu-down' />
