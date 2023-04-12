@@ -14,26 +14,42 @@ const Home = connect(
     authRoles,
     userRole,
   }) => {
-    console.log('userRole: ', userRole);
+    const getAccountView = () => {
+      if (!userRole) {
+        if (authRoles.length > 0) {
+          // Multiple accounts
+          return (
+            <>
+              <Accounts accounts={authRoles} />;
+            </>
+          );
+        } else {
+          // New accounts
+          return (
+            <RoleFilter
+              allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}
+              alt={() => <RoleRequestSentMessage className='p-2' />}>
+              <Hero />
+              <HomeReports />
+            </RoleFilter>
+          );
+        }
+      } else {
+        // Single accounts
+        return (
+          <RoleFilter
+            allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}
+            alt={() => <RoleRequestSentMessage className='p-2' />}>
+            <Hero />
+            <HomeReports />
+          </RoleFilter>
+        );
+      }
+    };
+
     return (
       <>
-        <RoleFilter
-          allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}
-        >
-          <Hero />
-        </RoleFilter>
-        {/* {((!userRole && authRoles) && (authRoles.length > 1)) && (
-          <>
-            <Accounts accounts={authRoles} />
-          </>
-        )} */}
-        {/* {(authRoles && authRoles.length > 0) ? (
-          <>
-            <Accounts accounts={authRoles} />
-          </>
-        ) : (
-
-        )} */}
+        {getAccountView()}
       </>
     );}
 );
