@@ -7,7 +7,7 @@ import './footer.scss';
 
 const Footer = () => (
   <div className='fixed-bottom'>
-    <footer aria-label='Site Footer'>
+    <footer aria-label='Site Footer' className='page-footer'>
       <div className='footer'>
         <div className='text-center'>
           <p>
