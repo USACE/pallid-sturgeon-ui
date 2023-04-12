@@ -7,20 +7,32 @@ import NavBar from 'app-components/navigation';
 import Hero from 'app-components/hero';
 import Footer from './common/footer/Footer';
 import PageContent from 'app-components/page-content';
+import LoadingModal from 'common/modals/loading';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './css/bootstrap/css/bootstrap.water.min.css';
 import './css/mdi/css/materialdesignicons.min.css';
 import './css/index.scss';
 
-export default connect('selectRoute', 'selectAuth', ({ route: Route, auth }) => (
-  <>
-    <ToastContainer autoClose={3500} hideProgressBar={false} />
-    <NavBar />
-    <PageContent>
-      {auth.token ? <Route />:<Hero />}
-    </PageContent>
-    <Modal closeWithEscape />
-    <Footer />
-  </>
-));
+export default connect(
+  'selectRoute', 
+  'selectAuth', 
+  'selectLoadingState',
+  'selectLoadingMessage',
+  ({ 
+    route: Route, 
+    auth,
+    loadingState,
+    loadingMessage
+  }) => (
+    <>
+      {loadingState && <LoadingModal text={loadingMessage} />}
+      <ToastContainer autoClose={3500} hideProgressBar={false} />
+      <NavBar />
+      <PageContent>
+        {auth.token ? <Route />:<Hero />}
+      </PageContent>
+      <Modal closeWithEscape />
+      <Footer />
+    </>
+  ));

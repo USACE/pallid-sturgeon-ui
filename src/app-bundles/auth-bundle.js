@@ -75,6 +75,8 @@ export default {
   },
 
   doAuthenticate: () => ({ dispatch, store }) => {
+    store.doSetLoadingState(true);
+    store.doSetLoadingMessage('Authenticating...');
     dispatch({
       type: 'START_AUTH',
       payload: {
@@ -127,16 +129,23 @@ export default {
   },
 
   doAuthUpdate: (id) => ({ dispatch, apiGet }) => {
+    store.doSetLoadingState(true);
+    store.doSetLoadingMessage('Fetching user...');
+
     if (id) {
       const url = `/psapi/userRoleOffice/${id}`;
 
       apiGet(url, (_err, body) => {
+        store.doSetLoadingState(false);
+        store.doSetLoadingMessage('Loading...');
         dispatch({
           type: 'UPDATE_ROLES',
           payload: body,
         });
       });
     } else {
+      store.doSetLoadingState(false);
+      store.doSetLoadingMessage('Loading...');
       dispatch({
         type: 'UPDATE_AUTH',
         payload: {
