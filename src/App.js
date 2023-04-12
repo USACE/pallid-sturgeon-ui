@@ -5,7 +5,7 @@ import { ToastContainer } from 'react-toastify';
 import Modal from 'app-components/modal';
 import NavBar from 'app-components/navigation';
 import Hero from 'app-components/hero';
-import Footer from './common/footer/Footer';
+import Footer from './app-components/footer';
 import PageContent from 'app-components/page-content';
 import LandingModal from 'common/modals/landing';
 
