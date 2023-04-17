@@ -74,9 +74,6 @@ const NavBar = connect(
 
     const toggleShow = () => setShow(!show);
 
-    console.log('authdata: ', authData);
-    console.log('authRoles: ', authRoles);
-
     return (
       <nav className={navClasses}>
         <div className='navbar-brand'>
