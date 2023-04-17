@@ -88,6 +88,7 @@ export default connect(
         fromDate: formatDate(fromDateFilter),
         toDate: formatDate(toDateFilter),
         approved: approvalFilter,
+        id: userRole.id,
         spice: speciesFilter,
       };
       doUpdateDatasheetParams(params);

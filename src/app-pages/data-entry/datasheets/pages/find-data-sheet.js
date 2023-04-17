@@ -15,6 +15,7 @@ const FindDataSheet = connect(
   'doFetchTelemetryDataEntry',
   'doFetchProcedureDataEntry',
   'doUpdateUrl',
+  'selectUserRole',
   ({
     doFetchMoRiverDataEntry,
     doFetchSupplementalDataEntry,
@@ -23,6 +24,7 @@ const FindDataSheet = connect(
     doFetchTelemetryDataEntry,
     doFetchProcedureDataEntry,
     doUpdateUrl,
+    userRole,
   }) => {
     const [pitTag, setPitTag] = useState('');
     const [tableId, setTableId] = useState('');
@@ -41,6 +43,7 @@ const FindDataSheet = connect(
         tableId,
         fieldId,
         geneticsVial,
+        id: userRole.id,
       };
 
       switch(dataSheetType) {

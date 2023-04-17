@@ -1,62 +1,57 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { connect } from 'redux-bundler-react';
 
-import Accordion from 'app-components/accordion';
 import Hero from 'app-components/hero';
-import UsgNoVialNumbersTable from './tables/usgNoVialNumberTable';
-import UncheckedDataTable from './tables/uncheckedDataTable';
-import OfficeErrorLogTable from './tables/officeErrorLog';
+import Accounts from './components/accounts/accounts';
+import HomeReports from './components/homeReports/homeReports';
 import RoleFilter from 'app-components/role-filter';
 import RoleRequestSentMessage from 'app-components/role-request-sent';
-import UnapprovedDataTable from './tables/unapprovedDataTable';
-import BafiDataTable from './tables/bafiDataTable';
 
 const Home = connect(
-  'doHomeFetch',
+  'selectAuthRoles',
+  'selectUserRole',
   ({
-    doHomeFetch,
+    authRoles,
+    userRole,
   }) => {
-    useEffect(() => {
-      doHomeFetch();
-    }, [doHomeFetch]);
+    const getAccountView = () => {
+      if (!userRole) {
+        if (authRoles.length > 0) {
+          // Multiple accounts
+          return (
+            <>
+              <Accounts accounts={authRoles} />;
+            </>
+          );
+        } else {
+          // New accounts
+          return (
+            <RoleFilter
+              allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}
+              alt={() => <RoleRequestSentMessage className='p-2' />}>
+              <Hero />
+              <HomeReports />
+            </RoleFilter>
+          );
+        }
+      } else {
+        // Single accounts
+        return (
+          <RoleFilter
+            allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}
+            alt={() => <RoleRequestSentMessage className='p-2' />}>
+            <Hero />
+            <HomeReports />
+          </RoleFilter>
+        );
+      }
+    };
 
     return (
-      <RoleFilter
-        allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}
-        alt={() => <RoleRequestSentMessage className='p-2' />}>
-        <Hero />
-        <div className='container pt-4'>
-          <Accordion.List>
-            <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
-              <Accordion.Item headingText='USG Species with No Vial Number'>
-                <UsgNoVialNumbersTable />
-              </Accordion.Item>
-            </RoleFilter>
-            <RoleFilter allowRoles={['ADMINISTRATOR']}>
-              <Accordion.Item headingText='Datasheet Records for Approval'>
-                <UnapprovedDataTable />
-              </Accordion.Item>
-            </RoleFilter>
-            <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE USER']}>
-              <Accordion.Item headingText='BAFI Datasheets'>
-                <BafiDataTable />
-              </Accordion.Item>
-            </RoleFilter>
-            <RoleFilter allowRoles={['OFFICE ADMIN', 'OFFICE USER']}>
-              <Accordion.Item headingText='Office Error Log'>
-                <OfficeErrorLogTable />
-              </Accordion.Item>
-            </RoleFilter>
-            <RoleFilter allowRoles={['OFFICE ADMIN']}>
-              <Accordion.Item headingText='Unchecked Data Sheet Records'>
-                <UncheckedDataTable />
-              </Accordion.Item>
-            </RoleFilter>
-          </Accordion.List>
-        </div>
-      </RoleFilter>
-    );
-  }
+      <>
+        {getAccountView()}
+      </>
+    );}
 );
 
 export default Home;
