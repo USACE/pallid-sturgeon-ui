@@ -86,11 +86,11 @@ export default {
     keycloak.authenticate();
   },
 
-  doAuthLogout: () => ({ dispatch, store }) => {
+  doAuthLogout: () => ({ store }) => {
     store.doAuthUpdate(null);
   },
 
-  doSessionStateUpdate: (sessionState) => ({ dispatch, store }) => {
+  doSessionStateUpdate: (sessionState) => ({ dispatch }) => {
     dispatch({
       type: 'UPDATE_SESSION_STATE',
       payload: {
@@ -128,7 +128,7 @@ export default {
     }
   },
 
-  doAuthUpdate: (id) => ({ dispatch, apiGet }) => {
+  doAuthUpdate: (id) => ({ dispatch, apiGet, store }) => {
     store.doSetLoadingState(true);
     store.doSetLoadingMessage('Fetching user...');
 
