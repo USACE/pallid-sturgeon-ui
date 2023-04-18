@@ -21,7 +21,6 @@ const Accounts = connect(
     return (
       <div className='container pt-4'>
         <p className='user-text'>Logged in as: <b>{authData ? authData.name : ''}</b></p>
-        <p className='role-text'>({ accounts ? accounts[0].role : ''})</p>
         <p className='center text'>There are multiple accounts for this user. Please select account below:</p>
         <Row className='center'>
           <div className='col-6'>

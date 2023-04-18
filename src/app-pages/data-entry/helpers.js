@@ -92,7 +92,7 @@ export const createAccountsOptions = data => {
   if (!data) return [];
 
   return data.map(opt => ({
-    text: 'Field Office: ' + opt.officeCode + ' - Project: ' + opt.projectCode + ' - ' + projectMap[opt.projectCode],
+    text: opt.role + ' - Field Office: ' + opt.officeCode + ' - Project: ' + opt.projectCode + ' - ' + projectMap[opt.projectCode],
     value: opt.id,
   }));
 };
