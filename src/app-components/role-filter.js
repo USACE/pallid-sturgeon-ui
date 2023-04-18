@@ -35,7 +35,7 @@ export default connect(
     alt = null,
     children,
   }) => {
-    const user = (usersData && userRole) ? usersData.find(user => userRole.userId === user.userId) : {};
+    const user = (usersData && userRole) ? usersData.find(user => userRole.id === user.id) : {};
     const showChildren = isUserAllowed(user, allowRoles);
 
     useEffect(() => {
