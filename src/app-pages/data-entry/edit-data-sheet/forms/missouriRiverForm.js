@@ -212,7 +212,7 @@ const MissouriRiverForm = connect(
 
     useEffect(() => {
       if (dataEntryData.mrId) {
-        doMoRiverDatasheetLoadData(dataEntryData.mrId, userRole.id);
+        doMoRiverDatasheetLoadData(dataEntryData.mrId);
       }
     }, [dataEntryData.mrId, userRole.id]);
 

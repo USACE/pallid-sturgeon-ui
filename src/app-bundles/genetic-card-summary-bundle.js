@@ -52,7 +52,6 @@ const geneticCardSummaryBundle = {
   }),
 
   doFetchGeneticCardSummary: () => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'GENETIC_CARD_SUMMARY_FETCH_START' });
     const toastId = toast.loading('Loading genetic card summary data...');
 
     const params = store.selectGeneticCardSummaryParams();
@@ -66,7 +65,6 @@ const geneticCardSummaryBundle = {
           type: 'GENETIC_CARD_SUMMARY_UPDATED_DATA',
           payload: body,
         });
-        dispatch({ type: 'GENETIC_CARD_SUMMARY_FETCH_FINISHED' });
         tSuccess(toastId, 'Successfully loaded genetic card summary data.');
       } else {
         dispatch({ type: 'GENETIC_CARD_SUMMARY_FETCH_ERROR' });
@@ -76,7 +74,6 @@ const geneticCardSummaryBundle = {
   },
 
   doFetchAllGeneticCardSummary: (filePrefix) => ({ dispatch, store, apiFetch }) => {
-    dispatch({ type: 'ALL_GENETIC_CARD_SUMMARY_FETCH_START' });
     const toastId = toast.loading('Preparing file for download...');
 
     const params = store.selectGeneticCardSummaryParams();

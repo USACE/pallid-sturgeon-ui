@@ -94,7 +94,7 @@ const SearchEffortForm = connect(
 
     useEffect(() => {
       if (dataEntryData.seId) {
-        doSearchEffortDatasheetLoadData(dataEntryData.seId, userRole.id);
+        doSearchEffortDatasheetLoadData(dataEntryData.seId);
       }
     }, [dataEntryData.seId]);
 

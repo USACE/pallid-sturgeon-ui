@@ -136,8 +136,7 @@ export default {
   selectDataEntryTelemetryData: state => state.dataEntry.telemetryData,
   selectDataEntryTelemetryTotalCount: state => state.dataEntry.telemetryData.totalCount,
 
-  doDataEntryLoadData: () => ({ dispatch, store }) => {
-    dispatch({ type: 'LOADING_DATA_ENTRY_INIT_DATA' });
+  doDataEntryLoadData: () => ({ store }) => {
     store.doDomainFieldOfficesFetch();
     store.doDomainProjectsFetch();
     store.doDomainSeasonsFetch();
@@ -145,8 +144,6 @@ export default {
   },
 
   doFetchHeaderData: (params) => ({ dispatch, apiGet }) => {
-    dispatch({ type: 'FETCH_HEADER_DATA_START' });
-
     const url = `/psapi/headerData${queryFromObject(params)}`;
 
     apiGet(url, (_err, body) => {
@@ -154,16 +151,14 @@ export default {
         type: 'UPDATED_HEADER_DATA',
         payload: body,
       });
-      dispatch({ type: 'FETCH_HEADER_DATA_FINISHED' });
     });
   },
 
-  doMoRiverDatasheetLoadData: (id, userId) => ({ dispatch, store }) => {
-    dispatch({ type: 'LOADING_MORIVER_DATA_ENTRY_INIT_DATA' });
+  doMoRiverDatasheetLoadData: (id) => ({ store }) => {
     // Load data
-    store.doFetchFishDataEntry({ mrId: id, id: userId }, null, false);
-    store.doFetchSupplementalDataEntry({ mrId: id, id: userId }, null, false);
-    store.doFetchProcedureDataEntry({ mrId: id, id: userId }, null, false);
+    store.doFetchFishDataEntry({ mrId: id, id: store.selectUserRole().id }, null, false);
+    store.doFetchSupplementalDataEntry({ mrId: id, id: store.selectUserRole().id }, null, false);
+    store.doFetchProcedureDataEntry({ mrId: id, id: store.selectUserRole().id }, null, false);
     // Load supporting data
     store.doDomainsFtPrefixesFetch();
     store.doDomainsMrFetch();
@@ -171,16 +166,14 @@ export default {
     store.doDomainsSpeciesFetch();
   },
 
-  doSearchEffortDatasheetLoadData: (id, userId) => ({ dispatch, store }) => {
-    dispatch({ type: 'LOADING_SEARCH_EFFORT_DATA_ENTRY_INIT_DATA' });
+  doSearchEffortDatasheetLoadData: (id) => ({ store }) => {
     // Load data
-    store.doFetchTelemetryDataEntry({ seId: id, id: userId }, null, false);
+    store.doFetchTelemetryDataEntry({ seId: id, id: store.selectUserRole().id }, null, false);
   },
 
   // DATA ENTRY FETCHES
 
   doFetchMoRiverDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Missouri River datasheet(s)...') : null;
 
     const url = `/psapi/moriverDataEntry${queryFromObject(params)}`;
@@ -203,7 +196,6 @@ export default {
             callback();
           }
         }
-        dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for Missouri River datasheet(s). Please try again.');
@@ -212,7 +204,6 @@ export default {
   },
 
   doFetchFishDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'FISH_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Fish datasheet(s)...') : null;
 
     const url = `/psapi/fishDataEntry${queryFromObject(params)}`;
@@ -232,7 +223,6 @@ export default {
             callback();
           }
         }
-        dispatch({ type: 'FISH_DATA_ENTRY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for Fish datasheet(s). Please try again.');
@@ -241,7 +231,6 @@ export default {
   },
 
   doFetchSupplementalDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Supplemental datasheet(s)...') : null;
 
     const url = `/psapi/supplementalDataEntry${queryFromObject(params)}`;
@@ -261,7 +250,6 @@ export default {
             callback();
           }
         }
-        dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for Supplemental datasheet(s). Please try again.');
@@ -270,7 +258,6 @@ export default {
   },
 
   doFetchProcedureDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'PROCEDURE_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Procedure datasheet(s)...') : null;
 
     const url = `/psapi/procedureDataEntry${queryFromObject(params)}`;
@@ -290,7 +277,6 @@ export default {
             callback();
           }
         }
-        dispatch({ type: 'PROCEDURE_DATA_ENTRY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'PROCEDURE_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for Procedure datasheet(s). Please try again.');
@@ -299,7 +285,6 @@ export default {
   },
 
   doFetchSearchDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'SEARCH_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Search Effort datasheet(s)...') : null;
 
     const url = `/psapi/searchDataEntry${queryFromObject(params)}`;
@@ -322,7 +307,6 @@ export default {
             callback();
           }
         }
-        dispatch({ type: 'SEARCH_DATA_ENTRY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'SEARCH_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for Search Effort datasheet(s). Please try again.');
@@ -331,7 +315,6 @@ export default {
   },
 
   doFetchTelemetryDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'TELEMETRY_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Telemetry datasheet(s)...') : null;
 
     const url = `/psapi/telemetryDataEntry${queryFromObject(params)}`;
@@ -351,7 +334,6 @@ export default {
             callback();
           }
         }
-        dispatch({ type: 'TELEMETRY_DATA_ENTRY_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_FETCH_ERROR', payload: err });
         tError(toastId, 'Error searching for Telemetry datasheet(s). Please try again.');
@@ -362,7 +344,6 @@ export default {
   // DATA ENTRY INSERTS
 
   doSaveMoRiverDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
-    dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
     const url = '/psapi/moriverDataEntry';
@@ -380,7 +361,6 @@ export default {
   },
 
   doSaveFishDataEntry: (formData, params) => ({ dispatch, store, apiPost }) => {
-    dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
     const url = '/psapi/fishDataEntry';
@@ -398,7 +378,6 @@ export default {
   },
 
   doSaveSupplementalDataEntry: (formData, params) => ({ dispatch, store, apiPost }) => {
-    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
     const url = '/psapi/supplementalDataEntry';
@@ -416,7 +395,6 @@ export default {
   },
 
   doSaveProcedureDataEntry: (formData, params) => ({ dispatch, store, apiPost }) => {
-    dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
     const url = '/psapi/procedureDataEntry';
@@ -434,7 +412,6 @@ export default {
   },
 
   doSaveSearchDataEntry: (formData) => ({ dispatch, store, apiPost }) => {
-    dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
     const url = '/psapi/searchDataEntry';
@@ -452,7 +429,6 @@ export default {
   },
 
   doSaveTelemetryDataEntry: (formData, params) => ({ dispatch, store, apiPost }) => {
-    dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
     const url = '/psapi/telemetryDataEntry';
@@ -472,7 +448,6 @@ export default {
   // DATA ENTRY UPDATES
 
   doUpdateMoRiverDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
-    dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
     const url = '/psapi/moriverDataEntry';
@@ -490,7 +465,6 @@ export default {
   },
 
   doUpdateFishDataEntry: (rowData, params) => ({ dispatch, store, apiPut }) => {
-    dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving fish datasheet...');
 
     const url = '/psapi/fishDataEntry';
@@ -508,7 +482,6 @@ export default {
   },
 
   doUpdateSupplementalDataEntry: (rowData, params) => ({ dispatch, store, apiPut }) => {
-    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving supplemental datasheet...');
 
     const url = '/psapi/supplementalDataEntry';
@@ -526,7 +499,6 @@ export default {
   },
 
   doUpdateProcedureDataEntry: (rowData, params) => ({ dispatch, store, apiPut }) => {
-    dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving procedure datasheet...');
 
     const url = '/psapi/procedureDataEntry';
@@ -544,7 +516,6 @@ export default {
   },
 
   doUpdateSearchDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
-    dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
     const url = '/psapi/searchDataEntry';
@@ -561,7 +532,6 @@ export default {
   },
 
   doUpdateTelemetryDataEntry: (formData, params) => ({ dispatch, store, apiPut }) => {
-    dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_START' });
     const toastId = toast.loading('Saving datasheet...');
 
     const url = '/psapi/telemetryDataEntry';
@@ -581,7 +551,6 @@ export default {
   // DATA ENTRY DELETES
 
   doDeleteFishDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
-    dispatch({ type: 'FISH_DATA_ENTRY_DELETE_START' });
     const toastId = toast.loading(`Deleting fish datasheet ID: ${id}...`);
 
     const url = `/psapi/fishDataEntry/${id}`;
@@ -599,7 +568,6 @@ export default {
   },
 
   doDeleteSupplementalDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
-    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_DELETE_START' });
     const toastId = toast.loading(`Deleting supplemental datasheet ID: ${id}...`);
 
     const url = `/psapi/supplementalDataEntry/${id}`;
@@ -617,7 +585,6 @@ export default {
   },
 
   doDeleteProcedureDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
-    dispatch({ type: 'PROCEDURE_DATA_ENTRY_DELETE_START' });
     const toastId = toast.loading(`Deleting procedure datasheet ID: ${id}...`);
 
     const url = `/psapi/procedureDataEntry/${id}`;
@@ -635,7 +602,6 @@ export default {
   },
 
   doDeleteTelemetryDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
-    dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_START' });
     const toastId = toast.loading(`Deleting telemetry datasheet ID: ${id}...`);
 
     const url = `/psapi/telemetryDataEntry/${id}`;
@@ -655,7 +621,6 @@ export default {
   // TABS
 
   doUpdateCurrentTab: (tab) => ({ dispatch }) => {
-    dispatch({ type: 'UPDATE_CURRENT_TAB_START' });
     dispatch({ type: 'UPDATE_CURRENT_TAB', payload: tab });
   },
 };

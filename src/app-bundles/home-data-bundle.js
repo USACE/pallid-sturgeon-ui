@@ -134,9 +134,7 @@ const homeDataBundle = {
   selectUncheckedDataSheets: state => state.home.uncheckedDataSheets,
   selectUncheckedDataParams: state => state.home.uncheckedDataSheets.params,
 
-  doHomeFetch: () => ({ dispatch, store }) => {
-    dispatch({ type: 'FETCHING_HOME_DATA ' });
-
+  doHomeFetch: () => ({ store }) => {
     store.doFetchDownloadInfo();
 
     // Fetch data based on user role
@@ -162,8 +160,6 @@ const homeDataBundle = {
   },
 
   doFetchDownloadInfo: () => ({ dispatch, apiGet }) => {
-    dispatch({ type: 'FETCH_DOWNLOAD_INFO_START' });
-
     const url = '/psapi/downloadInfo';
 
     apiGet(url, (err, body) => {
@@ -172,15 +168,13 @@ const homeDataBundle = {
           type: 'SET_DOWNLOAD_INFO_VERSION_DATA',
           payload: body,
         });
-        dispatch({ type: 'FETCH_DOWNLOAD_INFO_FINISH' });
       } else {
         dispatch({ type: 'FETCH_DOWNLOAD_INFO_ERROR' });
       }
     });
   },
 
-  doFetchDownloadZip: () => ({ dispatch, store, apiFetch }) => {
-    dispatch({ type: 'FETCH_DOWNLOAD_ZIP_START' });
+  doFetchDownloadZip: () => ({ store, apiFetch }) => {
     const toastId = toast.loading('Preparing .zip file...');
 
     const url = '/psapi/downloadZip';
@@ -221,11 +215,8 @@ const homeDataBundle = {
   //   });
   // },
 
-  doFetchOfficeErrorLogs: () => ({ dispatch, apiGet }) => {
-    dispatch({ type: 'FETCH_ERROR_LOG_START' });
-
+  doFetchOfficeErrorLogs: () => ({ dispatch, apiGet, store }) => {
     const query = queryFromObject({ id: store.selectUserRole().id });
-
     const url = `/psapi/officeErrorLog${query}`;
 
     apiGet(url, (err, body) => {
@@ -234,7 +225,6 @@ const homeDataBundle = {
           type: 'SET_ERROR_LOG_DATA',
           payload: body,
         });
-        dispatch({ type: 'FETCH_ERROR_LOG_FINISHED' });
       } else {
         dispatch({ type: 'FETCH_RROR_LOG_ERROR' });
       }
@@ -242,10 +232,7 @@ const homeDataBundle = {
   },
 
   doFetchUsgNoVialNumbers: () => ({ dispatch, apiGet, store }) => {
-    dispatch({ type: 'FETCH_USG_NO_VIAL_NUMBERS_START' });
-
     const query = queryFromObject({ id: store.selectUserRole().id });
-
     const url = `/psapi/usgNoVialNumbers${query}`;
 
     apiGet(url, (err, body) => {
@@ -254,7 +241,6 @@ const homeDataBundle = {
           type: 'SET_USG_NO_VIAL_NUMBERS_DATA',
           payload: body,
         });
-        dispatch({ type: 'FETCH_USG_NO_VIAL_NUMBERS_FINISHED' });
       } else {
         dispatch({ type: 'FETCH_USG_NO_VIAL_NUMBERS_ERROR' });
       }
@@ -262,7 +248,6 @@ const homeDataBundle = {
   },
 
   doFetchUnapprovedData: () => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'FETCH_UNAPPROVED_DATA_START' });
     const params = store.selectUnapprovedDataSheets();
     const { pageSize, pageNumber } = params;
 
@@ -271,7 +256,6 @@ const homeDataBundle = {
       page: pageNumber,
       id: store.selectUserRole().id
     });
-
     const url = `/psapi/unapprovedDataSheets${query}`;
 
     apiGet(url, (err, body) => {
@@ -280,7 +264,6 @@ const homeDataBundle = {
           type: 'SET_UNAPPROVED_DATA_DATA',
           payload: body,
         });
-        dispatch({ type: 'FETCH_UNAPPROVED_DATA_FINISH' });
       } else {
         dispatch({ type: 'FETCH_UNAPPROVED_DATA_ERROR' });
       }
@@ -288,7 +271,6 @@ const homeDataBundle = {
   },
 
   doFetchBafiData: () => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'FETCH_BAFI_DATA_START' });
     const params = store.selectUnapprovedDataSheets();
     const { pageSize, pageNumber } = params;
 
@@ -297,7 +279,6 @@ const homeDataBundle = {
       page: pageNumber,
       id: store.selectUserRole().id
     });
-
     const url = `/psapi/bafiDataSheets${query}`;
 
     apiGet(url, (err, body) => {
@@ -306,7 +287,6 @@ const homeDataBundle = {
           type: 'SET_BAFI_DATA_DATA',
           payload: body,
         });
-        dispatch({ type: 'FETCH_BAFI_DATA_FINISH' });
       } else {
         dispatch({ type: 'FETCH_BAFI_DATA_ERROR' });
       }
@@ -323,7 +303,6 @@ const homeDataBundle = {
       page: pageNumber,
       id: store.selectUserRole().id
     });
-
     const url = `/psapi/uncheckedDataSheets${query}`;
 
     apiGet(url, (err, body) => {
@@ -332,7 +311,6 @@ const homeDataBundle = {
           type: 'SET_UNCHECKED_DATA_DATA',
           payload: body,
         });
-        dispatch({ type: 'FETCH_UNCHECKED_DATA_FINISH' });
       } else {
         dispatch({ type: 'FETCH_UNCHECKED_DATA_ERROR' });
       }
