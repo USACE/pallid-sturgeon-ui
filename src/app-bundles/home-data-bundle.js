@@ -136,12 +136,29 @@ const homeDataBundle = {
 
   doHomeFetch: () => ({ dispatch, store }) => {
     dispatch({ type: 'FETCHING_HOME_DATA ' });
+
     store.doFetchDownloadInfo();
-    store.doFetchOfficeErrorLogs();
-    store.doFetchUsgNoVialNumbers();
-    store.doFetchUnapprovedData();
-    store.doFetchBafiData();
-    store.doFetchUncheckedData();
+
+    // Fetch data based on user role
+    if (store.selectUserRole().role === 'ADMINISTRATOR') {
+      store.doFetchOfficeErrorLogs();
+      store.doFetchUsgNoVialNumbers();
+      store.doFetchUnapprovedData();
+      store.doFetchBafiData();
+      store.doFetchUncheckedData();
+    }
+
+    if (store.selectUserRole().role === 'OFFICE ADMIN') {
+      store.doFetchOfficeErrorLogs();
+      store.doFetchUsgNoVialNumbers();
+      store.doFetchUncheckedData();
+    }
+
+    if (store.selectUserRole().role === 'OFFICE USER') {
+      store.doFetchOfficeErrorLogs();
+      store.doFetchUsgNoVialNumbers();
+      store.doFetchBafiData();
+    }
   },
 
   doFetchDownloadInfo: () => ({ dispatch, apiGet }) => {
@@ -207,7 +224,9 @@ const homeDataBundle = {
   doFetchOfficeErrorLogs: () => ({ dispatch, apiGet }) => {
     dispatch({ type: 'FETCH_ERROR_LOG_START' });
 
-    const url = '/psapi/officeErrorLog';
+    const query = queryFromObject({ id: store.selectUserRole().id });
+
+    const url = `/psapi/officeErrorLog${query}`;
 
     apiGet(url, (err, body) => {
       if (!err) {
@@ -222,10 +241,12 @@ const homeDataBundle = {
     });
   },
 
-  doFetchUsgNoVialNumbers: () => ({ dispatch, apiGet }) => {
+  doFetchUsgNoVialNumbers: () => ({ dispatch, apiGet, store }) => {
     dispatch({ type: 'FETCH_USG_NO_VIAL_NUMBERS_START' });
 
-    const url = '/psapi/usgNoVialNumbers';
+    const query = queryFromObject({ id: store.selectUserRole().id });
+
+    const url = `/psapi/usgNoVialNumbers${query}`;
 
     apiGet(url, (err, body) => {
       if (!err) {
@@ -248,6 +269,7 @@ const homeDataBundle = {
     const query = queryFromObject({
       size: pageSize,
       page: pageNumber,
+      id: store.selectUserRole().id
     });
 
     const url = `/psapi/unapprovedDataSheets${query}`;
@@ -273,6 +295,7 @@ const homeDataBundle = {
     const query = queryFromObject({
       size: pageSize,
       page: pageNumber,
+      id: store.selectUserRole().id
     });
 
     const url = `/psapi/bafiDataSheets${query}`;
@@ -298,6 +321,7 @@ const homeDataBundle = {
     const query = queryFromObject({
       size: pageSize,
       page: pageNumber,
+      id: store.selectUserRole().id
     });
 
     const url = `/psapi/uncheckedDataSheets${query}`;
@@ -324,16 +348,6 @@ const homeDataBundle = {
     dispatch({ type: 'SET_HOME_PAGINATION', payload: { pageSize, pageNumber } });
     store.doHomeFetch();
   },
-
-  /*
-    e.GET(urlContext+"/errorCount", PallidSturgeonH.GetErrorCount)
-    e.GET(urlContext+"/usgNoVialNumbers", PallidSturgeonH.GetUsgNoVialNumbers)
-    e.GET(urlContext+"/unapprovedDataSheets", PallidSturgeonH.GetUnapprovedDataSheets)
-    e.GET(urlContext+"/uncheckedDataSheets", PallidSturgeonH.GetUncheckedDataSheets)
-    e.GET(urlContext+"/downloadInfo", PallidSturgeonH.GetDownloadInfo)
-    e.GET(urlContext+"/downloadZip", PallidSturgeonH.GetDownloadZip)
-  */
-
 };
 
 export default homeDataBundle;

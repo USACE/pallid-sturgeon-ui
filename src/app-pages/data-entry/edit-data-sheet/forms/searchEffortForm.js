@@ -1,14 +1,15 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Card from 'app-components/card';
-import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
-import { searchTypeOptions } from './_shared/selectHelper';
 import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
 import Approval from 'app-pages/data-entry/datasheets/components/approval';
 import TabContainer from 'app-components/tab/tabContainer';
 import TelemetryDsTable from 'app-pages/data-entry/datasheets/tables/telemetryDsTable';
+
+import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
+import { searchTypeOptions } from './_shared/selectHelper';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -34,6 +35,7 @@ const SearchEffortForm = connect(
   'selectSitesData',
   'selectDataEntryTelemetryTotalCount',
   'selectCurrentTab',
+  'selectUserRole',
   ({
     doSearchEffortDatasheetLoadData,
     doSaveSearchDataEntry,
@@ -43,11 +45,11 @@ const SearchEffortForm = connect(
     sitesData,
     dataEntryTelemetryTotalCount,
     currentTab,
+    userRole,
     edit
   }) => {
     const initialState = {};
     const [state, dispatch] = useReducer(reducer, initialState);
-    // const [currentTab, setCurrentTab] = useState(0);
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
     const handleChange = e => {
@@ -92,7 +94,7 @@ const SearchEffortForm = connect(
 
     useEffect(() => {
       if (dataEntryData.seId) {
-        doSearchEffortDatasheetLoadData(dataEntryData.seId);
+        doSearchEffortDatasheetLoadData(dataEntryData.seId, userRole.id);
       }
     }, [dataEntryData.seId]);
 

@@ -56,6 +56,7 @@ const geneticCardSummaryBundle = {
     const toastId = toast.loading('Loading genetic card summary data...');
 
     const params = store.selectGeneticCardSummaryParams();
+    params['id'] = store.selectUserRole().id;
     const query = queryFromObject(params);
     const url = `/psapi/geneticDataSummary${query}`;
 

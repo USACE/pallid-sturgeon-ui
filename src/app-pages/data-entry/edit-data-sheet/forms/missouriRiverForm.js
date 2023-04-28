@@ -49,6 +49,7 @@ const MissouriRiverForm = connect(
   'selectDataEntrySupplementalTotalCount',
   'selectDataEntryProcedureTotalCount',
   'selectCurrentTab',
+  'selectUserRole',
   ({
     doMoRiverDatasheetLoadData,
     doSaveMoRiverDataEntry,
@@ -70,6 +71,7 @@ const MissouriRiverForm = connect(
     dataEntrySupplementalTotalCount,
     dataEntryProcedureTotalCount,
     currentTab,
+    userRole,
     edit,
   }) => {
     const initialState = {
@@ -210,9 +212,9 @@ const MissouriRiverForm = connect(
 
     useEffect(() => {
       if (dataEntryData.mrId) {
-        doMoRiverDatasheetLoadData(dataEntryData.mrId);
+        doMoRiverDatasheetLoadData(dataEntryData.mrId, userRole.id);
       }
-    }, [dataEntryData.mrId]);
+    }, [dataEntryData.mrId, userRole.id]);
 
     return (
       <>

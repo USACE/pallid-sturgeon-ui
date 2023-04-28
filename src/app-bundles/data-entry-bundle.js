@@ -158,12 +158,12 @@ export default {
     });
   },
 
-  doMoRiverDatasheetLoadData: (id) => ({ dispatch, store }) => {
+  doMoRiverDatasheetLoadData: (id, userId) => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_MORIVER_DATA_ENTRY_INIT_DATA' });
     // Load data
-    store.doFetchFishDataEntry({ mrId: id }, null, false);
-    store.doFetchSupplementalDataEntry({ mrId: id }, null, false);
-    store.doFetchProcedureDataEntry({ mrId: id }, null, false);
+    store.doFetchFishDataEntry({ mrId: id, id: userId }, null, false);
+    store.doFetchSupplementalDataEntry({ mrId: id, id: userId }, null, false);
+    store.doFetchProcedureDataEntry({ mrId: id, id: userId }, null, false);
     // Load supporting data
     store.doDomainsFtPrefixesFetch();
     store.doDomainsMrFetch();
@@ -171,10 +171,10 @@ export default {
     store.doDomainsSpeciesFetch();
   },
 
-  doSearchEffortDatasheetLoadData: (id) => ({ dispatch, store }) => {
+  doSearchEffortDatasheetLoadData: (id, userId) => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_SEARCH_EFFORT_DATA_ENTRY_INIT_DATA' });
     // Load data
-    store.doFetchTelemetryDataEntry({ seId: id }, null, false);
+    store.doFetchTelemetryDataEntry({ seId: id, id: userId }, null, false);
   },
 
   // DATA ENTRY FETCHES

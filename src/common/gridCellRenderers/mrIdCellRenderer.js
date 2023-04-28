@@ -16,11 +16,18 @@ const MrIdCellRenderer = connect(
     type,
     tab = 0,
   }) => {
-    const params = { tableId: data.mrId };
-
     const handleChange = () => {
       doUpdateCurrentTab(tab);
-      doFetchMoRiverDataEntry(params, () => doUpdateUrl(uri), false);
+      doFetchMoRiverDataEntry({ tableId: getMrId()}, () => doUpdateUrl(uri), false);
+    };
+
+    const getMrId = () => {
+      switch (type) {
+        case 'home':
+          return data.mrID;
+        default:
+          return data.mrId;
+      }
     };
 
     const getTypeText = () => {
@@ -33,6 +40,8 @@ const MrIdCellRenderer = connect(
           return data.suppCount;
         case 'procedure':
           return data.procCount;
+        case 'home':
+          return data.mrID;
         default:
           return <>Unknown data type.</>;
       }
