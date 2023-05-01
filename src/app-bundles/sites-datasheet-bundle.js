@@ -87,7 +87,6 @@ const sitesDatasheetBundle = {
     apiGet(url, (err, body) => {
       if (!err) {
         dispatch({ type: 'UPDATE_MORIVER_SITES_DATASHEET', payload: body });
-        dispatch({ type: 'MORIVER_SITES_DATASHEETS_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'MORIVER_SITES_DATASHEETS_FETCH_ERROR', payload: err });
       }
@@ -95,8 +94,6 @@ const sitesDatasheetBundle = {
   },
 
   doFetchSearchEffortSitesDatasheets: () => ({ dispatch, store, apiGet }) => {
-    dispatch({ type: 'SEARCH_EFFORT_SITES_DATASHEETS_FETCH_START' });
-
     const { ...params } = store.selectSitesDatasheetParams();
     const size = store.selectSitesDatasheetPageSize();
     const number = store.selectSitesDatasheetPageNumber();
@@ -112,7 +109,6 @@ const sitesDatasheetBundle = {
     apiGet(url, (err, body) => {
       if (!err) {
         dispatch({ type: 'UPDATE_SEARCH_EFFORT_SITES_DATASHEET', payload: body });
-        dispatch({ type: 'SEARCH_EFFORT_SITES_DATASHEETS_FETCH_FINISHED' });
       } else {
         dispatch({ type: 'SEARCH_EFFORT_SITES_DATASHEETS_FETCH_ERROR', payload: err });
       }

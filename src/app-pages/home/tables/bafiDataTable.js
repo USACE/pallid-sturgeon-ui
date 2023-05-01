@@ -27,7 +27,7 @@ const BafiDataTable = connect(
               mrIdCellRenderer: MrIdCellRenderer,
             }}
           >
-            <AgGridColumn field='mrId' width={100} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit'}} sortable unSortIcon />
+            <AgGridColumn field='mrId' width={100} cellRenderer='mrIdCellRenderer' cellRendererParams={{ uri: '/sites-list/datasheet/missouriRiver-edit', type: 'missouriRiver' }} sortable unSortIcon />
             <AgGridColumn field='fId' width={100} sortable unSortIcon />
             <AgGridColumn field='psb' width={400} resizable sortable unSortIcon />
             <AgGridColumn field='year' width={100} sortable unSortIcon />
