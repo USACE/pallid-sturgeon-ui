@@ -29,6 +29,12 @@
   vertical-align: bottom !important;
 }
 
+@media screen and (max-width: $small-screen-width) {
+  .offset-8{
+    margin-left:0% !important;
+  }
+ }
+
 /* Safari */
 @-webkit-keyframes spin {
   0% { -webkit-transform: rotate(0deg); }
