@@ -114,7 +114,7 @@ const NavBar = connect(
                   <NavItem href={utilityLinks} asDropdown>Utilities</NavItem>
                 </RoleFilter>
                 <RoleFilter
-                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN']}>
+                  allowRoles={['ADMINISTRATOR']}>
                   <NavItem href={administrationLinks}>Admin</NavItem>
                 </RoleFilter>
                 <li className='nav-item vl'>
