@@ -1,0 +1,22 @@
+@import '../../../../style/variables';
+
+.user-text {
+  font-size: 20px;
+  font-style: italic;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.role-text {
+  font-size: 20px;
+  font-style: italic;
+  text-align: center;
+}
+
+.center {
+  justify-content: center;
+
+  &.text {
+    text-align: center;
+  }
+}

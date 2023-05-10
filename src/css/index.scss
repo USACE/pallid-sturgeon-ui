@@ -40,7 +40,6 @@ $error-color: #f04124;
 footer.modal-footer {
   display: flex;
   align-items: center;
-  justify-content: space-between;
 }
 
 .alert-container.unread {
@@ -119,4 +118,15 @@ input[disabled] {
 
 .ag-theme-balham .ag-cell-inline-editing {
   height: 100% !important;
+}
+
+.cui-banner {
+  background-color: $color-black;
+  color: $color-white;
+  justify-content: center !important;
+  height: 20px;
+
+  .cui-banner-dropdown {
+    z-index: 8888;
+  }
 }

@@ -35,6 +35,7 @@ const SearchEffortForm = connect(
   'selectSitesData',
   'selectDataEntryTelemetryTotalCount',
   'selectCurrentTab',
+  'selectUserRole',
   ({
     doSearchEffortDatasheetLoadData,
     doSaveSearchDataEntry,
@@ -44,6 +45,7 @@ const SearchEffortForm = connect(
     sitesData,
     dataEntryTelemetryTotalCount,
     currentTab,
+    userRole,
     edit
   }) => {
     const initialState = {};

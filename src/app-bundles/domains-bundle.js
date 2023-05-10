@@ -85,10 +85,10 @@ export default {
   selectDomainsSetSite2: state => state.domains.setsite2,
   selectDomainsYears: state => state.domains.years,
 
-  doDomainProjectsFetch: (project = null) => ({ dispatch, apiGet }) => {
+  doDomainProjectsFetch: (project = null) => ({ dispatch, apiGet, store }) => {
     dispatch({ type: 'DOMAIN_FETCH_PROJECTS_START' });
 
-    const url = '/psapi/projects';
+    const url = `/psapi/projects${queryFromObject({ id: store.selectUserRole().id })}`;
     const urlFilter = `/psapi/projectsFilter${queryFromObject({project: project})}`;
 
     apiGet(project !== null ? urlFilter : url, (_err, body) => {
