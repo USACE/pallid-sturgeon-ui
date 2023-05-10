@@ -51,7 +51,7 @@ const DataHeader = connect(
                 </div>
               </Row>
             </div>
-            <div className='col-md-12 col-xs-4'>
+            <div className='col-md-12 col-xs-4 mt-2'>
               <Row>
                 <div className='col-sm-2'>
                   <b className='mr-2'>Sample Unit Type:</b>
