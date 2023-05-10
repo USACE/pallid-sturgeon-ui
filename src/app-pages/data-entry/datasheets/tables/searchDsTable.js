@@ -6,6 +6,8 @@ import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 import SearchIdCellRenderer from 'common/gridCellRenderers/searchIdCellRenderer';
 
+import { Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
+
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
@@ -22,23 +24,31 @@ const SearchDsTable = connect(
 
     return (
       <>
-        <Button
-          isOutline
-          size='small'
-          variant='info'
-          text='Export as CSV'
-          icon={<Icon icon='download' />}
-          // handleClick={() => doFetchAllDatasheet('search-datasheet')}
-        />
-        <Button
-          isOutline
-          size='small'
-          variant='info'
-          text='Create Search Effort Datasheet'
-          title='Create Search Effort Datasheet'
-          className='float-right mr-2'
-          handleClick={() => doUpdateUrl('/sites-list/datasheet/searchEffort-create')}
-        />
+        <Row>
+          <div className='col-md-9 col-xs-12'>
+            <Button
+              isOutline
+              size='small'
+              variant='success'
+              text='Add Search Effort Datasheet'
+              title='Add Search Effort Datasheet'
+              icon={<Icon icon='plus' />}
+              className='btn-width'
+              handleClick={() => doUpdateUrl('/sites-list/datasheet/searchEffort-create')}
+            />
+          </div>
+          <div className='col-md-3 col-xs-12'>
+            <Button
+              isOutline
+              size='small'
+              variant='info'
+              text='Export as CSV'
+              icon={<Icon icon='download' />}
+              className='float-right btn-width'
+              // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+            />
+          </div>
+        </Row>
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowHeight={35}

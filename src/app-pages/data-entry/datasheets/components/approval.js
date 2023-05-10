@@ -12,13 +12,13 @@ const Approval = ({
   <Card>
     <Card.Body>
       <Row>
-        <div className='col-3' style={{ borderRight: '1px solid lightgray' }}>
+        <div className='col-md-4 col-sm-12' style={{ borderRight: '1px solid lightgray' }}>
           <Row>
-            <div className='col-4'>
+            <div className='col-md-5 col-sm-23'>
               <label><small>Checked By</small></label>
               <div>{checkby || '--'}</div>
             </div>
-            <div className='col-4 text-center'>
+            <div className='col-md-2 text-center col-sm-23'>
               <label><small>Approved?</small></label>
               <input
                 type='checkbox'
@@ -34,7 +34,7 @@ const Approval = ({
             </div>
           </Row>
         </div>
-        <div className='col-1'>
+        <div className='col-md-1 col-sm-6'>
           <Input
             label='QC'
             name='qc'

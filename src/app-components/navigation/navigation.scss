@@ -5,8 +5,7 @@
     font-weight: 600;
     color: $color-gray !important;
 
-    &:hover,
-    &:focus {
+    &:hover,&:focus {
       text-decoration: none !important;
       color: $color-primary-dark !important;
     }
@@ -25,8 +24,7 @@
 .nav-dropdown-button {
   border: 0 !important;
 
-  &:focus,
-  &:active {
+  &:focus,&:active {
     outline: none !important;
     box-shadow: none !important;
   }
@@ -62,8 +60,7 @@
       }
     }
 
-    &:hover,
-    &:focus {
+    &:hover,&:focus {
       border-bottom: 3px solid $color-primary;
 
       .nav-link {
@@ -71,7 +68,6 @@
       }
     }
   }
-
 
   .nav-link {
     margin: 0.5rem;
@@ -83,23 +79,33 @@
   margin-bottom: 15px;
 }
 
+@media screen and (max-width: $medium-screen-width) {
+  .navbar-brand {
+    text-overflow: ellipsis;
+    max-width: 80%;
+    font-size: 15px !important;
+  }
+}
+
 @media screen and (max-width: $extra-large-screen-width) {
+  .navbar-brand {
+    text-overflow: ellipsis;
+    max-width: 80%;
+  }
+
   .navbar-collapse {
     background: $color-white !important;
     border-top: 1px solid $color-primary-light;
-    box-shadow: 2px 2px 5px $color-gray;
     margin-top: 5px;
     padding-top: 3px;
     z-index: 1000;
 
     .dropdown {
-      width: 50%;
-      z-index: 1000;
+      width: 60%;
 
       .dropdown-menu {
         margin-top: 0;
         position: relative;
-        z-index: 1000;
       }
     }
   }

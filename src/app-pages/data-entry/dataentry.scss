@@ -29,11 +29,27 @@
   vertical-align: bottom !important;
 }
 
+.mt-1 {
+  margin-top: 0px !important;
+}
+
 @media screen and (max-width: $small-screen-width) {
-  .offset-8{
+  .offset-8,.offset-10{
     margin-left:0% !important;
   }
- }
+
+  .float-right {
+    float:none !important;
+  }
+
+  .mt-1 {
+    margin-top: 2px !important;
+  }
+
+  .ml-1 {
+    margin-left: 0px !important;
+  }
+}
 
 /* Safari */
 @-webkit-keyframes spin {

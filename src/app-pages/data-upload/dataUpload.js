@@ -6,9 +6,10 @@ import Button from 'app-components/button';
 import Card from 'app-components/card';
 import DragInput from 'app-components/drag-input';
 import Select from 'app-components/select';
-import { keyAsText } from 'utils';
 
+import { keyAsText } from 'utils';
 import { getIsRequired, reduceCsvState,  formatAsNumber, formatJsonKey } from './helper';
+
 import './dataupload.scss';
 
 export default connect(
@@ -120,12 +121,12 @@ export default connect(
 
                   return (
                     <div key={key} className='row'>
-                      <div className='col-2 pt-2'>
+                      <div className='col-md-2 pt-2'>
                         <p className='pt-1'>
                           {isRequired ? '* ' : ''}{keyAsText(key)}:
                         </p>
                       </div>
-                      <div className='col-10'>
+                      <div className='col-md-10'>
                         <DragInput onChange={file => setFile(key, file)} />
                       </div>
                     </div>

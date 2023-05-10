@@ -13,6 +13,10 @@ import TextEditor from 'common/gridCellEditors/textEditor';
 import { baitOptions, finCurlOptions, raySpineOptions, scaleOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 import { createDropdownOptions, createMesoOptions } from 'app-pages/data-entry/helpers';
 import SuppLinkCellRenderer from 'common/gridCellRenderers/suppLinkCellRenderer';
+import { Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
+
+import '../../../data-summaries/data-summary.scss';
+import '../../dataentry.scss';
 
 const FishDsTable = connect(
   'doUpdateFishDataEntry',
@@ -82,35 +86,41 @@ const FishDsTable = connect(
 
     return (
       <div className='container-fluid overflow-auto'>
-        <Button
-          isOutline
-          size='small'
-          variant='success'
-          text='Add Row'
-          className='ml-1'
-          icon={<Icon icon='plus' />}
-          handleClick={addRow}
-        />
-        <Button
-          isOutline
-          size='small'
-          variant='secondary'
-          text='Copy Last Row'
-          title='Copy Last Row'
-          className='ml-1'
-          icon={<Icon icon='content-copy' />}
-          handleClick={copyLastRow}
-        />
-        <Button
-          isOutline
-          size='small'
-          variant='info'
-          text='Export as CSV'
-          className='float-right ml-1'
-          icon={<Icon icon='download' />}
-          isDisabled
-          handleClick={() => doFetchAllDatasheet('fish-datasheet')}
-        />
+        <Row>
+          <div className='col-md-9 col-xs-12'>
+            <Button
+              isOutline
+              size='small'
+              variant='success'
+              text='Add Row'
+              className='btn-width'
+              icon={<Icon icon='plus' />}
+              handleClick={addRow}
+            />
+            <Button
+              isOutline
+              size='small'
+              variant='secondary'
+              text='Copy Last Row'
+              title='Copy Last Row'
+              className='ml-1 mt-1 btn-width'
+              icon={<Icon icon='content-copy' />}
+              handleClick={copyLastRow}
+            />
+          </div>
+          <div className='col-md-3 col-xs-12'>
+            <Button
+              isOutline
+              size='small'
+              variant='info'
+              text='Export as CSV'
+              className='float-right btn-width mt-1'
+              icon={<Icon icon='download' />}
+              isDisabled
+              handleClick={() => doFetchAllDatasheet('fish-datasheet')}
+            />
+          </div>
+        </Row>
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}

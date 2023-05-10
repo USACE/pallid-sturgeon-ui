@@ -7,3 +7,9 @@
     border-color: #c8cacb #c8cacb $color-white !important;
   }
 }
+
+@media screen and (max-width: $small-screen-width) {
+  // .offset-8{
+  //   margin-left:0% !important;
+  // }
+}
