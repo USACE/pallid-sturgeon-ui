@@ -10,6 +10,8 @@ import SiteIdCellRenderer from 'common/gridCellRenderers/siteIdCellRenderer';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
+import './../../../data-summaries/data-summary.scss';
+
 const SitesListTable = connect(
   'doFetchExportsSites',
   'selectSitesData',
@@ -29,6 +31,7 @@ const SitesListTable = connect(
           size='small'
           variant='info'
           text='Export to CSV'
+          className='btn-width'
           icon={<Icon icon='download' />}
           onClick={() => doFetchExportsSites(sitesParams)}
           isOutline

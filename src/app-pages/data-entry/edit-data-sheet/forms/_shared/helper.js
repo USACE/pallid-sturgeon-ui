@@ -7,11 +7,14 @@ import FilterSelect from 'app-components/filter-select/filter-select';
 
 import '../../../dataentry.scss';
 
-export const Row = ({ children, className }) => (
-  <div className={`d-flex align-items-center w-100 mt-3 pb-3 ${className}`}>
-    {children}
-  </div>
-);
+export const Row = ({ children, className }) => {
+  const classNameString = className ? className : '';
+  return (
+    <div className={`row d-flex align-items-center w-100 mt-1 pb-1 ${classNameString}`}>
+      {children}
+    </div>
+  );
+};
 
 export const Input = ({ name, label, className, helperText, helperDirection = 'column', value, step, onChange, type = 'text', placeholder, isDisabled, isRequired }) => {
   const showRequired = isRequired && !value;

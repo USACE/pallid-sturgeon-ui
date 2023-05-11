@@ -36,7 +36,7 @@ const SiteDatasheet = connect(
     return (
       <div className='container-fluid'>
         <div className='row'>
-          <div className='col-7'>
+          <div className='col'>
             <h4>Datasheets for Site ID: {siteId}</h4>
           </div>
         </div>

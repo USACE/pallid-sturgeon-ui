@@ -7,7 +7,9 @@ import Card from 'app-components/card';
 import Icon from 'app-components/icon';
 import Pagination from 'app-components/pagination';
 import Select from 'app-components/select';
+
 import { dropdownYearsToNow } from 'utils';
+import { Input } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 const yesNoOptions = [
   { value: 0, text: 'No' },
@@ -53,28 +55,28 @@ export default connect(
               The displayed report below only shows a portion of the fields that are included in the downloaded report. 
             </span>
             <div className='row mt-3'>
-              <div className='col-2'>
+              <div className='col-md-2 col-xs-12'>
                 <Select
-                  label='Select Year:'
+                  label='Select Year'
                   value={year}
                   onChange={val => doUpdateGeneticCardSummaryParams({ year: val })}
                   options={dropdownYearsToNow(2002)}
                 />
               </div>
-              <div className='col-3'>
-                <label>Date Range - Min</label>
-                <input
-                  disabled={fieldDisabled}
+              <div className='col-md-3 col-xs-12'>
+                <Input
+                  label='Date Range - Start'
+                  isDisabled={fieldDisabled}
                   type='date'
                   className='form-control'
                   value={minDate}
                   onChange={e => doUpdateGeneticCardSummaryParams({ minDate: e.target.value })}
                 />
               </div>
-              <div className='col-3'>
-                <label>Date Range - Min</label>
-                <input
-                  disabled={fieldDisabled}
+              <div className='col-md-3 col-xs-12'>
+                <Input
+                  label='Date Range - Start'
+                  isDisabled={fieldDisabled}
                   type='date'
                   className='form-control'
                   value={maxDate}
@@ -83,7 +85,7 @@ export default connect(
               </div>
             </div>
             <div className='row mt-2'>
-              <div className='col-2'>
+              <div className='col-md-2 col-xs-12'>
                 <Select
                   isDisabled={fieldDisabled}
                   label='Broodstock'
@@ -92,7 +94,7 @@ export default connect(
                   options={yesNoOptions}
                 />
               </div>
-              <div className='col-2'>
+              <div className='col-md-2 col-xs-12'>
                 <Select
                   isDisabled={fieldDisabled}
                   label='Hatchery/Wild'
@@ -101,7 +103,7 @@ export default connect(
                   options={yesNoOptions}
                 />
               </div>
-              <div className='col-2'>
+              <div className='col-md-2 col-xs-12'>
                 <Select
                   isDisabled={fieldDisabled}
                   label='Species Id'

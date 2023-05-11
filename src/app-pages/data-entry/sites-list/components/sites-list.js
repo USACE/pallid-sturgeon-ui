@@ -13,6 +13,7 @@ import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers
 import { dropdownYearsToNow } from 'utils';
 
 import '../../dataentry.scss';
+import './../../../data-summaries/data-summary.scss';
 
 const SitesList = connect(
   // 'doDomainBendsFetch',
@@ -90,7 +91,7 @@ const SitesList = connect(
     return (
       <>
         <div className='row'>
-          <div className='col-2'>
+          <div className='col-sm-2 col-xs-12'>
             <Select
               label='Year'
               placeholderText='Select year...'
@@ -100,25 +101,25 @@ const SitesList = connect(
               options={dropdownYearsToNow(2011)}
             />
           </div>
-          <div className='col-2 offset-8'>
+          <div className='col-sm-2 col-xs-12 offset-8'>
             <Button
               isOutline
               size='small'
               variant='success'
               text='Create New Site'
-              className='mt-3 float-right'
+              className='mt-3 float-right btn-width'
               handleClick={() => doModalOpen(SitesFormModal)}
             />
           </div>
         </div>
         <div className='row mt-3'>
-          <div className='col-md-12 pl-3'>
+          <div className='col-sm-12 col-xs-12 pl-3'>
             <span className='info-message mr-1'><Icon icon='help-circle' /></span>
             <span className='info-message'>Select a year to populate the table and begin your search.</span>
           </div>
         </div>
         <div className='row mt-3'>
-          <div className='col-md-4'>
+          <div className='col-sm-4 col-xs-12'>
             <div className='form-group'>
               <Select
                 isDisabled={!yearFilter}
@@ -131,7 +132,7 @@ const SitesList = connect(
               />
             </div>
           </div>
-          <div className='col-md-4 pl-0'>
+          <div className='col-sm-4 col-xs-12'>
             <div className='form-group'>
               <FilterSelect
                 ref={segRef}
@@ -147,7 +148,7 @@ const SitesList = connect(
           </div>
         </div>
         <div className='row'>
-          <div className='col-md-4'>
+          <div className='col-sm-4 col-xs-12'>
             <div className='form-group'>
               <Select
                 isDisabled={!yearFilter}
@@ -160,7 +161,7 @@ const SitesList = connect(
               />
             </div>
           </div>
-          <div className='col-md-4 pl-0'>
+          <div className='col-sm-4 col-xs-12'>
             <div className='form-group'>
               <FilterSelect
                 ref={bendRef}
@@ -174,18 +175,19 @@ const SitesList = connect(
               />
             </div>
           </div>
-          <div className='col-md-2 align-self-end pl-1 pb-3'>
+          <div className='col-sm-2 col-xs-12 align-self-end pl-1 pb-3'>
             <Button
               isOutline
               size='small'
               variant='dark'
               text='Clear Filters'
+              className='ml-2 btn-width'
               handleClick={clearFilters}
             />
           </div>
         </div>
         <div className='row'>
-          <div className='col-md-12 pl-3'>
+          <div className='col-sm-12 col-xs-12 pl-3'>
             <span className='info-message mr-1'><Icon icon='help-circle' /></span>
             <span className='info-message'>Make selections from the drop down lists to go to the datasheets associated with your selection.</span>
           </div>

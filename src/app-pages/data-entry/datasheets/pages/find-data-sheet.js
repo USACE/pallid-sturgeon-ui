@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 import Select from 'app-components/select';
 
+import { Input, Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
+
 import '../../dataentry.scss';
+import '../../../data-summaries/data-summary.scss';
 
 const FindDataSheet = connect(
   'doFetchMoRiverDataEntry',
@@ -74,9 +77,9 @@ const FindDataSheet = connect(
     return (
       <>
         <div className='row d-flex flex-row'>
-          <div className='col-md-4 col-sm-12'>
-            <div className='row'>
-              <div className='col-md-6'>
+          <div className='col-md-3 col-xs-12'>
+            <Row>
+              <div className='col'>
                 <div className='form-group'>
                   <label><small>Select Data Sheet Type</small></label>
                   <div className='select'>
@@ -96,10 +99,14 @@ const FindDataSheet = connect(
                   </div>
                 </div>
               </div>
-              <div className='col-md-6'>
+            </Row>
+          </div>
+          <div className='col-md-4 col-xs-12'>
+            <Row>
+              <div className='col-md-5 col-sm-5 col-xs-5'>
                 <div className='form-group'>
-                  <label><small>Enter Table ID</small></label>
-                  <input
+                  <Input
+                    label='Table ID'
                     type='text'
                     className='form-control'
                     placeholder='Table ID...'
@@ -108,57 +115,64 @@ const FindDataSheet = connect(
                   />
                 </div>
               </div>
-            </div>
+              <div className='col-md-1 col-sm-1 col-xs-1'>
+                <span className='pt-4 mr-1 mb-3'>OR</span>
+              </div>
+              <div className='col-md-5 col-sm-5 col-xs-5'>
+                <div className='form-group'>
+                  <Input
+                    label='Field ID'
+                    type='text'
+                    className='form-control'
+                    placeholder='Field ID...'
+                    value={fieldId}
+                    onChange={e => setFieldId(e.target.value)}
+                  />
+                </div>
+              </div>
+            </Row>
           </div>
-          <span className='pt-4 mr-1'>OR</span>
-          <div className='col-md-2 col-sm-4'>
-            <div className='form-group'>
-              <label><small>Enter Field ID</small></label>
-              <input
-                type='text'
-                className='form-control'
-                placeholder='Field ID...'
-                value={fieldId}
-                onChange={e => setFieldId(e.target.value)}
-              />
+          {dataSheetType === 'supplemental' && (
+            <div className='col-md-5 col-xs-12'>
+              <Row>
+                <div className='col-md-5 col-sm-5 col-xs-5'>
+                  <div className='form-group'>
+                    <Input
+                      label='Genetic Vial #'
+                      disabled={!isSupplemental}
+                      type='text'
+                      className='form-control'
+                      placeholder='Genetic Vial #...'
+                      value={geneticsVial}
+                      onChange={e => setGeneticsVial(e.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className='col-md-1 col-sm-1 col-xs-1'>
+                  <span className='pt-4 mr-1 mb-3'>OR</span>
+                </div>
+                <div className='col-md-5 col-sm-5 col-xs-5'>
+                  <div className='form-group'>
+                    <Input
+                      label='Pit Tag'
+                      disabled={!isSupplemental}
+                      type='text'
+                      className='form-control'
+                      placeholder='Pit Tag...'
+                      value={pitTag}
+                      onChange={e => setPitTag(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </Row>
             </div>
-          </div>
-          <span className='pt-4 mr-1'>OR</span>
-          <div className='col-md-2 col-sm-4'>
-            <div className='form-group'>
-              <label><small>Enter Genetic Vial #</small></label>
-              <input
-                disabled={!isSupplemental}
-                type='text'
-                className='form-control'
-                placeholder='Genetic Vial #...'
-                value={geneticsVial}
-                onChange={e => setGeneticsVial(e.target.value)}
-              />
-            </div>
-          </div>
-          <span className='pt-4 mr-1'>OR</span>
-          <div className='col-md-2 col-sm-4'>
-            <div className='form-group'>
-              <label><small>Enter Pit Tag</small></label>
-              <input
-                disabled={!isSupplemental}
-                type='text'
-                className='form-control'
-                placeholder='Pit Tag...'
-                value={pitTag}
-                onChange={e => setPitTag(e.target.value)}
-              />
-            </div>
-          </div>
+          )}
         </div>
-        <div className='row'>
-          <div className='col-12 align-self-start mb-3'>
+        <Row>
+          <div className='col-12 mb-3'>
             <Icon icon='help-circle' />
-            <span className='info-message ml-2'>Enter the ID for the type of datasheet selected (Missouri River -MR_ID, Fish - F_ID, Supplemental
-            -F_ID.</span>
-            <br />
-            <span className='ml-4'>For Supplemental datasheet, choices also include Genetics Vial # or Pit Tag.</span>
+            <span className='info-message ml-2'>Enter the ID for the type of datasheet selected (EX: Missouri River: MR_ID, Fish: F_ID, Supplemental: S_ID).</span>
+            <span> For Supplemental datasheet, choices also include Genetics Vial # or Pit Tag.</span>
           </div>
           <div className='col-md-2 align-self-end'>
             <Button
@@ -166,11 +180,12 @@ const FindDataSheet = connect(
               isDisabled={isSearchDisabled}
               size='small'
               variant='info'
+              className='btn-width'
               text='Find Data Sheet'
               handleClick={() => findDataSheet()}
             />
           </div>
-        </div>
+        </Row>
       </>
     );
   }

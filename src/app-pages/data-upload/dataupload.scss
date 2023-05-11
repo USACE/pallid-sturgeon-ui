@@ -7,3 +7,13 @@
     color:red;
   }
 }
+
+.w-75 {
+  width: 75% !important;
+}
+
+@media screen and (max-width: $small-screen-width) {
+  .w-75 {
+    width: 100% !important;
+  }
+}

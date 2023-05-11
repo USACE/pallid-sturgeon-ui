@@ -160,13 +160,13 @@ const SearchEffortForm = connect(
                   content: (
                     <>
                       <Row>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='searchDate' label='Search Date' type='date' value={state['searchDate'] ? state['searchDate'].split('T')[0] : ''}  onChange={handleChange} isRequired />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='recorder' label='Recorder Initials' value={state['recorder']} onChange={handleChange} isRequired />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <SelectCustomLabel
                             name='searchTypeCode'
                             label='Search Type'
@@ -176,48 +176,49 @@ const SearchEffortForm = connect(
                             isRequired
                           />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='temp' label='Temp (c)' type='number' value={state['temp'] || ''} onChange={handleFloat} />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='conductivity' label='Conductivity' type='number' value={state['conductivity'] || ''} onChange={handleNumber} />
                         </div>
                       </Row>
                       <Row>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='startTime' label='Start Time (hh:mm:ss)' value={state['startTime']} onChange={handleChange} isRequired />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='startLatitude' type='number' label='Start Latitude' value={state['startLatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='startLongitude' type='number' label='Start Longitude' value={state['startLongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='stopTime' label='Stop Time (hh:mm:ss)' value={state['stopTime']} onChange={handleChange} isRequired />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='stopLatitude' type='number' label='Stop Latitude' value={state['stopLatitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='stopLongitude' type='number' label='Stop Longitude' value={state['stopLongitude'] || ''} placeholder='ex: 12.34567' onChange={handleFloat} isRequired />
                         </div>
                       </Row>
                       {edit && (<Row>
-                        <div className='col-5'>
+                        <div className='col-md-5 col-xs-12'>
                           <TextArea name='lastEditComment' label='Edit Comments' value={state['lastEditComment']} onChange={handleChange} isRequired={edit} />
                         </div>
-                        <div className='col-2'>
+                        <div className='col-md-2 col-xs-12'>
                           <Input name='editInitials' label='Edit Initials' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
                         </div>
                       </Row>)}
                       <Row>
-                        <div className='col-2 offset-10'>
+                        <div className='col-md-2 col-xs-12 offset-10'>
                           <div className='float-right'>
                             <Button
                               size='small'
                               variant='success'
                               text={edit ? 'Apply Changes' : 'Save'}
+                              className='btn-width'
                               handleClick={() => doSave()}
                               isDisabled={saveIsDisabled}
                             />

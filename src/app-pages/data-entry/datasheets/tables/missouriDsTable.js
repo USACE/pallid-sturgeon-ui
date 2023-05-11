@@ -8,6 +8,7 @@ import Icon from 'app-components/icon';
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import MrIdCellRenderer from 'common/gridCellRenderers/mrIdCellRenderer';
 import { dateFormatter } from 'common/gridHelpers/ag-grid-helper';
+import { Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -33,23 +34,31 @@ const MissouriDsTable = connect(
 
     return (
       <>
-        <Button
-          isOutline
-          size='small'
-          variant='info'
-          text='Export as CSV'
-          icon={<Icon icon='download' />}
-          isDisabled
-        />
-        <Button
-          isOutline
-          size='small'
-          variant='info'
-          text='Create Missouri River Datasheet'
-          title='Create Missouri River Datasheet'
-          className='float-right mr-2'
-          handleClick={() => doUpdateUrl('/sites-list/datasheet/missouriRiver-create')}
-        />
+        <Row>
+          <div className='col-md-9 col-xs-12'>
+            <Button
+              isOutline
+              size='small'
+              variant='success'
+              text='Add Missouri River Datasheet'
+              title='Add Missouri River Datasheet'
+              icon={<Icon icon='plus' />}
+              className='btn-width'
+              handleClick={() => doUpdateUrl('/sites-list/datasheet/missouriRiver-create')}
+            />
+          </div>
+          <div className='col-md-3 col-xs-12'>
+            <Button
+              isOutline
+              size='small'
+              variant='info'
+              text='Export as CSV'
+              className='float-right btn-width'
+              icon={<Icon icon='download' />}
+              isDisabled
+            />
+          </div>
+        </Row>
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowHeight={35}

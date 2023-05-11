@@ -11,8 +11,13 @@ import NumberEditor from 'common/gridCellEditors/numberEditor';
 import TextEditor from 'common/gridCellEditors/textEditor';
 import FloatEditor from 'common/gridCellEditors/floatEditor';
 
+import { Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
+
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+
+import '../../../data-summaries/data-summary.scss';
+import '../../dataentry.scss';
 
 // tableId = 4604 For testing
 
@@ -52,45 +57,41 @@ const TelemetryDsTable = connect(
     
     return (
       <div className='container-fluid overflow-auto'>
-        <Button
-          isOutline
-          size='small'
-          variant='success'
-          text='Add Row'
-          className='ml-1'
-          icon={<Icon icon='plus' />}
-          handleClick={addRow}
-        />
-        <Button
-          isOutline
-          size='small'
-          variant='secondary'
-          text='Copy Last Row'
-          title='Copy Last Row'
-          className='ml-1'
-          icon={<Icon icon='content-copy' />}
-          handleClick={copyLastRow}
-        />
-        {/* <Button
-          isOutline
-          size='small'
-          variant='info'
-          text='Create Telemetry Datasheet'
-          title='Create Telemetry Datasheet'
-          className='ml-1'
-          handleClick={() => doUpdateUrl('/sites-list/datasheet/telemetry-create')}
-          isDisabled
-        /> */}
-        <Button
-          isOutline
-          size='small'
-          variant='info'
-          text='Export as CSV'
-          className='float-right ml-1'
-          icon={<Icon icon='download' />}
-          isDisabled
-          handleClick={() => doFetchAllDatasheet('fish-datasheet')}
-        />
+        <Row>
+          <div className='col-md-9 col-xs-12'>
+            <Button
+              isOutline
+              size='small'
+              variant='success'
+              text='Add Row'
+              className='btn-width'
+              icon={<Icon icon='plus' />}
+              handleClick={addRow}
+            />
+            <Button
+              isOutline
+              size='small'
+              variant='secondary'
+              text='Copy Last Row'
+              title='Copy Last Row'
+              className='ml-1 mt-1 btn-width'
+              icon={<Icon icon='content-copy' />}
+              handleClick={copyLastRow}
+            />
+          </div>
+          <div className='col-md-3 col-xs-12'>
+            <Button
+              isOutline
+              size='small'
+              variant='info'
+              text='Export as CSV'
+              className='float-right ml-1 mt-1 btn-width'
+              icon={<Icon icon='download' />}
+              isDisabled
+              handleClick={() => doFetchAllDatasheet('fish-datasheet')}
+            />
+          </div>
+        </Row>
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}

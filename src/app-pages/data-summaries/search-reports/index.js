@@ -8,6 +8,8 @@ import Pagination from 'app-components/pagination';
 import DSSearchReportTable from './components/dsSearchReportTable';
 import SearchInput from './components/searchInput';
 
+import './../data-summary.scss';
+
 const SearchReports = connect(
   'doSetFilter',
   'doSearchReportsLoadData',
@@ -32,11 +34,11 @@ const SearchReports = connect(
         <Card.Header text='Search Reports' />
         <Card.Body>
           <div className='row'>
-            <div className='col-9'>
+            <div className='col-sm-9 col-xs-12'>
               <SearchInput handleSearch={filter => doSetFilter(filter)} />
             </div>
-            <div className='col-3'>
-              <DownloadAsCSV className='float-right' content={searchReportsData} filePrefix='search-reports' />
+            <div className='col-sm-3 col-xs-12'>
+              <DownloadAsCSV className='float-right btn-width' content={searchReportsData} filePrefix='search-reports' />
             </div>
           </div>
           {searchReportsFilter && (<p><i>Showing reports that contain: </i><b>{searchReportsFilter}</b></p>)}

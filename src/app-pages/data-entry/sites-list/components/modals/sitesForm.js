@@ -172,7 +172,7 @@ const SitesFormModal = connect(
               </>
             )}
             <Row>
-              <div className='col-2'>
+              <div className='col-md-2 col-xs-12'>
                 <SelectCustomLabel
                   label='Year'
                   name='year'
@@ -183,7 +183,7 @@ const SitesFormModal = connect(
                   isRequired
                 />
               </div>
-              <div className='col-4'>
+              <div className='col-md-4 col-xs-12'>
                 <SelectCustomLabel
                   label='Field Office'
                   name='fieldoffice'
@@ -196,7 +196,7 @@ const SitesFormModal = connect(
                   isRequired
                 />
               </div>
-              <div className='col-6'>
+              <div className='col-md-6 col-xs-12'>
                 <SelectCustomLabel
                   label='Project'
                   name='projectId'
@@ -211,7 +211,7 @@ const SitesFormModal = connect(
               </div>
             </Row>
             <Row>
-              <div className='col-6'>
+              <div className='col-md-6 col-xs-12'>
                 <FilterSelect
                   ref={segRef}
                   label='Segment'
@@ -239,7 +239,7 @@ const SitesFormModal = connect(
                   isRequired
                 />
               </div>
-              <div className='col-6'>
+              <div className='col-md-6 col-xs-12'>
                 <SelectCustomLabel
                   label='Season'
                   name='season'
@@ -259,7 +259,7 @@ const SitesFormModal = connect(
               </div>
             </Row>
             <Row>
-              <div className='col-4'>
+              <div className='col-md-4 col-xs-12'>
                 <SelectCustomLabel
                   label='Sample Unit Type'
                   name='sampleUnitType'
@@ -276,7 +276,7 @@ const SitesFormModal = connect(
                   isRequired
                 />
               </div>
-              <div className='col-8'>
+              <div className='col-md-8 col-xs-12'>
                 <FilterSelect
                   ref={bendRef}
                   label='Sample Unit'
@@ -303,7 +303,7 @@ const SitesFormModal = connect(
               </div>
             </Row>
             <Row>
-              <div className='col-6'>
+              <div className='col-md-6 col-xs-12'>
                 <SelectCustomLabel
                   label='Bend R/N'
                   name='bendrn'
@@ -315,10 +315,10 @@ const SitesFormModal = connect(
               </div>
             </Row>
             <Row>
-              <div className='col-6'>
+              <div className='col-md-6 col-xs-12'>
                 <TextArea name='last_edit_comment' label='Comments' value={state['last_edit_comment']} onChange={handleChange} isRequired={edit} />
               </div>
-              <div className='col-2'>
+              <div className='col-md-2 col-xs-12'>
                 <Input name='editInitials' label='Recorder Initials' value={state['editInitials']} onChange={handleChange} isRequired={edit} />
               </div>
             </Row>

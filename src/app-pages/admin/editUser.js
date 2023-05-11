@@ -50,80 +50,78 @@ export default connect(
         allowRoles={['ADMINISTRATOR']}
         alt={() => <NoRoleAccessMessage className='p-2' />}>
         <div className='container-fluid'>
-          <div className='container-fluid'>
-            <h4>Edit User</h4>
-            <Card className='mt-3'>
-              <Card.Header text='User List' />
-              <Card.Body>
-                <Button
-                  isOutline
-                  size='small'
-                  variant='info'
-                  text='Add Account to Existing User'
-                  icon={<Icon icon='account-plus' />}
-                  handleClick={() => doModalOpen(AddUserFormModal)}
-                />
-                <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
-                  <AgGridReact
-                    suppressClickEdit
-                    rowHeight={35}
-                    rowData={usersData}
-                    editType='fullRow'
-                    onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
-                    defaultColDef={{
-                      width: 150,
-                      editable: true,
-                      lockPinned: true,
+          <h4>Edit User</h4>
+          <Card className='mt-3'>
+            <Card.Header text='User List' />
+            <Card.Body>
+              <Button
+                isOutline
+                size='small'
+                variant='info'
+                text='Add Account to Existing User'
+                icon={<Icon icon='account-plus' />}
+                handleClick={() => doModalOpen(AddUserFormModal)}
+              />
+              <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
+                <AgGridReact
+                  suppressClickEdit
+                  rowHeight={35}
+                  rowData={usersData}
+                  editType='fullRow'
+                  onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
+                  defaultColDef={{
+                    width: 150,
+                    editable: true,
+                    lockPinned: true,
+                  }}
+                  frameworkComponents={{
+                    editCellRenderer: EditCellRenderer,
+                    fieldOfficeEditor: FieldOfficeEditor,
+                    rolesEditor: RolesEditor,
+                    projectEditor: ProjectEditor,
+                  }}
+                >
+                  <AgGridColumn
+                    field='edit'
+                    width={90}
+                    pinned
+                    lockPosition
+                    cellRenderer='editCellRenderer'
+                    cellRendererParams={{
+                      type: 'user',
                     }}
-                    frameworkComponents={{
-                      editCellRenderer: EditCellRenderer,
-                      fieldOfficeEditor: FieldOfficeEditor,
-                      rolesEditor: RolesEditor,
-                      projectEditor: ProjectEditor,
-                    }}
-                  >
-                    <AgGridColumn
-                      field='edit'
-                      width={90}
-                      pinned
-                      lockPosition
-                      cellRenderer='editCellRenderer'
-                      cellRendererParams={{
-                        type: 'user',
-                      }}
-                      editable={false}
-                    />
-                    <AgGridColumn field='firstName' editable={false} />
-                    <AgGridColumn field='lastName' editable={false} />
-                    <AgGridColumn field='email' width={250} editable={false} />
-                    <AgGridColumn
-                      field='roleId'
-                      headerName='Role'
-                      cellEditor='rolesEditor'
-                      cellEditorParams={{ roles }}
-                      cellRenderer={(params) => rolesList[params.value]}
-                    />
-                    <AgGridColumn
-                      field='officeId'
-                      headerName='Field Office'
-                      width={300}
-                      cellEditor='fieldOfficeEditor'
-                      cellEditorParams={{ fieldOffices, isId: true }}
-                      cellRenderer={(params) => fieldOfficeList[params.value]}
-                    />
-                    <AgGridColumn
-                      field='projectCode'
-                      headerName='Project'
-                      width={300}
-                      cellEditor='projectEditor'
-                      cellEditorParams={{ projects }}
-                      cellRenderer={(params) => projectCodeList[params.value]}
-                    />
-                  </AgGridReact>
-                </div>
-              </Card.Body>
-            </Card>
-          </div>
+                    editable={false}
+                  />
+                  <AgGridColumn field='firstName' editable={false} />
+                  <AgGridColumn field='lastName' editable={false} />
+                  <AgGridColumn field='email' width={250} editable={false} />
+                  <AgGridColumn
+                    field='roleId'
+                    headerName='Role'
+                    cellEditor='rolesEditor'
+                    cellEditorParams={{ roles }}
+                    cellRenderer={(params) => rolesList[params.value]}
+                  />
+                  <AgGridColumn
+                    field='officeId'
+                    headerName='Field Office'
+                    width={300}
+                    cellEditor='fieldOfficeEditor'
+                    cellEditorParams={{ fieldOffices, isId: true }}
+                    cellRenderer={(params) => fieldOfficeList[params.value]}
+                  />
+                  <AgGridColumn
+                    field='projectCode'
+                    headerName='Project'
+                    width={300}
+                    cellEditor='projectEditor'
+                    cellEditorParams={{ projects }}
+                    cellRenderer={(params) => projectCodeList[params.value]}
+                  />
+                </AgGridReact>
+              </div>
+            </Card.Body>
+          </Card>
         </div>
       </RoleFilter>
     );

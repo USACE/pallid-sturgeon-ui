@@ -30,14 +30,13 @@ export default connect(
     loadingState,
     loadingMessage
   }) => {
-    // @TODO: Change logic for this
     useEffect(() => {
-      if (!auth.token) {
+      if (!auth.token && !sessionStorage.getItem('isLoggedIn')) {
         doModalOpen(LandingModal);
       } else {
         doModalClose(LandingModal);
       }
-    }, [auth, doModalClose, doModalOpen]);
+    }, [auth, doModalClose, doModalOpen, sessionStorage.getItem('isLoggedIn')]);
 
     return (
       <>
