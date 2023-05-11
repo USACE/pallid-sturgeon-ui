@@ -143,6 +143,7 @@ export default {
           payload: body,
         });
       });
+      sessionStorage.setItem('isLoggedIn', true);
     } else {
       store.doSetLoadingState(false);
       store.doSetLoadingMessage('Loading...');
