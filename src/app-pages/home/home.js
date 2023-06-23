@@ -16,7 +16,7 @@ const Home = connect(
   }) => {
     const getAccountView = () => {
       if (!userRole) {
-        if (authRoles.length > 0) {
+        if (authRoles && authRoles.length > 0) {
           // Multiple accounts
           return (
             <>
