@@ -5,6 +5,7 @@ import Card from 'app-components/card';
 import Icon from 'app-components/icon';
 import Button from 'app-components/button';
 import { dropdownYearsToNow } from 'utils';
+import { fieldOfficeList } from '../../app-pages/admin/helper';
 import { SelectCustomLabel, Input, Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 //TODO:
@@ -16,6 +17,8 @@ export default connect(
     lastLocationData,
   }) => {
     const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
+    const [fieldOffice, setFieldOffice] = useState('');
+    const [daysToReaplce, setDaysToReaplce] = useState('');
 
     useEffect(() => {
       const params = {
@@ -28,6 +31,16 @@ export default connect(
     //   doDatasheetLoadData();
     //   doDataSummaryLoadData();
     // }, [doDatasheetLoadData, doDataSummaryLoadData]);
+
+    const fieldOfficeOptions = Object.values(fieldOfficeList).map(value => ({
+      value
+    }));
+
+    const clearAllFilters = () => {
+      setYearFilter('');
+      setFieldOffice('');
+      setDaysToReaplce('');
+    };
 
     return (
       <div className='container-fluid'>
@@ -50,13 +63,10 @@ export default connect(
                 <SelectCustomLabel
                   label='Select Field Office'
                   className='d-block mt-1 mb-2'
-                  // TODO:onChange={val => setApprovalFilter(val)}
-                  // TODO:value={approvalFilter}
-                  options={[
-                    { value: 0, text: 'All' },
-                  ]}
-                  defaultValue={'All'}
-                //TODO:options={createFieldOfficeIdDropdownOptions(domainsFieldOffices)}                  
+                  value={fieldOffice}
+                  onChange={val => setFieldOffice(val)}
+                  defaultValue={'ALL'}
+                  options={fieldOfficeOptions}
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
@@ -78,9 +88,10 @@ export default connect(
                     <div className='form-group'>
                       <Input
                         label='Days to Replace'
-                        type='text'
+                        type='number'
                         className='form-control'
-                        placeholder=''
+                        value={daysToReaplce}
+                        onChange={e => setDaysToReaplce(e.target.value)}
                       />
                     </div>
                   </div>
@@ -101,7 +112,7 @@ export default connect(
                 variant='secondary'
                 size='small'
                 text='Clear All Filters'
-              //TODO:handleClick={() => clearAllFilters()}
+                handleClick={() => clearAllFilters()}
               />
             </div>
           </Card.Body>
