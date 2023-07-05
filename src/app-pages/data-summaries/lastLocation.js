@@ -9,6 +9,7 @@ import { fieldOfficeList } from '../../app-pages/admin/helper';
 import { SelectCustomLabel, Input, Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import FilterSelect from 'app-components/filter-select/filter-select';
 import { createDropdownOptions } from 'app-pages/data-entry/helpers';
+import Select from 'app-components/select';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -27,21 +28,24 @@ const reducer = (state, action) => {
 //TODO:
 export default connect(
   'doUpdateDatasheetParams',
+  'doDomainFieldOfficesFetch',
   'doDomainSegmentsFetch',
+  'doFetchUsers',
   'selectDomains',
   'selectUserRole',
   'selectUsersData',
   ({
 
     doUpdateDatasheetParams,
+    doDomainFieldOfficesFetch,
     doDomainSegmentsFetch,
+    doFetchUsers,
     domains,
     userRole,
     usersData,
     lastLocationData,
   }) => {
-    const { segments } = domains;
-    console.log('dom:::', domains);
+    const { fieldOffices, segments } = domains;
     const [state, dispatch] = useReducer(reducer, {});
     const user = usersData.find(user => userRole.id === user.id);
     const [office, setOffice] = useState(user ? user.officeCode : '');
@@ -55,10 +59,14 @@ export default connect(
 
     const [segment, setSegment] = useState(0);
     const segRef = useRef();
+    const officeRef = useRef();
 
     const handleSelect = (field, val) => {
       if (field === 'segmentId') {
         setSegment(val);
+      }
+      if (field === 'fieldoffice') {
+        setOffice(val);
       }
       dispatch({
         type: 'UPDATE_INPUT',
@@ -66,6 +74,11 @@ export default connect(
         payload: val
       });
     };
+
+    useEffect(() => {
+      doDomainFieldOfficesFetch();
+      doFetchUsers();
+    }, []);
 
     useEffect(() => {
       const params = {
@@ -81,13 +94,14 @@ export default connect(
       }
     }, [office]);
 
-    const fieldOfficeOptions = Object.values(fieldOfficeList).map(value => ({
-      value
-    }));
+    // const fieldOfficeOptions = Object.values(fieldOfficeList).map(value => ({
+    //   value
+    // }));
 
     const clearAllFilters = () => {
+      console.log('state==========', state);
       setYearFilter('');
-      setFieldOffice('');
+      officeRef.current.clear();
       segRef.current.clear();
       setDaysToReaplce('');
     };
@@ -110,13 +124,14 @@ export default connect(
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
-                <SelectCustomLabel
-                  label='Select Field Office'
-                  className='d-block mt-1 mb-2'
-                  value={fieldOffice}
-                  onChange={val => setFieldOffice(val)}
-                  defaultValue={'ALL'}
-                  options={fieldOfficeOptions}
+                <FilterSelect
+                  ref={officeRef}
+                  label='Field Office'
+                  name='fieldoffice'
+                  defaultValue={office === 'ZZ' || office === '' ? '' : office}
+                  value={state['fieldoffice']}
+                  onChange={(_, __, value) => handleSelect('fieldoffice', value)}
+                  items={createDropdownOptions(fieldOffices)}
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
