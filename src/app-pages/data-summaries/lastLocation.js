@@ -5,11 +5,10 @@ import Card from 'app-components/card';
 import Icon from 'app-components/icon';
 import Button from 'app-components/button';
 import { dropdownYearsToNow } from 'utils';
-import { fieldOfficeList } from '../../app-pages/admin/helper';
+//import { fieldOfficeList } from '../../app-pages/admin/helper';
 import { SelectCustomLabel, Input, Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import FilterSelect from 'app-components/filter-select/filter-select';
 import { createDropdownOptions } from 'app-pages/data-entry/helpers';
-import Select from 'app-components/select';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -34,6 +33,7 @@ export default connect(
   'selectDomains',
   'selectUserRole',
   'selectUsersData',
+  'selectLastLocationSummaryData', //TODO:
   ({
 
     doUpdateDatasheetParams,
@@ -51,10 +51,39 @@ export default connect(
     const [office, setOffice] = useState(user ? user.officeCode : '');
     const [project, setProject] = useState(user ? user.projectCode : '');
 
+    console.log('lastLocationData', lastLocationData);
+
+    // TODO: remove later
+    const myDataObject = [
+      {
+        uniqueID: 250780,
+        year: 2023,
+        fieldOffice: 'KC',
+        radioTag: 'test',
+        segment: 13,
+        bend: 4,
+        captureLatitude: 123,
+        captureLongtitude: 456,
+        searchDate: '2022-11-07T00:00:00Z',
+        captureTime: '0001-01-01T00:00:00Z',
+        daysToReplace: 4,
+      },
+      {
+        uniqueID: 250781,
+        year: 2021,
+        fieldOffice: 'SD',
+        radioTag: 'test2',
+        segment: 25,
+        bend: 4,
+        captureLatitude: 123,
+        captureLongtitude: 456,
+        searchDate: '2022-11-07T00:00:00Z',
+        captureTime: '0001-01-01T00:00:00Z',
+        daysToReplace: 4,
+      },
+    ];
 
     const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
-    const [fieldOffice, setFieldOffice] = useState('');
-    const [segmentValue, setSegmentValue] = useState(null);
     const [daysToReaplce, setDaysToReaplce] = useState('');
 
     const [segment, setSegment] = useState(0);
@@ -80,13 +109,19 @@ export default connect(
       doFetchUsers();
     }, []);
 
-    useEffect(() => {
-      const params = {
-        year: yearFilter,
-        segmentCode: segmentValue,
-      };
-      doUpdateDatasheetParams(params);
-    }, [yearFilter, segmentValue]);
+    // useEffect(() => {
+    //   const params = {
+    //     year: yearFilter,
+    //     segmentCode: segmentValue,
+    //   };
+    //   doUpdateDatasheetParams(params);
+    // }, [yearFilter, segmentValue]);
+    // TODO:
+    // useEffect(() => {
+    //   if (params.year) {
+    //     doFetchGeneticCardSummary(params);
+    //   }
+    // }, [params]);
 
     useEffect(() => {
       if (office) {
@@ -99,7 +134,6 @@ export default connect(
     // }));
 
     const clearAllFilters = () => {
-      console.log('state==========', state);
       setYearFilter('');
       officeRef.current.clear();
       segRef.current.clear();
@@ -143,23 +177,6 @@ export default connect(
                   value={state['segmentId']}
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
                   items={createDropdownOptions(segments)}
-                // hasHelperIcon
-                // helperIconId='segment'
-                // helperContent={(
-                //   <>
-                //     Must select <b>Field Office</b> and <b>Project</b> to see Segment options. <br></br>
-                //     Two ways to select option:
-                //     <ol>
-                //       <li>Click on input box and select option from dropdown, or </li>
-                //       <li>Search for option by typing in the box.</li>
-                //     </ol>
-                //     Click the 'x' button to clear the input field.
-                //   </>
-                // )}
-                // hasClearButton
-                // isDisabled={!office}
-                // isLoading={segments && (segments.length === 0)}
-                // isRequired
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
@@ -209,7 +226,8 @@ export default connect(
               className='mr-2'
               text='Export as CSV'
               icon={<Icon icon='download' />}
-            // TODO:handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
+              // TODO:handleClick={}
+              isDisabled={true}
             />
             <Button
               isOutline
@@ -218,19 +236,21 @@ export default connect(
               className='mr-2'
               text='Export Spatial File'
               icon={<Icon icon='download' />}
-            // TODO:handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
+              // TODO:handleClick={}
+              isDisabled={true}
             />
             <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
               <AgGridReact
                 // TODO:
-                rowData={lastLocationData}
+                // rowData={lastLocationData}
+                rowData={myDataObject}
                 defaultColDef={{
                   width: 150,
                 }}
               >
                 <AgGridColumn field='year' />
                 <AgGridColumn field='fieldOffice' sortable unSortIcon />
-                <AgGridColumn field='radioTag #' />
+                <AgGridColumn field='radioTag' headerName='Radio Tag #' />
                 <AgGridColumn field='segment' />
                 <AgGridColumn field='bend' />
                 <AgGridColumn field='captureLatitude' />
