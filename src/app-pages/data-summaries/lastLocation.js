@@ -24,26 +24,27 @@ const reducer = (state, action) => {
   }
 };
 
-//TODO:
+//TODO: clean up
 export default connect(
-  'doUpdateDatasheetParams',
+  'doFetchLastLocationDataSummary',
+  'doUpdateLastLocationParams',
   'doDomainFieldOfficesFetch',
   'doDomainSegmentsFetch',
   'doFetchUsers',
   'selectDomains',
   'selectUserRole',
   'selectUsersData',
-  'selectLastLocationSummaryData', //TODO:
+  'selectLastLocationSummaryData',
   ({
-
-    doUpdateDatasheetParams,
+    doFetchLastLocationDataSummary,
+    doUpdateLastLocationParams,
     doDomainFieldOfficesFetch,
     doDomainSegmentsFetch,
     doFetchUsers,
     domains,
     userRole,
     usersData,
-    lastLocationData,
+    lastLocationSummaryData,
   }) => {
     const { fieldOffices, segments } = domains;
     const [state, dispatch] = useReducer(reducer, {});
@@ -51,15 +52,16 @@ export default connect(
     const [office, setOffice] = useState(user ? user.officeCode : '');
     const [project, setProject] = useState(user ? user.projectCode : '');
 
-    console.log('lastLocationData', lastLocationData);
+    console.log('lastLocationSummaryData comp====', lastLocationSummaryData);
+
 
     // TODO: remove later
-    const myDataObject = [
+    const tempData = [
       {
         uniqueID: 250780,
         year: 2023,
         fieldOffice: 'KC',
-        radioTag: 'test',
+        radioTag: 'tag1',
         segment: 13,
         bend: 4,
         captureLatitude: 123,
@@ -72,7 +74,7 @@ export default connect(
         uniqueID: 250781,
         year: 2021,
         fieldOffice: 'SD',
-        radioTag: 'test2',
+        radioTag: 'tag2',
         segment: 25,
         bend: 4,
         captureLatitude: 123,
@@ -104,24 +106,13 @@ export default connect(
       });
     };
 
+    // filters
     useEffect(() => {
-      doDomainFieldOfficesFetch();
-      doFetchUsers();
-    }, []);
-
-    // useEffect(() => {
-    //   const params = {
-    //     year: yearFilter,
-    //     segmentCode: segmentValue,
-    //   };
-    //   doUpdateDatasheetParams(params);
-    // }, [yearFilter, segmentValue]);
-    // TODO:
-    // useEffect(() => {
-    //   if (params.year) {
-    //     doFetchGeneticCardSummary(params);
-    //   }
-    // }, [params]);
+      const params = {
+        year: yearFilter,
+      };
+      doUpdateLastLocationParams(params);
+    }, [yearFilter, doUpdateLastLocationParams]);
 
     useEffect(() => {
       if (office) {
@@ -132,6 +123,10 @@ export default connect(
     // const fieldOfficeOptions = Object.values(fieldOfficeList).map(value => ({
     //   value
     // }));
+
+    useEffect(() => {
+      doFetchLastLocationDataSummary();
+    }, [yearFilter, office, segment, daysToReaplce]);
 
     const clearAllFilters = () => {
       setYearFilter('');
@@ -242,15 +237,15 @@ export default connect(
             <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
               <AgGridReact
                 // TODO:
-                // rowData={lastLocationData}
-                rowData={myDataObject}
+                rowData={lastLocationSummaryData}
+                //rowData={tempData}
                 defaultColDef={{
                   width: 150,
                 }}
               >
                 <AgGridColumn field='year' />
                 <AgGridColumn field='fieldOffice' sortable unSortIcon />
-                <AgGridColumn field='radioTag' headerName='Radio Tag #' />
+                <AgGridColumn field='radioTagNum' headerName='Radio Tag #' />
                 <AgGridColumn field='segment' />
                 <AgGridColumn field='bend' />
                 <AgGridColumn field='captureLatitude' />

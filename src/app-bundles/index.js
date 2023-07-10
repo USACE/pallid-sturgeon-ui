@@ -25,6 +25,7 @@ import usersBundle from './users-bundle';
 import sitesDatasheetBundle from './sites-datasheet-bundle';
 import exportsBundle from './exports/exports-bundle';
 import loadingBundle from './loading-bundle';
+import lastLocationSummaryBundle from './last-location-page-bundle';
 
 // Mock Token User
 const mockTokenApplicationAdmin =
@@ -65,4 +66,5 @@ export default composeBundles(
   sitesDatasheetBundle,
   exportsBundle,
   loadingBundle,
+  lastLocationSummaryBundle,
 );
