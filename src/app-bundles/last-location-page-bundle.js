@@ -18,7 +18,6 @@ const lastLocationSummaryBundle = {
     return (state = initialData, { type, payload }) => {
       switch (type) {
         case 'UPDATE_LASTLOCATION_PARAMS':
-          console.log('this UPDATE_LASTLOCATION_PARAMS case switch invoked');
           return {
             ...state,
             params: payload,
@@ -48,7 +47,6 @@ const lastLocationSummaryBundle = {
   doFetchLastLocationDataSummary: () => ({ dispatch, store, apiGet }) => {
     //const toastId = toast.loading('Loading last location summary data...');
     dispatch({ type: 'LASTLOCATION_DATA_SUMMARY_FETCH_START' });
-    console.log('doFetchLastLocationDataSummary');
 
     const { ...params } = store.selectLastLocationParams();
     const query = queryFromObject(params);

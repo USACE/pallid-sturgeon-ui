@@ -5,7 +5,6 @@ import Card from 'app-components/card';
 import Icon from 'app-components/icon';
 import Button from 'app-components/button';
 import { dropdownYearsToNow } from 'utils';
-//import { fieldOfficeList } from '../../app-pages/admin/helper';
 import { SelectCustomLabel, Input, Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import FilterSelect from 'app-components/filter-select/filter-select';
 import { createDropdownOptions } from 'app-pages/data-entry/helpers';
@@ -51,9 +50,6 @@ export default connect(
     const user = usersData.find(user => userRole.id === user.id);
     const [office, setOffice] = useState(user ? user.officeCode : '');
     const [project, setProject] = useState(user ? user.projectCode : '');
-
-    console.log('lastLocationSummaryData comp====', lastLocationSummaryData);
-
 
     // TODO: remove later
     const tempData = [
@@ -115,14 +111,15 @@ export default connect(
     }, [yearFilter, doUpdateLastLocationParams]);
 
     useEffect(() => {
+      doDomainFieldOfficesFetch();
+      doFetchUsers();
+    }, []);
+
+    useEffect(() => {
       if (office) {
         doDomainSegmentsFetch({ office: office, project: project });
       }
     }, [office]);
-
-    // const fieldOfficeOptions = Object.values(fieldOfficeList).map(value => ({
-    //   value
-    // }));
 
     useEffect(() => {
       doFetchLastLocationDataSummary();
@@ -161,6 +158,7 @@ export default connect(
                   value={state['fieldoffice']}
                   onChange={(_, __, value) => handleSelect('fieldoffice', value)}
                   items={createDropdownOptions(fieldOffices)}
+                  hasClearButton
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
@@ -172,6 +170,7 @@ export default connect(
                   value={state['segmentId']}
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
                   items={createDropdownOptions(segments)}
+                  hasClearButton
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
