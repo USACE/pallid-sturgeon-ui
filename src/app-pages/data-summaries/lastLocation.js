@@ -8,6 +8,7 @@ import { dropdownYearsToNow } from 'utils';
 import { SelectCustomLabel, Input, Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import FilterSelect from 'app-components/filter-select/filter-select';
 import { createDropdownOptions } from 'app-pages/data-entry/helpers';
+import { officeGroups } from './helper';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -51,36 +52,6 @@ export default connect(
     const [office, setOffice] = useState(user ? user.officeCode : '');
     const [project, setProject] = useState(user ? user.projectCode : '');
 
-    // TODO: remove later
-    const tempData = [
-      {
-        uniqueID: 250780,
-        year: 2023,
-        fieldOffice: 'KC',
-        radioTag: 'tag1',
-        segment: 13,
-        bend: 4,
-        captureLatitude: 123,
-        captureLongtitude: 456,
-        searchDate: '2022-11-07T00:00:00Z',
-        captureTime: '0001-01-01T00:00:00Z',
-        daysToReplace: 4,
-      },
-      {
-        uniqueID: 250781,
-        year: 2021,
-        fieldOffice: 'SD',
-        radioTag: 'tag2',
-        segment: 25,
-        bend: 4,
-        captureLatitude: 123,
-        captureLongtitude: 456,
-        searchDate: '2022-11-07T00:00:00Z',
-        captureTime: '0001-01-01T00:00:00Z',
-        daysToReplace: 4,
-      },
-    ];
-
     const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
     const [daysToReaplce, setDaysToReaplce] = useState('');
 
@@ -102,7 +73,6 @@ export default connect(
       });
     };
 
-    // filters
     useEffect(() => {
       const params = {
         year: yearFilter,
@@ -113,6 +83,7 @@ export default connect(
     useEffect(() => {
       doDomainFieldOfficesFetch();
       doFetchUsers();
+      doDomainSegmentsFetch();
     }, []);
 
     useEffect(() => {
@@ -130,6 +101,18 @@ export default connect(
       officeRef.current.clear();
       segRef.current.clear();
       setDaysToReaplce('');
+    };
+
+    const filterSegment = () => {
+      if (officeGroups.group1.includes(office)) {
+        return segments.filter(object => object.code <= 4);
+      } else if (officeGroups.group2.includes(office)) {
+        return segments.filter(object => object.code >= 7);
+      }
+      else if (officeGroups.group1.includes(office)) {
+        return segments;
+      }
+      return segments;
     };
 
     return (
@@ -169,7 +152,7 @@ export default connect(
                   placeholder='Select segment...'
                   value={state['segmentId']}
                   onChange={(_, __, value) => handleSelect('segmentId', value)}
-                  items={createDropdownOptions(segments)}
+                  items={createDropdownOptions(filterSegment(fieldOffices))}
                   hasClearButton
                 />
               </div>
@@ -237,7 +220,6 @@ export default connect(
               <AgGridReact
                 // TODO:
                 rowData={lastLocationSummaryData}
-                //rowData={tempData}
                 defaultColDef={{
                   width: 150,
                 }}
