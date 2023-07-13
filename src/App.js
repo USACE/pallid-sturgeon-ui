@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { connect } from 'redux-bundler-react';
 import { ToastContainer } from 'react-toastify';
 
@@ -15,6 +15,18 @@ import './css/bootstrap/css/bootstrap.water.min.css';
 import './css/mdi/css/materialdesignicons.min.css';
 import './css/index.scss';
 
+// Custom hook for authentication check and managing landing modal
+const useAuthCheck = (auth, doModalOpen, doModalClose) => {
+  useEffect(() => {
+    const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+    if (!auth.token && !isLoggedIn) {
+      doModalOpen(LandingModal);
+    } else {
+      doModalClose(LandingModal);
+    }
+  }, [auth, doModalClose, doModalOpen]);
+};
+
 export default connect(
   'doModalOpen',
   'doModalClose',
@@ -30,23 +42,21 @@ export default connect(
     loadingState,
     loadingMessage
   }) => {
-    useEffect(() => {
-      if (!auth.token && !sessionStorage.getItem('isLoggedIn')) {
-        doModalOpen(LandingModal);
-      } else {
-        doModalClose(LandingModal);
-      }
-    }, [auth, doModalClose, doModalOpen, sessionStorage.getItem('isLoggedIn')]);
+    useAuthCheck(auth, doModalOpen, doModalClose);
+
+    const loadingModal = useMemo(() => loadingState && <LoadingModal text={loadingMessage} />, [loadingState, loadingMessage]);
+    const content = useMemo(() => auth.token ? <Route /> : <Hero />, [auth.token, Route]);
 
     return (
       <>
-        {loadingState && <LoadingModal text={loadingMessage} />}
+        {loadingModal}
         <ToastContainer autoClose={3500} hideProgressBar={false} />
         <NavBar />
         <PageContent>
-          {auth.token ? <Route />:<Hero />}
+          {content}
         </PageContent>
         <Modal closeWithEscape />
         <Footer />
       </>
-    );});
+    );
+});
