@@ -51,7 +51,8 @@ const lastLocationSummaryBundle = {
     const { ...params } = store.selectLastLocationParams();
     const query = queryFromObject(params);
     const url = `/psapi/geneticDataSummary${query}`;
-    //const url = `/psapi/lastLocationDataSummary${query}`; //TODO: future endpoint
+    // const url = `/psapi/lastLocationDataSummary${query}`; //TODO: future endpoint
+    console.log('the url is: ', url);
 
     // const query = queryFromObject({
     //   ...params,
@@ -67,7 +68,7 @@ const lastLocationSummaryBundle = {
         });
         //(toastId, 'Successfully loaded last location summary data.');
       } else {
-        dispatch({ type: 'GENETIC_CARD_SUMMARY_FETCH_ERROR' });
+        dispatch({ type: 'LASTLOCATION_SUMMARY_FETCH_ERROR' });
         //tError(toastId, 'Failed to fetch last location summary data.');
       }
     });

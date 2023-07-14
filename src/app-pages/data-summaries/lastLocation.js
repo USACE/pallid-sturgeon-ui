@@ -27,6 +27,7 @@ const reducer = (state, action) => {
 //TODO: clean up
 export default connect(
   'doFetchLastLocationDataSummary',
+  'doLastLocationLoadData',
   'doUpdateLastLocationParams',
   'doDomainFieldOfficesFetch',
   'doDomainSegmentsFetch',
@@ -37,6 +38,7 @@ export default connect(
   'selectLastLocationSummaryData',
   ({
     doFetchLastLocationDataSummary,
+    doLastLocationLoadData,
     doUpdateLastLocationParams,
     doDomainFieldOfficesFetch,
     doDomainSegmentsFetch,
@@ -75,10 +77,14 @@ export default connect(
 
     useEffect(() => {
       const params = {
+        // TODO: get the query params values from API?
         year: yearFilter,
+        office: office,
+        segment: segment,
+        // TODO: daysToReplace
       };
       doUpdateLastLocationParams(params);
-    }, [yearFilter, doUpdateLastLocationParams]);
+    }, [yearFilter, office, segment, doUpdateLastLocationParams]);
 
     useEffect(() => {
       doDomainFieldOfficesFetch();
@@ -95,6 +101,10 @@ export default connect(
     useEffect(() => {
       doFetchLastLocationDataSummary();
     }, [yearFilter, office, segment, daysToReaplce]);
+
+    useEffect(() => {
+      doLastLocationLoadData();
+    }, [doLastLocationLoadData]);
 
     const clearAllFilters = () => {
       setYearFilter('');
@@ -180,7 +190,7 @@ export default connect(
                 size='small'
                 className='mr-2'
                 text='Apply Filters'
-              //TODO:handleClick={() => doDataSummaryLoadData()}
+                handleClick={() => doLastLocationLoadData()}
               />
               <Button
                 isOutline
