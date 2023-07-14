@@ -24,9 +24,9 @@ const reducer = (state, action) => {
   }
 };
 
-//TODO: clean up
 export default connect(
   'doFetchLastLocationDataSummary',
+  'doFetchLastLocationSummaryExport',
   'doLastLocationLoadData',
   'doUpdateLastLocationParams',
   'doDomainFieldOfficesFetch',
@@ -38,6 +38,7 @@ export default connect(
   'selectLastLocationSummaryData',
   ({
     doFetchLastLocationDataSummary,
+    doFetchLastLocationSummaryExport,
     doLastLocationLoadData,
     doUpdateLastLocationParams,
     doDomainFieldOfficesFetch,
@@ -213,7 +214,7 @@ export default connect(
               className='mr-2'
               text='Export as CSV'
               icon={<Icon icon='download' />}
-              // TODO:handleClick={}
+              handleClick={() => doFetchLastLocationSummaryExport('last-location-summary')}
               isDisabled={true}
             />
             <Button

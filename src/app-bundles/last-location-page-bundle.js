@@ -17,12 +17,12 @@ const lastLocationSummaryBundle = {
 
     return (state = initialData, { type, payload }) => {
       switch (type) {
-        case 'UPDATE_LASTLOCATION_PARAMS':
+        case 'UPDATE_LAST_LOCATION_PARAMS':
           return {
             ...state,
             params: payload,
           };
-        case 'LASTLOCATION_SUMMARY_UPDATED_DATA':
+        case 'LAST_LOCATION_SUMMARY_UPDATED_DATA':
           return {
             ...state,
             data: payload.items,
@@ -39,14 +39,13 @@ const lastLocationSummaryBundle = {
   selectLastLocationSummaryData: state => state.lastLocationSummary.data,
 
   doLastLocationLoadData: () => ({ dispatch, store }) => {
-    dispatch({ type: 'LOADING_LASTLOCATION_SUMMARY_INIT_DATA' });
+    dispatch({ type: 'LOADING_LAST_LOCATION_SUMMARY_INIT_DATA' });
     store.doFetchLastLocationDataSummary();
   },
 
   // action to fetch data
   doFetchLastLocationDataSummary: () => ({ dispatch, store, apiGet }) => {
-    //const toastId = toast.loading('Loading last location summary data...');
-    dispatch({ type: 'LASTLOCATION_DATA_SUMMARY_FETCH_START' });
+    dispatch({ type: 'LAST_LOCATION_DATA_SUMMARY_FETCH_START' });
 
     const { ...params } = store.selectLastLocationParams();
     const query = queryFromObject(params);
@@ -63,19 +62,45 @@ const lastLocationSummaryBundle = {
     apiGet(url, (err, body) => {
       if (!err) {
         dispatch({
-          type: 'LASTLOCATION_SUMMARY_UPDATED_DATA',
+          type: 'LAST_LOCATION_SUMMARY_UPDATED_DATA',
           payload: body,
         });
-        //(toastId, 'Successfully loaded last location summary data.');
       } else {
-        dispatch({ type: 'LASTLOCATION_SUMMARY_FETCH_ERROR' });
-        //tError(toastId, 'Failed to fetch last location summary data.');
+        dispatch({ type: 'LAST_LOCATION_SUMMARY_FETCH_ERROR' });
       }
     });
   },
 
+  // csv file export
+  doFetchLastLocationSummaryExport: (filePrefix) => ({ dispatch, store, apiFetch }) => {
+    const toastId = toast.loading('Preparing file for download...');
+
+    const { ...params } = store.selectLastLocationParams();
+    const query = queryFromObject(params);
+    const url = `/psapi/geneticFullDataSummary${query}`;
+    //const url = `/psapi/lastLocationFullDataSummary${query}`; //TODO: create endpoint
+
+    apiFetch(url)
+      .then(res => res.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${filePrefix}-${new Date().toISOString()}.csv`;
+        document.body.appendChild(a);
+        tSuccess(toastId, 'File Ready!');
+        a.click();
+        a.remove();
+      })
+      .catch(err => {
+        tError(toastId, 'Failed to generate file.');
+        console.error('An error occurred:', err);
+      });
+    dispatch({ type: 'ALL_LAST_LOCATION_SUMMARY_FETCH_FINISHED' });
+  },
+
   doUpdateLastLocationParams: (params) => ({ dispatch, store }) => {
-    dispatch({ type: 'UPDATE_LASTLOCATION_PARAMS', payload: params });
+    dispatch({ type: 'UPDATE_LAST_LOCATION_PARAMS', payload: params });
     store.doLastLocationLoadData();
   },
 };
