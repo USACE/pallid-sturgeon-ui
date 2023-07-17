@@ -52,14 +52,13 @@ export default connect(
     const { fieldOffices, segments } = domains;
     const [state, dispatch] = useReducer(reducer, {});
     const user = usersData.find(user => userRole.id === user.id);
-    const [office, setOffice] = useState(user ? user.officeCode : '');
-    const [project, setProject] = useState(user ? user.projectCode : '');
-
+    const [office, setOffice] = useState('');
     const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
     const [daysToReaplce, setDaysToReaplce] = useState('');
-
     const [segment, setSegment] = useState(0);
     const segRef = useRef();
+    const project = user ? user.projectCode : '';
+    const officeId = user ? user.officeCode : '';
     const officeRef = useRef();
 
     const handleSelect = (field, val) => {
@@ -115,16 +114,17 @@ export default connect(
     };
 
     const filterSegment = () => {
-      if (officeGroups.group1.includes(office)) {
+      if (officeGroups.group1.includes(officeId)) {
         return segments.filter(object => object.code <= 4);
-      } else if (officeGroups.group2.includes(office)) {
+      } else if (officeGroups.group2.includes(officeId)) {
         return segments.filter(object => object.code >= 7);
       }
-      else if (officeGroups.group1.includes(office)) {
+      else if (officeGroups.group1.includes(officeId)) {
         return segments;
       }
       return segments;
     };
+
 
     return (
       <div className='container-fluid'>
@@ -235,17 +235,17 @@ export default connect(
                   width: 150,
                 }}
               >
-                <AgGridColumn field='year' />
+                <AgGridColumn field='year' sortable unSortIcon/>
                 <AgGridColumn field='fieldOffice' sortable unSortIcon />
-                <AgGridColumn field='radioTagNum' headerName='Radio Tag #' />
-                <AgGridColumn field='segment' />
-                <AgGridColumn field='bend' />
-                <AgGridColumn field='captureLatitude' />
-                <AgGridColumn field='captureLongtitude' />
-                <AgGridColumn field='searchDate' />
-                <AgGridColumn field='captureTime' />
-                <AgGridColumn field='captureDate' />
-                <AgGridColumn field='daysToReplace' />
+                <AgGridColumn field='radioTagNum' headerName='Radio Tag #'sortable unSortIcon />
+                <AgGridColumn field='segment' sortable unSortIcon />
+                <AgGridColumn field='bend' sortable unSortIcon />
+                <AgGridColumn field='captureLatitude' sortable unSortIcon />
+                <AgGridColumn field='captureLongtitude' sortable unSortIcon />
+                <AgGridColumn field='searchDate' sortable unSortIcon />
+                <AgGridColumn field='captureTime' sortable unSortIcon />
+                <AgGridColumn field='captureDate' sortable unSortIcon />
+                <AgGridColumn field='daysToReplace' sortable unSortIcon />
               </AgGridReact>
             </div>
           </Card.Body>
