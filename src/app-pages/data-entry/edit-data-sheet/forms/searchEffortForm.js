@@ -31,26 +31,31 @@ const SearchEffortForm = connect(
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'doUpdateCurrentTab',
+  'doResetTelemetryDataEntries',
   'selectDataEntryData',
   'selectSitesData',
   'selectDataEntryTelemetryTotalCount',
   'selectCurrentTab',
   'selectUserRole',
+  'selectRouteParams',
   ({
     doSearchEffortDatasheetLoadData,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     doUpdateCurrentTab,
+    doResetTelemetryDataEntries,
     dataEntryData,
     sitesData,
     dataEntryTelemetryTotalCount,
     currentTab,
     userRole,
+    routeParams,
     edit
   }) => {
     const initialState = {};
     const [state, dispatch] = useReducer(reducer, initialState);
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
+    const isCreate = routeParams.form.split('-')[1] === 'create';
 
     const handleChange = e => {
       dispatch({
@@ -93,7 +98,11 @@ const SearchEffortForm = connect(
     };
 
     useEffect(() => {
-      if (dataEntryData.seId) {
+      if (isCreate) {
+        // reset data if adding new Search Effort datasheet
+        doResetTelemetryDataEntries();
+      } else if (dataEntryData.seId) {
+        // load data if editing or viewing existing Search Effort datasheet
         doSearchEffortDatasheetLoadData(dataEntryData.seId);
       }
     }, [dataEntryData.seId]);

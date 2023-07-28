@@ -40,6 +40,7 @@ const MissouriRiverForm = connect(
   'doDomainsStructureModFetch',
   'doDomainsSetSite1Fetch',
   'doDomainsSetSite2Fetch',
+  'doResetMoRiverDataEntryData',
   'selectDataEntryData',
   'selectSitesData',
   'selectDomainsMeso',
@@ -52,6 +53,7 @@ const MissouriRiverForm = connect(
   'selectDataEntryProcedureTotalCount',
   'selectCurrentTab',
   'selectUserRole',
+  'selectRouteParams',
   ({
     doMoRiverDatasheetLoadData,
     doSaveMoRiverDataEntry,
@@ -62,6 +64,7 @@ const MissouriRiverForm = connect(
     doDomainsStructureModFetch,
     doDomainsSetSite1Fetch,
     doDomainsSetSite2Fetch,
+    doResetMoRiverDataEntryData,
     dataEntryData,
     sitesData,
     domainsMeso,
@@ -74,6 +77,7 @@ const MissouriRiverForm = connect(
     dataEntryProcedureTotalCount,
     currentTab,
     userRole,
+    routeParams,
     edit,
   }) => {
     const initialState = {
@@ -90,7 +94,9 @@ const MissouriRiverForm = connect(
 
     const [isNoTurbidity, setIsNoTurbidity] = useState(false);
     const [isNoVelocity, setIsNoVelocity] = useState(false);
+
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
+    const isCreate = routeParams.form.split('-')[1] === 'create';
     const data = sitesData[0];
     const formComplete = true;  
 
@@ -213,10 +219,14 @@ const MissouriRiverForm = connect(
     }, [edit, dataEntryData]);
 
     useEffect(() => {
-      if (dataEntryData.mrId) {
+      if (isCreate) {
+        // reset data if adding new Missouri River datasheet
+        doResetMoRiverDataEntryData();
+      } else if (dataEntryData.mrId) {
+        // load data if editing or viewing existing Missouri River datasheet
         doMoRiverDatasheetLoadData(dataEntryData.mrId);
       }
-    }, [dataEntryData.mrId, userRole.id]);
+    }, [isCreate, dataEntryData.mrId, userRole.id]);
 
     return (
       <>

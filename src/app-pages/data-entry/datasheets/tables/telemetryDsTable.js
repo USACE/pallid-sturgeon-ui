@@ -27,12 +27,14 @@ const TelemetryDsTable = connect(
   'doUpdateTelemetryDataEntry',
   'selectDataEntryTelemetryData',
   'selectDataEntryLastParams',
+  'selectUserRole',
   ({
     doModalOpen,
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
     dataEntryTelemetryData,
-    dataEntryLastParams
+    dataEntryLastParams,
+    userRole
   }) => {
     const { items } = dataEntryTelemetryData;
     const gridRef = useRef();
@@ -102,7 +104,7 @@ const TelemetryDsTable = connect(
               lockPinned: true,
             }}
             editType='fullRow'
-            onRowValueChanged={({ data }) => !data.tId ? doSaveTelemetryDataEntry({...initialState ,...data}, { seId: dataEntryLastParams.seId }) : doUpdateTelemetryDataEntry(data, { seId: dataEntryLastParams.seId })}
+            onRowValueChanged={({ data }) => !data.tId ? doSaveTelemetryDataEntry({...initialState ,...data}, { seId: dataEntryLastParams.seId, id: userRole.id }) : doUpdateTelemetryDataEntry(data, { seId: dataEntryLastParams.seId, id: userRole.id })}
             rowHeight={35}
             rowData={items}
             frameworkComponents={{
