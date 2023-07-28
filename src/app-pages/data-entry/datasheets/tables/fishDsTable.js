@@ -28,6 +28,7 @@ const FishDsTable = connect(
   'selectDomainsMr',
   'selectDomainsOtolith',
   'selectDataEntryLastParams',
+  'selectUserRole',
   ({
     doUpdateFishDataEntry,
     doSaveFishDataEntry,
@@ -38,6 +39,7 @@ const FishDsTable = connect(
     domainsMr,
     domainsOtolith,
     dataEntryLastParams,
+    userRole,
     setIsAddRow,
     setRowId,
   }) => {
@@ -131,7 +133,7 @@ const FishDsTable = connect(
               lockPinned: true,
             }}
             editType='fullRow'
-            onRowValueChanged={({ data }) => !data.fid ? doSaveFishDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId }) : doUpdateFishDataEntry(data, { mrId: dataEntryLastParams.mrId })}
+            onRowValueChanged={({ data }) => !data.fid ? doSaveFishDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId, id: userRole.id }) : doUpdateFishDataEntry(data, { mrId: dataEntryLastParams.mrId, id: userRole.id })}
             rowHeight={35}
             rowData={dataEntryFishData.items}
             frameworkComponents={{

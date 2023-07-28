@@ -22,12 +22,14 @@ const SuppDsTable = connect(
   'doUpdateSupplementalDataEntry',
   'selectDataEntrySupplemental',
   'selectDataEntryLastParams',
+  'selectUserRole',
   ({
     doModalOpen,
     doSaveSupplementalDataEntry,
     doUpdateSupplementalDataEntry,
     dataEntrySupplemental,
     dataEntryLastParams,
+    userRole,
     isAddRow,
     rowId,
     setIsAddRow,
@@ -54,7 +56,6 @@ const SuppDsTable = connect(
             rowNode.setDataValue('proclink', false);
           }
         }
-        console.log(rowNode.rowIndex, rowNode.data.proclink);
       });
       gridRef.current.api.refreshCells({ columns: ['proclink'] });
     };
@@ -98,7 +99,7 @@ const SuppDsTable = connect(
               lockPinned: true,
             }}
             editType='fullRow'
-            onRowValueChanged={({ data }) => !data.sid ? doSaveSupplementalDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId }) : doUpdateSupplementalDataEntry(data, { mrId: dataEntryLastParams.mrId })}
+            onRowValueChanged={({ data }) => !data.sid ? doSaveSupplementalDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId, id: userRole.id }) : doUpdateSupplementalDataEntry(data, { mrId: dataEntryLastParams.mrId, id: userRole.id })}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
               procLinkCellRenderer: ProcLinkCellRenderer,

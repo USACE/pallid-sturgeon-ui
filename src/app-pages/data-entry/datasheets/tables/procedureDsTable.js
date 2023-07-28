@@ -24,12 +24,14 @@ const ProcedureDsTable = connect(
   'doUpdateProcedureDataEntry',
   'selectDataEntryProcedure',
   'selectDataEntryLastParams',
+  'selectUserRole',
   ({
     doModalOpen,
     doSaveProcedureDataEntry,
     doUpdateProcedureDataEntry,
     dataEntryProcedure,
     dataEntryLastParams,
+    userRole,
     isAddRow,
     rowId
   }) => {
@@ -42,11 +44,11 @@ const ProcedureDsTable = connect(
 
     const onRowValueChanged = (data) => {
       if (!data.id) {
-        doSaveProcedureDataEntry(data, { mrId: dataEntryLastParams.mrId });
+        doSaveProcedureDataEntry(data, { mrId: dataEntryLastParams.mrId, id: userRole.id });
       } else {
         // Format date fields before submitting data
         setDates(data.sid);
-        doUpdateProcedureDataEntry(data, { mrId: dataEntryLastParams.mrId });
+        doUpdateProcedureDataEntry(data, { mrId: dataEntryLastParams.mrId, id: userRole.id });
       }
     };
 
@@ -68,16 +70,6 @@ const ProcedureDsTable = connect(
 
     return (
       <div className='container-fluid overflow-auto'>
-        {/* <Button
-          isOutline
-          size='small'
-          variant='success'
-          text='Add Procedure Datasheet'
-          title='Add Procedure Datasheet'
-          icon={<Icon icon='plus' />}
-          handleClick={() => doUpdateUrl('/sites-list/datasheet/procedure-create')}
-          isDisabled
-        /> */}
         <Button
           isOutline
           size='small'

@@ -124,8 +124,8 @@ const NavBar = connect(
                     buttonClass='btn-small p-0 nav-dropdown-button'
                     buttonContent={(
                       <span className='nav-link user'>
-                        {Object.keys(user).length > 0 && (user.firstName + ' ' + user.lastName + ' (' + user.role + ')')}<br></br>
-                        {Object.keys(user).length > 0 && (user.officeCode + ' - Project ' + user.projectCode + ' - ' + projectMap[userRole.projectCode])}
+                        {(user && Object.keys(user).length > 0) && (user.firstName + ' ' + user.lastName + ' (' + user.role + ')')}<br></br>
+                        {(user && Object.keys(user).length > 0) && (user.officeCode + ' - Project ' + user.projectCode + ' - ' + projectMap[userRole.projectCode])}
                         <>&nbsp;</>
                         <Icon icon='menu-down' />
                       </span>

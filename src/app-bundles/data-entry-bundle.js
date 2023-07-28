@@ -111,6 +111,40 @@ export default {
             ...state,
             currentTab: payload,
           };
+
+        case 'RESET_FISH_DATA_ENTRIES':
+          return {
+            ...state,
+            fishData: {
+              items: [],
+              totalCount: 0,
+            }
+          };
+        case 'RESET_SUPP_DATA_ENTRIES':
+          return {
+            ...state,
+            supplementalData: {
+              items: [],
+              totalCount: 0,
+            }
+          };
+        case 'RESET_PROCEDURE_DATA_ENTRIES':
+          return {
+            ...state,
+            procedureData: {
+              items: [],
+              totalCount: 0,
+            }
+          };
+        case 'RESET_TELEMETRY_DATA_ENTRIES':
+          return {
+            ...state,
+            telemetryData: {
+              items: [],
+              totalCount: 0,
+            }
+          };
+
         default:
           return state;
       }
@@ -166,6 +200,12 @@ export default {
     store.doDomainsSpeciesFetch();
   },
 
+  doResetMoRiverDataEntryData: () => ({ store }) => {
+    store.doResetFishDataEntries();
+    store.doResetSupplementalDataEntries();
+    store.doResetProcedureDataEntries();
+  },
+
   doSearchEffortDatasheetLoadData: (id) => ({ store }) => {
     // Load data
     store.doFetchTelemetryDataEntry({ seId: id, id: store.selectUserRole().id }, null, false);
@@ -174,6 +214,7 @@ export default {
   // DATA ENTRY FETCHES
 
   doFetchMoRiverDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Missouri River datasheet(s)...') : null;
 
     const url = `/psapi/moriverDataEntry${queryFromObject(params)}`;
@@ -204,6 +245,7 @@ export default {
   },
 
   doFetchFishDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'FISH_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Fish datasheet(s)...') : null;
 
     const url = `/psapi/fishDataEntry${queryFromObject(params)}`;
@@ -231,6 +273,7 @@ export default {
   },
 
   doFetchSupplementalDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Supplemental datasheet(s)...') : null;
 
     const url = `/psapi/supplementalDataEntry${queryFromObject(params)}`;
@@ -258,6 +301,7 @@ export default {
   },
 
   doFetchProcedureDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'PROCEDURE_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Procedure datasheet(s)...') : null;
 
     const url = `/psapi/procedureDataEntry${queryFromObject(params)}`;
@@ -285,6 +329,7 @@ export default {
   },
 
   doFetchSearchDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'SEARCH_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Search Effort datasheet(s)...') : null;
 
     const url = `/psapi/searchDataEntry${queryFromObject(params)}`;
@@ -315,6 +360,7 @@ export default {
   },
 
   doFetchTelemetryDataEntry: (params, callback = null, ignoreToast = false) => ({ dispatch, store, apiGet }) => {
+    dispatch({ type: 'TELEMETRY_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Telemetry datasheet(s)...') : null;
 
     const url = `/psapi/telemetryDataEntry${queryFromObject(params)}`;
@@ -623,4 +669,21 @@ export default {
   doUpdateCurrentTab: (tab) => ({ dispatch }) => {
     dispatch({ type: 'UPDATE_CURRENT_TAB', payload: tab });
   },
+
+  // RESET
+  doResetFishDataEntries: () => ({ dispatch }) => {
+    dispatch({ type: 'RESET_FISH_DATA_ENTRIES' });
+  },
+
+  doResetSupplementalDataEntries: () => ({ dispatch }) => {
+    dispatch({ type: 'RESET_SUPP_DATA_ENTRIES' });
+  },
+
+  doResetProcedureDataEntries: () => ({ dispatch }) => {
+    dispatch({ type: 'RESET_PROCEDURE_DATA_ENTRIES' });
+  },
+
+  doResetTelemetryDataEntries: () => ({ dispatch }) => {
+    dispatch({ type: 'RESET_TELEMETRY_DATA_ENTRIES' });
+  }
 };
