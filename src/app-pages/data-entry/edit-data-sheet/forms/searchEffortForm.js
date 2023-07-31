@@ -181,6 +181,7 @@ const SearchEffortForm = connect(
                             label='Search Type'
                             options={searchTypeOptions}
                             value={state['searchTypeCode']}
+                            defaultValue={state['searchTypeCode']}
                             onChange={val => handleSelect('searchTypeCode', val)}
                             isRequired
                           />
