@@ -12,6 +12,7 @@ import TextEditor from 'common/gridCellEditors/textEditor';
 import FloatEditor from 'common/gridCellEditors/floatEditor';
 
 import { Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { frequencyIdOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -137,7 +138,7 @@ const TelemetryDsTable = connect(
             <AgGridColumn field='tFid' sortable unSortIcon />
             <AgGridColumn field='bend' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='radioTagNum' headerName='Radio Tag #' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} width={125} sortable unSortIcon />
-            <AgGridColumn field='frequencyIdCode' headerName='Frequency Id' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} width={125} sortable unSortIcon />
+            <AgGridColumn field='frequencyIdCode' headerName='Frequency Id' cellEditor='selectEditor' cellEditorParams={{  options: frequencyIdOptions, type: 'number', isRequired: true }} width={125} sortable unSortIcon />
             <AgGridColumn field='captureDate' headerName='Capture Time' width={125} sortable unSortIcon />
             <AgGridColumn field='captureLatitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} width={150} sortable unSortIcon />
             <AgGridColumn field='captureLongitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} width={150} sortable unSortIcon />
