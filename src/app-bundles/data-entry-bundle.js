@@ -8,6 +8,7 @@ export default {
     const initialData = {
       data: [],
       totalCount: 0,
+      pageSize: 50,
       fishData: {
         items: [],
         totalCount: 0,
@@ -160,6 +161,7 @@ export default {
 
   selectDataEntryFishData: state => state.dataEntry.fishData,
   selectDataEntryFishTotalCount: state => state.dataEntry.fishData.totalCount,
+  selectSitesDataEntryFishPageSize: state => state.dataEntry.pageSize,
 
   selectDataEntrySupplemental: state => state.dataEntry.supplementalData,
   selectDataEntrySupplementalTotalCount: state => state.dataEntry.supplementalData.totalCount,
@@ -248,7 +250,14 @@ export default {
     dispatch({ type: 'FISH_DATA_ENTRY_FETCH_START', payload: params });
     const toastId = ignoreToast ? toast.loading('Finding Fish datasheet(s)...') : null;
 
-    const url = `/psapi/fishDataEntry${queryFromObject(params)}`;
+    const size = store.selectSitesDataEntryFishPageSize();
+
+    const query = queryFromObject({
+      ...params,
+      size,
+    });
+
+    const url = `/psapi/fishDataEntry${query}`;
 
     apiGet(url, (err, body) => {
       if (!err) {
