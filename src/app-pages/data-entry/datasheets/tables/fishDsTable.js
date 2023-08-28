@@ -8,6 +8,7 @@ import Icon from 'app-components/icon';
 import SelectEditor from 'common/gridCellEditors/selectEditor';
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import NumberEditor from 'common/gridCellEditors/numberEditor';
+import FloatEditor from 'common/gridCellEditors/floatEditor';
 import TextEditor from 'common/gridCellEditors/textEditor';
 
 import { baitOptions, finCurlOptions, raySpineOptions, scaleOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
@@ -140,6 +141,7 @@ const FishDsTable = connect(
               editCellRenderer: EditCellRenderer,
               selectEditor: SelectEditor,
               numberEditor: NumberEditor,
+              floatEditor: FloatEditor,
               textEditor: TextEditor,
               suppLinkCellRenderer: SuppLinkCellRenderer
             }}
@@ -180,7 +182,7 @@ const FishDsTable = connect(
               }} 
             />
             <AgGridColumn field='length' cellEditor='numberEditor' />
-            <AgGridColumn field='weight' cellEditor='numberEditor' />
+            <AgGridColumn field='weight' cellEditor='floatEditor' />
             <AgGridColumn field='countF' headerName='Count' cellEditor='numberEditor' />
             <AgGridColumn 
               field='ftPrefix' 
