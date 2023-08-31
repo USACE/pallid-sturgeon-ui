@@ -16,8 +16,7 @@ const FloatEditor = forwardRef(({
     getValue: () => parseFloat(selectedValue) ? parseFloat(selectedValue) : 0,
     isCancelBeforeStart: () => false,
   }));
-
-  return (<Input value={parseFloat(selectedValue) ? parseFloat(selectedValue) : ''} type='number' onChange={setTest} isRequired={isRequired} />);
+  return (<Input value={parseFloat(selectedValue) !== undefined && parseFloat(selectedValue) !== null ? parseFloat(selectedValue) : ''} type='number' onChange={setTest} isRequired={isRequired} />);
 });
 
 export default FloatEditor;
