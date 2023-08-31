@@ -8,7 +8,7 @@ const FloatEditor = forwardRef(({
 }, ref) => {
   const [selectedValue, setSelectedValue] = useState(value);
 
-  const setTest = e => {
+  const setValue = e => {
     setSelectedValue(e.target.value);
   };
 
@@ -16,7 +16,7 @@ const FloatEditor = forwardRef(({
     getValue: () => parseFloat(selectedValue) ? parseFloat(selectedValue) : 0,
     isCancelBeforeStart: () => false,
   }));
-  return (<Input value={parseFloat(selectedValue) !== undefined && parseFloat(selectedValue) !== null ? parseFloat(selectedValue) : ''} type='number' onChange={setTest} isRequired={isRequired} />);
+  return (<Input value={selectedValue ? selectedValue : ''} type='number' onChange={setValue} isRequired={isRequired} />);
 });
 
 export default FloatEditor;
