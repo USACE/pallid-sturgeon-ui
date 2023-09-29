@@ -7,13 +7,13 @@ import ConfirmDelete from 'common/modals/confirmDelete';
 
 const EditCellRenderer = connect(
   'doModalOpen',
-  ({ 
+  ({
     doModalOpen,
-    api, 
-    columnApi, 
-    rowIndex, 
-    data, 
-    type, 
+    api,
+    columnApi,
+    rowIndex,
+    data,
+    type,
     setIsEditingRow
   }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -90,17 +90,17 @@ const EditCellRenderer = connect(
               icon={<Icon icon='pencil' />}
               handleClick={() => setIsEditing(true)}
             />
-            {type !== 'user' && 
-            <Button
-              isOutline
-              size='small'
-              variant='danger'
-              className='ml-1'
-              title='Delete'
-              icon={<Icon icon='trash-can-outline' />}
-              handleClick={() => doModalOpen(ConfirmDelete, { value: getType(), data: data, type: type })}
-            />}
-          </div> 
+            {type !== 'user' &&
+              <Button
+                isOutline
+                size='small'
+                variant='danger'
+                className='ml-1'
+                title='Delete'
+                icon={<Icon icon='trash-can-outline' />}
+                handleClick={() => doModalOpen(ConfirmDelete, { value: getType() ? getType() : data.id, data: data, type: type })}
+              />}
+          </div>
         )}
       </>
     );

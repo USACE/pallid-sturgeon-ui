@@ -10,6 +10,7 @@ import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import NumberEditor from 'common/gridCellEditors/numberEditor';
 import FloatEditor from 'common/gridCellEditors/floatEditor';
 import TextEditor from 'common/gridCellEditors/textEditor';
+import ConfirmDelete from 'common/modals/confirmDelete';
 
 import { baitOptions, finCurlOptions, raySpineOptions, scaleOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 import { createDropdownOptions, createMesoOptions } from 'app-pages/data-entry/helpers';
@@ -20,35 +21,38 @@ import '../../../data-summaries/data-summary.scss';
 import '../../dataentry.scss';
 
 const FishDsTable = connect(
-  'doUpdateFishDataEntry',
-  'doSaveFishDataEntry',
+  'doSubmitFishDataEntries',
+  'doResetStagedData',
+  'doUpdateStagedData',
   'doModalOpen',
-  'selectDataEntryFishData',
   'selectDomainsSpecies',
   'selectDomainsFtPrefixes',
   'selectDomainsMr',
   'selectDomainsOtolith',
   'selectDataEntryLastParams',
-  'selectUserRole',
+  'selectStagedData',
+  'selectCombinedFishData',
   ({
-    doUpdateFishDataEntry,
-    doSaveFishDataEntry,
+    doSubmitFishDataEntries,
+    doResetStagedData,
+    doUpdateStagedData,
     doModalOpen,
-    dataEntryFishData,
     domainsSpecies,
     domainsFtPrefixes,
     domainsMr,
     domainsOtolith,
     dataEntryLastParams,
-    userRole,
+    stagedData,
+    combinedFishData,
     setIsAddRow,
     setRowId,
   }) => {
     const gridRef = useRef();
-    const [ isEditingRow, setIsEditingRow ] = useState(false);
-    const lastRow = dataEntryFishData.items[dataEntryFishData.totalCount - 1];
+    const [isEditingRow, setIsEditingRow] = useState(false);
+    const [selectedRows, setSelectedRows] = useState([]);
+    const lastRow = combinedFishData[combinedFishData.length - 1];
     const initialState = {
-      mrId: dataEntryLastParams.mrId
+      mrId: dataEntryLastParams.mrId,
     };
 
     const addRow = useCallback(() => {
@@ -56,22 +60,24 @@ const FishDsTable = connect(
     }, []);
 
     const copyLastRow = () => {
-      const row = {...lastRow};
+      const row = { ...lastRow };
       if (row) {
         delete row['fid'];
         delete row['uploadedBy'];
+        row['id'] = combinedFishData.length + 1;
         gridRef.current.api.applyTransaction({ add: [row] });
+        doUpdateStagedData({ ...initialState, ...row }, 'fish');
       }
+    };
+
+    const getSelectedRows = () => {
+      setSelectedRows(gridRef.current.api.getSelectedNodes());
     };
 
     const refreshSuppLinkButtons = () => {
       gridRef.current.api.forEachNode(rowNode => {
         if (gridRef.current.api.getEditingCells().length > 0) {
-          if (rowNode.rowIndex === gridRef.current.api.getEditingCells()[0].rowIndex) {
-            rowNode.setDataValue('supplink', true);
-          } else {
-            rowNode.setDataValue('supplink', false);
-          }
+          rowNode.setDataValue('supplink', (rowNode.rowIndex === gridRef.current.api.getEditingCells()[0].rowIndex) ? true : false);
         }
       });
       gridRef.current.api.refreshCells({ columns: ['supplink'] });
@@ -86,6 +92,10 @@ const FishDsTable = connect(
       // Find row(s) user is editing and update supplink value
       refreshSuppLinkButtons();
     }, [isEditingRow]);
+
+    useEffect(() => {
+      doResetStagedData();
+    }, []);
 
     return (
       <div className='container-fluid overflow-auto'>
@@ -110,6 +120,17 @@ const FishDsTable = connect(
               icon={<Icon icon='content-copy' />}
               handleClick={copyLastRow}
             />
+            <Button
+              isOutline
+              size='small'
+              variant={selectedRows.length > 0 ? 'danger' : 'info'}
+              text={selectedRows.length > 0 ? `Delete (${selectedRows.length})` : `Submit ${stagedData.length > 0 ? `(${stagedData.length})` : ''}`}
+              className='ml-1 mt-1 btn-width'
+              icon={<Icon icon={selectedRows.length > 0 ? 'trash-can-outline' : 'content-save-outline'} />}
+              handleClick={() => {
+                selectedRows.length > 0 ? doModalOpen(ConfirmDelete, { type: 'fish', selectedData: selectedRows, setSelectedRows: setSelectedRows }) : doSubmitFishDataEntries(stagedData);
+              }}
+            />
           </div>
           <div className='col-md-3 col-xs-12'>
             <Button
@@ -127,16 +148,17 @@ const FishDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}
-            suppressClickEdit
             defaultColDef={{
               width: 100,
               editable: true,
-              lockPinned: true,
             }}
             editType='fullRow'
-            onRowValueChanged={({ data }) => !data.fid ? doSaveFishDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId, id: userRole.id }) : doUpdateFishDataEntry(data, { mrId: dataEntryLastParams.mrId, id: userRole.id })}
+            rowSelection='multiple'
+            suppressRowClickSelection={true}
+            onRowSelected={getSelectedRows}
+            onSelectionChanged={() => { }}
             rowHeight={35}
-            rowData={dataEntryFishData.items}
+            rowData={combinedFishData}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
               selectEditor: SelectEditor,
@@ -145,14 +167,22 @@ const FishDsTable = connect(
               textEditor: TextEditor,
               suppLinkCellRenderer: SuppLinkCellRenderer
             }}
+            onRowValueChanged={({ data }) => {
+              if (data.fid) {
+                doUpdateStagedData({ ...initialState, ...data }, 'fish');
+              } else if (data.id) {
+                doUpdateStagedData({ ...{ ...initialState, id: data.id }, ...data }, 'fish');
+              } else {
+                doUpdateStagedData({ ...{ ...initialState, id: Number(combinedFishData.length + 1) }, ...data }, 'fish');
+              }
+            }}
           >
+            <AgGridColumn field='' headerName='' width={50} editable={false} headerCheckboxSelection={true} checkboxSelection={true} />
             <AgGridColumn
               field='Actions'
               width={100}
-              pinned
-              lockPosition
               cellRenderer='editCellRenderer'
-              cellRendererParams={{ 
+              cellRendererParams={{
                 type: 'fish',
                 doModalOpen: doModalOpen,
                 setIsEditingRow: setIsEditingRow,
@@ -173,25 +203,25 @@ const FishDsTable = connect(
               editable={false}
             />
             <AgGridColumn field='panelHook' headerName='Panel Hook' />
-            <AgGridColumn 
-              field='species' 
-              cellEditor='selectEditor' 
-              cellEditorParams={{ 
-                options: createMesoOptions(domainsSpecies), 
-                isRequired: true 
-              }} 
+            <AgGridColumn
+              field='species'
+              cellEditor='selectEditor'
+              cellEditorParams={{
+                options: createMesoOptions(domainsSpecies),
+                isRequired: true
+              }}
             />
             <AgGridColumn field='length' cellEditor='numberEditor' />
             <AgGridColumn field='weight' cellEditor='floatEditor' />
             <AgGridColumn field='countF' headerName='Count' cellEditor='numberEditor' />
-            <AgGridColumn 
-              field='ftPrefix' 
-              headerName='FT Prefix' 
-              cellEditor='selectEditor' 
-              cellEditorParams={{ 
-                options: createMesoOptions(domainsFtPrefixes), 
-                isRequired: false 
-              }} 
+            <AgGridColumn
+              field='ftPrefix'
+              headerName='FT Prefix'
+              cellEditor='selectEditor'
+              cellEditorParams={{
+                options: createMesoOptions(domainsFtPrefixes),
+                isRequired: false
+              }}
             />
             <AgGridColumn field='mR' headerName='M/R' cellEditor='selectEditor' cellEditorParams={{ options: createMesoOptions(domainsMr), isRequired: false }} />
             <AgGridColumn field='ftnum' headerName='Floy Tag' />

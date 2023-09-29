@@ -10,12 +10,19 @@ const ConfirmDelete = connect(
   'doDeleteTelemetryDataEntry',
   'doDeleteSupplementalDataEntry',
   'doDeleteProcedureDataEntry',
+  'doDeleteStaged',
+  'doDeleteBulk',
+  'selectStagedData',
   ({
     doModalClose,
     doDeleteFishDataEntry,
     doDeleteTelemetryDataEntry,
     doDeleteSupplementalDataEntry,
     doDeleteProcedureDataEntry,
+    doDeleteStaged,
+    doDeleteBulk,
+    selectedData = [],
+    setSelectedRows = () => { },
     value,
     data,
     type
@@ -56,6 +63,36 @@ const ConfirmDelete = connect(
       }
     };
 
+    const getTypeDeleteBulk = () => {
+      switch (type) {
+        case 'fish':
+          return doDeleteFishDataEntry;
+        case 'supplemental':
+          return doDeleteSupplementalDataEntry;
+        case 'procedure':
+          return doDeleteProcedureDataEntry;
+        case 'telemetry':
+          return doDeleteTelemetryDataEntry;
+        default:
+          return <>Unknown data type.</>;
+      }
+    };
+
+    const getTypeId = () => {
+      switch (type) {
+        case 'fish':
+          return 'fid';
+        case 'supplemental':
+          return 'sid';
+        case 'procedure':
+          return 'pid';
+        case 'telemetry':
+          return 'tid';
+        default:
+          return <>Unknown data type.</>;
+      }
+    };
+
     const getTypeValue = () => {
       switch (type) {
         case 'fish' || 'telemetry':
@@ -78,15 +115,28 @@ const ConfirmDelete = connect(
           <div className='container-fluid'>
             Are you sure you want to delete?
             <div className='pt-2'>
-              <div><b>{getTypeText()}</b><i>{getTypeValue()}</i></div>
+              {/* Bulk data entry delete */}
+              {(selectedData.length > 0) ? (
+                <div>
+                  <ul>
+                    {selectedData.map(item => <li><b>{getTypeText()}</b><i>{item.data.id ? item.data.id : item.data[getTypeId()]}</i></li>)}
+                  </ul>
+                </div>
+              ) : (
+                // Delete single data entry
+                <div><b>{getTypeText()}</b><i>{getTypeValue()}</i></div>
+              )}
+              {/* Delete single user */}
               {type !== 'user' ? (
-                <div><b>Uploaded By: </b><i>{data.uploadedBy}</i></div>
+                <div>
+                  {/* <b>Uploaded By: </b><i>{data.uploadedBy}</i> */}
+                </div>
               ) : (
                 <>
                   <div><b>Email: </b><i>{data.email}</i></div>
                   <div><b>Role: </b><i>{data.role}</i></div>
                   <div><b>Office Code: </b><i>{data.officeCode}</i></div>
-                  <div><b>Project: </b><i>{data.projectCode + ' - ' + projectMap[data.projectCode] }</i></div>
+                  <div><b>Project: </b><i>{data.projectCode + ' - ' + projectMap[data.projectCode]}</i></div>
                 </>)}
             </div>
           </div>
@@ -96,7 +146,15 @@ const ConfirmDelete = connect(
           saveText='Cancel'
           onSave={() => doModalClose()}
           onDelete={() => {
-            getTypeDelete();
+            if (selectedData.length > 0) {
+              doDeleteBulk(selectedData, type, getTypeDeleteBulk());
+              setSelectedRows([]);
+            } else if (data.id) {
+              doDeleteStaged(data.id);
+              setSelectedRows([]);
+            } else {
+              getTypeDelete();
+            }
             doModalClose();
           }}
           deleteText='Delete'

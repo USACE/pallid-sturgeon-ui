@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify';
 import { tSuccess, tError, tWarning } from 'common/toast/toastHelper';
 import { queryFromObject } from 'utils';
+import { createSelector } from 'redux-bundler';
 
 export default {
   name: 'dataEntry',
@@ -27,6 +28,7 @@ export default {
       headerData: {},
       lastParams: {},
       currentTab: 0,
+      stagedData: [],
     };
 
     return (state = initialData, { type, payload }) => {
@@ -144,7 +146,10 @@ export default {
               totalCount: 0,
             }
           };
-
+        case 'RESET_STAGED_DATA':
+          return { ...state, stagedData: [] };
+        case 'UPDATE_STAGED_DATA':
+          return { ...state, stagedData: payload };
         default:
           return state;
       }
@@ -169,6 +174,9 @@ export default {
 
   selectDataEntryTelemetryData: state => state.dataEntry.telemetryData,
   selectDataEntryTelemetryTotalCount: state => state.dataEntry.telemetryData.totalCount,
+
+  selectStagedData: state => state.dataEntry.stagedData,
+  selectCombinedFishData: createSelector('selectDataEntryFishData', 'selectStagedData', (fishData, stagedData) => [...fishData.items, ...stagedData.filter(item => item.id)]),
 
   doDataEntryLoadData: () => ({ store }) => {
     store.doDomainFieldOfficesFetch();
@@ -209,6 +217,28 @@ export default {
   doSearchEffortDatasheetLoadData: (id) => ({ store }) => {
     // Load data
     store.doFetchTelemetryDataEntry({ seId: id, id: store.selectUserRole().id }, null, false);
+  },
+
+  doUpdateStagedData: (data, dataType) => ({ dispatch, store }) => {
+    let iDType;
+    switch (dataType) {
+      case 'fish':
+        iDType = 'fid';
+        break;
+      default:
+        break;
+    }
+
+    let finalArr;
+    const stagedData = [...store.selectStagedData()];
+    const index = stagedData.findIndex(item => data[iDType] ? (item[iDType] === data[iDType]) : (item.id === data.id));
+    if (index === -1) {
+      finalArr = [...store.selectStagedData(), ...[data]];
+    } else {
+      stagedData[index] = data;
+      finalArr = stagedData;
+    }
+    dispatch({ type: 'UPDATE_STAGED_DATA', payload: finalArr });
   },
 
   // DATA ENTRY FETCHES
@@ -423,6 +453,28 @@ export default {
     });
   },
 
+  doSubmitFishDataEntries: (data) => ({ dispatch, store, apiPost }) => {
+    store.doSetLoadingState(true);
+    store.doSetLoadingMessage('Submitting Fish data entries...');
+
+    const url = '/psapi/submitFishDataEntries';
+
+    apiPost(url, data, (err, _body) => {
+      if (!err) {
+        store.doSetLoadingState(false);
+        store.doSetLoadingMessage('Loading...');
+        toast.success('Fish data entries have been successfully submitted!');
+        store.doResetStagedData();
+        store.doFetchFishDataEntry({ mrId: store.selectDataEntryLastParams().mrId, id: store.selectUserRole().id });
+      } else {
+        store.doSetLoadingState(false);
+        store.doSetLoadingMessage('Loading...');
+        dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
+        toast.error('Error saving data entries. Check your field entries and please try again.');
+      }
+    });
+  },
+
   doSaveSupplementalDataEntry: (formData, params) => ({ dispatch, store, apiPost }) => {
     const toastId = toast.loading('Saving datasheet...');
 
@@ -596,19 +648,17 @@ export default {
 
   // DATA ENTRY DELETES
 
-  doDeleteFishDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
-    const toastId = toast.loading(`Deleting fish datasheet ID: ${id}...`);
-
+  doDeleteFishDataEntry: (id, multi = false) => ({ dispatch, store, apiDelete }) => {
     const url = `/psapi/fishDataEntry/${id}`;
 
     apiDelete(url, (err, _body) => {
       if (!err) {
-        tSuccess(toastId, `Fish datasheet ID: ${id} successfully deleted!`);
-        dispatch({ type: 'FISH_DATA_ENTRY_DELETE_FINISHED' });
+        multi === false && toast.success(`Fish data entry ID: ${id} successfully deleted!`);
+        dispatch({ type: 'FISH_DATA_ENTRY_DELETE_FINISHED', payload: id });
         store.doFetchFishDataEntry(store.selectDataEntryLastParams());
       } else {
         dispatch({ type: 'FISH_DATA_ENTRY_DELETE_ERROR', payload: err });
-        tError(toastId, `Error deleting fish datasheet ID: ${id}. Please try again.`);
+        toast.error(`Error deleting fish data ID: ${id}. Please try again.`);
       }
     });
   },
@@ -664,6 +714,55 @@ export default {
     });
   },
 
+  doDeleteTelemetryDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
+    const toastId = toast.loading(`Deleting telemetry datasheet ID: ${id}...`);
+
+    const url = `/psapi/telemetryDataEntry/${id}`;
+
+    apiDelete(url, (err, _body) => {
+      if (!err) {
+        tSuccess(toastId, 'Datasheet successfully deleted!');
+        dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_FINISHED' });
+        store.doFetchTelemetryDataEntry(store.selectDataEntryLastParams());
+      } else {
+        dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_ERROR', payload: err });
+        tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
+      }
+    });
+  },
+
+  doDeleteBulk: (data, type, del) => async ({ dispatch, store }) => {
+    store.doSetLoadingState(true);
+    store.doSetLoadingMessage(`Deleting ${data.length} Fish data entries...`);
+
+    let iDType;
+    switch (type) {
+      case 'fish':
+        iDType = 'fid';
+        break;
+      default:
+        break;
+    }
+
+    data.forEach(async item => {
+      await item.data.id ? store.doDeleteStaged(item.data.id) : del(item.data[iDType], true);
+    });
+
+    setTimeout(() => {
+      store.doSetLoadingState(false);
+      store.doSetLoadingMessage('Loading...');
+      toast.success('Fish data entries were successfully deleted!');
+      dispatch({ type: 'BULK_DELETE_SUCCESSFUL' });
+    }, '2000');
+  },
+
+  doDeleteStaged: (id) => ({ dispatch, store }) => {
+    const testArr = [...store.selectStagedData()];
+    const index = testArr.findIndex(item => item.id === id);
+    testArr.splice(index, 1);
+    dispatch({ type: 'UPDATE_STAGED_DATA', payload: testArr });
+  },
+
   // TABS
 
   doUpdateCurrentTab: (tab) => ({ dispatch }) => {
@@ -685,5 +784,9 @@ export default {
 
   doResetTelemetryDataEntries: () => ({ dispatch }) => {
     dispatch({ type: 'RESET_TELEMETRY_DATA_ENTRIES' });
+  },
+
+  doResetStagedData: () => ({ dispatch }) => {
+    dispatch({ type: 'RESET_STAGED_DATA' });
   }
 };
