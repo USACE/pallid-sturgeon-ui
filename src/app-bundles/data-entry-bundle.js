@@ -177,6 +177,7 @@ export default {
 
   selectStagedData: state => state.dataEntry.stagedData,
   selectCombinedFishData: createSelector('selectDataEntryFishData', 'selectStagedData', (fishData, stagedData) => [...fishData.items, ...stagedData.filter(item => item.id)]),
+  selectCombinedTelemetryData: createSelector('selectDataEntryTelemetryData', 'selectStagedData', (telemetryData, stagedData) => [...telemetryData.items, ...stagedData.filter(item => item.id)]),
 
   doDataEntryLoadData: () => ({ store }) => {
     store.doDomainFieldOfficesFetch();
@@ -224,6 +225,9 @@ export default {
     switch (dataType) {
       case 'fish':
         iDType = 'fid';
+        break;
+      case 'telemetry':
+        iDType = 'tid';
         break;
       default:
         break;
@@ -543,6 +547,28 @@ export default {
     });
   },
 
+  doSubmitTelemetryDataEntries: (data) => ({ dispatch, store, apiPost }) => {
+    store.doSetLoadingState(true);
+    store.doSetLoadingMessage('Submitting Telemetry data entries...');
+
+    const url = '/psapi/submitTelemetryDataEntries';
+
+    apiPost(url, data, (err, _body) => {
+      if (!err) {
+        store.doSetLoadingState(false);
+        store.doSetLoadingMessage('Loading...');
+        toast.success('Telemetry data entries have been successfully submitted!');
+        store.doResetStagedData();
+        store.doFetchTelemetryDataEntry({ seId: store.selectDataEntryLastParams().seId, id: store.selectUserRole().id });
+      } else {
+        store.doSetLoadingState(false);
+        store.doSetLoadingMessage('Loading...');
+        dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
+        toast.error('Error saving data entries. Check your field entries and please try again.');
+      }
+    });
+  },
+
   // DATA ENTRY UPDATES
 
   doUpdateMoRiverDataEntry: (formData) => ({ dispatch, store, apiPut }) => {
@@ -697,61 +723,45 @@ export default {
     });
   },
 
-  doDeleteTelemetryDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
-    const toastId = toast.loading(`Deleting telemetry datasheet ID: ${id}...`);
-
+  doDeleteTelemetryDataEntry: (id, multi = false) => ({ dispatch, store, apiDelete }) => {
     const url = `/psapi/telemetryDataEntry/${id}`;
 
     apiDelete(url, (err, _body) => {
       if (!err) {
-        tSuccess(toastId, 'Datasheet successfully deleted!');
+        multi === false && toast.success(`Telemetry data entry ID: ${id} successfully deleted!`);
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_FINISHED' });
         store.doFetchTelemetryDataEntry(store.selectDataEntryLastParams());
       } else {
         dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_ERROR', payload: err });
-        tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
+        toast.error(`Error deleting telemtetry data ID: ${id}. Please try again.`);
       }
     });
   },
 
-  doDeleteTelemetryDataEntry: (id) => ({ dispatch, store, apiDelete }) => {
-    const toastId = toast.loading(`Deleting telemetry datasheet ID: ${id}...`);
-
-    const url = `/psapi/telemetryDataEntry/${id}`;
-
-    apiDelete(url, (err, _body) => {
-      if (!err) {
-        tSuccess(toastId, 'Datasheet successfully deleted!');
-        dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_FINISHED' });
-        store.doFetchTelemetryDataEntry(store.selectDataEntryLastParams());
-      } else {
-        dispatch({ type: 'TELEMETRY_DATA_ENTRY_DELETE_ERROR', payload: err });
-        tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
-      }
-    });
-  },
-
-  doDeleteBulk: (data, type, del) => async ({ dispatch, store }) => {
+  doDeleteBulk: (data, type, typeIDName) => async ({ dispatch, store }) => {
     store.doSetLoadingState(true);
-    store.doSetLoadingMessage(`Deleting ${data.length} Fish data entries...`);
+    store.doSetLoadingMessage(`Deleting ${data.length} ${type} data entries...`);
 
-    let iDType;
-    switch (type) {
-      case 'fish':
-        iDType = 'fid';
-        break;
-      default:
-        break;
-    }
-
-    data.forEach(async item => {
-      await item.data.id ? store.doDeleteStaged(item.data.id) : del(item.data[iDType], true);
+    data.forEach(item => {
+      if (item.data.id) {
+        store.doDeleteStaged(item.data.id);
+      } else {
+        switch (type) {
+          case 'fish':
+            store.doDeleteFishDataEntry(item.data[typeIDName], true);
+            break;
+          case 'telemetry':
+            store.doDeleteTelemetryDataEntry(item.data[typeIDName], true);
+          default:
+            console.log('UNKNOWN DATATYPE');
+        }
+      }
     });
 
     setTimeout(() => {
       store.doSetLoadingState(false);
       store.doSetLoadingMessage('Loading...');
-      toast.success('Fish data entries were successfully deleted!');
+      toast.success(`${type} data entries were successfully deleted!`);
       dispatch({ type: 'BULK_DELETE_SUCCESSFUL' });
     }, '2000');
   },

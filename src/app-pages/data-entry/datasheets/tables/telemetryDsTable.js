@@ -1,9 +1,10 @@
-import React, { useRef, useCallback } from 'react';
+import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 
 import Button from 'app-components/button';
 import Icon from 'app-components/icon';
+import ConfirmDelete from 'common/modals/confirmDelete';
 
 import EditCellRenderer from 'common/gridCellRenderers/editCellRenderer';
 import SelectEditor from 'common/gridCellEditors/selectEditor';
@@ -25,22 +26,31 @@ import '../../dataentry.scss';
 const TelemetryDsTable = connect(
   'doModalOpen',
   'doSaveTelemetryDataEntry',
+  'doSubmitTelemetryDataEntries',
+  'doResetStagedData',
+  'doUpdateStagedData',
   'doUpdateTelemetryDataEntry',
   'selectDataEntryTelemetryData',
   'selectDataEntryLastParams',
   'selectUserRole',
+  'selectCombinedTelemetryData',
+  'selectStagedData',
   ({
     doModalOpen,
     doSaveTelemetryDataEntry,
+    doSubmitTelemetryDataEntries,
+    doResetStagedData,
+    doUpdateStagedData,
     doUpdateTelemetryDataEntry,
     dataEntryTelemetryData,
     dataEntryLastParams,
-    userRole
+    userRole,
+    combinedTelemetryData,
+    stagedData
   }) => {
-    const { items } = dataEntryTelemetryData;
     const gridRef = useRef();
-
-    const lastRow = dataEntryTelemetryData.items[dataEntryTelemetryData.totalCount - 1];
+    const [selectedRows, setSelectedRows] = useState([]);
+    const lastRow = combinedTelemetryData[combinedTelemetryData.length - 1];
     const initialState = {
       seId: dataEntryLastParams.seId
     };
@@ -50,14 +60,24 @@ const TelemetryDsTable = connect(
     }, []);
 
     const copyLastRow = () => {
-      const row = {...lastRow};
+      const row = { ...lastRow };
       if (row) {
         delete row['tId'];
         delete row['uploadedBy'];
+        row['id'] = combinedTelemetryData.length + 1;
         gridRef.current.api.applyTransaction({ add: [row] });
+        doUpdateStagedData({ ...initialState, ...row }, 'telemetry');
       }
     };
-    
+
+    const getSelectedRows = () => {
+      setSelectedRows(gridRef.current.api.getSelectedNodes());
+    };
+
+    useEffect(() => {
+      doResetStagedData();
+    }, []);
+
     return (
       <div className='container-fluid overflow-auto'>
         <Row>
@@ -81,6 +101,18 @@ const TelemetryDsTable = connect(
               icon={<Icon icon='content-copy' />}
               handleClick={copyLastRow}
             />
+            <Button
+              isOutline
+              size='small'
+              variant={selectedRows.length > 0 ? 'danger' : 'info'}
+              text={selectedRows.length > 0 ? `Delete (${selectedRows.length})` : `Submit ${stagedData.length > 0 ? `(${stagedData.length})` : ''}`}
+              className='ml-1 mt-1 btn-width'
+              icon={<Icon icon={selectedRows.length > 0 ? 'trash-can-outline' : 'content-save-outline'} />}
+              handleClick={() => {
+                selectedRows.length > 0 ? doModalOpen(ConfirmDelete, { type: 'telemetry', selectedData: selectedRows, setSelectedRows: setSelectedRows }) : doSubmitTelemetryDataEntries(stagedData);
+              }}
+              isDisabled={selectedRows.length === 0 && stagedData.length === 0}
+            />
           </div>
           <div className='col-md-3 col-xs-12'>
             <Button
@@ -98,16 +130,16 @@ const TelemetryDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}
-            suppressClickEdit
             defaultColDef={{
               width: 100,
               editable: true,
-              lockPinned: true,
             }}
             editType='fullRow'
-            onRowValueChanged={({ data }) => !data.tId ? doSaveTelemetryDataEntry({...initialState ,...data}, { seId: dataEntryLastParams.seId, id: userRole.id }) : doUpdateTelemetryDataEntry(data, { seId: dataEntryLastParams.seId, id: userRole.id })}
+            rowSelection='multiple'
+            suppressRowClickSelection={true}
+            onRowSelected={getSelectedRows}
             rowHeight={35}
-            rowData={items}
+            rowData={combinedTelemetryData}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
               selectEditor: SelectEditor,
@@ -115,30 +147,39 @@ const TelemetryDsTable = connect(
               textEditor: TextEditor,
               floatEditor: FloatEditor,
             }}
+            // onRowValueChanged={({ data }) => !data.tId ? doSaveTelemetryDataEntry({ ...initialState, ...data }, { seId: dataEntryLastParams.seId, id: userRole.id }) : doUpdateTelemetryDataEntry(data, { seId: dataEntryLastParams.seId, id: userRole.id })}
+            onRowValueChanged={({ data }) => {
+              if (data.fid) {
+                doUpdateStagedData({ ...initialState, ...data }, 'telemetry');
+              } else if (data.id) {
+                doUpdateStagedData({ ...{ ...initialState, id: data.id }, ...data }, 'telemetry');
+              } else {
+                doUpdateStagedData({ ...{ ...initialState, id: Number(combinedTelemetryData.length + 1) }, ...data }, 'telemetry');
+              }
+            }}
           >
+            <AgGridColumn field='' headerName='' width={50} editable={false} headerCheckboxSelection={true} checkboxSelection={true} />
             <AgGridColumn
               field='Actions'
               width={100}
-              pinned
-              lockPosition
               cellRenderer='editCellRenderer'
-              cellRendererParams={{ 
+              cellRendererParams={{
                 type: 'telemetry',
                 doModalOpen: doModalOpen,
               }}
               editable={false}
             />
-            <AgGridColumn 
-              field='tId' 
-              headerName='T ID' 
-              sortable 
-              unSortIcon 
+            <AgGridColumn
+              field='tId'
+              headerName='T ID'
+              sortable
+              unSortIcon
               editable={false}
             />
             <AgGridColumn field='tFid' sortable unSortIcon />
             <AgGridColumn field='bend' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='radioTagNum' headerName='Radio Tag #' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} width={125} sortable unSortIcon />
-            <AgGridColumn field='frequencyIdCode' headerName='Frequency Id' cellEditor='selectEditor' cellEditorParams={{  options: frequencyIdOptions, type: 'number', isRequired: true }} width={125} sortable unSortIcon />
+            <AgGridColumn field='frequencyIdCode' headerName='Frequency Id' cellEditor='selectEditor' cellEditorParams={{ options: frequencyIdOptions, type: 'number', isRequired: true }} width={125} sortable unSortIcon />
             <AgGridColumn field='captureDate' headerName='Capture Time' width={125} sortable unSortIcon />
             <AgGridColumn field='captureLatitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} width={150} sortable unSortIcon />
             <AgGridColumn field='captureLongitude' cellEditor='floatEditor' cellEditorParams={{ isRequired: true }} width={150} sortable unSortIcon />

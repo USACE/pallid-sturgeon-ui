@@ -130,6 +130,7 @@ const FishDsTable = connect(
               handleClick={() => {
                 selectedRows.length > 0 ? doModalOpen(ConfirmDelete, { type: 'fish', selectedData: selectedRows, setSelectedRows: setSelectedRows }) : doSubmitFishDataEntries(stagedData);
               }}
+              isDisabled={selectedRows.length === 0 && stagedData.length === 0}
             />
           </div>
           <div className='col-md-3 col-xs-12'>
@@ -156,7 +157,6 @@ const FishDsTable = connect(
             rowSelection='multiple'
             suppressRowClickSelection={true}
             onRowSelected={getSelectedRows}
-            onSelectionChanged={() => { }}
             rowHeight={35}
             rowData={combinedFishData}
             frameworkComponents={{

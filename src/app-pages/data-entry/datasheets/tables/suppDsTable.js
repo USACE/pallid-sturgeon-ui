@@ -36,9 +36,8 @@ const SuppDsTable = connect(
     setRowId,
   }) => {
     const gridRef = useRef();
-    const [ isEditingRow, setIsEditingRow ] = useState(false);
+    const [isEditingRow, setIsEditingRow] = useState(false);
     const { items } = dataEntrySupplemental;
-
     const initialState = {
       mrId: dataEntryLastParams.mrId
     };
@@ -85,21 +84,20 @@ const SuppDsTable = connect(
           text='Export as CSV'
           icon={<Icon icon='download' />}
           isDisabled
-          // handleClick={() => doFetchAllDatasheet('search-datasheet')}
+        // handleClick={() => doFetchAllDatasheet('search-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             ref={gridRef}
-            suppressClickEdit
-            rowHeight={35}
-            rowData={items}
             defaultColDef={{
               width: 100,
               editable: true,
-              lockPinned: true,
             }}
             editType='fullRow'
-            onRowValueChanged={({ data }) => !data.sid ? doSaveSupplementalDataEntry({...initialState ,...data}, { mrId: dataEntryLastParams.mrId, id: userRole.id }) : doUpdateSupplementalDataEntry(data, { mrId: dataEntryLastParams.mrId, id: userRole.id })}
+            suppressRowClickSelection={true}
+            rowHeight={35}
+            rowData={items}
+            onRowValueChanged={({ data }) => !data.sid ? doSaveSupplementalDataEntry({ ...initialState, ...data }, { mrId: dataEntryLastParams.mrId, id: userRole.id }) : doUpdateSupplementalDataEntry(data, { mrId: dataEntryLastParams.mrId, id: userRole.id })}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
               procLinkCellRenderer: ProcLinkCellRenderer,
@@ -111,10 +109,8 @@ const SuppDsTable = connect(
             <AgGridColumn
               field='Actions'
               width={100}
-              pinned
-              lockPosition
               cellRenderer='editCellRenderer'
-              cellRendererParams={{ 
+              cellRendererParams={{
                 type: 'supplemental',
                 doModalOpen: doModalOpen,
                 setIsEditingRow: setIsEditingRow,
@@ -125,11 +121,11 @@ const SuppDsTable = connect(
             <AgGridColumn field='fid' headerName='Fish ID' editable={false} sortable unSortIcon />
             <AgGridColumn field='complete' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
             <AgGridColumn field='fFid' cellEditor='textEditor' resizable sortable unSortIcon />
-            <AgGridColumn 
-              field='proclink' 
-              headerName='Proc Link' 
-              width={130} 
-              cellRenderer='procLinkCellRenderer' 
+            <AgGridColumn
+              field='proclink'
+              headerName='Proc Link'
+              width={130}
+              cellRenderer='procLinkCellRenderer'
               cellRendererParams={{
                 setIsAddRow: setIsAddRow,
                 setRowId: setRowId,

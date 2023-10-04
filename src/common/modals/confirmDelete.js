@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import { ModalContent, ModalFooter, ModalHeader } from 'app-components/modal';
@@ -12,7 +12,6 @@ const ConfirmDelete = connect(
   'doDeleteProcedureDataEntry',
   'doDeleteStaged',
   'doDeleteBulk',
-  'selectStagedData',
   ({
     doModalClose,
     doDeleteFishDataEntry,
@@ -27,24 +26,48 @@ const ConfirmDelete = connect(
     data,
     type
   }) => {
-    const getTypeText = () => {
+    const [staticText, setStaticText] = useState('');
+    const [typeIDName, setTypeIDName] = useState(null);
+    const [typeValue, setTypeValue] = useState(null);
+
+    const isBulk = selectedData.length === 1;
+
+    const getTypeValues = () => {
       switch (type) {
         case 'missouriRiver':
-          return <>Missouri River Data Entry ID: </>;
+          setStaticText('Missouri River Data Entry ID: ');
+          break;
         case 'fish':
-          return <>Fish Data Entry ID: </>;
+          setStaticText('Fish Data Entry ID: ');
+          setTypeIDName('fid');
+          isBulk && setTypeValue(selectedData[0].data.id ? selectedData[0].data.id : selectedData[0].data[typeIDName]);
+          value && setTypeValue(value);
+          break;
         case 'supplemental':
-          return <>Supplemental Data Entry ID: </>;
+          setStaticText('Supplemental Data Entry ID: ');
+          setTypeIDName('sid');
+          setTypeValue(data.sid);
+          break;
         case 'searchEffort':
-          return <>Search Effort Data Entry ID: </>;
+          setStaticText('Search Effort Data Entry ID: ');
+          break;
         case 'telemetry':
-          return <>Telemetry Data Entry ID: </>;
+          setStaticText('Telemetry Data Entry ID: ');
+          setTypeIDName('tId');
+          isBulk && setTypeValue(selectedData[0].data.id ? selectedData[0].data.id : selectedData[0].data[typeIDName]);
+          value && setTypeValue(value);
+          break;
         case 'procedure':
-          return <>Procedure Data Entry ID: </>;
+          setStaticText('Procedure Data Entry ID: ');
+          setTypeIDName('pid');
+          setTypeValue(data.id);
+          break;
         case 'user':
-          return <>User: </>;
+          setStaticText('User: ');
+          break;
         default:
-          return <>Unknown data type.</>;
+          console.log('UNKNOWN DATATYPE');
+          break;
       }
     };
 
@@ -59,54 +82,14 @@ const ConfirmDelete = connect(
         case 'telemetry':
           return doDeleteTelemetryDataEntry(value);
         default:
-          return <>Unknown data type.</>;
+          console.log('UNKNOWN DATATYPE');
+          break;
       }
     };
 
-    const getTypeDeleteBulk = () => {
-      switch (type) {
-        case 'fish':
-          return doDeleteFishDataEntry;
-        case 'supplemental':
-          return doDeleteSupplementalDataEntry;
-        case 'procedure':
-          return doDeleteProcedureDataEntry;
-        case 'telemetry':
-          return doDeleteTelemetryDataEntry;
-        default:
-          return <>Unknown data type.</>;
-      }
-    };
-
-    const getTypeId = () => {
-      switch (type) {
-        case 'fish':
-          return 'fid';
-        case 'supplemental':
-          return 'sid';
-        case 'procedure':
-          return 'pid';
-        case 'telemetry':
-          return 'tid';
-        default:
-          return <>Unknown data type.</>;
-      }
-    };
-
-    const getTypeValue = () => {
-      switch (type) {
-        case 'fish' || 'telemetry':
-          return value;
-        case 'supplemental':
-          return data.sid;
-        case 'procedure':
-          return data.id;
-        case 'user':
-          return data.firstName + ' ' + data.lastName;
-        default:
-          return <>Unknown data type.</>;
-      }
-    };
+    useEffect(() => {
+      getTypeValues();
+    }, []);
 
     return (
       <ModalContent>
@@ -119,12 +102,12 @@ const ConfirmDelete = connect(
               {(selectedData.length > 0) ? (
                 <div>
                   <ul>
-                    {selectedData.map(item => <li><b>{getTypeText()}</b><i>{item.data.id ? item.data.id : item.data[getTypeId()]}</i></li>)}
+                    {selectedData.map((item, index) => <li key={index}><b>{staticText}</b><i>{item.data.id ? item.data.id : item.data[typeIDName]}</i></li>)}
                   </ul>
                 </div>
               ) : (
                 // Delete single data entry
-                <div><b>{getTypeText()}</b><i>{getTypeValue()}</i></div>
+                <div><b>{staticText}</b><i>{typeValue}</i></div>
               )}
               {/* Delete single user */}
               {type !== 'user' ? (
@@ -147,7 +130,7 @@ const ConfirmDelete = connect(
           onSave={() => doModalClose()}
           onDelete={() => {
             if (selectedData.length > 0) {
-              doDeleteBulk(selectedData, type, getTypeDeleteBulk());
+              doDeleteBulk(selectedData, type, typeIDName);
               setSelectedRows([]);
             } else if (data.id) {
               doDeleteStaged(data.id);
