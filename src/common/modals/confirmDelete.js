@@ -12,6 +12,7 @@ const ConfirmDelete = connect(
   'doDeleteProcedureDataEntry',
   'doDeleteStaged',
   'doDeleteBulk',
+  'selectStagedData',
   ({
     doModalClose,
     doDeleteFishDataEntry,
@@ -20,6 +21,7 @@ const ConfirmDelete = connect(
     doDeleteProcedureDataEntry,
     doDeleteStaged,
     doDeleteBulk,
+    stagedData,
     selectedData = [],
     setSelectedRows = () => { },
     value,
@@ -132,7 +134,7 @@ const ConfirmDelete = connect(
             if (selectedData.length > 0) {
               doDeleteBulk(selectedData, type, typeIDName);
               setSelectedRows([]);
-            } else if (data.id) {
+            } else if (data.id && stagedData.length > 0) {
               doDeleteStaged(data.id);
               setSelectedRows([]);
             } else {
