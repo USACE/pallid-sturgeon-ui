@@ -8,9 +8,11 @@ import DragInput from 'app-components/drag-input';
 import Select from 'app-components/select';
 
 import { keyAsText } from 'utils';
-import { getIsRequired, reduceCsvState,  formatAsNumber, formatJsonKey } from './helper';
+import { getIsRequired, reduceCsvState, formatAsNumber, formatJsonKey } from './helper';
 
 import './dataupload.scss';
+
+const sizeof = require('object-sizeof');
 
 export default connect(
   'doFetchUploadSessionLogs',
@@ -53,18 +55,37 @@ export default connect(
         [key]: file,
       });
 
+      console.log('file: ', file);
+
       if (file) {
         Papa.parse(file, {
-          complete: result => dispatch({ type: 'update', key, data: result.data }),
-          transformHeader: formatJsonKey,
-          transform: formatAsNumber,
+          complete: result => {
+            const data = result.data;
+            const newHeaders = updateHeaderNames(result.data[0]);
+            data[0] = newHeaders;
+            dispatch({ type: 'update', key, data: data });
+          },
           skipEmptyLines: true,
-          header: true,
+          dynamicTyping: header => formatting(header, key)
         });
       } else {
         dispatch({ type: 'update', key, data: null });
       }
     };
+
+    const formatting = (header, key) => {
+      let keepAsString = [];;
+      switch (key) {
+        case 'missouriRiverFile':
+          keepAsString = [1, 2, 4, 5, 8, 9, 10, 11, 19, 20, 21, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 43, 58, 64, 65, 66];
+        default:
+          keepAsString = [];
+      }
+
+      return keepAsString.includes(header) ? false : true;
+    };
+
+    const updateHeaderNames = arr => arr.map((item, i) => formatJsonKey(item, i));
 
     const submitIsDisabled = () => {
       let isDisabled = false;
@@ -152,9 +173,9 @@ export default connect(
                 <div>{`Date Created: ${uploadLogs[0].dateCreated.split('T')[0]}`}</div>
                 {uploadLogs.map((log, index) => (
                   <div key={index} className='text log'>{log.debugText}</div>
-                ))} 
+                ))}
               </>)
-              : <div className='text'>No logs to report</div> }
+              : <div className='text'>No logs to report</div>}
           </Card.Body>
         </Card>
       </div>

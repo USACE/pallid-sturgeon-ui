@@ -1,7 +1,7 @@
 import { isNumeric } from 'utils';
 
 export const getIsRequired = (key, files) => {
-  switch(key) {
+  switch (key) {
     case 'searchEffortFile':
       return !!files['telemetryFishFile'];
     case 'missouriRiverFile':
@@ -41,8 +41,8 @@ export const formatJsonKey = (key = '', _index) => {
 };
 
 export const formatAsNumber = (value, _header) => {
-  const keepAString = ['sitefid','mrfid','season','setdate','subsamplen','recorder','gear','geartype','structurenumber','usgs','riverstage','u1','u2','u3','u4','u5','u6','u7','macro','meso','habitatrn','qc','micro_structure','microstructure','structureflow','structure_mod','structuremod','setsite1','setsite2','setsite3','starttime','stoptime','watervel','comments','checkby','noturbidity','novelocity','editinitials','lasteditcomment','floytag','fieldoffice','panelhook', 'tagnumber', 'gonadcondition','procedurestarttime','procedureendtime','visualreprostatus','ultrasoundreprostatus', 'othertaginfo', 'dststarttime'];
-  if (typeof value === 'string' && value.length === 0){
+  const keepAString = ['sitefid', 'mrfid', 'season', 'setdate', 'subsamplen', 'recorder', 'gear', 'geartype', 'structurenumber', 'usgs', 'riverstage', 'u1', 'u2', 'u3', 'u4', 'u5', 'u6', 'u7', 'macro', 'meso', 'habitatrn', 'qc', 'micro_structure', 'microstructure', 'structureflow', 'structure_mod', 'structuremod', 'setsite1', 'setsite2', 'setsite3', 'starttime', 'stoptime', 'watervel', 'comments', 'checkby', 'noturbidity', 'novelocity', 'editinitials', 'lasteditcomment', 'floytag', 'fieldoffice', 'panelhook', 'tagnumber', 'gonadcondition', 'procedurestarttime', 'procedureendtime', 'visualreprostatus', 'ultrasoundreprostatus', 'othertaginfo', 'dststarttime'];
+  if (typeof value === 'string' && value.length === 0) {
     return null;
   } else if (isNumeric(value) && keepAString.indexOf(_header.toLowerCase()) === -1) {
     return Number(value);
