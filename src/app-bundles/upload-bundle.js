@@ -2,6 +2,26 @@ import { toast } from 'react-toastify';
 import { tSuccess, tError } from 'common/toast/toastHelper';
 import { queryFromObject } from 'utils';
 
+const processResponse = (response, type) => (
+  new Promise((resolve, reject) => {
+    const func = response.status < 400 ? resolve : reject;
+    // @TODO: handle different response types
+    type === 'json' ?
+      response.json()
+        .then(json => func({
+          'status': response.status,
+          'json': json,
+        }))
+        .catch(e => console.error(e)) :
+      response.blob()
+        .then(blob => func({
+          'status': response.status,
+          'blob': blob,
+        }))
+        .catch(e => console.error(e));
+  })
+);
+
 export default {
   name: 'upload',
   getReducer: () => {
@@ -31,47 +51,40 @@ export default {
   selectUploadLogs: state => state.upload.logs,
   selectUploadData: state => state.upload.data,
 
-  doUploadAllFiles: (params) => ({ dispatch, apiPost, store }) => {
+  doUploadAllFiles: (files, version, recorder) => ({ dispatch, apiFetch, store }) => {
     dispatch({ type: 'UPLOAD_FILES_START' });
     const toastId = toast.loading('Uploading files, please wait...');
 
-    const { files, data, recorder } = params;
-    const {
-      siteFile          = null,
-      searchEffortFile  = null,
-      telemetryFishFile = null,
-      missouriRiverFile = null,
-      fishFile          = null,
-      supplementalFile  = null,
-      proceduresFile    = null,
-    } = data;
-
     const url = '/psapi/upload';
-    const payload = {
-      editInitials: recorder,
-      ...siteFile           && { siteUpload:          { uploadFilename: files.siteFile.name,          items: siteFile }},
-      ...searchEffortFile   && { searchUpload:        { uploadFilename: files.searchEffortFile.name,  items: searchEffortFile }},
-      ...telemetryFishFile  && { telemetryUpload:     { uploadFilename: files.telemetryFishFile.name, items: telemetryFishFile }},
-      ...missouriRiverFile  && { moriverUpload:       { uploadFilename: files.missouriRiverFile.name, items: missouriRiverFile }},
-      ...fishFile           && { fishUpload:          { uploadFilename: files.fishFile.name,          items: fishFile }},
-      ...supplementalFile   && { supplementalUpload:  { uploadFilename: files.supplementalFile.name,  items: supplementalFile }},
-      ...proceduresFile     && { procedureUpload:     { uploadFilename: files.proceduresFile.name,    items: proceduresFile }},
-    };
 
-    apiPost(url, payload, (err, _body) => {
-      if (!err) {
-        dispatch({
-          type: 'UPDATE_UPLOAD',
-          payload: _body,
-        });
-        dispatch({ type: 'UPLOAD_FILES_FINISHED' });
-        tSuccess(toastId, 'Successfully uploaded all files!');
-        store.doFetchUploadSessionLogs({ uploadSessionId: _body.uploadSessionId});
-      } else {
-        dispatch({ type: 'UPLOAD_FILES_ERROR', payload: err });
-        tError(toastId, 'Failed to upload files. Please verify file formats and try again.');
-      }
-    });
+    var data = new FormData();
+    data.append('editInitials', recorder);
+    data.append('version', version);
+    for (let key in files) {
+      files[key] && data.append('files', files[key]);
+    }
+    // PRINTING FORMDATA
+    // for (var pair of data.entries()) {
+    //   console.log(pair);
+    // }
+
+    apiFetch(url, { method: 'POST', body: data })
+      .then(response => processResponse(response, 'json'))
+      .then(response => {
+        if (response.json.status === 'Success') {
+          dispatch({ type: 'UPDATE_UPLOAD', payload: body });
+          dispatch({ type: 'UPLOAD_FILES_FINISHED' });
+          tSuccess(toastId, 'Successfully uploaded all files!');
+          store.doFetchUploadSessionLogs({ uploadSessionId: body.uploadSessionId });
+        } else {
+          dispatch({ type: 'UPLOAD_FILES_ERROR', payload: err });
+          tError(toastId, 'Failed to upload files. Please verify file formats and try again.');
+        }
+      })
+      .catch(e => {
+        dispatch({ type: 'UPLOAD_FILE_ERROR' });
+        console.error(`Request returned a ${e.status}`);
+      });
   },
 
   doFetchUploadSessionLogs: (params) => ({ dispatch, apiGet }) => {
