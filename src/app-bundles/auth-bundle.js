@@ -172,7 +172,7 @@ export default {
 
   selectAuthData: state => state.auth.authData,
 
-  selectUserRole: state => state.auth.authData.role,
+  selectUserRole: state => state.auth?.authData?.role,
 
   selectInitOptions: state => state.auth.initOptions,
 
