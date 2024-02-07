@@ -8,7 +8,7 @@ import DragInput from 'app-components/drag-input';
 import Select from 'app-components/select';
 
 import { keyAsText } from 'utils';
-import { getIsRequired, reduceCsvState,  formatAsNumber, formatJsonKey } from './helper';
+import { getIsRequired, reduceCsvState, formatAsNumber, formatJsonKey } from './helper';
 
 import './dataupload.scss';
 
@@ -52,18 +52,6 @@ export default connect(
         ...files,
         [key]: file,
       });
-
-      if (file) {
-        Papa.parse(file, {
-          complete: result => dispatch({ type: 'update', key, data: result.data }),
-          transformHeader: formatJsonKey,
-          transform: formatAsNumber,
-          skipEmptyLines: true,
-          header: true,
-        });
-      } else {
-        dispatch({ type: 'update', key, data: null });
-      }
     };
 
     const submitIsDisabled = () => {
@@ -79,12 +67,14 @@ export default connect(
     };
 
     const uploadAllFiles = () => {
-      doUploadAllFiles({ files, data: csvData, version, recorder });
+      doUploadAllFiles(files, version, recorder);
     };
 
     useEffect(() => {
       doFetchUploadSessionLogs();
     }, []);
+
+    console.log('files: ', files);
 
     return (
       <div className='container-fluid w-75'>
@@ -96,7 +86,7 @@ export default connect(
               <Select
                 className='w-25 d-inline-block mb-1 mr-4'
                 onChange={value => setVersion(value)}
-                defaultOption={{ value: '4.2.1' }}
+                defaultOption={'4.2.1'}
                 options={[
                   { value: '4.2.1' },
                   { value: '4.1.3' },
@@ -152,9 +142,9 @@ export default connect(
                 <div>{`Date Created: ${uploadLogs[0].dateCreated.split('T')[0]}`}</div>
                 {uploadLogs.map((log, index) => (
                   <div key={index} className='text log'>{log.debugText}</div>
-                ))} 
+                ))}
               </>)
-              : <div className='text'>No logs to report</div> }
+              : <div className='text'>No logs to report</div>}
           </Card.Body>
         </Card>
       </div>
