@@ -11,6 +11,7 @@ export default connect(
   ({
     doDataEntryLoadData,
   }) => {
+    // Populate search filters
     useEffect(() => {
       doDataEntryLoadData();
     }, []);

@@ -76,19 +76,19 @@ const SitesFormModal = connect(
     };
 
     const handleSelect = (field, val) => {
-      if (field==='segmentId') {
+      if (field === 'segmentId') {
         setSegment(val);
       }
-      if (field==='fieldoffice') {
+      if (field === 'fieldoffice') {
         setOffice(val);
       }
-      if (field==='bend') {
+      if (field === 'bend') {
         setBend(val);
       }
-      if (field==='projectId') {
+      if (field === 'projectId') {
         setProject(val);
       }
-      if (field==='sampleUnitType') {
+      if (field === 'sampleUnitType') {
         setSampleUnitType(val);
       }
       dispatch({
@@ -152,13 +152,13 @@ const SitesFormModal = connect(
       clearSegments();
       clearSampleUnit();
       if (office && project) {
-        doDomainSegmentsFetch({ office: office, project: project });
+        doDomainSegmentsFetch();
       }
     }, [office, project]);
 
     useEffect(() => {
-      doDomainSeasonsFetch({ project: project });
-    }, [project]);
+      doDomainSeasonsFetch();
+    }, []);
 
     return (
       <ModalContent size='lg'>
@@ -206,7 +206,7 @@ const SitesFormModal = connect(
                   options={createDropdownOptions(projects)}
                   isLoading={projects && (projects.length === 0)}
                   isDisabled={user ? (user.role !== 'ADMINISTRATOR') : false}
-                  isRequired                
+                  isRequired
                 />
               </div>
             </Row>
