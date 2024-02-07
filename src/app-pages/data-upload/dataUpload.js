@@ -52,6 +52,18 @@ export default connect(
         ...files,
         [key]: file,
       });
+
+      if (file) {
+        Papa.parse(file, {
+          complete: result => dispatch({ type: 'update', key, data: result.data }),
+          transformHeader: formatJsonKey,
+          transform: formatAsNumber,
+          skipEmptyLines: true,
+          header: true,
+        });
+      } else {
+        dispatch({ type: 'update', key, data: null });
+      }
     };
 
     const submitIsDisabled = () => {
@@ -67,14 +79,12 @@ export default connect(
     };
 
     const uploadAllFiles = () => {
-      doUploadAllFiles(files, version, recorder);
+      doUploadAllFiles({ files, data: csvData, version, recorder });
     };
 
     useEffect(() => {
       doFetchUploadSessionLogs();
     }, []);
-
-    console.log('files: ', files);
 
     return (
       <div className='container-fluid w-75'>
@@ -86,7 +96,7 @@ export default connect(
               <Select
                 className='w-25 d-inline-block mb-1 mr-4'
                 onChange={value => setVersion(value)}
-                defaultOption={'4.2.1'}
+                defaultOption={{ value: '4.2.1' }}
                 options={[
                   { value: '4.2.1' },
                   { value: '4.1.3' },
