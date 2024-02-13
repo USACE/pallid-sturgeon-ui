@@ -6,7 +6,7 @@ const keycloakClient = process.env.REACT_APP_KEYCLOAK_CLIENT;
 
 let keycloak = null;
 
-export default {
+const createAuthBundle = options => ({
   name: 'auth',
 
   getReducer: () => {
@@ -59,7 +59,7 @@ export default {
         store.doFetchAuthRoles(token);
       },
       onRedirect: (sessionState) => {
-        store.doSessionStateUpdate(sessionState);
+        // store.doSessionStateUpdate(sessionState);
       },
       onError: (err) => {
         console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
@@ -177,4 +177,6 @@ export default {
   selectInitOptions: state => state.auth.initOptions,
 
   selectAuthRoles: state => state.auth.roles,
-}; 
+});
+
+export default createAuthBundle;
