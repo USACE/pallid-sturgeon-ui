@@ -124,12 +124,17 @@ export default {
   },
 
   doSetSitesPagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
-    dispatch({ type: 'SET_SITES_PAGINATION', payload: { pageSize, pageNumber }});
+    dispatch({ type: 'SET_SITES_PAGINATION', payload: { pageSize, pageNumber } });
     store.doSitesFetch();
   },
 
-  doUpdateSiteParams: (params) => ({ dispatch, store }) => {
-    dispatch({ type: 'UPDATE_SITE_PARAMS', payload: params });
+  doUpdateSiteParams: (searchParams) => ({ dispatch, store }) => {
+    const paramObj = {
+      id: store.selectUserRole()?.id,
+      project: store.selectUserRole()?.projectCode
+    };
+
+    dispatch({ type: 'UPDATE_SITE_PARAMS', payload: { ...searchParams, ...paramObj } });
     store.doSitesFetch();
   },
 };

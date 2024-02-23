@@ -38,8 +38,8 @@ const SitesList = connect(
   }) => {
     const { projects, seasons, bends, segments } = domains;
 
-    const [yearFilter, setYearFilter] = useState('2023');
-    const [projectFilter, setProjectFilter] = useState('');
+    const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
+    const [projectFilter, setProjectFilter] = useState(userRole?.projectCode);
     const [seasonFilter, setSeasonFilter] = useState('');
 
     const [bendFilter, setBendFilter] = useState('');
@@ -63,30 +63,24 @@ const SitesList = connect(
     };
 
     useEffect(() => {
-      const params = {
+      const searchParams = {
         year: yearFilter,
         bendrn: bendValue,
         seasonCode: seasonFilter,
         segmentCode: segmentValue,
-        projectCode: projectFilter,
-        id: userRole.id,
       };
-      doUpdateSiteParams(params);
-    }, [yearFilter, bendValue, seasonFilter, segmentValue, projectFilter]);
+      doUpdateSiteParams(searchParams);
+    }, [yearFilter, bendValue, seasonFilter, segmentValue]);
 
+    // Load data
     useEffect(() => {
-      if (userRole.officeCode) {
-        doDomainSegmentsFetch({ office: userRole.officeCode });
-      }
+      doDomainSegmentsFetch();
+      doDomainSeasonsFetch();
     }, []);
 
     // useEffect(() => {
     //   doDomainBendsFetch({ segment: segmentValue });
     // }, [segmentValue]);
-
-    useEffect(() => {
-      doDomainSeasonsFetch({ project: projectFilter });
-    }, [projectFilter]);
 
     return (
       <>
@@ -97,7 +91,7 @@ const SitesList = connect(
               placeholderText='Select year...'
               onChange={value => setYearFilter(value)}
               value={yearFilter}
-              defaultOption='2023'
+              defaultOption={new Date().getFullYear()}
               options={dropdownYearsToNow(2011)}
             />
           </div>
@@ -122,13 +116,14 @@ const SitesList = connect(
           <div className='col-sm-4 col-xs-12'>
             <div className='form-group'>
               <Select
-                isDisabled={!yearFilter}
                 showPlaceholderWhileValid
                 label='Select Project'
                 placeholderText='Project...'
                 onChange={value => setProjectFilter(value)}
                 value={projectFilter}
                 options={createDropdownOptions(projects)}
+                defaultOption={userRole?.projectCode}
+                isDisabled={userRole?.projectCode === '2'}
               />
             </div>
           </div>

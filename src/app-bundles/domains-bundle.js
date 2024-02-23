@@ -85,13 +85,18 @@ export default {
   selectDomainsSetSite2: state => state.domains.setsite2,
   selectDomainsYears: state => state.domains.years,
 
-  doDomainProjectsFetch: (project = null) => ({ dispatch, apiGet, store }) => {
-    dispatch({ type: 'DOMAIN_FETCH_PROJECTS_START' });
+  doDomainProjectsFetch: (filter = true) => ({ dispatch, apiGet, store }) => {
+    const id = store.selectUserRole()?.id;
+    const project = store.selectUserRole()?.projectCode;
 
-    const url = `/psapi/projects${queryFromObject({ id: store.selectUserRole().id })}`;
-    const urlFilter = `/psapi/projectsFilter${queryFromObject({project: project})}`;
+    const url = '/psapi/projects?' + new URLSearchParams({
+      id: id
+    });
+    const urlFilter = '/psapi/projectsFilter?' + new URLSearchParams({
+      project: project
+    });
 
-    apiGet(project !== null ? urlFilter : url, (_err, body) => {
+    apiGet(filter === true ? urlFilter : url, (_err, body) => {
       dispatch({
         type: 'DOMAIN_UPDATED_PROJECTS',
         payload: body,
@@ -100,10 +105,12 @@ export default {
     });
   },
 
-  doDomainSeasonsFetch: (params) => ({ dispatch, apiGet }) => {
-    dispatch({ type: 'DOMAIN_FETCH_SEASONS_START' });
+  doDomainSeasonsFetch: () => ({ dispatch, apiGet, store }) => {
+    const project = store.selectUserRole()?.projectCode;
 
-    const url = `/psapi/seasons${queryFromObject(params)}`;
+    const url = '/psapi/seasons?' + new URLSearchParams({
+      project: project
+    });
 
 
     apiGet(url, (_err, body) => {
@@ -115,10 +122,14 @@ export default {
     });
   },
 
-  doDomainSegmentsFetch: (params) => ({ dispatch, apiGet }) => {
-    dispatch({ type: 'DOMAIN_FETCH_SEGMENTS_START' });
+  doDomainSegmentsFetch: () => ({ dispatch, apiGet, store }) => {
+    const fieldOffice = store.selectUserRole()?.officeCode;
+    const project = store.selectUserRole()?.projectCode;
 
-    const url = `/psapi/segments${queryFromObject(params)}`;
+    const url = '/psapi/segments?' + new URLSearchParams({
+      office: fieldOffice,
+      project: project
+    });
 
     apiGet(url, (_err, body) => {
       dispatch({
