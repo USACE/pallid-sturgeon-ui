@@ -3,7 +3,7 @@ import {
   createCacheBundle,
   createUrlBundle,
 } from 'redux-bundler';
-import createAuthBundle from './create-auth-bundle';
+import createAuthBundle from './auth-bundle';
 import createJwtApiBundle from './create-jwt-api-bundle';
 import cache from '../cache';
 
@@ -18,7 +18,6 @@ import sitesBundle from './sites-bundle';
 import uploadBundle from './upload-bundle';
 import homeDataBundle from './home-data-bundle';
 import geneticCardSummaryBundle from './genetic-card-summary-bundle';
-import authBundle from './auth-bundle';
 import userAccessRequestBundle from './users-access-request-bundle';
 import rolesBundle from './roles-bundle';
 import usersBundle from './users-bundle';
@@ -58,7 +57,6 @@ export default composeBundles(
   searchReportsPageBundle,
   sitesBundle,
   uploadBundle,
-  authBundle,
   userAccessRequestBundle,
   rolesBundle,
   usersBundle,
