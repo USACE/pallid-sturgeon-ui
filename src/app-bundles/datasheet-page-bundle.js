@@ -135,7 +135,7 @@ export default {
     store.doFetchProcedureDataSummary();
   },
 
-  doDatasheetLoadData: () => ({ dispatch }) => {
+  doDatasheetLoadData: () => ({ dispatch, store }) => {
     dispatch({ type: 'LOADING_DATASHEET_INIT_DATA' });
     // Loading supporting data
     store.doDomainsYearsFetch();
