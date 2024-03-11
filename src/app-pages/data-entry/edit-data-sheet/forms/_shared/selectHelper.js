@@ -535,6 +535,7 @@ export const evalLocationsOptions = [
 export const visualAssessmentOptions = [
   { value: 'R' },
   { value: 'N' },
+  { value: 'Z'},
 ];
 
 export const YNNumOptions = [

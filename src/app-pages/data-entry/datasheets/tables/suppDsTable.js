@@ -141,7 +141,7 @@ const SuppDsTable = connect(
             <AgGridColumn field='speciesId' headerName='Species' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='recorder' cellEditor='textEditor' sortable unSortIcon />
             <AgGridColumn field='tagnumber' cellEditor='textEditor' width={125} sortable unSortIcon />
-            <AgGridColumn field='pitrn' headerName='PIT' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} sortable unSortIcon />
+            <AgGridColumn field='pitrn' headerName='PIT R/N/Z' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} sortable unSortIcon />
             <AgGridColumn field='cwtyn' headerName='CWT' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions, isRequired: true }} unSortIcon />
             <AgGridColumn field='dangler' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions, isRequired: true }} sortable unSortIcon />
             <AgGridColumn field='scuteloc' headerName='Scute' cellEditor='selectEditor' cellEditorParams={{ options: ScuteOptions }} sortable unSortIcon />
