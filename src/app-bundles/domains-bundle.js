@@ -105,13 +105,16 @@ export default {
     });
   },
 
-  doDomainSeasonsFetch: () => ({ dispatch, apiGet, store }) => {
+  doDomainSeasonsFetch: (year = null) => ({ dispatch, apiGet, store }) => {
     const project = store.selectUserRole()?.projectCode;
+    const office = store.selectUserRole()?.officeCode;
 
-    const url = '/psapi/seasons?' + new URLSearchParams({
-      project: project
-    });
+    const params = {
+      office: office,
+      project: project,
+    };
 
+    const url = '/psapi/seasons?' + new URLSearchParams(year === null ? params : { ...params, year: year });
 
     apiGet(url, (_err, body) => {
       dispatch({
