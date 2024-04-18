@@ -173,7 +173,6 @@ export default {
   doDataEntryLoadData: () => ({ store }) => {
     store.doDomainFieldOfficesFetch();
     store.doDomainProjectsFetch();
-    store.doDomainSeasonsFetch();
     store.doDomainSampleUnitTypesFetch();
   },
 

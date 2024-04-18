@@ -129,15 +129,13 @@ const SitesList = connect(
           </div>
           <div className='col-sm-4 col-xs-12'>
             <div className='form-group'>
-              <FilterSelect
-                ref={segRef}
-                isDisabled={!yearFilter}
+              <Select
+                showPlaceholderWhileValid
                 label='Select Segment'
-                handleInputChange={value => setSegmentFilter(value)}
-                onChange={(_, __, val) => setSegmentValue(val)}
+                placeholderText='Segment...'
+                onChange={value => setSegmentFilter(value)}
                 value={segmentFilter}
-                placeholder='Segment...'
-                items={createDropdownOptions(segments)}
+                options={createDropdownOptions(segments)}
               />
             </div>
           </div>

@@ -133,8 +133,8 @@ export default {
       id: store.selectUserRole()?.id,
       project: store.selectUserRole()?.projectCode
     };
-
     dispatch({ type: 'UPDATE_SITE_PARAMS', payload: { ...searchParams, ...paramObj } });
+    store.doDomainSeasonsFetch(searchParams?.year);
     store.doSitesFetch();
   },
 };
