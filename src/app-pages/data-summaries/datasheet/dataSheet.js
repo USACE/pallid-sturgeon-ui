@@ -54,7 +54,7 @@ export default connect(
 
     const { projects, seasons } = domains;
 
-    const tabs = ['missouriRiverData', 'fishData',  'suppData', 'telemetryData', 'procedureData', 'searchData'];
+    const tabs = ['missouriRiverData', 'fishData', 'suppData', 'telemetryData', 'procedureData', 'searchData'];
 
     const clearAllFilters = () => {
       setYearFilter('');
@@ -126,8 +126,8 @@ export default connect(
                   onChange={val => setProjectFilter(val)}
                   value={projectFilter}
                   options={createDropdownOptions(projects)}
-                  defaultValue={userRole && (userRole.projectCode === '2' ? 2 : userRole.projectCode)} 
-                  isDisabled={userRole && (userRole.projectCode === '2')} 
+                  defaultValue={userRole?.projectCode === '2' ? 2 : userRole?.projectCode}
+                  isDisabled={userRole?.projectCode === '2'}
                 />
               </div>
               <div className='col-md-3 col-xs-12'>
@@ -138,8 +138,8 @@ export default connect(
                   onChange={val => setApprovalFilter(val)}
                   value={approvalFilter}
                   options={[
-                    { value: 0, text: '0 - Not Approved'},
-                    { value: 1, text: '1 - Approved'},
+                    { value: 0, text: '0 - Not Approved' },
+                    { value: 1, text: '1 - Approved' },
                   ]}
                 />
               </div>
@@ -191,7 +191,7 @@ export default connect(
                 />
                 <ReactTooltip id='helpMonth' effect='solid' place='bottom'>
                   <span>
-                    The Month and Date Range filters will filter by <b>Set Date</b> for Missouri River, Fish, Supplemental, and Procedure datasheets, 
+                    The Month and Date Range filters will filter by <b>Set Date</b> for Missouri River, Fish, Supplemental, and Procedure datasheets,
                     <br></br> and <b>Search Date</b> for Search Effort and Telemetry datasheets.
                   </span>
                 </ReactTooltip>
@@ -271,16 +271,16 @@ export default connect(
                   title: `Supplemental (${datasheet.supplemental.totalCount})`,
                   content: <SupplementalTable />,
                 },
-                { 
-                  title: `Procedure (${datasheet.procedure.totalCount})`, 
+                {
+                  title: `Procedure (${datasheet.procedure.totalCount})`,
                   content: <ProcedureTable />,
                 },
-                { 
-                  title: `Search Effort (${datasheet.searchEffort.totalCount})`, 
+                {
+                  title: `Search Effort (${datasheet.searchEffort.totalCount})`,
                   content: <SearchTable />
                 },
-                { 
-                  title: `Telemetry (${datasheet.telemetry.totalCount})`, 
+                {
+                  title: `Telemetry (${datasheet.telemetry.totalCount})`,
                   content: <TelemetryTable />,
                 },
               ]}

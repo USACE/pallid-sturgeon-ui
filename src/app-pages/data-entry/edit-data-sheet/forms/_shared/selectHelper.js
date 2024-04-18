@@ -535,6 +535,7 @@ export const evalLocationsOptions = [
 export const visualAssessmentOptions = [
   { value: 'R' },
   { value: 'N' },
+  { value: 'Z'},
 ];
 
 export const YNNumOptions = [
@@ -554,7 +555,22 @@ export const ScuteOptions = [
 ];
 
 export const HVXOptions = [
-  { value: 'N' },
-  { value: 'R' },
-  { value: 'L' },
+  { value: 'H', text: 'Horizontal Position' },
+  { value: 'V', text: 'Vertical Position' },
+  { value: 'X', text: 'Undetermined Position' },
+];
+
+export const ERELOptions = [
+  {value: 'G', text: 'Green'},
+  {value: 'O', text: 'Orange'},
+  {value: 'R', text: 'Red'},
+  {value: 'P', text: 'Pink'},
+  {value: 'Y', text: 'Yellow'},
+  {value: 'W', text: 'White'},
+  {value: 'V', text: 'Purple'},
+  {value: 'B', text: 'Brown'},
+  {value: 'K', text: 'Black'},
+  {value: 'U', text: 'Blue'},
+  {value: 'N', text: 'None'},
+  {value: 'x', text: 'Undetermined'},
 ];

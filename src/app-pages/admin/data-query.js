@@ -37,8 +37,8 @@ export default connect(
             <Card.Body>
               <Icon icon='help-circle' />
               <span className='info-message ml-2'>
-                  Click the "Export as CSV" link at the top of the report to download the query results for the year and filters selected.
-                  The displayed report below only shows a portion of the fields that are included in the downloaded report.
+                Click the "Export as CSV" link at the top of the report to download the query results for the year and filters selected.
+                The displayed report below only shows a portion of the fields that are included in the downloaded report.
               </span>
               <div className='row mt-3'>
                 <div className='col-md-4 col-xs-8'>
@@ -67,14 +67,14 @@ export default connect(
                   size='small'
                   className='mr-2'
                   text='Apply Filters'
-                  // handleClick={() => doDatasheetFetch()}
+                // handleClick={() => doDatasheetFetch()}
                 />
                 <Button
                   isOutline
                   variant='secondary'
                   size='small'
                   text='Clear All Filters'
-                  // handleClick={() => clearAllFilters()}
+                // handleClick={() => clearAllFilters()}
                 />
               </div>
             </Card.Body>
@@ -88,7 +88,7 @@ export default connect(
                 variant='info'
                 text='Export as CSV'
                 icon={<Icon icon='download' />}
-                // handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
+              // handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
               />
               <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
                 <AgGridReact

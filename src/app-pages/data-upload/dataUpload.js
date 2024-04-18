@@ -8,7 +8,7 @@ import DragInput from 'app-components/drag-input';
 import Select from 'app-components/select';
 
 import { keyAsText } from 'utils';
-import { getIsRequired, reduceCsvState,  formatAsNumber, formatJsonKey } from './helper';
+import { getIsRequired, reduceCsvState, formatAsNumber, formatJsonKey } from './helper';
 
 import './dataupload.scss';
 
@@ -152,9 +152,9 @@ export default connect(
                 <div>{`Date Created: ${uploadLogs[0].dateCreated.split('T')[0]}`}</div>
                 {uploadLogs.map((log, index) => (
                   <div key={index} className='text log'>{log.debugText}</div>
-                ))} 
+                ))}
               </>)
-              : <div className='text'>No logs to report</div> }
+              : <div className='text'>No logs to report</div>}
           </Card.Body>
         </Card>
       </div>

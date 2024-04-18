@@ -11,7 +11,7 @@ import TextEditor from 'common/gridCellEditors/textEditor';
 import SelectEditor from 'common/gridCellEditors/selectEditor';
 import NumberEditor from 'common/gridCellEditors/numberEditor';
 
-import { HVXOptions, ScuteOptions, visualAssessmentOptions, YNNumOptions, YNTextOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
+import { ERELOptions, HVXOptions, ScuteOptions, visualAssessmentOptions, YNNumOptions, YNTextOptions } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -141,7 +141,7 @@ const SuppDsTable = connect(
             <AgGridColumn field='speciesId' headerName='Species' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='recorder' cellEditor='textEditor' sortable unSortIcon />
             <AgGridColumn field='tagnumber' cellEditor='textEditor' width={125} sortable unSortIcon />
-            <AgGridColumn field='pitrn' headerName='PIT' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} sortable unSortIcon />
+            <AgGridColumn field='pitrn' headerName='PIT R/N/Z' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} sortable unSortIcon />
             <AgGridColumn field='cwtyn' headerName='CWT' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions, isRequired: true }} unSortIcon />
             <AgGridColumn field='dangler' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions, isRequired: true }} sortable unSortIcon />
             <AgGridColumn field='scuteloc' headerName='Scute' cellEditor='selectEditor' cellEditorParams={{ options: ScuteOptions }} sortable unSortIcon />
@@ -149,9 +149,9 @@ const SuppDsTable = connect(
             <AgGridColumn field='scuteloc2' headerName='Scute 2' cellEditor='selectEditor' cellEditorParams={{ options: ScuteOptions }} sortable unSortIcon />
             <AgGridColumn field='scutenum2' headerName='Scute # 2' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='elhv' headerName='EL H/V/X' cellEditor='selectEditor' cellEditorParams={{ options: HVXOptions }} sortable unSortIcon />
-            <AgGridColumn field='elcolor' headerName='EL Color' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='elcolor' headerName='EL Color' cellEditor='selectEditor' cellEditorParams={{ options: ERELOptions}} sortable unSortIcon />
             <AgGridColumn field='erhv' headerName='ER H/V/X' cellEditor='selectEditor' cellEditorParams={{ options: HVXOptions }} sortable unSortIcon />
-            <AgGridColumn field='ercolor' headerName='ER Color' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} sortable unSortIcon />
+            <AgGridColumn field='ercolor' headerName='ER Color' cellEditor='selectEditor' cellEditorParams={{ options: ERELOptions }} sortable unSortIcon />
             <AgGridColumn field='genetic' headerName='Genetic Y/N' cellEditor='selectEditor' cellEditorParams={{ options: YNTextOptions }} width={125} sortable unSortIcon />
             {/* @TODO: Do we need the following fields? */}
             <AgGridColumn field='geneticNeeds' cellEditor='textEditor' width={150} sortable unSortIcon />

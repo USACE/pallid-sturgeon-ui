@@ -40,7 +40,7 @@ export default connect(
 
     useEffect(() => {
       doDomainFieldOfficesFetch({ showAll: true });
-      doDomainProjectsFetch();
+      doDomainProjectsFetch(false);
       doFetchUsers();
       doFetchRoles();
     }, []);

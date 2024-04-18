@@ -7,6 +7,7 @@ import DataHeader from 'app-pages/data-entry/datasheets/components/dataHeader';
 import Approval from 'app-pages/data-entry/datasheets/components/approval';
 
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
+import { ERELOptions, HVXOptions } from './_shared/selectHelper';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -161,34 +162,36 @@ const SupplementalForm = connect(
             </Row>
             <Row>
               <div className='col-2'>
-                <Input name='elcolor' label='EL Color' value={state['elcolor']} onChange={handleChange} isRequired/>
+                <SelectCustomLabel 
+                  name='elcolor' 
+                  label='EL Color' 
+                  value={state['elcolor']} 
+                  options={ERELOptions} 
+                  onChange={val => handleSelect('elcolor', val)}/>
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
                   name='elhv' 
                   label='EL (H/V/X)' 
                   value={state['elhv']} 
-                  options={[
-                    { value: 'H' },
-                    { value: 'V' },
-                    { value: 'X' },
-                  ]}
+                  options={HVXOptions}
                   onChange={val => handleSelect('elhv', val)}
                 />
               </div>
               <div className='col-2'>
-                <Input name='ercolor' label='ER Color' value={state['ercolor']} onChange={handleChange} isRequired />
+                <SelectCustomLabel 
+                  name='ercolor' 
+                  label='ER Color' 
+                  value={state['ercolor']}
+                  options={ERELOptions}
+                  onChange={val => handleSelect('ercolor', val)} />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
                   name='erhv' 
                   label='ER (H/V/X)' 
                   value={state['erhv']} 
-                  options={[
-                    { value: 'H' },
-                    { value: 'V' },
-                    { value: 'X' },
-                  ]}
+                  options={HVXOptions}
                   onChange={val => handleSelect('erhv', val)} 
                   isRequired
                 />

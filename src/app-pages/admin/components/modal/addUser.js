@@ -62,10 +62,10 @@ const AddUserFormModal = connect(
 
     useEffect(() => {
       doDomainFieldOfficesFetch();
-      doDomainProjectsFetch();
+      doDomainProjectsFetch(false);
       doFetchUsersList();
     }, []);
-  
+
     return (
       <ModalContent size='lg'>
         <ModalHeader title='Add Account to Existing User' />

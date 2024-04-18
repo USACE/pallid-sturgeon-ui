@@ -139,10 +139,10 @@ export default {
     dispatch({ type: 'LOADING_DATASHEET_INIT_DATA' });
     // Loading supporting data
     store.doDomainsYearsFetch();
-    store.doDomainProjectsFetch(store.selectUserRole().projectCode);
-    store.doDomainSeasonsFetch({ project: store.selectUserRole().projectCode });
+    store.doDomainProjectsFetch();
+    store.doDomainSeasonsFetch();
   },
-  
+
   doFetchMoRiverDataSummary: () => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'MORIVER_DATA_SUMMARY_FETCH_START' });
 
@@ -379,7 +379,7 @@ export default {
   },
 
   doSetDatasheetPagination: ({ pageSize, pageNumber }) => ({ dispatch, store }) => {
-    dispatch({ type: 'SET_DATASHEET_PAGINATION', payload: { pageSize, pageNumber }});
+    dispatch({ type: 'SET_DATASHEET_PAGINATION', payload: { pageSize, pageNumber } });
     // store.doDatasheetFetch();
   },
 
