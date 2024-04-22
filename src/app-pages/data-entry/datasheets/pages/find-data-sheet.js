@@ -18,6 +18,7 @@ const FindDataSheet = connect(
   'doFetchTelemetryDataEntry',
   'doFetchProcedureDataEntry',
   'doUpdateUrl',
+  'doUpdateCurrentTab',
   'selectUserRole',
   ({
     doFetchMoRiverDataEntry,
@@ -27,6 +28,7 @@ const FindDataSheet = connect(
     doFetchTelemetryDataEntry,
     doFetchProcedureDataEntry,
     doUpdateUrl,
+    doUpdateCurrentTab,
     userRole,
   }) => {
     const [pitTag, setPitTag] = useState('');
@@ -49,24 +51,30 @@ const FindDataSheet = connect(
         id: userRole.id,
       };
 
-      switch(dataSheetType) {
-        case 'fish':
-          doFetchFishDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/fish-edit'), true);
-          break;
-        case 'supplemental':
-          doFetchSupplementalDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/supplemental-edit'), true);
-          break;
+      switch (dataSheetType) {
         case 'missouriRiver':
           doFetchMoRiverDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doUpdateCurrentTab(0);
+          break;
+        case 'fish':
+          doFetchFishDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doUpdateCurrentTab(1);
+          break;
+        case 'supplemental':
+          doFetchSupplementalDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doUpdateCurrentTab(2);
+          break;
+        case 'procedures':
+          doFetchProcedureDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doUpdateCurrentTab(3);
           break;
         case 'searchEffort':
           doFetchSearchDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'), true);
+          doUpdateCurrentTab(0);
           break;
         case 'telemetry':
-          doFetchTelemetryDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/telemetry-edit'), true);
-          break;
-        case 'procedures':
-          doFetchProcedureDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/procedure-edit'), true);
+          doFetchTelemetryDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'), true);
+          doUpdateCurrentTab(1);
           break;
         default:
           console.log('Select a datasheet type');
