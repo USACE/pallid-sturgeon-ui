@@ -194,7 +194,7 @@ const FishDsTable = connect(
               }} 
             />
             <AgGridColumn field='mR' headerName='M/R' cellEditor='selectEditor' cellEditorParams={{ options: createMesoOptions(domainsMr), isRequired: false }} />
-            <AgGridColumn field='ftnum' headerName='Floy Tag' />
+            <AgGridColumn field='floyTag' headerName='Floy Tag' />
             <AgGridColumn field='geneticsVialNumber' width={125} headerName='Genetics Vial #' />
             <AgGridColumn field='condition' cellEditor='numberEditor' editable={false} />
             <AgGridColumn field='finCurl' cellEditor='selectEditor' cellEditorParams={{ options: finCurlOptions, isRequired: false }} />
