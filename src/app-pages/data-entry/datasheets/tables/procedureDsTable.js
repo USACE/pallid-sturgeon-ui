@@ -158,7 +158,7 @@ const ProcedureDsTable = connect(
             <AgGridColumn field='dstReimplant' headerName='DST Reimplant' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} width={125} sortable unSortIcon />
             <AgGridColumn field='newRadioTagNum' headerName='New Radio Tag #' cellEditor='numberEditor' width={150} sortable unSortIcon />
             <AgGridColumn field='newFreqId' headerName='New Frequency Id' cellEditor='selectEditor' cellEditorParams={{ options: frequencyIdOptions, type: 'number' }} width={150} sortable unSortIcon />
-            <AgGridColumn field='sexCode' cellEditor='selectEditor' cellEditorParams={{ options: sexOptions }} sortable unSortIcon />
+            <AgGridColumn field='sex' headerName='Sex Code' cellEditor='selectEditor' cellEditorParams={{ options: sexOptions }} sortable unSortIcon />
             {/* Blood sample not on the original form? */}
             <AgGridColumn field='bloodSample' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} width={125} sortable unSortIcon /> 
             {/* @TODO: Change egg sample Y/N cell editor to checkbox */}
