@@ -14,10 +14,13 @@ const DataHeader = connect(
     doFetchHeaderData,
     headerData,
     id,
+    office,
+    year,
+    project
   }) => {
     useEffect(() => {
-      doFetchHeaderData({siteId: id});
-    }, [id]);
+      doFetchHeaderData(id, office, year, project);
+    }, [id, office, year, project]);
 
     return (
       <Card className='mb-3'>
@@ -31,23 +34,23 @@ const DataHeader = connect(
                 </div>
                 <div className='col-sm-2'>
                   <b className='mr-2'>Year:</b>
-                  {headerData[0] ? headerData[0].year : '--'}
+                  {headerData?.[0]?.year || '--'}
                 </div>
                 <div className='col-sm-2'>
                   <b className='mr-2'>Field Office:</b>
-                  {headerData[0] ? headerData[0].fieldoffice : '--'}
+                  {headerData?.[0]?.fieldoffice || '--'}
                 </div>
                 <div className='col-sm-2'>
                   <b className='mr-2'>Project:</b>
-                  {headerData[0] ? headerData[0].project : '--'}
+                  {headerData?.[0]?.project || '--'}
                 </div>
                 <div className='col-sm-2'>
                   <b className='mr-2'>Segment:</b>
-                  {headerData[0] ? headerData[0].segment : '--'}
+                  {headerData?.[0]?.segment || '--'}
                 </div>
                 <div className='col-sm-2'>
                   <b className='mr-2'>Season:</b>
-                  {headerData[0] ? headerData[0].season : '--'}
+                  {headerData?.[0]?.season || '--'}
                 </div>
               </Row>
             </div>
@@ -55,19 +58,19 @@ const DataHeader = connect(
               <Row>
                 <div className='col-sm-2'>
                   <b className='mr-2'>Sample Unit Type:</b>
-                  {headerData[0] ? headerData[0].sampleUnitType : '--'}
+                  {headerData?.[0]?.sampleUnitType || '--'}
                 </div>
                 <div className='col-sm-2'>
                   <b className='mr-2'>Sample Unit:</b>
-                  {headerData[0] ? headerData[0].bend : '--'}
+                  {headerData?.[0]?.bend || '--'}
                 </div>
                 <div className='col-sm-2'>
                   <b className='mr-2'>R/N:</b>
-                  {headerData[0] ? headerData[0].bendrn : '--'}
+                  {headerData?.[0]?.bendrn || '--'}
                 </div>
                 <div className='col-sm-2'>
                   <b className='mr-2'>Bend River Mile:</b>
-                  {headerData[0] ? headerData[0].bendrivermile : '--'}
+                  {headerData?.[0]?.bendrivermile || '--'}
                 </div>
               </Row>
             </div>
