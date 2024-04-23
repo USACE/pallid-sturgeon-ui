@@ -176,8 +176,13 @@ export default {
     store.doDomainSampleUnitTypesFetch();
   },
 
-  doFetchHeaderData: (params) => ({ dispatch, apiGet }) => {
-    const url = `/psapi/headerData${queryFromObject(params)}`;
+  doFetchHeaderData: (siteId, office, year, project) => ({ dispatch, apiGet }) => {
+    const url = '/psapi/headerData?' + new URLSearchParams({
+      siteId: siteId,
+      office: office,
+      year: year,
+      project: project,
+    });
 
     apiGet(url, (_err, body) => {
       dispatch({
