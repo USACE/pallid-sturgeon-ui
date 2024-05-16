@@ -56,7 +56,7 @@ export default {
     store.doDomainBendRnFetch();
   },
 
-  doSitesFetch: (data) => ({ dispatch, store, apiGet }) => {
+  doSitesFetch: (siteId) => ({ dispatch, store, apiGet }) => {
     dispatch({ type: 'SITES_FETCH_START' });
     const params = store.selectSitesParams();
     const pageSize = store.selectSitesPageSize();
@@ -69,10 +69,13 @@ export default {
     });
 
     const queryById = queryFromObject({
-      ...data,
+      ...params,
+      ...siteId,
+      size: pageSize,
+      page: pageNumber,
     });
 
-    const url = `/psapi/siteDataEntry${data ? queryById : query}`;
+    const url = `/psapi/siteDataEntry${siteId ? queryById : query}`;
 
     apiGet(url, (err, body) => {
       if (!err) {
