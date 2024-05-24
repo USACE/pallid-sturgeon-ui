@@ -47,18 +47,14 @@ const SitesList = connect(
     const bendRef = useRef();
 
     const [segmentFilter, setSegmentFilter] = useState('');
-    const [segmentValue, setSegmentValue] = useState(null);
-    const segRef = useRef();
 
     const clearFilters = () => {
       setBendFilter('');
       setBendValue(null);
       setSeasonFilter('');
-      setSegmentValue(null);
       setSegmentFilter('');
       setProjectFilter('');
 
-      segRef.current.clear();
       bendRef.current.clear();
     };
 
@@ -67,20 +63,16 @@ const SitesList = connect(
         year: yearFilter,
         bendrn: bendValue,
         seasonCode: seasonFilter,
-        segmentCode: segmentValue,
+        segmentCode: segmentFilter,
       };
       doUpdateSiteParams(searchParams);
-    }, [yearFilter, bendValue, seasonFilter, segmentValue]);
+    }, [yearFilter, bendValue, seasonFilter, segmentFilter]);
 
     // Load data
     useEffect(() => {
       doDomainSegmentsFetch();
       doDomainSeasonsFetch();
     }, []);
-
-    // useEffect(() => {
-    //   doDomainBendsFetch({ segment: segmentValue });
-    // }, [segmentValue]);
 
     return (
       <>
