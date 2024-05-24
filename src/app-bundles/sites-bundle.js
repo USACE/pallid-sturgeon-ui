@@ -139,5 +139,6 @@ export default {
     dispatch({ type: 'UPDATE_SITE_PARAMS', payload: { ...searchParams, ...paramObj } });
     store.doDomainSeasonsFetch(searchParams?.year);
     store.doSitesFetch();
+    store.doFetchExportsSites({ ...searchParams, ...paramObj });
   },
 };

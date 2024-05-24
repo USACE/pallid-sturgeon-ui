@@ -1,10 +1,8 @@
 import React from 'react';
-
-import { classArray } from 'utils';
-
-import '../../css/utils.scss';
+import { classArray } from 'utils.js';
 
 /**
+ * Reusable button with many options to style and transform.
  * 
  * @param {string} size - one of `['small', 'large']` to size the button to your needs
  * @param {string} variant - one of `['primary', 'secondary', 'success', 'warning', 'danger', 'info', 'light', 'dark', 'link']` to apply a class standard style
@@ -23,23 +21,23 @@ const Button = ({
   variant = 'primary',
   text = '',
   title = '',
-  href = '',
   type = 'button',
   icon = null,
   isOutline = false,
   isDisabled = false,
   isActive = false,
-  handleClick = () => {},
+  isLoading = false,
+  handleClick = () => { },
   className = '',
   ...customProps
 }) => {
-  const elem = href ? 'a' : 'button';
   const classes = classArray([
     'btn',
     size && size === 'small' ? 'btn-sm' : size === 'large' ? 'btn-lg' : '',
     `btn-${isOutline ? 'outline-' : ''}${variant}`,
     isActive && 'active',
     isDisabled && 'disabled not-allowed',
+    'pb-2',
     className,
   ]);
 
@@ -50,19 +48,21 @@ const Button = ({
     title: title || text,
     disabled: isDisabled,
     'aria-disabled': isDisabled,
-    ...href ? { href: isDisabled ? null : href } : { onClick: handleClick },
+    onClick: handleClick,
+    tabIndex: 0,
     ...customProps,
   };
 
-  const Child = () => (
-    <>
-      {icon}
-      {icon && text && <>&nbsp;</>}
-      {text}
-    </>
+  return (
+    <button {...buttonProps} {...customProps}>
+      <span className='align-middle'>
+        {isLoading && <span className='spinner-border spinner-border-sm' role='status' aria-hidden='true'></span>}
+        {!isLoading && icon}
+        {!isLoading && icon && text && <>&nbsp;</>}
+        {!isLoading && text}
+      </span>
+    </button>
   );
-
-  return React.createElement(elem, buttonProps, <Child />);
 };
 
 export default Button;

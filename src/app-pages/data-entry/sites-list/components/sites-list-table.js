@@ -3,23 +3,21 @@ import { connect } from 'redux-bundler-react';
 import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
 import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 
-import Button from 'app-components/button';
-import Icon from 'app-components/icon';
 import SiteIdCellRenderer from 'common/gridCellRenderers/siteIdCellRenderer';
+import ExportButton from 'app-components/button/exportButton';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 import './../../../data-summaries/data-summary.scss';
+import Icon from 'app-components/icon/icon';
 
 const SitesListTable = connect(
-  'doFetchExportsSites',
   'selectSitesData',
-  'selectSitesParams',
+  'selectExportData',
   ({
-    doFetchExportsSites,
     sitesData,
-    sitesParams,
+    exportData
   }) => {
     const cellStyle = (params) => ({
       backgroundColor: params.data.bkgColor,
@@ -27,15 +25,14 @@ const SitesListTable = connect(
 
     return (
       <div className='pt-3'>
-        <Button
-          size='small'
+        <ExportButton 
           variant='info'
-          text='Export to CSV'
-          className='btn-width'
-          icon={<Icon icon='download' />}
-          onClick={() => doFetchExportsSites(sitesParams)}
+          size='small'
           isOutline
-          isDisabled={sitesData.length === 0}
+          isDisabled={sitesData?.length === 0}
+          filename={`sites-list-${new Date().toISOString()}`}
+          data={exportData}
+          icon={<Icon icon='download' />}
         />
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact

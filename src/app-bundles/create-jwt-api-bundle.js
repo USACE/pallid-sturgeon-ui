@@ -28,65 +28,81 @@ const shouldSkipToken = (method, path, unless) => {
   return skip;
 };
 
-const processResponse = response => (
-  new Promise((resolve, reject) => {
-    const func = response.status < 400 ? resolve : reject;
+// const processResponse = response => (
+//   new Promise((resolve, reject) => {
+//     const func = response.status < 400 ? resolve : reject;
 
-    // Handle no content - @TODO: test this
-    if (response.status === 204) {
-      func({
-        'status': response.status,
-        'json': {},
-      });
-    } else if (response.status === 401) {
-      store[doAuthLogout]();
-    } else {
-      response.json()
-        .then(json => func({
-          'status': response.status,
-          'json': json,
-        }))
-        .catch(e => console.error(e));
-    }
-  })
-);
+//     // Handle no content - @TODO: test this
+//     if (response.status === 204) {
+//       func({
+//         'status': response.status,
+//         'json': {},
+//       });
+//     } else if (response.status === 401) {
+//       store[doAuthLogout]();
+//     } else {
+//       response.json()
+//         .then(json => func({
+//           'status': response.status,
+//           'json': json,
+//         }))
+//         .catch(e => console.error(e));
+//     }
+//   })
+// );
 
-const commonFetch = (root, path, options, callback) => {
-  fetch(`${root}${path}`, options)
-    .then(processResponse)
-    .then(response => {
+const commonFetch = async (root, path, options, callback) => {
+  let attempts = 0;
+  const maxAttempts = 5;
+  const retryInterval = 5000;
+
+  const callFetch = async () => {
+    attempts++;
+    try {
+      const res = await fetch(`${root}${path}`, options);
+      const json = await res.json();
       if (callback && typeof callback === 'function') {
-        callback(null, response.json);
+        callback(null, json);
         return;
       }
-    })
-    .catch(response => {
-      // console.log(response);
-      throw new ApiError(response.json, `Request returned a ${response.status}`);
-    })
-    .catch(err => {
-      callback(err);
-    });
-};
-
-class ApiError extends Error {
-  constructor(data = {}, ...params) {
-    super(...params);
-
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ApiError);
+    } catch (e) {
+      if (options.method === 'GET' && attempts < maxAttempts) {
+        console.error('The following error occured:', e, `Retry ${attempts}`);
+        await new Promise(resolve => setTimeout(resolve, retryInterval));
+        await callFetch();
+        return;
+      }
+      else {
+        console.error(e);
+        if (callback && typeof callback === 'function') {
+          callback(e, null);
+          return;
+        }
+      }
     }
-
-    const dataKeys = Object.keys(data);
-
-    this.name = 'Api Error';
-    this.timestamp = new Date();
-
-    dataKeys.forEach(key => {
-      this[key] = data[key];
-    });
   };
+
+  await callFetch();
 };
+
+// class ApiError extends Error {
+//   constructor(data = {}, ...params) {
+//     super(...params);
+
+//     if (Error.captureStackTrace) {
+//       Error.captureStackTrace(this, ApiError);
+//     }
+
+//     const dataKeys = Object.keys(data);
+
+//     this.name = 'Api Error';
+//     this.timestamp = new Date();
+
+//     dataKeys.forEach(key => {
+//       this[key] = data[key];
+//     });
+//   };
+// };
 
 const createJwtApiBundle = (opts) => {
   const defaults = {
