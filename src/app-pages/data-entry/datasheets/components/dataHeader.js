@@ -10,13 +10,12 @@ import '../../dataentry.scss';
 const DataHeader = connect(
   'doFetchHeaderData',
   'selectHeaderData',
-  ({
-    doFetchHeaderData,
-    headerData,
-    id,
-  }) => {
+  'selectDataEntryLastParams',
+  'selectRouteParams',
+  'selectUserRole',
+  ({ doFetchHeaderData, headerData, dataEntryLastParams, routeParams, userRole, id, year }) => {
     useEffect(() => {
-      doFetchHeaderData({siteId: id});
+      doFetchHeaderData({ siteId: id, office: userRole?.officeCode, year: year, project: userRole?.projectCode, mrId: dataEntryLastParams?.mrId });
     }, [id]);
 
     return (
@@ -66,15 +65,22 @@ const DataHeader = connect(
                   {headerData[0] ? headerData[0].bendrn : '--'}
                 </div>
                 <div className='col-sm-2'>
-                  <b className='mr-2'>Bend River Mile:</b>
+                  <b className='mr-2'>BendRiver Mile:</b>
                   {headerData[0] ? headerData[0].bendrivermile : '--'}
                 </div>
+                {routeParams?.form === 'missouriRiver-edit' && (
+                  <div className='col-sm-4'>
+                    <b className='mr-2'>MR_FID:</b>
+                    {headerData[0] ? headerData[0].mrFid: '--'}
+                  </div>
+                )}
               </Row>
             </div>
           </Row>
         </Card.Body>
       </Card>
     );
-  });
+  }
+);
 
 export default DataHeader;

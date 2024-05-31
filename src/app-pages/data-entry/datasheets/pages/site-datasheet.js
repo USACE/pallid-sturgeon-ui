@@ -22,7 +22,7 @@ const SiteDatasheet = connect(
     searchEffortSitesDatasheetTotalResults,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const { siteId } = sitesData[0];
+    const { siteId, year } = sitesData[0];
 
     useEffect(() => {
       const params = { siteId: siteId };
@@ -41,7 +41,7 @@ const SiteDatasheet = connect(
           </div>
         </div>
         {/* Top Level Info */}
-        <DataHeader id={siteId} />
+        <DataHeader id={siteId} year={year}/>
         {/* Tab Container */}
         <Card>
           <Card.Header text='Datasheet Workflows' />

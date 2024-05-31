@@ -14,5 +14,6 @@ export const sitesExportHeaders = [
   'BEND',
   'BENDRN',
   'BENDRIVERMILE',
+  'MRFID',
   'SAMPLE_UNIT_DESC',
 ];

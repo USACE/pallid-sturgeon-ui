@@ -96,6 +96,7 @@ const MissouriRiverForm = connect(
     const [isNoVelocity, setIsNoVelocity] = useState(false);
 
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
+    const year = sitesData?.[0]?.year;
     const isCreate = routeParams.form.split('-')[1] === 'create';
     const data = sitesData[0];
     const formComplete = true;  
@@ -236,7 +237,7 @@ const MissouriRiverForm = connect(
           </div>
         </div>
         {/* Top Level Info */}
-        <DataHeader id={siteId} />
+        <DataHeader id={siteId} year={year}/>
         {/* Approval */}
         {/* TO DO: include component props */}
         <Approval />

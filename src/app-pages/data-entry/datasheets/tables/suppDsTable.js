@@ -139,6 +139,10 @@ const SuppDsTable = connect(
             <AgGridColumn field='checkby' headerName='Checked' cellEditor='textEditor' sortable unSortIcon />
             <AgGridColumn field='approved' cellEditor='selectEditor' cellEditorParams={{ options: YNNumOptions, type: 'number' }} sortable unSortIcon />
             <AgGridColumn field='speciesId' headerName='Species' cellEditor='numberEditor' sortable unSortIcon />
+            <AgGridColumn field='netrivermile' headerName='Net River Mile' cellEditor='numberEditor' editable={false}/>
+            <AgGridColumn field='length' headerName='Length' cellEditor='textEditor' editable={false} />
+            <AgGridColumn field='weight' headerName='Weight' cellEditor='textEditor' editable={false} />
+            <AgGridColumn field='condition' headerName='Condition' cellEditor='numberEditor' editable={false} />
             <AgGridColumn field='recorder' cellEditor='textEditor' sortable unSortIcon />
             <AgGridColumn field='tagnumber' cellEditor='textEditor' width={125} sortable unSortIcon />
             <AgGridColumn field='pitrn' headerName='PIT R/N/Z' cellEditor='selectEditor' cellEditorParams={{ options: visualAssessmentOptions }} sortable unSortIcon />
