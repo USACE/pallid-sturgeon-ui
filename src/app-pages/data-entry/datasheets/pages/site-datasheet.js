@@ -22,7 +22,11 @@ const SiteDatasheet = connect(
     searchEffortSitesDatasheetTotalResults,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const { siteId, year } = sitesData[0];
+
+    const siteId = sitesData?.[0]?.siteId ?? null;
+    const fieldoffice = sitesData?.[0]?.fieldoffice ?? null;
+    const year = sitesData?.[0]?.year ?? null;
+    const projectId = sitesData?.[0]?.projectId ?? null;
 
     useEffect(() => {
       const params = { siteId: siteId };
