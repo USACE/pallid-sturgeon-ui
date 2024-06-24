@@ -16,7 +16,7 @@ const MrIdCellRenderer = connect(
     type,
     tab = 0,
   }) => {
-    const handleChange = () => {
+    const handleClick = () => {
       doUpdateCurrentTab(tab);
       doFetchMoRiverDataEntry({ tableId: getMrId()}, () => doUpdateUrl(uri), false);
     };
@@ -53,7 +53,7 @@ const MrIdCellRenderer = connect(
         variant='link'
         className='p-0 mb-1'
         text={getTypeText()}
-        handleClick={handleChange}
+        handleClick={handleClick}
       />
     );
   });

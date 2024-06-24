@@ -11,22 +11,18 @@ import SearchDsTable from '../tables/searchDsTable';
 const SiteDatasheet = connect(
   'doSitesDatasheetLoadData',
   'doUpdateSitesDatasheetParams',
-  'selectSitesData',
+  'selectBaseData',
   'selectMoriverSitesDatasheetTotalResults',
   'selectSearchEffortSitesDatasheetTotalResults',
   ({
     doSitesDatasheetLoadData,
     doUpdateSitesDatasheetParams,
-    sitesData,
+    baseData,
     moriverSitesDatasheetTotalResults,
-    searchEffortSitesDatasheetTotalResults,
+    searchEffortSitesDatasheetTotalResults
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-
-    const siteId = sitesData?.[0]?.siteId ?? null;
-    const fieldoffice = sitesData?.[0]?.fieldoffice ?? null;
-    const year = sitesData?.[0]?.year ?? null;
-    const projectId = sitesData?.[0]?.projectId ?? null;
+    const siteId = baseData?.siteId ?? null;
 
     useEffect(() => {
       const params = { siteId: siteId };
@@ -45,7 +41,7 @@ const SiteDatasheet = connect(
           </div>
         </div>
         {/* Top Level Info */}
-        <DataHeader id={siteId} />
+        <DataHeader />
         {/* Tab Container */}
         <Card>
           <Card.Header text='Datasheet Workflows' />
