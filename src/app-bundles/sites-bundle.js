@@ -79,11 +79,8 @@ export default {
 
     apiGet(url, (err, body) => {
       if (!err) {
-        dispatch({
-          type: 'SITES_UPDATED_ITEMS',
-          payload: body,
-        });
-        dispatch({ type: 'SITES_FETCH_FINISHED' });
+        dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body });
+        siteId && dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.items?.[0] });
       } else {
         dispatch({ type: 'SITES_FETCH_ERROR', payload: err });
       }

@@ -24,7 +24,6 @@ export default {
         items: [],
         totalCount: 0,
       },
-      headerData: {},
       lastParams: {},
       currentTab: 0,
     };
@@ -104,8 +103,6 @@ export default {
             },
           };
 
-        case 'UPDATED_HEADER_DATA':
-          return { ...state, headerData: payload };
         case 'UPDATE_CURRENT_TAB':
           return {
             ...state,
@@ -154,7 +151,6 @@ export default {
   selectDataEntry: state => state.dataEntry,
   selectDataEntryData: state => state.dataEntry.data.length ? state.dataEntry.data[0] : {},
   selectDataEntryLastParams: state => state.dataEntry.lastParams,
-  selectHeaderData: state => state.dataEntry.headerData,
   selectCurrentTab: state => state.dataEntry.currentTab,
   selectDataEntryTotalCount: state => state.dataEntry.totalCount,
 
@@ -174,22 +170,6 @@ export default {
     store.doDomainFieldOfficesFetch();
     store.doDomainProjectsFetch();
     store.doDomainSampleUnitTypesFetch();
-  },
-
-  doFetchHeaderData: (siteId, office, year, project) => ({ dispatch, apiGet }) => {
-    const url = '/psapi/headerData?' + new URLSearchParams({
-      siteId: siteId,
-      office: office,
-      year: year,
-      project: project,
-    });
-
-    apiGet(url, (_err, body) => {
-      dispatch({
-        type: 'UPDATED_HEADER_DATA',
-        payload: body,
-      });
-    });
   },
 
   doMoRiverDatasheetLoadData: (id) => ({ store }) => {
@@ -232,6 +212,7 @@ export default {
             type: 'missouriRiver',
           },
         });
+        dispatch({ type: 'UPDATE_BASE_DATA', payload: { mrId: body?.items?.[0]?.mrId, mrFid: body?.items?.[0]?.mrFid } });
 
         if (store.selectDataEntryTotalCount() === 0) {
           if (ignoreToast) { tWarning(toastId, 'No Missouri River datasheet(s) found.'); }

@@ -181,7 +181,7 @@ const FishDsTable = connect(
                 isRequired: true 
               }} 
             />
-            <AgGridColumn field='length' cellEditor='numberEditor' />
+            <AgGridColumn field='length' cellEditor='floatEditor' />
             <AgGridColumn field='weight' cellEditor='floatEditor' />
             <AgGridColumn field='countF' headerName='Count' cellEditor='numberEditor' />
             <AgGridColumn 

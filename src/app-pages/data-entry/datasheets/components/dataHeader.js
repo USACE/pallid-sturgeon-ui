@@ -8,10 +8,11 @@ import { Row } from 'app-pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import '../../dataentry.scss';
 
 const DataHeader = connect(
-  'selectHeaderData',
+  'selectBaseData',
+  'selectRouteParams',
   ({
-    headerData,
-    id,
+    baseData,
+    routeParams
   }) =>  (
     <Card className='mb-3'>
       <Card.Body>
@@ -20,27 +21,27 @@ const DataHeader = connect(
             <Row className='border-bottom'>
               <div className='col-sm-2'>
                 <b className='mr-2'>Site ID:</b>
-                {id || '--'}
+                {baseData?.siteId || '--'}
               </div>
               <div className='col-sm-2'>
                 <b className='mr-2'>Year:</b>
-                {headerData?.[0]?.year || '--'}
+                {baseData?.year || '--'}
               </div>
               <div className='col-sm-2'>
                 <b className='mr-2'>Field Office:</b>
-                {headerData?.[0]?.fieldoffice || '--'}
+                {baseData?.fieldoffice || '--'}
               </div>
               <div className='col-sm-2'>
                 <b className='mr-2'>Project:</b>
-                {headerData?.[0]?.project || '--'}
+                {baseData?.projectId || '--'}
               </div>
               <div className='col-sm-2'>
                 <b className='mr-2'>Segment:</b>
-                {headerData?.[0]?.segment || '--'}
+                {baseData?.segmentId || '--'}
               </div>
               <div className='col-sm-2'>
                 <b className='mr-2'>Season:</b>
-                {headerData?.[0]?.season || '--'}
+                {baseData?.season || '--'}
               </div>
             </Row>
           </div>
@@ -48,20 +49,26 @@ const DataHeader = connect(
             <Row>
               <div className='col-sm-2'>
                 <b className='mr-2'>Sample Unit Type:</b>
-                {headerData?.[0]?.sampleUnitType || '--'}
+                {baseData?.sampleUnitType || '--'}
               </div>
               <div className='col-sm-2'>
                 <b className='mr-2'>Sample Unit:</b>
-                {headerData?.[0]?.bend || '--'}
+                {baseData?.bend || '--'}
               </div>
               <div className='col-sm-2'>
                 <b className='mr-2'>R/N:</b>
-                {headerData?.[0]?.bendrn || '--'}
+                {baseData?.bendrn || '--'}
               </div>
               <div className='col-sm-2'>
                 <b className='mr-2'>Bend River Mile:</b>
-                {headerData?.[0]?.bendrivermile || '--'}
+                {baseData?.bendRiverMile || '--'}
               </div>
+              {(routeParams?.form === 'missouriRiver-edit' || routeParams?.form === 'missouriRiver-create') && (
+                <div className='col-sm-4'>
+                  <b className='mr-2'>MR FID:</b>
+                  {baseData?.mrFid || '--'}
+                </div>
+              )}
             </Row>
           </div>
         </Row>

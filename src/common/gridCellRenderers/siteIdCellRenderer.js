@@ -5,12 +5,10 @@ import Button from 'app-components/button';
 import SitesFormModal from 'app-pages/data-entry/sites-list/components/modals/sitesForm';
 
 const SiteIdCellRenderer = connect(
-  'doFetchHeaderData',
   'doSitesFetch',
   'doUpdateUrl',
   'doModalOpen',
   ({
-    doFetchHeaderData,
     doSitesFetch,
     doUpdateUrl,
     doModalOpen,
@@ -19,7 +17,6 @@ const SiteIdCellRenderer = connect(
     value,
   }) => {
     const handleCallback = () => {
-      doFetchHeaderData(data?.siteId, data?.fieldoffice, data?.year, data?.projectId);
       doUpdateUrl('/sites-list/datasheet');
     };
 

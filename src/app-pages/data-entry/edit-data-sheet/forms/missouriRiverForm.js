@@ -42,7 +42,7 @@ const MissouriRiverForm = connect(
   'doDomainsSetSite2Fetch',
   'doResetMoRiverDataEntryData',
   'selectDataEntryData',
-  'selectSitesData',
+  'selectBaseData',
   'selectDomainsMeso',
   'selectDomainsStructureFlow',
   'selectDomainsStructureMod',
@@ -66,7 +66,7 @@ const MissouriRiverForm = connect(
     doDomainsSetSite2Fetch,
     doResetMoRiverDataEntryData,
     dataEntryData,
-    sitesData,
+    baseData,
     domainsMeso,
     domainsStructureFlow,
     domainsStructureMod,
@@ -95,9 +95,7 @@ const MissouriRiverForm = connect(
     const [isNoTurbidity, setIsNoTurbidity] = useState(false);
     const [isNoVelocity, setIsNoVelocity] = useState(false);
 
-    const siteId = edit ? state['siteId'] : sitesData[0].siteId;
     const isCreate = routeParams.form.split('-')[1] === 'create';
-    const data = sitesData[0];
     const formComplete = true;  
 
     const handleChange = e => {
@@ -214,7 +212,7 @@ const MissouriRiverForm = connect(
           setIsNoVelocity(false);
         }
       } else {
-        handleSelect('siteId', Number(data.siteId));
+        handleSelect('siteId', Number(baseData?.siteId));
       }
     }, [edit, dataEntryData]);
 
@@ -236,7 +234,7 @@ const MissouriRiverForm = connect(
           </div>
         </div>
         {/* Top Level Info */}
-        <DataHeader id={siteId} />
+        <DataHeader />
         {/* Approval */}
         {/* TO DO: include component props */}
         <Approval />
