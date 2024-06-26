@@ -31,6 +31,7 @@ const reducer = (state, action) => {
 };
 
 const MissouriRiverForm = connect(
+  'doUpdateBaseData',
   'doMoRiverDatasheetLoadData',
   'doSaveMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
@@ -55,6 +56,7 @@ const MissouriRiverForm = connect(
   'selectUserRole',
   'selectRouteParams',
   ({
+    doUpdateBaseData,
     doMoRiverDatasheetLoadData,
     doSaveMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
@@ -225,6 +227,11 @@ const MissouriRiverForm = connect(
         doMoRiverDatasheetLoadData(dataEntryData.mrId);
       }
     }, [isCreate, dataEntryData.mrId, userRole.id]);
+
+    useEffect(() => {
+      // netrivermile in baseData
+      doUpdateBaseData('netrivermile', state['netrivermile']);
+    }, [state['netrivermile']]);
 
     return (
       <>
