@@ -46,7 +46,7 @@ const FishDsTable = connect(
   }) => {
     const gridRef = useRef();
     const [ isEditingRow, setIsEditingRow ] = useState(false);
-    const lastRow = dataEntryFishData.items[dataEntryFishData.totalCount - 1];
+    const lastRow = dataEntryFishData?.items?.[dataEntryFishData?.totalCount - 1];
     const initialState = {
       mrId: dataEntryLastParams.mrId
     };

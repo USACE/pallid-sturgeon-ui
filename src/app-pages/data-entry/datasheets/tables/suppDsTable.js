@@ -23,6 +23,7 @@ const SuppDsTable = connect(
   'selectDataEntrySupplemental',
   'selectDataEntryLastParams',
   'selectUserRole',
+  'selectBaseData',
   ({
     doModalOpen,
     doSaveSupplementalDataEntry,
@@ -30,8 +31,8 @@ const SuppDsTable = connect(
     dataEntrySupplemental,
     dataEntryLastParams,
     userRole,
+    baseData,
     isAddRow,
-    rowId,
     setIsAddRow,
     setRowId,
   }) => {
@@ -39,12 +40,22 @@ const SuppDsTable = connect(
     const [ isEditingRow, setIsEditingRow ] = useState(false);
     const { items } = dataEntrySupplemental;
 
+    const defaultValues = { 
+      fid: baseData?.fid,
+      ffid: baseData?.ffid,
+      condition: baseData?.condition,
+      netrivermile: baseData?.netrivermile,
+      length: baseData?.length,
+      weight: baseData?.weight,
+      species: baseData?.species
+    };
+
     const initialState = {
       mrId: dataEntryLastParams.mrId
     };
 
-    const addRow = useCallback((fid) => {
-      gridRef.current.api.applyTransaction({ add: [{ fid: fid }] });
+    const addRow = useCallback(() => {
+      gridRef.current.api.applyTransaction({ add: [defaultValues] });
     }, []);
 
     const refreshSuppLinkButtons = () => {
@@ -62,7 +73,7 @@ const SuppDsTable = connect(
 
     useEffect(() => {
       if (isAddRow) {
-        addRow(rowId);
+        addRow();
       }
     }, [isAddRow]);
 

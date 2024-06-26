@@ -5,9 +5,11 @@ import Button from 'app-components/button';
 import Icon from 'app-components/icon';
 
 const SuppLinkCellRenderer = connect(
+  'doUpdateBaseData',
   'doUpdateCurrentTab',
   'selectDataEntrySupplemental',
   ({
+    doUpdateBaseData,
     doUpdateCurrentTab,
     dataEntrySupplemental,
     data,
@@ -15,7 +17,7 @@ const SuppLinkCellRenderer = connect(
     setRowId,
   }) => {
     const fId = data.fid; 
-    const hasSuppData = !!dataEntrySupplemental.items.filter(data => data.fid === fId).length;
+    const hasSuppData = !!dataEntrySupplemental?.items?.filter(data => data.fid === fId)?.length;
     const isNewRow = Object.keys(data).length === 0;    
 
     const handleAddRow = (add) => {
@@ -24,6 +26,18 @@ const SuppLinkCellRenderer = connect(
         setIsAddRow(true);
         setRowId(fId);
       }
+    };
+
+    const handleClick = (e) => {
+      // Store condition, length, weight, species in baseData
+      doUpdateBaseData('condition', data?.condition);
+      doUpdateBaseData('length', data?.length);
+      doUpdateBaseData('weight', data?.weight);
+      doUpdateBaseData('species', data?.species);
+      doUpdateBaseData('fid', data?.fid);
+      doUpdateBaseData('ffid', data?.ffid);
+      // Add row in Supplemental tab
+      handleAddRow(true);
     };
 
     const isButtonDisabled = () => {
@@ -39,32 +53,16 @@ const SuppLinkCellRenderer = connect(
     };
 
     return (
-      <>
-        {hasSuppData ? (
-          <Button
-            isOutline
-            size='small'
-            variant='info'
-            title='Associated Supplemental Data Entries'
-            text={'View Data'}
-            icon={<Icon icon='dots-horizontal' />}
-            handleClick={() => handleAddRow(false)}
-            isDisabled={isButtonDisabled()}
-          />
-        ) : (
-          <Button
-            isOutline
-            size='small'
-            variant='success'
-            title='Associated Supplemental Data Entries'
-            text={'Add Data'}
-            icon={<Icon icon='plus' />}
-            handleClick={() => handleAddRow(true)}
-            isDisabled={isButtonDisabled()}
-          />
-        )}
-        
-      </>
+      <Button
+        isOutline
+        size='small'
+        variant={hasSuppData ? 'info' : 'success'}
+        title='Associated Supplemental Data Entries'
+        text={hasSuppData ? 'View Data' : 'Add Data'}
+        icon={<Icon icon={hasSuppData ? 'dots-horizontal' : 'plus'} />}
+        handleClick={handleClick}
+        isDisabled={isButtonDisabled()}
+      />
     );
   });
 
