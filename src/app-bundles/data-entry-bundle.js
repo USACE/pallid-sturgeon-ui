@@ -212,6 +212,9 @@ export default {
             type: 'missouriRiver',
           },
         });
+
+        // Update base data
+        store.doSitesFetch(body?.items?.[0]?.siteId);
         dispatch({ type: 'UPDATE_BASE_DATA', payload: { mrId: body?.items?.[0]?.mrId, mrFid: body?.items?.[0]?.mrFid } });
 
         if (store.selectDataEntryTotalCount() === 0) {
@@ -242,6 +245,9 @@ export default {
           payload: body,
         });
 
+        // Update base data
+        store.doSitesFetch(body?.items?.[0]?.siteId);
+
         if (store.selectDataEntryFishTotalCount() === 0) {
           if (ignoreToast) { tWarning(toastId, 'No Fish datasheet(s) found.'); }
         } else {
@@ -270,6 +276,9 @@ export default {
           payload: body,
         });
 
+        // Update base data
+        store.doSitesFetch(body?.items?.[0]?.siteId);
+
         if (store.selectDataEntrySupplementalTotalCount() === 0) {
           if (ignoreToast) { tWarning(toastId, 'No Supplemental datasheet(s) found.'); }
         } else {
@@ -297,6 +306,9 @@ export default {
           type: 'DATA_ENTRY_UPDATE_PROCEDURE_DATA',
           payload: body,
         });
+
+        // Update base data
+        store.doSitesFetch(body?.items?.[0]?.siteId);
 
         if (store.selectDataEntryProcedureTotalCount() === 0) {
           if (ignoreToast) { tWarning(toastId, 'No Procedure datasheet(s) found.'); }
@@ -329,6 +341,9 @@ export default {
           },
         });
 
+        // Update base data
+        store.doSitesFetch(body?.items?.[0]?.siteId);
+
         if (store.selectDataEntryTotalCount() === 0) {
           if (ignoreToast) { tWarning(toastId, 'No Search Effort datasheet(s) found'); }
         } else {
@@ -356,6 +371,9 @@ export default {
           type: 'DATA_ENTRY_UPDATE_TELEMETRY_DATA',
           payload: body,
         });
+
+        // Update base data
+        store.doSitesFetch(body?.items?.[0]?.siteId);
 
         if (store.selectDataEntryTelemetryTotalCount() === 0) {
           if (ignoreToast) { tWarning(toastId, 'No Telemetry datasheet(s) found.'); }
