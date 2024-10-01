@@ -29,16 +29,20 @@ const TelemetryDsTable = connect(
   'selectDataEntryTelemetryData',
   'selectDataEntryLastParams',
   'selectUserRole',
+  'selectBaseData',
   ({
     doModalOpen,
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
     dataEntryTelemetryData,
     dataEntryLastParams,
-    userRole
+    userRole,
+    baseData
   }) => {
     const { items } = dataEntryTelemetryData;
     const gridRef = useRef();
+
+    const rowData = items?.map(item => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
 
     const lastRow = dataEntryTelemetryData.items[dataEntryTelemetryData.totalCount - 1];
     const initialState = {
@@ -46,7 +50,7 @@ const TelemetryDsTable = connect(
     };
 
     const addRow = useCallback(() => {
-      gridRef.current.api.applyTransaction({ add: [{}] });
+      gridRef.current.api.applyTransaction({ add: [{ bendRiverMile: baseData?.bendRiverMile }] });
     }, []);
 
     const copyLastRow = () => {
@@ -107,7 +111,7 @@ const TelemetryDsTable = connect(
             editType='fullRow'
             onRowValueChanged={({ data }) => !data.tId ? doSaveTelemetryDataEntry({...initialState ,...data}, { seId: dataEntryLastParams.seId, id: userRole.id }) : doUpdateTelemetryDataEntry(data, { seId: dataEntryLastParams.seId, id: userRole.id })}
             rowHeight={35}
-            rowData={items}
+            rowData={rowData}
             frameworkComponents={{
               editCellRenderer: EditCellRenderer,
               selectEditor: SelectEditor,
@@ -137,6 +141,7 @@ const TelemetryDsTable = connect(
             />
             <AgGridColumn field='tFid' sortable unSortIcon />
             <AgGridColumn field='bend' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='bendRiverMile' sortable unSortIcon editable={false} />
             <AgGridColumn field='radioTagNum' headerName='Radio Tag #' cellEditor='numberEditor' cellEditorParams={{ isRequired: true }} width={125} sortable unSortIcon />
             <AgGridColumn field='frequencyIdCode' headerName='Frequency Id' cellEditor='selectEditor' cellEditorParams={{  options: frequencyIdOptions, type: 'number', isRequired: true }} width={125} sortable unSortIcon />
             <AgGridColumn field='captureDate' headerName='Capture Time' width={125} sortable unSortIcon />
