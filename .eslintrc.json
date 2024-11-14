@@ -1,4 +1,7 @@
 {
+  "ignorePatterns": [
+    "vite.config.mjs"
+  ],
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module",
@@ -10,21 +13,27 @@
     "react"
   ],
   "rules": {
-    "semi": "error",
+    "semi": "warn",
+    "no-extra-semi": "warn",
+    "no-unused-vars": "warn",
+    "no-use-before-define": 2,
     "quotes": [
-      "error",
-      "single"
+      "warn",
+      "single",
+      {
+        "avoidEscape": true
+      }
     ],
     "jsx-quotes": [
-      "error",
+      "warn",
       "prefer-single"
     ],
     "arrow-body-style": [
-      "error",
+      "warn",
       "as-needed"
     ],
     "indent": [
-      "error",
+      "warn",
       2,
       {
         "VariableDeclarator": "first",
