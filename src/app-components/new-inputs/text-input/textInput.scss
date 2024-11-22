@@ -1,0 +1,8 @@
+@import '@styles/mixins.scss';
+
+input.usa-input {
+  @include input-styles;
+  padding: 0rem .4rem;
+  overflow-x: hidden !important;
+  text-overflow: ellipsis !important;
+}

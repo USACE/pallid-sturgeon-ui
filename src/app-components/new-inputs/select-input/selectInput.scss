@@ -1,0 +1,41 @@
+@import '@styles/_mixins';
+@import '@styles/_variables';
+
+@mixin select-container-styles {
+  padding: 0;
+  position: relative;
+
+  .usa-select {
+    @include input-styles;
+    margin-top: 0;
+    // width: 100%;
+
+    &.usa-select:disabled {
+      background-color: $color-primary-light;
+      cursor: default;
+    }
+  }
+
+  &.is-invalid {
+    select {
+      border: 1px solid $color-error;
+      padding-right: 3.25rem;
+    }
+
+    &:after {
+      @include input-error-icon;
+      background-position: right 0 top 0rem;
+      content: '';
+      height: 1.2rem;
+      left: calc(100% - 3rem);
+      pointer-events: none;
+      position: absolute;
+      top: 0.55rem;
+      width: 1.2rem;
+    }
+  }
+}
+
+.select-container {
+  @include select-container-styles;
+}

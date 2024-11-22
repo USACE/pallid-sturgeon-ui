@@ -1,23 +1,34 @@
 // Colors
-$color-primary:             #6fc3db;
-$color-primary-light:       #e3eef1;
-$color-primary-dark:        #2c3e50;
+$color-primary: #6fc3db;
+$color-primary-light: #e3eef1;
+$color-primary-dark: #2c3e50;
 
-$color-gray:                #5e5e5e;
-$color-gray-light:          #a7a7a7;
-$color-gray-dark:           #454545;
+$color-gray: #5e5e5e;
+$color-gray-light: #a7a7a7;
+$color-gray-dark: #454545;
 
-$color-white:               #ffffff;
-$color-black:               #000000;
+$color-white: #ffffff;
+$color-black: #000000;
 
+$color-success: #68a072;
+$color-success-hover: #578b60;
 
-$color-success:             #68A072;
-$color-success-hover:       #578B60;
+// Error State
+$color-error: #e74c3c;
+$color-error-asterisk: #ef0000;
+$color-error-border: #d54309;
+$color-error-light: #f4e3db;
 
-$color-error:               #e74c3c;
+// Links
+$link-color: #005ea2;
+$link-logout: #565c65;
+
+// Inputs
+$input-border: #ccc;
+$input-error-border: #d54309;
 
 // Sizes for media queries
-$small-screen-width:               576px;
-$medium-screen-width:              768px;
-$large-screen-width:               992px;
-$extra-large-screen-width:         1200px;
+$small-screen-width: 576px;
+$medium-screen-width: 768px;
+$large-screen-width: 992px;
+$extra-large-screen-width: 1200px;

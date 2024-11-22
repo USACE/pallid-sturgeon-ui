@@ -7,11 +7,11 @@ import Icon from '@components/icon';
 import Pagination from '@components/pagination';
 import Select from '@components/select';
 import SitesListTable from './sites-list-table';
-import SitesFormModal from './modals/sitesForm';
+import SitesFormModal from './site-form-modal/SitesFormModal';
 
 import {
   createDropdownOptions,
-  createBendsDropdownOptions,
+  // createBendsDropdownOptions,
 } from '../../helpers';
 import { dropdownYearsToNow } from '@src/utils';
 
@@ -72,10 +72,10 @@ const SitesList = connect(
     }, [yearFilter, bendValue, seasonFilter, segmentFilter]);
 
     // Load data
-    useEffect(() => {
-      doDomainSegmentsFetch();
-      doDomainSeasonsFetch();
-    }, []);
+    // useEffect(() => {
+    //   doDomainSegmentsFetch();
+    //   doDomainSeasonsFetch();
+    // }, []);
 
     return (
       <>
@@ -153,7 +153,7 @@ const SitesList = connect(
               />
             </div>
           </div>
-          <div className='col-sm-4 col-xs-12'>
+          {/* <div className='col-sm-4 col-xs-12'>
             <div className='form-group'>
               <FilterSelect
                 ref={bendRef}
@@ -166,7 +166,7 @@ const SitesList = connect(
                 items={createBendsDropdownOptions(bends)}
               />
             </div>
-          </div>
+          </div> */}
           <div className='col-sm-2 col-xs-12 align-self-end pl-1 pb-3'>
             <Button
               isOutline

@@ -1,15 +1,45 @@
 import { connect } from 'redux-bundler-react';
 
 import Button from '@components/button';
-import SitesFormModal from '@pages/data-entry/sites-list/components/modals/sitesForm';
+import SitesFormModal from '@src/app-pages/data-entry/sites-list/components/site-form-modal/SitesFormModal';
 
 const SiteIdCellRenderer = connect(
+  'doDomainFieldOfficesFetch',
+  'doDomainBendRnFetch',
+  'doDomainSegmentsFetch',
+  'doFetchUsers',
+  'doDomainSeasonsFetch',
   'doSitesFetch',
   'doUpdateUrl',
   'doModalOpen',
-  ({ doSitesFetch, doUpdateUrl, doModalOpen, edit, data, value }) => {
+  ({
+    doDomainFieldOfficesFetch,
+    doDomainBendRnFetch,
+    doDomainSegmentsFetch,
+    doFetchUsers,
+    doDomainSeasonsFetch,
+    doSitesFetch,
+    doUpdateUrl,
+    doModalOpen,
+    edit,
+    data,
+    value,
+  }) => {
     const handleCallback = () => {
       doUpdateUrl('/sites-list/datasheet');
+    };
+
+    const handleClick = () => {
+      if (edit) {
+        doDomainFieldOfficesFetch();
+        doDomainBendRnFetch();
+        doFetchUsers();
+        doDomainSeasonsFetch();
+        doDomainSegmentsFetch();
+        doModalOpen(SitesFormModal, { edit: true, data: data });
+      } else {
+        doSitesFetch({ siteId: data?.siteId }, handleCallback());
+      }
     };
 
     return (
@@ -18,11 +48,7 @@ const SiteIdCellRenderer = connect(
         variant='link'
         className='p-0 mb-1'
         text={value}
-        handleClick={() =>
-          edit
-            ? doModalOpen(SitesFormModal, { edit: true, id: value })
-            : doSitesFetch({ siteId: data?.siteId }, handleCallback())
-        }
+        handleClick={() => handleClick()}
       />
     );
   }

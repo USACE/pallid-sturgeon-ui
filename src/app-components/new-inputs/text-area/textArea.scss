@@ -1,0 +1,26 @@
+@import '@styles/_mixins';
+
+.textarea-container {
+  .usa-textarea {
+    @include input-styles;
+    padding-right: 2rem;
+
+    &.usa-textarea:read-only {
+      color: $color-primary-dark;
+      background-color: $color-primary-light !important;
+    }
+  }
+  .usa-character-count__status {
+    font-size: 0.9rem;
+    padding-top: 0;
+  }
+  .usa-hint {
+    margin-top: 0.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+textarea.usa-textarea.read-only-multiselect {
+  @include input-styles;
+  background-color: $color-primary-light !important;
+}
