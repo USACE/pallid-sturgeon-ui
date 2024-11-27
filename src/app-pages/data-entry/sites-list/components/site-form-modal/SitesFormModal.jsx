@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { connect } from 'redux-bundler-react';
-import { Grid } from '@trussworks/react-uswds';
+import { Alert, Grid } from '@trussworks/react-uswds';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -11,16 +11,16 @@ import TextInput from '@components/new-inputs/text-input/TextInput';
 import TextArea from '@components/new-inputs/text-area/TextArea';
 import SelectInput from '@components/new-inputs/select-input/SelectInput';
 import ComboBox from '@components/new-inputs/combo-box/ComboBox';
+import Card from '@components/card';
+import ErrorSummary from '@components/error-summary/ErrorSummary';
 
-import {
-  createDropdownOptions,
-  createCustomCodeDropdownOptions,
-} from '@pages/data-entry/helpers';
+import { createDropdownOptions } from '@pages/data-entry/helpers';
 import { dropdownYearsToNow } from '@src/utils';
 import {
   sampleUnitTypeProject1,
   sitesFormTooltipContent,
 } from './sitesFormModalHelper';
+import { ValidationMessages } from '@src/utils/enums';
 
 const SitesFormModal = connect(
   'doDomainBendsFetch',
@@ -52,6 +52,22 @@ const SitesFormModal = connect(
     } = domains;
 
     const user = usersData.find((user) => userRole.id === user.id);
+    const currentYear = new Date().getFullYear();
+
+    // Additional fields need to be provided for updating site data
+    const additionalValues = {
+      approved: data?.approved ?? '',
+      bendRiverMile: data?.bendRiverMile ?? '',
+      bkgColor: data?.bkgColor ?? '',
+      brmId: data?.brmId ?? '',
+      complete: data?.complete ?? '',
+      lastUpdated: data?.lastUpdated ?? '',
+      siteFid: data?.siteFid ?? '',
+      siteId: data?.siteId ?? '',
+      uploadFilename: data?.uploadFilename ?? '',
+      uploadSessionId: data?.uploadSessionId ?? '',
+      uploadedBy: data?.uploadedBy ?? '',
+    };
 
     const bendComboOptions = useMemo(
       () =>
@@ -76,35 +92,47 @@ const SitesFormModal = connect(
     );
 
     const defaultValues = {
-      year: data?.year ?? null,
-      fieldoffice: data?.fieldoffice ?? null, // @TODO: double check logic for user's field office
-      projectId: data?.projectId ?? null, // @TODO: double check logic for user's field office
+      edit: edit ?? false,
+      year: data?.year ?? String(currentYear),
+      fieldoffice: edit
+        ? data?.fieldoffice
+        : user?.officeCode === 'ZZ'
+        ? ''
+        : user?.officeCode,
+      projectId: edit ? data?.projectId : user?.projectCode,
       segmentId: data?.segmentId
         ? segmentComboOptions.filter(
             (item) => item.value === data.segmentId
           )?.[0]
-        : null,
-      season: data?.season ?? null,
-      sampleUnitType: data?.sampleUnitType ?? null,
+        : '',
+      season: data?.season ?? '',
+      sampleUnitType: data?.sampleUnitType ?? '',
       bend: data?.bend
         ? bendComboOptions.filter((item) => item.value === data.bend)?.[0]
-        : null,
-      bendrn: data?.bendrn ?? null,
-      last_edit_comment: data?.last_edit_comment ?? null,
-      editInitials: data?.editInitials ?? null,
+        : '',
+      bendrn: data?.bendrn ?? '',
+      last_edit_comment: data?.last_edit_comment ?? '',
+      editInitials: data?.editInitials ?? '',
     };
 
     const schema = yup.object().shape({
-      year: yup.string().required('Value is required'),
-      fieldoffice: yup.string().required('Value is required'),
-      projectId: yup.string().required('Value is required'),
-      season: yup.string().required('Value is required'),
-      segmentId: yup.object().required('Value is required'),
-      sampleUnitType: yup.string().required('Value is required'),
-      bend: yup.object().required('Value is required'),
-      bendrn: yup.string().required('Value is required'),
-      last_edit_comment: yup.string().required('Value is required'),
-      editInitials: yup.string().required('Value is required'),
+      edit: yup.boolean(),
+      year: yup.string().required(ValidationMessages.FieldRequired),
+      fieldoffice: yup.string().required(ValidationMessages.FieldRequired),
+      projectId: yup.string().required(ValidationMessages.FieldRequired),
+      season: yup.string().required(ValidationMessages.FieldRequired),
+      segmentId: yup.object().required(ValidationMessages.FieldRequired),
+      sampleUnitType: yup.string().required(ValidationMessages.FieldRequired),
+      bend: yup.object().required(ValidationMessages.FieldRequired),
+      bendrn: yup.string().required(ValidationMessages.FieldRequired),
+      last_edit_comment: yup.string().when('edit', {
+        is: true,
+        then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      }),
+      editInitials: yup.string().when('edit', {
+        is: true,
+        then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      }),
     });
 
     const methods = useForm({
@@ -119,6 +147,7 @@ const SitesFormModal = connect(
       watch,
       getValues,
       trigger,
+      setValue,
     } = methods;
 
     const office = watch('fieldoffice');
@@ -127,19 +156,72 @@ const SitesFormModal = connect(
     const segment = watch('segmentId');
     const bend = watch('bend');
 
-    const sampleUnitOptions =
-      project === 1
-        ? sampleUnitTypeProject1
-        : createCustomCodeDropdownOptions(sampleUnitTypes);
+    const sampleUnitOptions = useMemo(
+      () =>
+        project === 1
+          ? sampleUnitTypeProject1
+          : sampleUnitTypes?.map((item) => ({
+              value: item.code,
+              text: `${item.code} - ${item.description}`,
+            })),
+      []
+    );
+
+    const handleChange = (e) => {
+      // If you want to access the event properties in an asynchronous way,
+      // you should call event.persist() on the event
+      e?.persist();
+
+      const name = e?.target?.name;
+
+      if (name === 'projectId') {
+        setValue('segmentId', null);
+        setValue('season', null);
+        setValue('sampleUnitType', null);
+        doDomainSegmentsFetch();
+      }
+
+      if (name === 'fieldoffice') {
+        setValue('segmentId', null);
+        doDomainSegmentsFetch();
+      }
+
+      if (name === 'segmentId') {
+        setValue('bend', null);
+        doDomainBendsFetch({
+          sampleUnitType: sampleUnitType,
+          segment: segment?.value,
+        });
+      }
+
+      if (name === 'sampleUnitType') {
+        setValue('bend', null);
+        doDomainBendsFetch({
+          sampleUnitType: sampleUnitType,
+          segment: segment?.value,
+        });
+      }
+    };
 
     const handleSave = () => {
       if (isValid) {
         const values = getValues();
+        const castedValues = {
+          ...values,
+          segmentId: values.segmentId.value,
+          bend: values.bend.value,
+          projectId: Number(values.projectId),
+          year: Number(values.year),
+        };
         edit
-          ? doUpdateSite(values)
+          ? doUpdateSite({ ...castedValues, ...additionalValues })
           : doPostNewSite(
-              { code: bend, sampleUnitType: sampleUnitType, segment: segment },
-              values
+              {
+                code: castedValues.bend,
+                sampleUnitType: sampleUnitType,
+                segment: castedValues.segmentId,
+              },
+              castedValues
             );
       } else {
         trigger();
@@ -149,7 +231,6 @@ const SitesFormModal = connect(
     // Update Bend options if segmentId and sampleUnitType values change
     useEffect(() => {
       if (segment && sampleUnitType) {
-        // setValue('bend', null);
         doDomainBendsFetch({
           sampleUnitType: sampleUnitType,
           segment: segment?.value,
@@ -159,10 +240,7 @@ const SitesFormModal = connect(
 
     // Update Segment options if fieldoffice and projectId values change
     useEffect(() => {
-      // Clear Segment and Bend values
       if (office && project) {
-        // setValue('segmentId', null);
-        // setValue('bend', null);
         doDomainSegmentsFetch();
       }
     }, [office, project]);
@@ -179,27 +257,54 @@ const SitesFormModal = connect(
       <ModalContent size='lg'>
         <FormProvider {...methods}>
           <ModalHeader title={edit ? 'Update Site' : 'Create New Site'} />
-          <section className='modal-body'>
-            <div className='container-fluid'>
+          {errors && (
+            <ErrorSummary
+              errors={errors}
+              modalID='siteFormModal'
+              type='modal'
+            />
+          )}
+          <section className='modal-body' id='siteFormModal'>
+            <div className='container-fluid margin-top-1'>
+              {user?.role !== 'ADMINISTRATOR' && (
+                <Card>
+                  <Card.Body>
+                    <Grid row>
+                      <Grid tablet={{ col: 6 }}>
+                        <p className='margin-bottom-0'>
+                          <span className='text-bold'>Field Office:</span>{' '}
+                          {
+                            fieldOffices?.filter(
+                              (item) => item.code === office
+                            )?.[0]?.description
+                          }
+                        </p>
+                      </Grid>
+                      <Grid tablet={{ col: 6 }}>
+                        <p className='margin-bottom-0'>
+                          <span className='text-bold'>Project:</span>{' '}
+                          {
+                            projects?.filter(
+                              (item) => item.code === Number(project)
+                            )?.[0]?.description
+                          }
+                        </p>
+                      </Grid>
+                    </Grid>
+                  </Card.Body>
+                </Card>
+              )}
               {!edit && (
-                <>
-                  <p>
-                    Please complete the following fields to create a new site.
-                  </p>
-                  <p>
-                    <span className='text-bold'>Note:</span> Some dropdown
-                    options are dependent from other fields.
-                  </p>
-                </>
+                <Alert noIcon slim className='callout'>
+                  Please complete the following fields to create a new site.
+                  <br></br>
+                  <span className='text-bold'>Note:</span> Some dropdown options
+                  are dependent from other fields.
+                </Alert>
               )}
               <Grid row gap='md'>
                 <Grid tablet={{ col: 4 }}>
-                  <SelectInput
-                    name='year'
-                    label='Year'
-                    defaultOption={new Date().getFullYear()}
-                    required
-                  >
+                  <SelectInput name='year' label='Year' required>
                     {dropdownYearsToNow().map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.value}
@@ -207,51 +312,57 @@ const SitesFormModal = connect(
                     ))}
                   </SelectInput>
                 </Grid>
-                <Grid tablet={{ col: 4 }}>
-                  <SelectInput
-                    name='fieldoffice'
-                    label='Field Office'
-                    defaultOption={
-                      office === 'ZZ' || office === '' ? '' : office
-                    }
-                    readOnly={user ? user.role !== 'ADMINISTRATOR' : false}
-                    required
-                  >
-                    {createDropdownOptions(fieldOffices).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </Grid>
-                <Grid tablet={{ col: 4 }}>
-                  <SelectInput
-                    name='projectId'
-                    label='Project'
-                    defaultOption={user ? user.projectCode : ''}
-                    readOnly={user ? user.role !== 'ADMINISTRATOR' : false}
-                    required
-                  >
-                    {createDropdownOptions(projects).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </Grid>
+                {user?.role === 'ADMINISTRATOR' && (
+                  <>
+                    <Grid tablet={{ col: 4 }}>
+                      <SelectInput
+                        name='fieldoffice'
+                        label='Field Office'
+                        onChange={handleChange}
+                        required
+                      >
+                        {createDropdownOptions(fieldOffices).map(
+                          (item, index) => (
+                            <option key={index + 1} value={item.value}>
+                              {item.text}
+                            </option>
+                          )
+                        )}
+                      </SelectInput>
+                    </Grid>
+                    <Grid tablet={{ col: 4 }}>
+                      <SelectInput
+                        name='projectId'
+                        label='Project'
+                        defaultOption={user ? user.projectCode : ''}
+                        onChange={handleChange}
+                        required
+                      >
+                        {createDropdownOptions(projects).map((item, index) => (
+                          <option key={index + 1} value={item.value}>
+                            {item.text}
+                          </option>
+                        ))}
+                      </SelectInput>
+                    </Grid>
+                  </>
+                )}
               </Grid>
               <ComboBox
                 label='Segment'
                 name='segmentId'
                 options={segmentComboOptions}
+                onChange={handleChange}
                 tooltip={sitesFormTooltipContent.segment}
-                readOnly={!office}
+                readOnly={!office || !project}
                 required
               />
               <SelectInput
                 name='season'
                 label='Season'
+                onChange={handleChange}
                 tooltip={sitesFormTooltipContent.season}
+                readOnly={!project}
                 required
               >
                 {createDropdownOptions(seasons).map((item, index) => (
@@ -263,7 +374,9 @@ const SitesFormModal = connect(
               <SelectInput
                 name='sampleUnitType'
                 label='Sample Unit Type'
+                onChange={handleChange}
                 tooltip={sitesFormTooltipContent.sampleUnitType}
+                readOnly={!project}
                 required
               >
                 {sampleUnitOptions.map((item, index) => (
@@ -275,10 +388,9 @@ const SitesFormModal = connect(
               <ComboBox
                 label='Sample Unit'
                 name='bend'
-                placeholder='Select sample unit...'
                 options={bendComboOptions}
-                defaultValue={bend}
                 tooltip={sitesFormTooltipContent.sampleUnit}
+                readOnly={!segment || !sampleUnitType}
                 required={bend !== 0}
               />
               <SelectInput name='bendrn' label='Bend R/N' required>
@@ -293,14 +405,14 @@ const SitesFormModal = connect(
                   <TextArea
                     name='last_edit_comment'
                     label='Comments'
-                    required
+                    required={edit}
                   />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
                   <TextInput
                     name='editInitials'
                     label='Recorder Initials'
-                    required
+                    required={edit}
                   />
                 </Grid>
               </Grid>

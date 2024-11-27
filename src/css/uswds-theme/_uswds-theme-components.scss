@@ -95,3 +95,20 @@ div.usa-label {
     background-color: transparent;
   }
 }
+
+div.usa-alert {
+  &.callout {
+    border-left-color: #ccc;
+
+    &.usa-alert--no-icon {
+      .usa-alert__body {
+        padding-left: 1rem;
+      }
+    }
+  }
+
+  .usa-alert__body {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+}

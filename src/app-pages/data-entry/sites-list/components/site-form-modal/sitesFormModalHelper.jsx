@@ -16,9 +16,6 @@ export const sitesFormTooltipContent = {
         <li>Click on input box and select option from dropdown, or </li>
         <li>Search for option by typing in the box.</li>
       </ol>
-      <p className='margin-bottom-0'>
-        Click the 'x' button to clear the input field.
-      </p>
     </>
   ),
   sampleUnitType: (
@@ -46,9 +43,6 @@ export const sitesFormTooltipContent = {
         <li>Click on input box and select option from dropdown, or </li>
         <li>Search for option by typing in the box.</li>
       </ol>
-      <p className='margin-bottom-0'>
-        Click the 'x' button to clear the input field.
-      </p>
     </>
   ),
 };

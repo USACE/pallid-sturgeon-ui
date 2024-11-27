@@ -1,12 +1,8 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import Select from 'react-select';
-
 import { Label, Tooltip } from '@trussworks/react-uswds';
 
-import {
-  customSelectStyles,
-  customSelectStylesNonRequired,
-} from './comboBoxHelper';
+import { baseStyle, customSelectStyles, customSelectStylesNonRequired } from './comboBoxHelper';
 
 import Icon from '@components/icon';
 
@@ -27,14 +23,11 @@ const ComboBox = ({
   const {
     control,
     formState: { errors },
-    getValues,
   } = useFormContext();
 
   const inputError = errors[name];
 
-  const errorStyle = required
-    ? customSelectStyles
-    : customSelectStylesNonRequired;
+  const errorStyle = required ? customSelectStyles : customSelectStylesNonRequired;
 
   return (
     <>
@@ -47,10 +40,7 @@ const ComboBox = ({
         )}
         {tooltip && (
           <Tooltip label={tooltip} position='right'>
-            <Icon
-              icon='help-circle'
-              style={{ fontSize: '16px', marginBottom: '8px' }}
-            />
+            <Icon icon='help-circle' style={{ fontSize: '16px', marginBottom: '8px' }} />
           </Tooltip>
         )}
       </Label>
@@ -80,7 +70,7 @@ const ComboBox = ({
               readOnly={readOnly}
               required={required}
               ref={ref}
-              styles={inputError ? errorStyle : {}}
+              styles={inputError ? errorStyle : baseStyle}
               value={value}
             />
           </>

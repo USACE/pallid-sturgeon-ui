@@ -1,6 +1,8 @@
 import { useCallback, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
+import './modal.scss';
+
 const Modal = connect(
   'doModalClose',
   'selectModalContent',

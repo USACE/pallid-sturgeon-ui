@@ -1,4 +1,16 @@
 // To make multi select look like other elements
+export const baseStyle = {
+  control: (base, state) => ({
+    ...base,
+    border: '1px solid #6fc3db',
+    borderColor: state.isFocused ? '#6fc3db' : '#6fc3db',
+    boxShadow: state.isFocused ? '0 0 0 2px rgb(36,145,255)' : 'none',
+    '&:hover': {
+      borderColor: state.isFocused ? '#ccc' : '#6fc3db',
+    },
+  }),
+};
+
 export const customSelectStyles = {
   control: (base, state) => ({
     ...base,

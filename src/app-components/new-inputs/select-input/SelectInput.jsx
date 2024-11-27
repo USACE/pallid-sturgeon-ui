@@ -14,8 +14,8 @@ const SelectInput = ({
   showOptionalText = true,
   label,
   name,
-  onBlur,
-  onChange,
+  onBlur = () => {},
+  onChange = () => {},
   options = [],
   readOnly,
   required,
@@ -42,10 +42,7 @@ const SelectInput = ({
 
   const { ref: selectRef, ...rest } = register(name, {
     onBlur,
-    onChange: async (e) => {
-      await trigger(name);
-      onChange?.(e);
-    },
+    onChange,
     ...validations,
   });
 
