@@ -1,20 +1,15 @@
 import ReactTooltip from 'react-tooltip';
+import { mdiHelpCircleOutline } from '@mdi/js';
 
-import Icon from '@components/icon';
 import Select from '@components/select/select';
 import FilterSelect from '@components/filter-select/filter-select';
+import Icon from '@components/icon/icon';
 
-import '../../../dataentry.scss';
+import '@pages/data-entry/dataentry.scss';
 
 export const Row = ({ children, className }) => {
   const classNameString = className ? className : '';
-  return (
-    <div
-      className={`row d-flex align-items-center w-100 mt-1 pb-1 ${classNameString}`}
-    >
-      {children}
-    </div>
-  );
+  return <div className={`row d-flex align-items-center w-100 mt-1 pb-1 ${classNameString}`}>{children}</div>;
 };
 
 export const Input = ({
@@ -43,9 +38,7 @@ export const Input = ({
         )}
         <div className={`d-flex flex-${helperDirection} w-100`}>
           <input
-            className={`form-control w-100 mt-1${
-              showRequired ? ' is-invalid' : ''
-            }`}
+            className={`form-control w-100 mt-1${showRequired ? ' is-invalid' : ''}`}
             id={name}
             name={name}
             disabled={isDisabled}
@@ -55,10 +48,7 @@ export const Input = ({
             step={step}
             placeholder={placeholder}
           />
-          <p
-            className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'}
-            style={{ fontSize: 'smaller' }}
-          >
+          <p className={helperDirection === 'row' ? 'm-0 ml-2' : 'm-0'} style={{ fontSize: 'smaller' }}>
             <i>{helperText}</i>
           </p>
         </div>
@@ -88,16 +78,7 @@ export const Input = ({
   }
 };
 
-export const TextArea = ({
-  value,
-  name,
-  label,
-  onChange,
-  rowCount = 3,
-  className = '',
-  isRequired,
-  isDisabled,
-}) => {
+export const TextArea = ({ value, name, label, onChange, rowCount = 3, className = '', isRequired, isDisabled }) => {
   const isDataGap = value === 'Data Gap';
   const displayValue = isDataGap ? '' : value;
   const showRequired = isRequired && !value;
@@ -152,7 +133,7 @@ export const SelectCustomLabel = ({
         {hasHelperIcon && (
           <>
             <Icon
-              icon='help-circle-outline'
+              path={mdiHelpCircleOutline}
               data-tip
               data-for={helperIconId}
               style={{ fontSize: '15px', marginBottom: '8px' }}
@@ -190,7 +171,7 @@ export const SelectCustomLabel = ({
         {hasHelperIcon && (
           <>
             <Icon
-              icon='help-circle-outline'
+              path={mdiHelpCircleOutline}
               data-tip
               data-for={helperIconId}
               style={{ fontSize: '15px', marginBottom: '8px' }}

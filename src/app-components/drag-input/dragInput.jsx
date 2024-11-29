@@ -1,16 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { mdiClose } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
 import FileDetails from './fileDetails';
+import Icon from '@components/icon/icon';
 
 import './dragInput.scss';
 
-const DragInput = ({
-  text = "Drag 'n' drop your file here, or click to select a file",
-  onChange = (_file) => {},
-}) => {
+const DragInput = ({ text = "Drag 'n' drop your file here, or click to select a file", onChange = (_file) => {} }) => {
   const [currentFile, setCurrentFile] = useState(null);
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     accept:
@@ -49,7 +47,7 @@ const DragInput = ({
           handleClick={(e) => {
             setCurrentFile(null);
           }}
-          icon={<Icon icon='close' />}
+          icon={<Icon path={mdiClose} focusable={false} />}
         />
       )}
     </div>

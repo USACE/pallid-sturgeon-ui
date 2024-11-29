@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
+import { mdiMagnify } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
 
 const SearchInput = ({
   placeholder = 'Enter Search Text...',
@@ -39,7 +40,7 @@ const SearchInput = ({
           size='small'
           variant='info'
           title='Search Reports'
-          icon={<Icon icon='magnify' />}
+          icon={<Icon path={mdiMagnify} />}
           handleClick={() => handleSearch(input)}
         />
       </div>

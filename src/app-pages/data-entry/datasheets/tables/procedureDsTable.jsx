@@ -1,9 +1,11 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { mdiDownload } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
+
 import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
 import TextEditor from '@common/gridCellEditors/textEditor';
 import SelectEditor from '@common/gridCellEditors/selectEditor';
@@ -48,16 +50,10 @@ const ProcedureDsTable = connect(
     const setDates = useCallback((id) => {
       const rowNode = gridRef.current.api.getRowNode(String(id));
       if (rowNode.data.procedureDate) {
-        rowNode.setDataValue(
-          'procedureDate',
-          rowNode.data.procedureDate.split('T')[0]
-        );
+        rowNode.setDataValue('procedureDate', rowNode.data.procedureDate.split('T')[0]);
       }
       if (rowNode.data.dstStartDate) {
-        rowNode.setDataValue(
-          'dstStartDate',
-          rowNode.data.dstStartDate.split('T')[0]
-        );
+        rowNode.setDataValue('dstStartDate', rowNode.data.dstStartDate.split('T')[0]);
       }
     }, []);
 
@@ -96,14 +92,11 @@ const ProcedureDsTable = connect(
           size='small'
           variant='info'
           text='Export as CSV'
-          icon={<Icon icon='download' />}
+          icon={<Icon path={mdiDownload} />}
           isDisabled
           // handleClick={() => doFetchAllDatasheet('search-datasheet')}
         />
-        <div
-          className='ag-theme-balham mt-2'
-          style={{ width: '100%', height: '600px' }}
-        >
+        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             getRowNodeId={(params) => String(params.sid)}
             ref={gridRef}
@@ -138,27 +131,9 @@ const ProcedureDsTable = connect(
               }}
               editable={false}
             />
-            <AgGridColumn
-              field='id'
-              headerName='P ID'
-              sortable
-              unSortIcon
-              editable={false}
-            />
-            <AgGridColumn
-              field='sid'
-              headerName='S ID'
-              sortable
-              unSortIcon
-              editable={false}
-            />
-            <AgGridColumn
-              field='fid'
-              headerName='F ID'
-              sortable
-              unSortIcon
-              editable={false}
-            />
+            <AgGridColumn field='id' headerName='P ID' sortable unSortIcon editable={false} />
+            <AgGridColumn field='sid' headerName='S ID' sortable unSortIcon editable={false} />
+            <AgGridColumn field='fid' headerName='F ID' sortable unSortIcon editable={false} />
             <AgGridColumn field='fFid' resizable sortable unSortIcon />
             <AgGridColumn field='mrFid' resizable sortable unSortIcon />
             <AgGridColumn
@@ -324,22 +299,8 @@ const ProcedureDsTable = connect(
               sortable
               unSortIcon
             />
-            <AgGridColumn
-              field='comments'
-              cellEditor='textEditor'
-              width={200}
-              resizable
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='fishHealthComment'
-              cellEditor='textEditor'
-              width={200}
-              resizable
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='comments' cellEditor='textEditor' width={200} resizable sortable unSortIcon />
+            <AgGridColumn field='fishHealthComment' cellEditor='textEditor' width={200} resizable sortable unSortIcon />
             <AgGridColumn
               field='evalLocation'
               cellEditor='selectEditor'
@@ -372,27 +333,9 @@ const ProcedureDsTable = connect(
               sortable
               unSortIcon
             />
-            <AgGridColumn
-              field='expectedSpawnYear'
-              cellEditor='numberEditor'
-              width={175}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='ultrasoundGonadLength'
-              cellEditor='numberEditor'
-              width={175}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='gonadCondition'
-              cellEditor='textEditor'
-              width={150}
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='expectedSpawnYear' cellEditor='numberEditor' width={175} sortable unSortIcon />
+            <AgGridColumn field='ultrasoundGonadLength' cellEditor='numberEditor' width={175} sortable unSortIcon />
+            <AgGridColumn field='gonadCondition' cellEditor='textEditor' width={150} sortable unSortIcon />
             <AgGridColumn
               field='lastEditComment'
               cellEditor='textEditor'
@@ -410,13 +353,7 @@ const ProcedureDsTable = connect(
               sortable
               unSortIcon
             />
-            <AgGridColumn
-              field='uploadedBy'
-              width={200}
-              sortable
-              unSortIcon
-              editable={false}
-            />
+            <AgGridColumn field='uploadedBy' width={200} sortable unSortIcon editable={false} />
           </AgGridReact>
         </div>
       </div>

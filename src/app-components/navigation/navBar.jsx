@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
+import { mdiLogout, mdiMenuDown } from '@mdi/js';
 
 import Dropdown from '@components/dropdown';
-import Icon from '../icon';
 import NavItem from './navItem';
 import RoleFilter from '@components/role-filter';
+import Icon from '@components/icon/icon';
 
 import { classArray } from '@src/utils';
 import { projectMap } from '@pages/data-entry/helpers';
@@ -20,12 +21,7 @@ const dataSummaryLinks = [
   '/tag-replacement',
 ];
 
-const administrationLinks = [
-  '/data-query',
-  '/multiple-record-approval',
-  '/user-access-requests',
-  '/edit-user',
-];
+const administrationLinks = ['/data-query', '/multiple-record-approval', '/user-access-requests', '/edit-user'];
 
 const dataEntryLinks = ['/sites-list', '/find-data-sheet'];
 
@@ -40,9 +36,7 @@ const NavBar = connect(
   ({ doAuthenticate, authLoggedIn, userRole, pathname, usersData }) => {
     const [show, setShow] = useState(false);
     const isHome = pathname === '/';
-    const user = userRole
-      ? usersData.find((user) => userRole.id === user.id)
-      : {};
+    const user = userRole ? usersData.find((user) => userRole.id === user.id) : {};
 
     const navClasses = classArray([
       'navbar',
@@ -53,11 +47,7 @@ const NavBar = connect(
       !isHome && 'seperator',
     ]);
 
-    const navCollapseClasses = classArray([
-      'collapse',
-      'navbar-collapse',
-      show && 'show',
-    ]);
+    const navCollapseClasses = classArray(['collapse', 'navbar-collapse', show && 'show']);
 
     const toggleShow = () => setShow(!show);
 
@@ -78,37 +68,21 @@ const NavBar = connect(
         <div className={navCollapseClasses}>
           <ul className='navbar-nav ml-auto'>
             {authLoggedIn ? (
-              <RoleFilter
-                allowRoles={[
-                  'ADMINISTRATOR',
-                  'OFFICE ADMIN',
-                  'OFFICE USER',
-                  'READONLY',
-                ]}
-              >
+              <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER', 'READONLY']}>
                 <NavItem href={['/']}>Home</NavItem>
                 <NavItem href={dataSummaryLinks}>Data Summaries</NavItem>
-                <RoleFilter
-                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}
-                >
+                <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
                   <NavItem
                     href={dataEntryLinks}
-                    inlcudedLinks={[
-                      '/sites-list/create-new-site',
-                      '/sites-list/edit-site',
-                    ]}
+                    inlcudedLinks={['/sites-list/create-new-site', '/sites-list/edit-site']}
                   >
                     Data Entry
                   </NavItem>
                 </RoleFilter>
-                <RoleFilter
-                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}
-                >
+                <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
                   <NavItem href={['/data-upload']}>Data Upload</NavItem>
                 </RoleFilter>
-                <RoleFilter
-                  allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}
-                >
+                <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
                   <NavItem href={utilityLinks} asDropdown>
                     Utilities
                   </NavItem>
@@ -125,27 +99,18 @@ const NavBar = connect(
                       <span className='nav-link user'>
                         {user &&
                           Object.keys(user).length > 0 &&
-                          user.firstName +
-                            ' ' +
-                            user.lastName +
-                            ' (' +
-                            user.role +
-                            ')'}
+                          user.firstName + ' ' + user.lastName + ' (' + user.role + ')'}
                         <br></br>
                         {user &&
                           Object.keys(user).length > 0 &&
-                          user.officeCode +
-                            ' - Project ' +
-                            user.projectCode +
-                            ' - ' +
-                            projectMap[userRole.projectCode]}
+                          user.officeCode + ' - Project ' + user.projectCode + ' - ' + projectMap[userRole.projectCode]}
                         <>&nbsp;</>
-                        <Icon icon='menu-down' />
+                        <Icon path={mdiMenuDown} />
                       </span>
                     }
                   >
                     <Dropdown.Item href='/logout'>
-                      <Icon icon='logout' /> Logout
+                      <Icon path={mdiLogout} /> Logout
                     </Dropdown.Item>
                   </Dropdown.Menu>
                 </li>

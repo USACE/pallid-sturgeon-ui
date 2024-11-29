@@ -1,8 +1,9 @@
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { mdiDownload } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -20,13 +21,10 @@ const TelemetryTable = connect(
           size='small'
           variant='info'
           text='Export as CSV'
-          icon={<Icon icon='download' />}
+          icon={<Icon path={mdiDownload} />}
           handleClick={() => doFetchAllDatasheet('telemetry-datasheet')}
         />
-        <div
-          className='ag-theme-balham mt-2'
-          style={{ width: '100%', height: '600px' }}
-        >
+        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowData={data}
             defaultColDef={{
@@ -39,38 +37,13 @@ const TelemetryTable = connect(
             <AgGridColumn field='segment' sortable unSortIcon />
             <AgGridColumn field='season' sortable unSortIcon />
             <AgGridColumn field='bend' sortable unSortIcon />
-            <AgGridColumn
-              headerName='Telemetry ID'
-              field='tId'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              headerName='Search Effort ID'
-              field='seId'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              headerName='Site ID'
-              field='siteId'
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn headerName='Telemetry ID' field='tId' sortable unSortIcon />
+            <AgGridColumn headerName='Search Effort ID' field='seId' sortable unSortIcon />
+            <AgGridColumn headerName='Site ID' field='siteId' sortable unSortIcon />
             <AgGridColumn field='searchDate' sortable unSortIcon />
             <AgGridColumn field='searchDay' sortable unSortIcon />
-            <AgGridColumn
-              headerName='Radio Tag Number'
-              field='radioTagNum'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              headerName='Frequency'
-              field='frequencyIdCode'
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn headerName='Radio Tag Number' field='radioTagNum' sortable unSortIcon />
+            <AgGridColumn headerName='Frequency' field='frequencyIdCode' sortable unSortIcon />
             <AgGridColumn field='captureTime' sortable unSortIcon />
             <AgGridColumn field='captureLatitude' sortable unSortIcon />
             <AgGridColumn field='captureLongitude' sortable unSortIcon />

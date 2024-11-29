@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import ReactTooltip from 'react-tooltip';
+import { mdiHelpCircleOutline } from '@mdi/js';
 
-import Icon from '@components/icon';
 import Button from '@components/button';
 import Card from '@components/card';
 import Pagination from '@components/pagination/pagination';
 import Select from '@components/select';
 import TabContainer from '@components/tab';
+import Icon from '@components/icon/icon';
 
 import FishTable from './tables/fishTable';
 import MissouriRiverTable from './tables/missouriRiverTable';
@@ -45,9 +46,7 @@ export default connect(
     const [currentTab, setCurrentTab] = useState(0);
     const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
     const [monthFilter, setMonthFilter] = useState('');
-    const [projectFilter, setProjectFilter] = useState(
-      userRole ? userRole.projectCode : ''
-    );
+    const [projectFilter, setProjectFilter] = useState(userRole ? userRole.projectCode : '');
     const [approvalFilter, setApprovalFilter] = useState('');
     const [seasonFilter, setSeasonFilter] = useState('');
     const [speciesFilter, setSpeciesFilter] = useState(1);
@@ -56,14 +55,7 @@ export default connect(
 
     const { projects, seasons } = domains;
 
-    const tabs = [
-      'missouriRiverData',
-      'fishData',
-      'suppData',
-      'telemetryData',
-      'procedureData',
-      'searchData',
-    ];
+    const tabs = ['missouriRiverData', 'fishData', 'suppData', 'telemetryData', 'procedureData', 'searchData'];
 
     const clearAllFilters = () => {
       setYearFilter('');
@@ -133,10 +125,7 @@ export default connect(
                   className='d-block mt-1 mb-2'
                   onChange={(val) => setYearFilter(val)}
                   value={yearFilter}
-                  options={
-                    domainsYears &&
-                    domainsYears.map((item) => ({ value: item.year }))
-                  }
+                  options={domainsYears && domainsYears.map((item) => ({ value: item.year }))}
                   defaultValue={new Date().getFullYear()}
                 />
               </div>
@@ -149,9 +138,7 @@ export default connect(
                   onChange={(val) => setProjectFilter(val)}
                   value={projectFilter}
                   options={createDropdownOptions(projects)}
-                  defaultValue={
-                    userRole?.projectCode === '2' ? 2 : userRole?.projectCode
-                  }
+                  defaultValue={userRole?.projectCode === '2' ? 2 : userRole?.projectCode}
                   isDisabled={userRole?.projectCode === '2'}
                 />
               </div>
@@ -187,15 +174,15 @@ export default connect(
                   <small>Select Species</small>
                 </label>
                 <Icon
-                  icon='help-circle-outline'
+                  path={mdiHelpCircleOutline}
                   data-tip
                   data-for='helpSpecies'
                   style={{ fontSize: '15px', marginBottom: '8px' }}
                 />
                 <ReactTooltip id='helpSpecies' effect='solid' place='bottom'>
                   <span>
-                    The Species filter will <b>only apply</b> to the Missouri
-                    River, Fish, Supplemental, and Procedure datasheets.
+                    The Species filter will <b>only apply</b> to the Missouri River, Fish, Supplemental, and Procedure
+                    datasheets.
                   </span>
                 </ReactTooltip>
                 <Select
@@ -216,18 +203,16 @@ export default connect(
                   <small>Select Month</small>
                 </label>
                 <Icon
-                  icon='help-circle-outline'
+                  path={mdiHelpCircleOutline}
                   data-tip
                   data-for='helpMonth'
                   style={{ fontSize: '15px', marginBottom: '8px' }}
                 />
                 <ReactTooltip id='helpMonth' effect='solid' place='bottom'>
                   <span>
-                    The Month and Date Range filters will filter by{' '}
-                    <b>Set Date</b> for Missouri River, Fish, Supplemental, and
-                    Procedure datasheets,
-                    <br></br> and <b>Search Date</b> for Search Effort and
-                    Telemetry datasheets.
+                    The Month and Date Range filters will filter by <b>Set Date</b> for Missouri River, Fish,
+                    Supplemental, and Procedure datasheets,
+                    <br></br> and <b>Search Date</b> for Search Effort and Telemetry datasheets.
                   </span>
                 </ReactTooltip>
                 <Select
@@ -327,9 +312,7 @@ export default connect(
               className='mt-2'
               itemCount={(datasheetData[tabs[currentTab]] || {}).totalCount}
               defaultItemsPerPage='50'
-              handlePageChange={(pageNumber, pageSize) =>
-                doSetDatasheetPagination({ pageSize, pageNumber })
-              }
+              handlePageChange={(pageNumber, pageSize) => doSetDatasheetPagination({ pageSize, pageNumber })}
             />
           </Card.Body>
         </Card>

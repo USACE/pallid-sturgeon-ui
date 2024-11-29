@@ -1,59 +1,45 @@
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { mdiHelpCircle } from '@mdi/js';
 
 import Button from '@components/button';
 import Card from '@components/card';
-import Icon from '@components/icon';
 import Select from '@components/select';
-import { dropdownYearsToNow } from '@src/utils';
+import Icon from '@components/icon/icon';
 import RoleFilter from '@components/role-filter';
+
+import { dropdownYearsToNow } from '@src/utils';
 import { NoRoleAccessMessage } from './helper';
 
 const MultipleRecordApproval = () => (
-  <RoleFilter
-    allowRoles={['ADMINISTRATOR']}
-    alt={() => <NoRoleAccessMessage className='p-2' />}
-  >
+  <RoleFilter allowRoles={['ADMINISTRATOR']} alt={() => <NoRoleAccessMessage className='p-2' />}>
     <div className='container-fluid'>
       <h4>Multiple Record Approval</h4>
       <Card className='mt-3'>
         <Card.Header text='Instructions' />
         <Card.Body>
-          <Icon icon='help-circle' />
-          <span className='info-message ml-2'>
-            Multiple record approval is a two-step process:
-          </span>
+          <Icon path={mdiHelpCircle} />
+          <span className='info-message ml-2'>Multiple record approval is a two-step process:</span>
           <div className='info-message mt-2'>
-            1. Select a year and select a date for which records will be
-            approved for that date and earlier, for the selected year (these 2
-            fields are required). Optionally, enter a list of comma delimited
-            MR_ID values to exclude specific records. Click the "Determine # of
-            Records" to see a display of the number of records that will be
-            approved given the year and date selected.
+            1. Select a year and select a date for which records will be approved for that date and earlier, for the
+            selected year (these 2 fields are required). Optionally, enter a list of comma delimited MR_ID values to
+            exclude specific records. Click the "Determine # of Records" to see a display of the number of records that
+            will be approved given the year and date selected.
           </div>
           <div className='info-message mt-2'>
-            2. Once you have displayed the number of records that will be
-            approved, an "Approve Records" button will appear. Click this button
-            to approve the records.
+            2. Once you have displayed the number of records that will be approved, an "Approve Records" button will
+            appear. Click this button to approve the records.
           </div>
           <div className='info-message mt-2'>
-            Note: Records with unresolved errors in the error log are not
-            included.
+            Note: Records with unresolved errors in the error log are not included.
           </div>
           <div className='row mt-3'>
             <div className='col-2'>
-              <Select
-                label='Select Site Year:'
-                options={dropdownYearsToNow(2002)}
-              />
+              <Select label='Select Site Year:' options={dropdownYearsToNow(2002)} />
             </div>
             <div className='col-2'>
               <label>
                 <small>Select Date:</small>
               </label>
-              <input
-                className='form-control input-group-prepend-input mt-1'
-                type='date'
-              />
+              <input className='form-control input-group-prepend-input mt-1' type='date' />
             </div>
             <div className='col-2'>
               <label>

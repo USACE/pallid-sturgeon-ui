@@ -1,22 +1,11 @@
 import { CSVLink } from 'react-csv';
 
-import Icon from '@components/icon';
 import { classArray } from '@src/utils';
+import { mdiDownload } from '@mdi/js';
+import Icon from '@components/icon/icon';
 
-const DownloadAsCSV = ({
-  content = [],
-  className = '',
-  filePrefix = '',
-  headers,
-}) => {
-  const classes = classArray([
-    'mb-3',
-    'mt-1',
-    'btn',
-    'btn-sm',
-    'btn-outline-info',
-    className,
-  ]);
+const DownloadAsCSV = ({ content = [], className = '', filePrefix = '', headers }) => {
+  const classes = classArray(['mb-3', 'mt-1', 'btn', 'btn-sm', 'btn-outline-info', className]);
 
   return (
     <CSVLink
@@ -25,7 +14,7 @@ const DownloadAsCSV = ({
       data={content}
       headers={headers}
     >
-      <Icon icon='download' className='mr-1' />
+      <Icon className='mr-1' focusable={false} path={mdiDownload} />
       Export as CSV
     </CSVLink>
   );

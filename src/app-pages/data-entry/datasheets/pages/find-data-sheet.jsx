@@ -2,16 +2,14 @@ import React, { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
 import Select from '@components/select';
 
-import {
-  Input,
-  Row,
-} from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { Input, Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import '../../dataentry.scss';
 import '@pages/data-summaries/data-summary.scss';
+import Icon from '@components/icon/icon';
+import { mdiHelpCircle } from '@mdi/js';
 
 const FindDataSheet = connect(
   'doFetchMoRiverDataEntry',
@@ -41,10 +39,7 @@ const FindDataSheet = connect(
     const [dataSheetType, setDataSheetType] = useState('');
 
     const isSupplemental = dataSheetType === 'supplemental';
-    const isSearchDisabled = !(
-      dataSheetType &&
-      (tableId || fieldId || geneticsVial || pitTag)
-    );
+    const isSearchDisabled = !(dataSheetType && (tableId || fieldId || geneticsVial || pitTag));
 
     const findDataSheet = () => {
       const params = {
@@ -57,51 +52,27 @@ const FindDataSheet = connect(
 
       switch (dataSheetType) {
         case 'missouriRiver':
-          doFetchMoRiverDataEntry(
-            params,
-            () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'),
-            true
-          );
+          doFetchMoRiverDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
           doUpdateCurrentTab(0);
           break;
         case 'fish':
-          doFetchFishDataEntry(
-            params,
-            () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'),
-            true
-          );
+          doFetchFishDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
           doUpdateCurrentTab(1);
           break;
         case 'supplemental':
-          doFetchSupplementalDataEntry(
-            params,
-            () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'),
-            true
-          );
+          doFetchSupplementalDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
           doUpdateCurrentTab(2);
           break;
         case 'procedures':
-          doFetchProcedureDataEntry(
-            params,
-            () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'),
-            true
-          );
+          doFetchProcedureDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
           doUpdateCurrentTab(3);
           break;
         case 'searchEffort':
-          doFetchSearchDataEntry(
-            params,
-            () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'),
-            true
-          );
+          doFetchSearchDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'), true);
           doUpdateCurrentTab(0);
           break;
         case 'telemetry':
-          doFetchTelemetryDataEntry(
-            params,
-            () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'),
-            true
-          );
+          doFetchTelemetryDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'), true);
           doUpdateCurrentTab(1);
           break;
         default:
@@ -208,16 +179,12 @@ const FindDataSheet = connect(
         </div>
         <Row>
           <div className='col-12 mb-3'>
-            <Icon icon='help-circle' />
+            <Icon focusable={false} path={mdiHelpCircle} />
             <span className='info-message ml-2'>
-              Enter the ID for the type of datasheet selected (EX: Missouri
-              River: MR_ID, Fish: F_ID, Supplemental: S_ID).
+              Enter the ID for the type of datasheet selected (EX: Missouri River: MR_ID, Fish: F_ID, Supplemental:
+              S_ID).
             </span>
-            <span>
-              {' '}
-              For Supplemental datasheet, choices also include Genetics Vial #
-              or Pit Tag.
-            </span>
+            <span> For Supplemental datasheet, choices also include Genetics Vial # or Pit Tag.</span>
           </div>
           <div className='col-md-2 align-self-end'>
             <Button

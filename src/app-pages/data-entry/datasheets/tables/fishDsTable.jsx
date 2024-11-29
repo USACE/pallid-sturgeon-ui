@@ -1,9 +1,10 @@
-import React, { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import { mdiContentCopy, mdiDownload, mdiPlus } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
 
 import SelectEditor from '@common/gridCellEditors/selectEditor';
 import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
@@ -17,15 +18,12 @@ import {
   raySpineOptions,
   scaleOptions,
 } from '@pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
-import {
-  createDropdownOptions,
-  createMesoOptions,
-} from '@pages/data-entry/helpers';
+import { createDropdownOptions, createMesoOptions } from '@pages/data-entry/helpers';
 import SuppLinkCellRenderer from '@common/gridCellRenderers/suppLinkCellRenderer';
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
-import '../../../data-summaries/data-summary.scss';
-import '../../dataentry.scss';
+import '@pages/data-summaries/data-summary.scss';
+import '@pages/data-entry/dataentry.scss';
 
 const FishDsTable = connect(
   'doUpdateFishDataEntry',
@@ -54,8 +52,7 @@ const FishDsTable = connect(
   }) => {
     const gridRef = useRef();
     const [isEditingRow, setIsEditingRow] = useState(false);
-    const lastRow =
-      dataEntryFishData?.items?.[dataEntryFishData?.totalCount - 1];
+    const lastRow = dataEntryFishData?.items?.[dataEntryFishData?.totalCount - 1];
     const initialState = {
       mrId: dataEntryLastParams.mrId,
     };
@@ -76,10 +73,7 @@ const FishDsTable = connect(
     const refreshSuppLinkButtons = () => {
       gridRef.current.api.forEachNode((rowNode) => {
         if (gridRef.current.api.getEditingCells().length > 0) {
-          if (
-            rowNode.rowIndex ===
-            gridRef.current.api.getEditingCells()[0].rowIndex
-          ) {
+          if (rowNode.rowIndex === gridRef.current.api.getEditingCells()[0].rowIndex) {
             rowNode.setDataValue('supplink', true);
           } else {
             rowNode.setDataValue('supplink', false);
@@ -109,7 +103,7 @@ const FishDsTable = connect(
               variant='success'
               text='Add Row'
               className='btn-width'
-              icon={<Icon icon='plus' />}
+              icon={<Icon path={mdiPlus} />}
               handleClick={addRow}
             />
             <Button
@@ -119,7 +113,7 @@ const FishDsTable = connect(
               text='Copy Last Row'
               title='Copy Last Row'
               className='ml-1 mt-1 btn-width'
-              icon={<Icon icon='content-copy' />}
+              icon={<Icon path={mdiContentCopy} />}
               handleClick={copyLastRow}
             />
           </div>
@@ -130,16 +124,13 @@ const FishDsTable = connect(
               variant='info'
               text='Export as CSV'
               className='float-right btn-width mt-1'
-              icon={<Icon icon='download' />}
+              icon={<Icon path={mdiDownload} />}
               isDisabled
               handleClick={() => doFetchAllDatasheet('fish-datasheet')}
             />
           </div>
         </Row>
-        <div
-          className='ag-theme-balham mt-2'
-          style={{ height: '600px', width: '100%' }}
-        >
+        <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}
             suppressClickEdit
@@ -151,10 +142,7 @@ const FishDsTable = connect(
             editType='fullRow'
             onRowValueChanged={({ data }) =>
               !data.fid
-                ? doSaveFishDataEntry(
-                    { ...initialState, ...data },
-                    { mrId: dataEntryLastParams.mrId, id: userRole.id }
-                  )
+                ? doSaveFishDataEntry({ ...initialState, ...data }, { mrId: dataEntryLastParams.mrId, id: userRole.id })
                 : doUpdateFishDataEntry(data, {
                     mrId: dataEntryLastParams.mrId,
                     id: userRole.id,
@@ -185,14 +173,7 @@ const FishDsTable = connect(
               editable={false}
             />
             <AgGridColumn field='fid' headerName='Fish ID' editable={false} />
-            <AgGridColumn
-              field='ffid'
-              headerName='Field ID'
-              width={200}
-              resizable
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='ffid' headerName='Field ID' width={200} resizable sortable unSortIcon />
             <AgGridColumn
               field='supplink'
               headerName='Supp Link'
@@ -215,11 +196,7 @@ const FishDsTable = connect(
             />
             <AgGridColumn field='length' cellEditor='floatEditor' />
             <AgGridColumn field='weight' cellEditor='floatEditor' />
-            <AgGridColumn
-              field='countF'
-              headerName='Count'
-              cellEditor='numberEditor'
-            />
+            <AgGridColumn field='countF' headerName='Count' cellEditor='numberEditor' />
             <AgGridColumn
               field='ftPrefix'
               headerName='FT Prefix'
@@ -239,16 +216,8 @@ const FishDsTable = connect(
               }}
             />
             <AgGridColumn field='floyTag' headerName='Floy Tag' />
-            <AgGridColumn
-              field='geneticsVialNumber'
-              width={125}
-              headerName='Genetics Vial #'
-            />
-            <AgGridColumn
-              field='condition'
-              cellEditor='numberEditor'
-              editable={false}
-            />
+            <AgGridColumn field='geneticsVialNumber' width={125} headerName='Genetics Vial #' />
+            <AgGridColumn field='condition' cellEditor='numberEditor' editable={false} />
             <AgGridColumn
               field='finCurl'
               cellEditor='selectEditor'
@@ -268,31 +237,19 @@ const FishDsTable = connect(
               cellEditor='selectEditor'
               cellEditorParams={{ options: raySpineOptions, isRequired: false }}
             />
-            <AgGridColumn
-              headerName='KN'
-              cellEditor='numberEditor'
-              editable={false}
-            />
+            <AgGridColumn headerName='KN' cellEditor='numberEditor' editable={false} />
             <AgGridColumn
               field='scale'
               cellEditor='selectEditor'
               cellEditorParams={{ options: scaleOptions, isRequired: false }}
             />
-            <AgGridColumn
-              headerName='RSD'
-              cellEditor='numberEditor'
-              editable={false}
-            />
+            <AgGridColumn headerName='RSD' cellEditor='numberEditor' editable={false} />
             <AgGridColumn
               field='bait'
               cellEditor='selectEditor'
               cellEditorParams={{ options: baitOptions, isRequired: false }}
             />
-            <AgGridColumn
-              field='editInitials'
-              cellEditor='textEditor'
-              cellEditorParams={{ isRequired: true }}
-            />
+            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} />
             <AgGridColumn
               field='lastEditComment'
               cellEditor='textEditor'
@@ -300,12 +257,7 @@ const FishDsTable = connect(
               width={200}
               resizable
             />
-            <AgGridColumn
-              field='uploadedBy'
-              width={150}
-              resizable
-              editable={false}
-            />
+            <AgGridColumn field='uploadedBy' width={150} resizable editable={false} />
           </AgGridReact>
         </div>
       </div>

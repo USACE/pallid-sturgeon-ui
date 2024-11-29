@@ -1,5 +1,6 @@
+import { mdiCheckboxBlankOutline, mdiCheckboxOutline } from '@mdi/js';
 import Dropdown from '../dropdown';
-import Icon from '../icon';
+import Icon from '../icon/icon';
 
 export const reduceSelections = (selection, currentSelections) => {
   const final = [...currentSelections];
@@ -11,14 +12,12 @@ export const reduceSelections = (selection, currentSelections) => {
 };
 
 export const generateOption = (option, handleClick, optionIsSelected, i) => {
-  const icon = optionIsSelected
-    ? 'check-box-outline'
-    : 'checkbox-blank-outline';
+  const icon = optionIsSelected ? mdiCheckboxOutline : mdiCheckboxBlankOutline;
 
   return (
     <Dropdown.Item key={i} onClick={(_e) => handleClick()}>
       <span className={optionIsSelected ? 'text-info' : 'text-dark'}>
-        <Icon icon={icon} />
+        <Icon path={icon} />
         &nbsp;
         {option.text || option.value}
       </span>

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-
-import Icon from '../icon';
+import { mdiMenuDown, mdiMenuRight } from '@mdi/js';
 
 import { classArray } from '@src/utils';
+
+import Icon from '@components/icon/icon';
 
 import './accordion.scss';
 
@@ -18,12 +19,7 @@ const AccordionListItem = ({
 
   const itemClasses = classArray(['accordion-item', className]);
 
-  const contentClasses = classArray([
-    'accordion-collapse',
-    'collapse',
-    isOpen && 'show',
-    contentClassname,
-  ]);
+  const contentClasses = classArray(['accordion-collapse', 'collapse', isOpen && 'show', contentClassname]);
 
   const headingClasses = classArray(['accordion-heading', isOpen && 'is-open']);
 
@@ -35,10 +31,7 @@ const AccordionListItem = ({
   return (
     <div className={itemClasses}>
       <div className={headingClasses} onClick={() => toggleAccordion()}>
-        <Icon
-          className='ml-3 accordion-icon'
-          icon={isOpen ? 'menu-down' : 'menu-right'}
-        />
+        <Icon className='ml-3 accordion-icon' focusable={false} path={isOpen ? mdiMenuDown : mdiMenuRight} />
         <p className='text-primary'>{headingText}</p>
       </div>
       <div className={contentClasses}>
