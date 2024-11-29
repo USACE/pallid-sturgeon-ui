@@ -1,9 +1,11 @@
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
-import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
+import { mdiDownload } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
+
+import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -21,13 +23,10 @@ const SearchTable = connect(
           size='small'
           variant='info'
           text='Export as CSV'
-          icon={<Icon icon='download' />}
+          icon={<Icon path={mdiDownload} />}
           handleClick={() => doFetchAllDatasheet('search-datasheet')}
         />
-        <div
-          className='ag-theme-balham mt-2'
-          style={{ width: '100%', height: '600px' }}
-        >
+        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowData={data}
             defaultColDef={{
@@ -42,12 +41,7 @@ const SearchTable = connect(
             <AgGridColumn field='bend' sortable unSortIcon />
             <AgGridColumn field='bendRiverMile' sortable unSortIcon />
             <AgGridColumn field='bendrn' sortable unSortIcon />
-            <AgGridColumn
-              field='seId'
-              headerName='Search Effort ID'
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='seId' headerName='Search Effort ID' sortable unSortIcon />
             <AgGridColumn
               field='searchDate'
               valueGetter={(params) => dateFormatter(params.data.searchDate)}

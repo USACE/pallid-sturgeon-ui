@@ -1,15 +1,17 @@
 import { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
+import { mdiContentSave } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
 import Select from '@components/select';
+import RoleFilter from '@components/role-filter';
+import Icon from '@components/icon/icon';
+
 import {
   createDropdownOptions,
   createRolesDropdownOptions,
   createFieldOfficeIdDropdownOptions,
 } from '@pages/data-entry/helpers';
-import RoleFilter from '@components/role-filter';
 import { NoRoleAccessMessage } from './helper';
 
 import './admin.scss';
@@ -21,14 +23,7 @@ export default connect(
   'selectUserAccessRequests',
   'selectRoles',
   'selectDomains',
-  ({
-    doFetchUserAccessRequests,
-    doFetchRoles,
-    doRoleOfficeUpdate,
-    userAccessRequests,
-    roles,
-    domains,
-  }) => {
+  ({ doFetchUserAccessRequests, doFetchRoles, doRoleOfficeUpdate, userAccessRequests, roles, domains }) => {
     const { projects, fieldOffices } = domains;
     const [roleUpdated, setRoleUpdated] = useState([]);
     const [officeUpdated, setOfficeUpdated] = useState([]);
@@ -54,10 +49,7 @@ export default connect(
       } else if (updatedIndex === roleUpdated.length - 1) {
         newUpdated = newUpdated.concat(roleUpdated.slice(0, -1));
       } else if (updatedIndex > 0) {
-        newUpdated = newUpdated.concat(
-          roleUpdated.slice(0, updatedIndex),
-          roleUpdated.slice(updatedIndex + 1)
-        );
+        newUpdated = newUpdated.concat(roleUpdated.slice(0, updatedIndex), roleUpdated.slice(updatedIndex + 1));
       }
 
       setRoleUpdated(newUpdated);
@@ -85,10 +77,7 @@ export default connect(
       } else if (updatedIndex === officeUpdated.length - 1) {
         newUpdated = newUpdated.concat(officeUpdated.slice(0, -1));
       } else if (updatedIndex > 0) {
-        newUpdated = newUpdated.concat(
-          officeUpdated.slice(0, updatedIndex),
-          officeUpdated.slice(updatedIndex + 1)
-        );
+        newUpdated = newUpdated.concat(officeUpdated.slice(0, updatedIndex), officeUpdated.slice(updatedIndex + 1));
       }
 
       setOfficeUpdated(newUpdated);
@@ -116,10 +105,7 @@ export default connect(
       } else if (updatedIndex === projectUpdated.length - 1) {
         newUpdated = newUpdated.concat(projectUpdated.slice(0, -1));
       } else if (updatedIndex > 0) {
-        newUpdated = newUpdated.concat(
-          projectUpdated.slice(0, updatedIndex),
-          projectUpdated.slice(updatedIndex + 1)
-        );
+        newUpdated = newUpdated.concat(projectUpdated.slice(0, updatedIndex), projectUpdated.slice(updatedIndex + 1));
       }
 
       setProjectUpdated(newUpdated);
@@ -133,10 +119,7 @@ export default connect(
     }, []);
 
     return (
-      <RoleFilter
-        allowRoles={['ADMINISTRATOR']}
-        alt={() => <NoRoleAccessMessage className='p-2' />}
-      >
+      <RoleFilter allowRoles={['ADMINISTRATOR']} alt={() => <NoRoleAccessMessage className='p-2' />}>
         <div className='col-md-9'>
           <table className='table table-bordered'>
             <thead>
@@ -184,9 +167,7 @@ export default connect(
                           }}
                           placeholderText='Select Office...'
                           data-size='3'
-                          options={createFieldOfficeIdDropdownOptions(
-                            fieldOffices
-                          )}
+                          options={createFieldOfficeIdDropdownOptions(fieldOffices)}
                         />
                       </div>
                     </td>
@@ -207,11 +188,7 @@ export default connect(
                       <Button
                         className={'icon-button small-btn'}
                         title='Save'
-                        disabled={
-                          !isRoleItemUpdated ||
-                          !isOfficeItemUpdated ||
-                          !isProjectItemUpdated
-                        }
+                        disabled={!isRoleItemUpdated || !isOfficeItemUpdated || !isProjectItemUpdated}
                         onClick={function () {
                           doRoleOfficeUpdate(
                             {
@@ -227,12 +204,7 @@ export default connect(
                             }
                           );
                         }}
-                        icon={
-                          <Icon
-                            icon='content-save'
-                            className={`button-icon ${user.id} mr-2`}
-                          />
-                        }
+                        icon={<Icon path={mdiContentSave} className={`button-icon ${user.id} mr-2`} />}
                       />
                     </td>
                   </tr>

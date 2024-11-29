@@ -1,22 +1,21 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from '@components/button';
 import FilterSelect from '@components/filter-select/filter-select';
-import Icon from '@components/icon';
 import Pagination from '@components/pagination';
 import Select from '@components/select';
 import SitesListTable from './sites-list-table';
 import SitesFormModal from './modals/sitesForm';
+import Icon from '@components/icon/icon';
 
-import {
-  createDropdownOptions,
-  createBendsDropdownOptions,
-} from '../../helpers';
+import { createDropdownOptions, createBendsDropdownOptions } from '../../helpers';
 import { dropdownYearsToNow } from '@src/utils';
 
-import '../../dataentry.scss';
+import '@pages/data-entry/dataentry.scss';
 import '@pages/data-summaries/data-summary.scss';
+
+import { mdiHelpCircle } from '@mdi/js';
 
 const SitesList = connect(
   // 'doDomainBendsFetch',
@@ -104,11 +103,9 @@ const SitesList = connect(
         <div className='row mt-3'>
           <div className='col-sm-12 col-xs-12 pl-3'>
             <span className='info-message mr-1'>
-              <Icon icon='help-circle' />
+              <Icon focusable={false} path={mdiHelpCircle} />
             </span>
-            <span className='info-message'>
-              Select a year to populate the table and begin your search.
-            </span>
+            <span className='info-message'>Select a year to populate the table and begin your search.</span>
           </div>
         </div>
         <div className='row mt-3'>
@@ -181,11 +178,10 @@ const SitesList = connect(
         <div className='row'>
           <div className='col-sm-12 col-xs-12 pl-3'>
             <span className='info-message mr-1'>
-              <Icon icon='help-circle' />
+              <Icon path={mdiHelpCircle} />
             </span>
             <span className='info-message'>
-              Make selections from the drop down lists to go to the datasheets
-              associated with your selection.
+              Make selections from the drop down lists to go to the datasheets associated with your selection.
             </span>
           </div>
         </div>
@@ -194,9 +190,7 @@ const SitesList = connect(
           className='mt-3'
           itemCount={sitesTotalResults}
           defaultItemsPerPage={20}
-          handlePageChange={(pageNumber, pageSize) =>
-            doSetSitesPagination({ pageNumber, pageSize })
-          }
+          handlePageChange={(pageNumber, pageSize) => doSetSitesPagination({ pageNumber, pageSize })}
         />
       </>
     );

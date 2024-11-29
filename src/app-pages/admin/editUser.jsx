@@ -1,16 +1,17 @@
 import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { mdiAccountPlus } from '@mdi/js';
 
 import AddUserFormModal from './components/modal/addUser';
 import Button from '@components/button';
 import Card from '@components/card';
 import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
 import FieldOfficeEditor from '@common/gridCellEditors/fieldOfficeEditor';
-import Icon from '@components/icon';
 import RolesEditor from '@common/gridCellEditors/rolesEditor';
 import ProjectEditor from '@common/gridCellEditors/projectEditor';
 import RoleFilter from '@components/role-filter';
+import Icon from '@components/icon/icon';
 
 import { rolesList, fieldOfficeList, projectCodeList, NoRoleAccessMessage } from './helper';
 
@@ -56,7 +57,7 @@ export default connect(
                 size='small'
                 variant='info'
                 text='Add Account to Existing User'
-                icon={<Icon icon='account-plus' />}
+                icon={<Icon path={mdiAccountPlus} />}
                 handleClick={() => doModalOpen(AddUserFormModal)}
               />
               <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>

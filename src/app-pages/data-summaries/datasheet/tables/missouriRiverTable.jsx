@@ -1,8 +1,10 @@
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { mdiDownload } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
+
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
@@ -21,13 +23,10 @@ const MissouriRiverTable = connect(
           size='small'
           variant='info'
           text='Export as CSV'
-          icon={<Icon icon='download' />}
+          icon={<Icon path={mdiDownload} />}
           handleClick={() => doFetchAllDatasheet('missouri-river-datasheet')}
         />
-        <div
-          className='ag-theme-balham mt-2'
-          style={{ width: '100%', height: '600px' }}
-        >
+        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowData={data}
             defaultColDef={{

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
+import { mdiCheck, mdiClose, mdiPencil, mdiTrashCanOutline } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
 import ConfirmDelete from '@common/modals/confirmDelete';
+import Icon from '@components/icon/icon';
 
 const EditCellRenderer = connect(
   'doModalOpen',
@@ -61,14 +62,14 @@ const EditCellRenderer = connect(
               size='small'
               variant='secondary'
               title='Cancel Changes'
-              icon={<Icon icon='close' />}
+              icon={<Icon path={mdiClose} />}
               handleClick={() => cancelRowEdits()}
             />
             <Button
               size='small'
               variant='success'
               title='Save Changes'
-              icon={<Icon icon='check' />}
+              icon={<Icon path={mdiCheck} />}
               handleClick={() => saveChangesToRow()}
             />
           </div>
@@ -79,7 +80,7 @@ const EditCellRenderer = connect(
               size='small'
               variant='info'
               title='Edit'
-              icon={<Icon icon='pencil' />}
+              icon={<Icon path={mdiPencil} />}
               handleClick={() => setIsEditing(true)}
             />
             {type !== 'user' && (
@@ -89,7 +90,7 @@ const EditCellRenderer = connect(
                 variant='danger'
                 className='ml-1'
                 title='Delete'
-                icon={<Icon icon='trash-can-outline' />}
+                icon={<Icon path={mdiTrashCanOutline} />}
                 handleClick={() =>
                   doModalOpen(ConfirmDelete, {
                     value: getType(),

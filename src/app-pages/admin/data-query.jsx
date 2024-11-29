@@ -1,15 +1,17 @@
 import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { AgGridReact } from 'ag-grid-react';
+import { mdiDownload, mdiHelpCircle } from '@mdi/js';
 
 import Button from '@components/button';
 import Card from '@components/card';
-import Icon from '@components/icon';
 import Select from '@components/select';
+import RoleFilter from '@components/role-filter';
+import Icon from '@components/icon/icon';
+
 import { dropdownYearsToNow } from '@src/utils';
 import { dataQueries, NoRoleAccessMessage } from './helper';
 import { createDropdownOptions } from '@pages/data-entry/helpers';
-import RoleFilter from '@components/role-filter';
 
 export default connect('doDomainProjectsFetch', 'selectDomains', ({ doDomainProjectsFetch, domains }) => {
   useEffect(() => {
@@ -25,7 +27,7 @@ export default connect('doDomainProjectsFetch', 'selectDomains', ({ doDomainProj
         <Card className='mt-3'>
           <Card.Header text='Filters' />
           <Card.Body>
-            <Icon icon='help-circle' />
+            <Icon path={mdiHelpCircle} />
             <span className='info-message ml-2'>
               Click the "Export as CSV" link at the top of the report to download the query results for the year and
               filters selected. The displayed report below only shows a portion of the fields that are included in the
@@ -69,7 +71,7 @@ export default connect('doDomainProjectsFetch', 'selectDomains', ({ doDomainProj
               size='small'
               variant='info'
               text='Export as CSV'
-              icon={<Icon icon='download' />}
+              icon={<Icon path={mdiDownload} />}
               // handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
             />
             <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>

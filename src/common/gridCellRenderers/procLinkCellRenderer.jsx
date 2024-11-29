@@ -1,7 +1,8 @@
 import { connect } from 'redux-bundler-react';
+import { mdiDotsHorizontal, mdiPlus } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
 
 const ProcLinkCellRenderer = connect(
   'doUpdateCurrentTab',
@@ -9,9 +10,7 @@ const ProcLinkCellRenderer = connect(
   ({ doUpdateCurrentTab, dataEntryProcedure, data, setIsAddRow, setRowId }) => {
     const fId = data.fid;
     const sId = data.sid;
-    const hasProcData = !!dataEntryProcedure.items.filter(
-      (data) => data.sid === sId
-    ).length;
+    const hasProcData = !!dataEntryProcedure.items.filter((data) => data.sid === sId).length;
     const isNewRow = Object.keys(data).length === 0;
 
     const handleAddRow = (add) => {
@@ -26,11 +25,7 @@ const ProcLinkCellRenderer = connect(
       if (isNewRow || !data.sid) {
         return true;
       } else {
-        if (
-          data.proclink === null ||
-          data.proclink === undefined ||
-          data.proclink === false
-        ) {
+        if (data.proclink === null || data.proclink === undefined || data.proclink === false) {
           return false;
         } else {
           return true;
@@ -47,7 +42,7 @@ const ProcLinkCellRenderer = connect(
             variant='info'
             title='Associated Procedure Data Entries'
             text={'View Data'}
-            icon={<Icon icon='dots-horizontal' />}
+            icon={<Icon path={mdiDotsHorizontal} />}
             handleClick={() => handleAddRow(false)}
             isDisabled={isButtonDisabled()}
           />
@@ -58,7 +53,7 @@ const ProcLinkCellRenderer = connect(
             variant='success'
             title='Associated Procedure Data Entries'
             text={'Add Data'}
-            icon={<Icon icon='plus' />}
+            icon={<Icon path={mdiPlus} />}
             handleClick={() => handleAddRow(true)}
             isDisabled={isButtonDisabled()}
           />

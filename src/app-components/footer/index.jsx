@@ -1,7 +1,7 @@
-import React from 'react';
+import { mdiCopyright } from '@mdi/js';
 
 import CuiBanner from '../cui-banner';
-import Icon from '../icon';
+import Icon from '@components/icon/icon';
 
 import './footer.scss';
 
@@ -12,7 +12,7 @@ const Footer = () => (
         <div className='text-center'>
           <p>
             <strong>
-              <Icon icon='copyright' />
+              <Icon path={mdiCopyright} />
             </strong>{' '}
             U.S. Army Corps of Engineers {new Date().getFullYear()}
           </p>
