@@ -1,7 +1,7 @@
-export const createDropdownOptions = data => {
+export const createDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.map(d => {
+  return data.map((d) => {
     const { code, description } = d;
 
     return {

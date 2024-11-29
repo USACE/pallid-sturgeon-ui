@@ -34,6 +34,11 @@ export default ({ mode }) => {
     ],
     css: {
       devSourcemap: false,
+      preprocessorOptions: {
+        scss: {
+          api: 'modern-compiler', // or "modern"
+        },
+      },
     },
     build: {
       outDir: 'build',

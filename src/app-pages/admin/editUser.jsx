@@ -12,8 +12,7 @@ import RolesEditor from '@common/gridCellEditors/rolesEditor';
 import ProjectEditor from '@common/gridCellEditors/projectEditor';
 import RoleFilter from '@components/role-filter';
 
-import { rolesList, fieldOfficeList, projectCodeList } from './helper';
-import { NoRoleAccessMessage } from './helper';
+import { rolesList, fieldOfficeList, projectCodeList, NoRoleAccessMessage } from './helper';
 
 export default connect(
   'doDomainFieldOfficesFetch',
@@ -46,10 +45,7 @@ export default connect(
     }, []);
 
     return (
-      <RoleFilter
-        allowRoles={['ADMINISTRATOR']}
-        alt={() => <NoRoleAccessMessage className='p-2' />}
-      >
+      <RoleFilter allowRoles={['ADMINISTRATOR']} alt={() => <NoRoleAccessMessage className='p-2' />}>
         <div className='container-fluid'>
           <h4>Edit User</h4>
           <Card className='mt-3'>
@@ -63,10 +59,7 @@ export default connect(
                 icon={<Icon icon='account-plus' />}
                 handleClick={() => doModalOpen(AddUserFormModal)}
               />
-              <div
-                className='ag-theme-balham mt-3'
-                style={{ width: '100%', height: '600px' }}
-              >
+              <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
                 <AgGridReact
                   suppressClickEdit
                   rowHeight={35}

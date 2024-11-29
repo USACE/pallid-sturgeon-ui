@@ -1,11 +1,12 @@
-@import '@styles/_variables';
+@use '@styles/_variables' as *;
 
 .navbar-brand {
-  >*{
+  > * {
     font-weight: 600;
     color: $color-gray !important;
 
-    &:hover,&:focus {
+    &:hover,
+    &:focus {
       text-decoration: none !important;
       color: $color-primary-dark !important;
     }
@@ -24,7 +25,8 @@
 .nav-dropdown-button {
   border: 0 !important;
 
-  &:focus,&:active {
+  &:focus,
+  &:active {
     outline: none !important;
     box-shadow: none !important;
   }
@@ -33,18 +35,18 @@
 .vl {
   border-left: 1px solid;
   border-image: linear-gradient(
-    to bottom, 
-    rgba(0,0,0,0) 15%,
+    to bottom,
+    rgba(0, 0, 0, 0) 15%,
     $color-gray 15%,
     $color-gray 85%,
-    rgba(0,0,0,0) 85%
+    rgba(0, 0, 0, 0) 85%
   );
   border-image-slice: 1;
 }
 
 .navbar-nav {
   .nav-item {
-    border-bottom: 3px solid rgba(0,0,0,0);
+    border-bottom: 3px solid rgba(0, 0, 0, 0);
     cursor: pointer;
     max-height: 62px;
 
@@ -52,7 +54,7 @@
       color: $color-gray !important;
 
       &.user {
-        margin:0;
+        margin: 0;
       }
     }
 
@@ -64,7 +66,8 @@
       }
     }
 
-    &:hover,&:focus {
+    &:hover,
+    &:focus {
       border-bottom: 3px solid $color-primary;
 
       .nav-link {

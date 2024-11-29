@@ -1,7 +1,7 @@
-import { createSelector } from "redux-bundler";
+import { createSelector } from 'redux-bundler';
 
 const rolesBundle = {
-  name: "roles",
+  name: 'roles',
   getReducer: () => {
     const initialData = {
       data: [],
@@ -13,10 +13,10 @@ const rolesBundle = {
     };
     return (state = initialData, { type, payload }) => {
       switch (type) {
-        case "ROLES_LOADING":
-        case "FETCH_ROLES_START":
-        case "ROLES_ERROR":
-        case "ROLES_LOADED":
+        case 'ROLES_LOADING':
+        case 'FETCH_ROLES_START':
+        case 'ROLES_ERROR':
+        case 'ROLES_LOADED':
           return Object.assign({}, state, payload);
         default:
       }
@@ -27,7 +27,7 @@ const rolesBundle = {
     () =>
     ({ dispatch }) => {
       dispatch({
-        type: "ROLES_LOADING",
+        type: 'ROLES_LOADING',
         payload: {
           loading: true,
           shouldQuery: true,
@@ -38,14 +38,14 @@ const rolesBundle = {
     () =>
     ({ dispatch, apiGet }) => {
       dispatch({
-        type: "FETCH_ROLES_START",
+        type: 'FETCH_ROLES_START',
         payload: { shouldQuery: false },
       });
 
-      apiGet("/psapi/roles", (err, body) => {
+      apiGet('/psapi/roles', (err, body) => {
         if (err) {
           dispatch({
-            type: "ROLES_ERROR",
+            type: 'ROLES_ERROR',
             payload: {
               loading: false,
               err: { err },
@@ -54,7 +54,7 @@ const rolesBundle = {
           });
         } else {
           dispatch({
-            type: "ROLES_LOADED",
+            type: 'ROLES_LOADED',
             payload: {
               loading: false,
               data: body,
@@ -67,10 +67,10 @@ const rolesBundle = {
     },
   selectRoles: (state) => state.roles,
 
-  reactShouldLoadRoles: createSelector("selectRoles", (roles) => {
-    if (roles && roles.shouldQuery) return { actionCreator: "doLoadRoles" };
+  reactShouldLoadRoles: createSelector('selectRoles', (roles) => {
+    if (roles && roles.shouldQuery) return { actionCreator: 'doLoadRoles' };
   }),
-  persistActions: ["ROLES_LOADED"],
+  persistActions: ['ROLES_LOADED'],
 };
 
 export default rolesBundle;

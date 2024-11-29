@@ -19,7 +19,7 @@ const baseDataBundle = {
     };
   },
 
-  selectBaseData: state =>  state.baseData.data,
+  selectBaseData: (state) =>  state.baseData.data,
 
   doUpdateBaseData: (name, value) => ({ dispatch }) => {
     dispatch({ type: 'UPDATE_BASE_DATA', payload: { [name]: value } });

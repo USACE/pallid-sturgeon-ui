@@ -1,4 +1,4 @@
-@import '@styles/_variables';
+@use '@styles/_variables' as *;
 
 $border-radius: 5px;
 
@@ -41,7 +41,7 @@ $border-radius: 5px;
 .accordion-heading {
   align-content: center;
   border: 1px solid $color-gray-light;
-  border-bottom: 1px solid rgba(0,0,0,0);
+  border-bottom: 1px solid rgba(0, 0, 0, 0);
   cursor: pointer;
   height: 52px;
   justify-content: space-between;

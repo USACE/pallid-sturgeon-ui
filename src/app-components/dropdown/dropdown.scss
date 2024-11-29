@@ -1,4 +1,4 @@
-@import '@styles/_variables';
+@use '@styles/_variables' as *;
 
 .dropdown-item {
   color: $color-primary-dark !important;
@@ -10,7 +10,9 @@
     background-color: $color-primary !important;
   }
 
-  &:focus,&:active,&.active {
+  &:focus,
+  &:active,
+  &.active {
     color: $color-white !important;
     background-color: $color-primary-dark !important;
   }

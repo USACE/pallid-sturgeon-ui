@@ -9,11 +9,11 @@ const loadingBundle = {
       if (type === 'SET_LOADING_STATE') {
         return { ...state, isLoading: payload };
 
-      };
+      }
 
       if (type === 'SET_LOADING_MESSAGE') {
         return { ...state, message: payload };
-      };
+      }
 
       return state;
     };

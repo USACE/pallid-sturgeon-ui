@@ -25,9 +25,9 @@ const usersBundle = {
     };
   },
 
-  selectUsers: state =>  state.userBundles,
-  selectUsersData: state => state.userBundles.data,
-  selectUsersList: state => state.userBundles.users,
+  selectUsers: (state) =>  state.userBundles,
+  selectUsersData: (state) => state.userBundles.data,
+  selectUsersList: (state) => state.userBundles.users,
 
   // Fetch All User Accounts
   doFetchUsers: () => ({ dispatch, apiGet }) => {
