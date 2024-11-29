@@ -1,4 +1,4 @@
-@import '../style/variables';
+@use '@styles/_variables' as *;
 
 $inactive-color: grey;
 $success-color: #43ac6a;
@@ -33,7 +33,7 @@ $error-color: #f04124;
   margin-top: 98px;
 
   &.banner {
-    margin-top: 130px
+    margin-top: 130px;
   }
 }
 
@@ -69,15 +69,15 @@ td {
   font-size: small;
 }
 
-table.table-bordered{
-  border:1px solid $color-gray-light;
-  margin-bottom:0px;
+table.table-bordered {
+  border: 1px solid $color-gray-light;
+  margin-bottom: 0px;
 }
-table.table-bordered > thead > tr > th{
-  border:1px solid $color-gray-light;
+table.table-bordered > thead > tr > th {
+  border: 1px solid $color-gray-light;
 }
-table.table-bordered > tbody > tr > td{
-  border:1px solid $color-gray-light;
+table.table-bordered > tbody > tr > td {
+  border: 1px solid $color-gray-light;
 }
 
 label {
@@ -88,7 +88,7 @@ label {
 textarea.form-control {
   color: $color-primary-dark !important;
   border: 1px solid $color-primary !important;
-  border-radius: .3rem !important;
+  border-radius: 0.3rem !important;
   font-size: 0.9rem;
   padding: 0.4rem;
 
@@ -100,10 +100,10 @@ textarea.form-control {
 input.form-control {
   color: $color-primary-dark !important;
   height: 33px;
-  padding: 0rem .4rem;
+  padding: 0rem 0.4rem;
   font-size: 0.9rem;
   border: 1px solid $color-primary !important;
-  border-radius: .3rem !important;
+  border-radius: 0.3rem !important;
   overflow-x: hidden !important;
   text-overflow: ellipsis !important;
 

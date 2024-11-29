@@ -5,11 +5,11 @@ import { useEffect } from 'react';
  */
 const useOutsideEventHandle = (event, ref, callback) => {
   useEffect(() => {
-    const handleEventOutside = event => {
+    const handleEventOutside = (event) => {
       if (Array.isArray(ref)) {
         let contained = false;
 
-        ref.forEach(r => {
+        ref.forEach((r) => {
           if (r.current && r.current.contains(event.target)) contained = true;
         });
 

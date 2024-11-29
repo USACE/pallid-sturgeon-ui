@@ -1,4 +1,4 @@
-@import '@styles/_variables';
+@use '@styles/_variables' as *;
 
 .breadcrumb-container {
   .breadcrumb-list {
@@ -8,7 +8,7 @@
   }
 
   .breadcrumb-item + .breadcrumb-item::before {
-    content: ">";
+    content: '>';
     color: $color-gray;
   }
 

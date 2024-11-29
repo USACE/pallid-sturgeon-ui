@@ -1,4 +1,3 @@
-import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'redux-bundler-react';
 import { getNavHelper } from 'internal-nav-helper';

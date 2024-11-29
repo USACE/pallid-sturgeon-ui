@@ -1,3 +1,3 @@
-@import "bulma/variables";
-@import "bulma/bulma.sass";
-@import "bulma/overrides";
+@use 'bulma/variables' as *;
+@use 'bulma/bulma.sass' as *;
+@use 'bulma/overrides' as *;
