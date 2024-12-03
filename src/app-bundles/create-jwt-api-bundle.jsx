@@ -68,7 +68,7 @@ const commonFetch = async (root, path, options, callback) => {
     } catch (e) {
       if (options.method === 'GET' && attempts < maxAttempts) {
         console.error('The following error occured:', e, `Retry ${attempts}`);
-        await new Promise(resolve => setTimeout(resolve, retryInterval));
+        await new Promise((resolve) => setTimeout(resolve, retryInterval));
         await callFetch();
         return;
       }
@@ -149,7 +149,7 @@ const createJwtApiBundle = (opts) => {
         tokenSelector: store[selectTokenSelector](),
       });
 
-      const defaultHeaders = token => ({
+      const defaultHeaders = (token) => ({
         Authorization: `Bearer ${token}`,
       });
 

@@ -2,7 +2,7 @@ export const classnames = (opts) => Object.keys(opts)
   .map((key) => !!opts[key] ? key : '')
   .join(' ');
 
-export const classArray = (arr) => arr.filter(e => e).join(' ');
+export const classArray = (arr) => arr.filter((e) => e).join(' ');
 
 export const formatBytes = (bytes) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -12,7 +12,7 @@ export const formatBytes = (bytes) => {
   return `${(bytes / 1024 ** i).toFixed(1)} ${sizes[i]}`;
 };
 
-export const isNumeric = str => {
+export const isNumeric = (str) => {
   if (typeof str != 'string') return false; // only process strings
   return !isNaN(str) &&                     // use type coercion to parse the entirety of the string (`parseFloat` alone does not do this)...
          !isNaN(parseFloat(str));           // ...and ensure strings of whitespace fail
@@ -30,15 +30,15 @@ export const pluralize = (single, plural, value) => {
   return plural;
 };
 
-export const keyAsText = key => {
+export const keyAsText = (key) => {
   const words = key.substring(1).split(/(?=[A-Z])/).join(' ');
   return key.substring(0, 1).toUpperCase() + words;
 };
 
-export const hrefAsString = href => {
+export const hrefAsString = (href) => {
   const str = href.replace('/', '');
   const words = str.split('-');
-  const upperWords = words.map(word => word.substring(0, 1).toUpperCase() + word.substring(1));
+  const upperWords = words.map((word) => word.substring(0, 1).toUpperCase() + word.substring(1));
   
   return upperWords.join(' ');
 };
@@ -48,9 +48,9 @@ export const queryFromObject = (obj = {}) => {
 
   if (!keys.length) return '';
 
-  const finalKeys = keys.filter(key => !!obj[key] || isNumeric(obj[key]));
+  const finalKeys = keys.filter((key) => !!obj[key] || isNumeric(obj[key]));
 
-  return `?${finalKeys.map(key => `${key}=${obj[key]}`).join('&')}`;
+  return `?${finalKeys.map((key) => `${key}=${obj[key]}`).join('&')}`;
 };
 
 export const dropdownYearsToNow = (toYear = 2018) => {

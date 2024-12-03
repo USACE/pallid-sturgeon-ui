@@ -3,21 +3,32 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babel/eslint-parser": "^7.25.9",
     "@corpsmap/corpsmap": "^4.0.36",
     "@hookform/devtools": "^4.3.1",
     "@hookform/resolvers": "^3.9.1",
+    "@eslint/js": "^9.15.0",
+    "@mdi/js": "^7.4.47",
     "@mdi/react": "^1.6.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "@trussworks/react-uswds": "^9.1.0",
+    "@types/eslint__js": "^8.42.3",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
     "@typescript-eslint/parser": "^8.16.0",
     "@vitejs/plugin-react": "^4.3.3",
     "ag-grid-community": "^25.3.0",
     "ag-grid-react": "^25.3.0",
     "date-fns": "^2.16.1",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
     "export-to-csv": "^0.2.1",
     "internal-nav-helper": "^3.1.0",
+    "lint-staged": "^15.2.10",
     "lodash.debounce": "^4.0.8",
     "lodash.isequal": "^4.5.0",
     "money-clip": "^3.0.1",
@@ -35,10 +46,12 @@
     "react-tooltip": "^4.4.3",
     "redux-bundler": "^27.0.1",
     "redux-bundler-react": "^1.2.0",
+    "rimraf": "^6.0.1",
     "rollup-plugin-visualizer": "^5.12.0",
     "sass": "^1.75.0",
     "source-map-explorer": "^2.5.2",
     "typescript": "^5.7.2",
+    "typescript-eslint": "^8.16.0",
     "vite": "^5.4.10",
     "vite-plugin-checker": "^0.8.0",
     "vite-plugin-eslint": "^1.8.1",
@@ -70,6 +83,9 @@
   },
   "devDependencies": {
     "env-cmd": "^10.1.0",
-    "eslint-plugin-react": "^7.22.0"
+    "eslint-plugin-react": "^7.37.2"
+  },
+  "resolutions": {
+    "@typescript-eslint/typescript-estree": "^5.62.0"
   }
 }

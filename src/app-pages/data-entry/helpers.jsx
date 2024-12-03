@@ -3,10 +3,10 @@ export const projectMap = {
   2: 'HAMP',
 };
 
-export const createDropdownOptions = data => {
+export const createDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.map(d => {
+  return data.map((d) => {
     const { code, description } = d;
     return {
       value: code,
@@ -15,10 +15,10 @@ export const createDropdownOptions = data => {
   });
 };
 
-export const createBendsDropdownOptions = data => {
+export const createBendsDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.map(d => {
+  return data.map((d) => {
     const { description, sampleUnit } = d;
 
     if (!description) return null;
@@ -27,22 +27,22 @@ export const createBendsDropdownOptions = data => {
       value: sampleUnit,
       text: description,
     };
-  }).filter(e => e);
+  }).filter((e) => e);
 };
 
-export const createRolesDropdownOptions = data => {
+export const createRolesDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.data.map(opt => ({
+  return data.data.map((opt) => ({
     text: opt.description,
     value: opt.id,
   }));
 };
 
-export const createFieldOfficeIdDropdownOptions = data => {
+export const createFieldOfficeIdDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.map(d => {
+  return data.map((d) => {
     const { id, description } = d;
 
     return {
@@ -52,64 +52,64 @@ export const createFieldOfficeIdDropdownOptions = data => {
   });
 };
 
-export const createProjectDropdownOptions = data => {
+export const createProjectDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.data.map(opt => ({
+  return data.data.map((opt) => ({
     text: opt.description,
     value: opt.code,
   }));
 };
 
-export const createMesoOptions = data => {
+export const createMesoOptions = (data) => {
   if (!data) return [];
 
-  return data.map(opt => ({
+  return data.map((opt) => ({
     text: opt.code,
     value: opt.code,
   }));
 };
 
-export const createStructureFlowOptions = data => {
+export const createStructureFlowOptions = (data) => {
   if (!data) return [];
 
-  return data.map(opt => ({
+  return data.map((opt) => ({
     text: opt.code,
     value: opt.id,
   }));
 };
 
-export const createStructureModOptions = data => {
+export const createStructureModOptions = (data) => {
   if (!data) return [];
 
-  return data.map(opt => ({
+  return data.map((opt) => ({
     text: opt.description,
     value: opt.code,
   }));
 };
 
-export const createAccountsOptions = data => {
+export const createAccountsOptions = (data) => {
   if (!data) return [];
 
-  return data.map(opt => ({
+  return data.map((opt) => ({
     text: opt.role + ' - Field Office: ' + opt.officeCode + ' - Project: ' + opt.projectCode + ' - ' + projectMap[opt.projectCode],
     value: opt.id,
   }));
 };
 
-export const createUsersOptions = data => {
+export const createUsersOptions = (data) => {
   if (!data) return [];
 
-  return data.map(opt => ({
+  return data.map((opt) => ({
     text: opt.firstName + ' ' + opt.lastName + ' (' + opt.userName + ')',
     value: opt.userId,
   }));
 };
 
-export const createCustomCodeDropdownOptions = data => {
+export const createCustomCodeDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.map(d => {
+  return data.map((d) => {
     const { code, description } = d;
     return {
       value: code,

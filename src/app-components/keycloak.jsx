@@ -1,4 +1,4 @@
-const urlencodeFormData = fd => new URLSearchParams([...fd]);
+const urlencodeFormData = (fd) => new URLSearchParams([...fd]);
 
 class Keycloak {
   constructor(config) {

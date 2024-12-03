@@ -34,6 +34,11 @@ export default ({ mode }) => {
     ],
     css: {
       devSourcemap: false,
+      preprocessorOptions: {
+        scss: {
+          api: 'modern-compiler', // or "modern"
+        },
+      },
     },
     build: {
       outDir: 'build',
@@ -55,7 +60,7 @@ export default ({ mode }) => {
         '@src': '/src',
         '@components': '/src/app-components',
         '@pages': '/src/app-pages',
-        '@styles': '/src/style',
+        '@styles': '/src/css',
         '@common': '/src/common',
         '@hooks': '/src/customHooks',
       },

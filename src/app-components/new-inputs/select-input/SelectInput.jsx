@@ -1,8 +1,9 @@
 import { useFormContext } from 'react-hook-form';
 import { Label, Select, Tooltip } from '@trussworks/react-uswds';
+import { mdiHelpCircle } from '@mdi/js';
 import classnames from 'classnames';
 
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
 
 import './selectInput.scss';
 
@@ -57,10 +58,7 @@ const SelectInput = ({
         )}
         {tooltip && (
           <Tooltip label={tooltip} position='right'>
-            <Icon
-              icon='help-circle'
-              style={{ fontSize: '16px', marginBottom: '8px' }}
-            />
+            <Icon path={mdiHelpCircle} size='16px' />
           </Tooltip>
         )}
       </Label>

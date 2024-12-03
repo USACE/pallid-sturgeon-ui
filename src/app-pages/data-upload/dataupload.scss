@@ -1,10 +1,10 @@
-@import '@styles/_variables';
+@use '@styles/_variables' as *;
 
 .text {
-  font-style:italic;
+  font-style: italic;
 
   &.log {
-    color:red;
+    color: red;
   }
 }
 

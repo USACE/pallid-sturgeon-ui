@@ -1,4 +1,4 @@
-@import '@styles/_variables';
+@use '@styles/_variables' as *;
 
 .usa-button.link-button-style {
   background: none;

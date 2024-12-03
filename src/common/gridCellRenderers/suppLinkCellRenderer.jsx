@@ -1,24 +1,16 @@
 import { connect } from 'redux-bundler-react';
+import { mdiDotsHorizontal, mdiPlus } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
 
 const SuppLinkCellRenderer = connect(
   'doUpdateBaseData',
   'doUpdateCurrentTab',
   'selectDataEntrySupplemental',
-  ({
-    doUpdateBaseData,
-    doUpdateCurrentTab,
-    dataEntrySupplemental,
-    data,
-    setIsAddRow,
-    setRowId,
-  }) => {
+  ({ doUpdateBaseData, doUpdateCurrentTab, dataEntrySupplemental, data, setIsAddRow, setRowId }) => {
     const fId = data.fid;
-    const hasSuppData = !!dataEntrySupplemental?.items?.filter(
-      (data) => data.fid === fId
-    )?.length;
+    const hasSuppData = !!dataEntrySupplemental?.items?.filter((data) => data.fid === fId)?.length;
     const isNewRow = Object.keys(data).length === 0;
 
     const handleAddRow = (add) => {
@@ -45,11 +37,7 @@ const SuppLinkCellRenderer = connect(
       if (isNewRow || !data.fid) {
         return true;
       } else {
-        if (
-          data.supplink === null ||
-          data.supplink === undefined ||
-          data.supplink === false
-        ) {
+        if (data.supplink === null || data.supplink === undefined || data.supplink === false) {
           return false;
         } else {
           return true;
@@ -64,7 +52,7 @@ const SuppLinkCellRenderer = connect(
         variant={hasSuppData ? 'info' : 'success'}
         title='Associated Supplemental Data Entries'
         text={hasSuppData ? 'View Data' : 'Add Data'}
-        icon={<Icon icon={hasSuppData ? 'dots-horizontal' : 'plus'} />}
+        icon={<Icon path={hasSuppData ? mdiDotsHorizontal : mdiPlus} />}
         handleClick={handleClick}
         isDisabled={isButtonDisabled()}
       />

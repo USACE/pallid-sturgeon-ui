@@ -1,5 +1,4 @@
-@import '@styles/variables';
-@import './uswds-theme/uswds-theme-components';
+@use '@styles/_variables' as *;
 
 $inactive-color: grey;
 $success-color: #43ac6a;

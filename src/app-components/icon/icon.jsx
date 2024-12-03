@@ -1,9 +1,14 @@
-import { classArray } from '@src/utils';
+import MaterialIcon from '@mdi/react';
 
-const Icon = ({ icon = '', className = '', ...customProps }) => {
-  const classnames = classArray(['mdi', `mdi-${icon}`, className]);
-
-  return <i className={classnames} {...customProps} />;
-};
+const Icon = ({ focusable = true, size = '16px', ...rest }) => (
+  <MaterialIcon
+    aria-hidden={focusable ? 'false' : 'true'}
+    focusable={focusable ? 'true' : 'false'}
+    tabIndex={focusable ? '0' : '-1'}
+    role={focusable ? 'button' : 'img'}
+    size={size}
+    {...rest}
+  />
+);
 
 export default Icon;

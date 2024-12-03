@@ -1,16 +1,13 @@
-import {
-  useEffect,
-  useState,
-  forwardRef,
-  useImperativeHandle,
-  useRef,
-} from 'react';
+import { useEffect, useState, forwardRef, useImperativeHandle, useRef } from 'react';
 import ReactTooltip from 'react-tooltip';
 import isEqual from 'lodash.isequal';
+import { mdiClose, mdiHelpCircleOutline } from '@mdi/js';
 
 import Dropdown from '../dropdown';
-import Icon from '../icon';
+import Icon from '@components/icon/icon';
+
 import usePrevious from '@hooks/usePrevious';
+
 import { classArray } from '@src/utils';
 
 import './filter-select.scss';
@@ -87,11 +84,7 @@ const FilterSelect = (
       setFilteredList(newSet);
 
       if (onChange) {
-        onChange(
-          newSet,
-          inputVal,
-          inputVal ? (items.find((e) => e.text === inputVal) || {}).value : ''
-        );
+        onChange(newSet, inputVal, inputVal ? (items.find((e) => e.text === inputVal) || {}).value : '');
       }
     }
   }, [inputVal, previousVal, items, onChange, setFilteredList]);
@@ -112,7 +105,7 @@ const FilterSelect = (
       {hasHelperIcon && (
         <>
           <Icon
-            icon='help-circle-outline'
+            path={mdiHelpCircleOutline}
             data-tip
             data-for={helperIconId}
             style={{ fontSize: '15px', marginBottom: '8px' }}
@@ -129,9 +122,7 @@ const FilterSelect = (
             <input
               disabled={isDisabled}
               ref={inputRef}
-              className={
-                showRequired ? 'form-control is-invalid' : 'form-control'
-              }
+              className={showRequired ? 'form-control is-invalid' : 'form-control'}
               placeholder={placeholder}
               onChange={(e) => handleChange(e.target.value)}
               value={!!handleInputChange ? value : inputVal}
@@ -139,12 +130,8 @@ const FilterSelect = (
             />
             {hasClearButton && (
               <div className='input-group-append'>
-                <span
-                  title='Clear Filter'
-                  className='input-group-text pointer'
-                  onClick={() => setInputVal('')}
-                >
-                  <Icon icon='close' />
+                <span title='Clear Filter' className='input-group-text pointer' onClick={() => setInputVal('')}>
+                  <Icon path={mdiClose} />
                 </span>
               </div>
             )}
@@ -157,10 +144,7 @@ const FilterSelect = (
             const display = getDisplay(elem);
 
             return (
-              <Dropdown.Item
-                key={display}
-                onClick={() => handleChange(display)}
-              >
+              <Dropdown.Item key={display} onClick={() => handleChange(display)}>
                 {display}
               </Dropdown.Item>
             );

@@ -12,8 +12,8 @@ import NavBar from '@components/navigation';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './css/bootstrap/css/bootstrap.water.min.css';
-import './css/mdi/css/materialdesignicons.min.css';
-import './css/index.scss';
+import '@styles/index.scss';
+import '@styles/uswds-theme/_uswds-theme-components.scss';
 
 export default connect(
   'doModalOpen',
@@ -22,14 +22,7 @@ export default connect(
   'selectAuth',
   'selectLoadingState',
   'selectLoadingMessage',
-  ({
-    doModalOpen,
-    doModalClose,
-    route: Route,
-    auth,
-    loadingState,
-    loadingMessage,
-  }) => {
+  ({ doModalOpen, doModalClose, route: Route, auth, loadingState, loadingMessage }) => {
     useEffect(() => {
       if (!auth.token && !sessionStorage.getItem('isLoggedIn')) {
         doModalOpen(LandingModal);

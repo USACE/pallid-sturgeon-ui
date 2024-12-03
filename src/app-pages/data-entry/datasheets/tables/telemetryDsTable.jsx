@@ -1,9 +1,10 @@
 import React, { useRef, useCallback } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { mdiContentCopy, mdiDownload, mdiPlus } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
 
 import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
 import SelectEditor from '@common/gridCellEditors/selectEditor';
@@ -16,9 +17,8 @@ import { frequencyIdOptions } from '@pages/data-entry/edit-data-sheet/forms/_sha
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
-
-import '../../../data-summaries/data-summary.scss';
-import '../../dataentry.scss';
+import '@pages/data-summaries/data-summary.scss';
+import '@pages/data-entry/dataentry.scss';
 
 // tableId = 4604 For testing
 
@@ -47,8 +47,7 @@ const TelemetryDsTable = connect(
       bendRiverMile: baseData?.bendRiverMile,
     }));
 
-    const lastRow =
-      dataEntryTelemetryData.items[dataEntryTelemetryData.totalCount - 1];
+    const lastRow = dataEntryTelemetryData.items[dataEntryTelemetryData.totalCount - 1];
     const initialState = {
       seId: dataEntryLastParams.seId,
     };
@@ -78,7 +77,7 @@ const TelemetryDsTable = connect(
               variant='success'
               text='Add Row'
               className='btn-width'
-              icon={<Icon icon='plus' />}
+              icon={<Icon path={mdiPlus} />}
               handleClick={addRow}
             />
             <Button
@@ -88,7 +87,7 @@ const TelemetryDsTable = connect(
               text='Copy Last Row'
               title='Copy Last Row'
               className='ml-1 mt-1 btn-width'
-              icon={<Icon icon='content-copy' />}
+              icon={<Icon path={mdiContentCopy} />}
               handleClick={copyLastRow}
             />
           </div>
@@ -99,16 +98,13 @@ const TelemetryDsTable = connect(
               variant='info'
               text='Export as CSV'
               className='float-right ml-1 mt-1 btn-width'
-              icon={<Icon icon='download' />}
+              icon={<Icon path={mdiDownload} />}
               isDisabled
               handleClick={() => doFetchAllDatasheet('fish-datasheet')}
             />
           </div>
         </Row>
-        <div
-          className='ag-theme-balham mt-2'
-          style={{ height: '600px', width: '100%' }}
-        >
+        <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}
             suppressClickEdit
@@ -151,26 +147,10 @@ const TelemetryDsTable = connect(
               }}
               editable={false}
             />
-            <AgGridColumn
-              field='tId'
-              headerName='T ID'
-              sortable
-              unSortIcon
-              editable={false}
-            />
+            <AgGridColumn field='tId' headerName='T ID' sortable unSortIcon editable={false} />
             <AgGridColumn field='tFid' sortable unSortIcon />
-            <AgGridColumn
-              field='bend'
-              cellEditor='floatEditor'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='bendRiverMile'
-              sortable
-              unSortIcon
-              editable={false}
-            />
+            <AgGridColumn field='bend' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='bendRiverMile' sortable unSortIcon editable={false} />
             <AgGridColumn
               field='radioTagNum'
               headerName='Radio Tag #'
@@ -193,13 +173,7 @@ const TelemetryDsTable = connect(
               sortable
               unSortIcon
             />
-            <AgGridColumn
-              field='captureDate'
-              headerName='Capture Time'
-              width={125}
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='captureDate' headerName='Capture Time' width={125} sortable unSortIcon />
             <AgGridColumn
               field='captureLatitude'
               cellEditor='floatEditor'
@@ -225,71 +199,19 @@ const TelemetryDsTable = connect(
               unSortIcon
             />
             <AgGridColumn field='mesoId' sortable unSortIcon />
-            <AgGridColumn
-              field='depth'
-              cellEditor='floatEditor'
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='depth' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='macroId' sortable unSortIcon />
-            <AgGridColumn
-              field='temp'
-              cellEditor='floatEditor'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='conductivity'
-              cellEditor='floatEditor'
-              width={125}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='turbidity'
-              cellEditor='floatEditor'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='silt'
-              cellEditor='floatEditor'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='sand'
-              cellEditor='floatEditor'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='gravel'
-              cellEditor='floatEditor'
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='temp' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='conductivity' cellEditor='floatEditor' width={125} sortable unSortIcon />
+            <AgGridColumn field='turbidity' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='silt' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='sand' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='gravel' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='comments' width={200} sortable unSortIcon />
-            <AgGridColumn
-              field='editInitials'
-              width={125}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='lastEditComment'
-              width={200}
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='editInitials' width={125} sortable unSortIcon />
+            <AgGridColumn field='lastEditComment' width={200} sortable unSortIcon />
             <AgGridColumn field='checkby' sortable unSortIcon />
-            <AgGridColumn
-              field='uploadedBy'
-              width={200}
-              sortable
-              unSortIcon
-              editable={false}
-            />
+            <AgGridColumn field='uploadedBy' width={200} sortable unSortIcon editable={false} />
           </AgGridReact>
         </div>
       </div>

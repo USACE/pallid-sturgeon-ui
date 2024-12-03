@@ -1,8 +1,9 @@
-@import '@styles/_mixins';
+@use '@styles/_mixins' as m;
+@use '@styles/_variables' as *;
 
 .textarea-container {
   .usa-textarea {
-    @include input-styles;
+    @include m.input-styles;
     padding-right: 2rem;
 
     &.usa-textarea:read-only {
@@ -21,6 +22,6 @@
 }
 
 textarea.usa-textarea.read-only-multiselect {
-  @include input-styles;
+  @include m.input-styles;
   background-color: $color-primary-light !important;
 }

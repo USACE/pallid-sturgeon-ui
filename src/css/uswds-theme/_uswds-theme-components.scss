@@ -1,4 +1,5 @@
-@import '@styles/_mixins';
+@use '@styles/_mixins.scss' as mixin;
+@use '@styles/_variables.scss' as *;
 
 // USWDS Style Overrides
 
@@ -67,7 +68,7 @@ a.usa-link {
 
 label.usa-label,
 div.usa-label {
-  @include input-font-styles;
+  @include mixin.input-font-styles;
   max-width: 100%;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
@@ -87,7 +88,7 @@ div.usa-label {
   background-color: transparent;
   padding: 0;
 
-  i {
+  svg {
     color: $link-color;
   }
 

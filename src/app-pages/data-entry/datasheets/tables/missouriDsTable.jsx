@@ -1,12 +1,13 @@
-import React from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { mdiDownload, mdiPlus } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
 
 import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
+
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
@@ -39,11 +40,9 @@ const MissouriDsTable = connect(
               variant='success'
               text='Add Missouri River Datasheet'
               title='Add Missouri River Datasheet'
-              icon={<Icon icon='plus' />}
+              icon={<Icon path={mdiPlus} />}
               className='btn-width'
-              handleClick={() =>
-                doUpdateUrl('/sites-list/datasheet/missouriRiver-create')
-              }
+              handleClick={() => doUpdateUrl('/sites-list/datasheet/missouriRiver-create')}
             />
           </div>
           <div className='col-md-3 col-xs-12'>
@@ -53,15 +52,12 @@ const MissouriDsTable = connect(
               variant='info'
               text='Export as CSV'
               className='float-right btn-width'
-              icon={<Icon icon='download' />}
+              icon={<Icon path={mdiDownload} />}
               isDisabled
             />
           </div>
         </Row>
-        <div
-          className='ag-theme-balham mt-2'
-          style={{ width: '100%', height: '600px' }}
-        >
+        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowHeight={35}
             rowData={moriverSitesDatasheetData}
@@ -127,14 +123,7 @@ const MissouriDsTable = connect(
               sortable
               unSortIcon
             />
-            <AgGridColumn
-              field='mrFid'
-              headerName='Field ID'
-              width={170}
-              resizable
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='mrFid' headerName='Field ID' width={170} resizable sortable unSortIcon />
             <AgGridColumn
               field='setdate'
               headerName='Date'
@@ -143,24 +132,9 @@ const MissouriDsTable = connect(
               unSortIcon
             />
             <AgGridColumn field='subsample' sortable unSortIcon />
-            <AgGridColumn
-              field='gear'
-              headerName='Gear Code'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='recorder'
-              headerName='Recorder'
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='checkby'
-              headerName='Checked?'
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='gear' headerName='Gear Code' sortable unSortIcon />
+            <AgGridColumn field='recorder' headerName='Recorder' sortable unSortIcon />
+            <AgGridColumn field='checkby' headerName='Checked?' sortable unSortIcon />
             {/* @TODO: Check with Tisha on approved field. */}
             <AgGridColumn headerName='Approved?' sortable unSortIcon />
           </AgGridReact>

@@ -1,8 +1,9 @@
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { mdiDownload } from '@mdi/js';
 
 import Button from '@components/button';
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
@@ -20,13 +21,10 @@ const FishTable = connect(
           size='small'
           variant='info'
           text='Export as CSV'
-          icon={<Icon icon='download' />}
+          icon={<Icon path={mdiDownload} />}
           handleClick={() => doFetchAllDatasheet('fish-datasheet')}
         />
-        <div
-          className='ag-theme-balham mt-2'
-          style={{ width: '100%', height: '600px' }}
-        >
+        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowData={data}
             defaultColDef={{
@@ -34,12 +32,7 @@ const FishTable = connect(
             }}
           >
             <AgGridColumn field='uniqueID' sortable unSortIcon />
-            <AgGridColumn
-              field='fishId'
-              headerName='Fish ID'
-              sortable
-              unSortIcon
-            />
+            <AgGridColumn field='fishId' headerName='Fish ID' sortable unSortIcon />
             <AgGridColumn field='year' />
             <AgGridColumn field='fieldOffice' sortable unSortIcon />
             <AgGridColumn field='project' />

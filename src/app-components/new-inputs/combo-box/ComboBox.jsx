@@ -4,7 +4,8 @@ import { Label, Tooltip } from '@trussworks/react-uswds';
 
 import { baseStyle, customSelectStyles, customSelectStylesNonRequired } from './comboBoxHelper';
 
-import Icon from '@components/icon';
+import Icon from '@components/icon/icon';
+import { mdiHelpCircle } from '@mdi/js';
 
 const ComboBox = ({
   closeMenuOnSelect = false,
@@ -40,7 +41,7 @@ const ComboBox = ({
         )}
         {tooltip && (
           <Tooltip label={tooltip} position='right'>
-            <Icon icon='help-circle' style={{ fontSize: '16px', marginBottom: '8px' }} />
+            <Icon path={mdiHelpCircle} size='16px' />
           </Tooltip>
         )}
       </Label>

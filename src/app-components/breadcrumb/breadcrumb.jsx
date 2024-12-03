@@ -1,4 +1,6 @@
-import Icon from '../icon';
+import { mdiHome } from '@mdi/js';
+
+import Icon from '@components/icon/icon';
 
 import { hrefAsString } from '@src/utils';
 
@@ -15,7 +17,7 @@ const Breadcrumb = ({ home = true, pathname }) => {
           {home && (
             <li className='breadcrumb-item'>
               <a href='/'>
-                <Icon icon='home' className='pr-1' />
+                <Icon className='pr-1' path={mdiHome} />
                 Home
               </a>
             </li>

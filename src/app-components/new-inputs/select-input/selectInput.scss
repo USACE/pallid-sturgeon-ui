@@ -1,12 +1,12 @@
-@import '@styles/_mixins';
-@import '@styles/_variables';
+@use '@styles/_mixins' as mixin;
+@use '@styles/_variables' as *;
 
 @mixin select-container-styles {
   padding: 0;
   position: relative;
 
   .usa-select {
-    @include input-styles;
+    @include mixin.input-styles;
     margin-top: 0;
     // width: 100%;
 
@@ -23,7 +23,7 @@
     }
 
     &:after {
-      @include input-error-icon;
+      @include mixin.input-error-icon;
       background-position: right 0 top 0rem;
       content: '';
       height: 1.2rem;

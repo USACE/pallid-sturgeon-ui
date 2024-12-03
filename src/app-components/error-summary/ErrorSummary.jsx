@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 
 import LinkButton from '@components/link-button/linkButton';
-import Icon from '../icon';
+import Icon from '@components/icon/icon';
 
 import { getLabelTextById } from '@src/utils/helpers';
 
 import './errorSummary.scss';
+import { mdiChevronDown, mdiChevronUp } from '@mdi/js';
 
 const cleanAndTruncateLabels = (input, maxLength) => {
   if (typeof input === 'undefined') {
@@ -162,8 +163,8 @@ const ErrorSummary = ({ errors, type = 'base', modalID, sectionNo = 0 }) => {
             >
               <Icon
                 aria-label={`${isExpanded ? 'close' : 'open'} error summary`}
-                icon={isExpanded ? 'chevron-up' : 'chevron-down'}
-                style={{ fontSize: '36px', marginBottom: '8px' }}
+                path={isExpanded ? mdiChevronUp : mdiChevronDown}
+                size='36px'
               />
             </div>
           )}
