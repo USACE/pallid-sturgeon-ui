@@ -14,6 +14,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import './css/bootstrap/css/bootstrap.water.min.css';
 import '@styles/index.scss';
 import '@styles/uswds-theme/_uswds-theme-components.scss';
+import '@styles/_buttons.scss';
 
 export default connect(
   'doModalOpen',

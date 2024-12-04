@@ -9,6 +9,7 @@ import { mdiHelpCircle } from '@mdi/js';
 
 const ComboBox = ({
   closeMenuOnSelect = false,
+  showOptionalText = true,
   handleBlur,
   handleChange,
   isLoading,
@@ -37,7 +38,7 @@ const ComboBox = ({
         {required ? (
           <span className='asterisk-color'>*</span>
         ) : (
-          <span style={{ fontStyle: 'italic' }}> (optional)</span>
+          showOptionalText && <span style={{ fontStyle: 'italic' }}> (optional)</span>
         )}
         {tooltip && (
           <Tooltip label={tooltip} position='right'>

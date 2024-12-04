@@ -111,6 +111,6 @@
   }
 
   &.usa-input:read-only {
-    background-color: $color-primary-light !important;
+    background-color: $input-disabled !important;
   }
 }

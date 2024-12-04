@@ -1,7 +1,7 @@
 import { connect } from 'redux-bundler-react';
 
 import Button from '@components/button';
-import SitesFormModal from '@src/app-pages/data-entry/sites-list/components/site-form-modal/SitesFormModal';
+import SitesFormModal from '@src/app-pages/sites-list/site-form-modal/SitesFormModal';
 
 const SiteIdCellRenderer = connect(
   'doDomainFieldOfficesFetch',
@@ -42,15 +42,7 @@ const SiteIdCellRenderer = connect(
       }
     };
 
-    return (
-      <Button
-        size='small'
-        variant='link'
-        className='p-0 mb-1'
-        text={value}
-        handleClick={() => handleClick()}
-      />
-    );
+    return <Button size='small' variant='link' className='p-0 mb-1' text={value} handleClick={() => handleClick()} />;
   }
 );
 

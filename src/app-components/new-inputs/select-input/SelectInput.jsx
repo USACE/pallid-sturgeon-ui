@@ -22,6 +22,7 @@ const SelectInput = ({
   required,
   validations,
   tooltip,
+  hint,
   ...customProps
 }) => {
   const {
@@ -60,6 +61,11 @@ const SelectInput = ({
           <Tooltip label={tooltip} position='right'>
             <Icon path={mdiHelpCircle} size='16px' />
           </Tooltip>
+        )}
+        {hint && (
+          <div className='usa-hint' id={`${name}_hint`}>
+            {hint}
+          </div>
         )}
       </Label>
       <div className={containerCss}>

@@ -8,10 +8,9 @@
   .usa-select {
     @include mixin.input-styles;
     margin-top: 0;
-    // width: 100%;
 
     &.usa-select:disabled {
-      background-color: $color-primary-light;
+      background-color: $input-disabled;
       cursor: default;
     }
   }
