@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { Alert, Button, Grid } from '@trussworks/react-uswds';
 
@@ -149,7 +149,7 @@ const SitesListFilter = connect(
                   showOptionalText={false}
                 />
               </Grid> */}
-              <Grid tablet={{ col: 2 }} style={{ verticalAlign: 'bottom' }}>
+              <Grid tablet={{ col: 2 }} className='filter-btn-container'>
                 <div>
                   <Button onClick={clearFilters} className='clear-btn' outline title='Clear Filters'>
                     Clear All Filters

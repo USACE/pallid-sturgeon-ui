@@ -16,10 +16,7 @@ import ErrorSummary from '@components/error-summary/ErrorSummary';
 
 import { createDropdownOptions } from '@pages/data-entry/helpers';
 import { dropdownYearsToNow } from '@src/utils';
-import {
-  sampleUnitTypeProject1,
-  sitesFormTooltipContent,
-} from './sitesFormModalHelper';
+import { sampleUnitTypeProject1, sitesFormTooltipContent } from './sitesFormModalHelper';
 import { ValidationMessages } from '@src/utils/enums';
 
 const SitesFormModal = connect(
@@ -41,15 +38,7 @@ const SitesFormModal = connect(
     edit,
     data,
   }) => {
-    const {
-      fieldOffices,
-      projects,
-      seasons,
-      bends,
-      bendRn,
-      segments,
-      sampleUnitTypes,
-    } = domains;
+    const { fieldOffices, projects, seasons, bends, bendRn, segments, sampleUnitTypes } = domains;
 
     const user = usersData.find((user) => userRole.id === user.id);
     const currentYear = new Date().getFullYear();
@@ -94,22 +83,12 @@ const SitesFormModal = connect(
     const defaultValues = {
       edit: edit ?? false,
       year: data?.year ?? String(currentYear),
-      fieldoffice: edit
-        ? data?.fieldoffice
-        : user?.officeCode === 'ZZ'
-        ? ''
-        : user?.officeCode,
+      fieldoffice: edit ? data?.fieldoffice : user?.officeCode === 'ZZ' ? '' : user?.officeCode,
       projectId: edit ? data?.projectId : user?.projectCode,
-      segmentId: data?.segmentId
-        ? segmentComboOptions.filter(
-            (item) => item.value === data.segmentId
-          )?.[0]
-        : '',
+      segmentId: data?.segmentId ? segmentComboOptions.filter((item) => item.value === data.segmentId)?.[0] : '',
       season: data?.season ?? '',
       sampleUnitType: data?.sampleUnitType ?? '',
-      bend: data?.bend
-        ? bendComboOptions.filter((item) => item.value === data.bend)?.[0]
-        : '',
+      bend: data?.bend ? bendComboOptions.filter((item) => item.value === data.bend)?.[0] : '',
       bendrn: data?.bendrn ?? '',
       last_edit_comment: data?.last_edit_comment ?? '',
       editInitials: data?.editInitials ?? '',
@@ -256,14 +235,8 @@ const SitesFormModal = connect(
     return (
       <ModalContent size='lg'>
         <FormProvider {...methods}>
-          <ModalHeader title={edit ? 'Update Site' : 'Create New Site'} />
-          {errors && (
-            <ErrorSummary
-              errors={errors}
-              modalID='siteFormModal'
-              type='modal'
-            />
-          )}
+          <ModalHeader title={edit ? 'Update Site' : 'Add Site'} />
+          {errors && <ErrorSummary errors={errors} modalID='siteFormModal' type='modal' />}
           <section className='modal-body' id='siteFormModal'>
             <div className='container-fluid margin-top-1'>
               {user?.role !== 'ADMINISTRATOR' && (
@@ -273,21 +246,13 @@ const SitesFormModal = connect(
                       <Grid tablet={{ col: 6 }}>
                         <p className='margin-bottom-0'>
                           <span className='text-bold'>Field Office:</span>{' '}
-                          {
-                            fieldOffices?.filter(
-                              (item) => item.code === office
-                            )?.[0]?.description
-                          }
+                          {fieldOffices?.filter((item) => item.code === office)?.[0]?.description}
                         </p>
                       </Grid>
                       <Grid tablet={{ col: 6 }}>
                         <p className='margin-bottom-0'>
                           <span className='text-bold'>Project:</span>{' '}
-                          {
-                            projects?.filter(
-                              (item) => item.code === Number(project)
-                            )?.[0]?.description
-                          }
+                          {projects?.filter((item) => item.code === Number(project))?.[0]?.description}
                         </p>
                       </Grid>
                     </Grid>
@@ -298,8 +263,7 @@ const SitesFormModal = connect(
                 <Alert noIcon slim className='callout'>
                   Please complete the following fields to create a new site.
                   <br></br>
-                  <span className='text-bold'>Note:</span> Some dropdown options
-                  are dependent from other fields.
+                  <span className='text-bold'>Note:</span> Some dropdown options are dependent from other fields.
                 </Alert>
               )}
               <Grid row gap='md'>
@@ -315,19 +279,12 @@ const SitesFormModal = connect(
                 {user?.role === 'ADMINISTRATOR' && (
                   <>
                     <Grid tablet={{ col: 4 }}>
-                      <SelectInput
-                        name='fieldoffice'
-                        label='Field Office'
-                        onChange={handleChange}
-                        required
-                      >
-                        {createDropdownOptions(fieldOffices).map(
-                          (item, index) => (
-                            <option key={index + 1} value={item.value}>
-                              {item.text}
-                            </option>
-                          )
-                        )}
+                      <SelectInput name='fieldoffice' label='Field Office' onChange={handleChange} required>
+                        {createDropdownOptions(fieldOffices).map((item, index) => (
+                          <option key={index + 1} value={item.value}>
+                            {item.text}
+                          </option>
+                        ))}
                       </SelectInput>
                     </Grid>
                     <Grid tablet={{ col: 4 }}>
@@ -402,18 +359,10 @@ const SitesFormModal = connect(
               </SelectInput>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 9 }}>
-                  <TextArea
-                    name='last_edit_comment'
-                    label='Comments'
-                    required={edit}
-                  />
+                  <TextArea name='last_edit_comment' label='Comments' required={edit} />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput
-                    name='editInitials'
-                    label='Recorder Initials'
-                    required={edit}
-                  />
+                  <TextInput name='editInitials' label='Recorder Initials' required={edit} />
                 </Grid>
               </Grid>
             </div>
