@@ -1,0 +1,27 @@
+@use '@styles/_mixins' as m;
+@use '@styles/_variables' as *;
+
+.textarea-container {
+  .usa-textarea {
+    @include m.input-styles;
+    padding-right: 2rem;
+
+    &.usa-textarea:read-only {
+      color: $color-primary-dark;
+      background-color: $color-primary-light !important;
+    }
+  }
+  .usa-character-count__status {
+    font-size: 0.9rem;
+    padding-top: 0;
+  }
+  .usa-hint {
+    margin-top: 0.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+textarea.usa-textarea.read-only-multiselect {
+  @include m.input-styles;
+  background-color: $color-primary-light !important;
+}

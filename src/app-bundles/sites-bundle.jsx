@@ -63,27 +63,30 @@ export default {
   doSitesFetch:
     (siteId) =>
     ({ dispatch, store, apiGet }) => {
-      dispatch({ type: 'SITES_FETCH_START' });
-      const params = store.selectSitesParams();
+      const filterParams = store.selectSitesParams();
       const pageSize = store.selectSitesPageSize();
       const pageNumber = store.selectSitesPageNumber();
 
-      const query = queryFromObject({
-        ...params,
+      const queryAllSites = queryFromObject({
+        ...filterParams,
         size: pageSize,
         page: pageNumber,
       });
 
       const queryById = queryFromObject({
-        ...params,
+        ...filterParams,
         ...siteId,
         size: pageSize,
         page: pageNumber,
       });
 
-      const url = `/psapi/siteDataEntry${siteId ? queryById : query}`;
+      const url = `/psapi/siteDataEntry${siteId ? queryById : queryAllSites}`;
+
+      store.doSetLoadingState(true);
+      store.doSetLoadingMessage('Fetching Sites...');
 
       apiGet(url, (err, body) => {
+        store.doSetLoadingState(false);
         if (!err) {
           dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body });
           siteId && dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.items?.[0] });

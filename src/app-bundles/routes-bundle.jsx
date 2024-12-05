@@ -1,6 +1,6 @@
 import { createRouteBundle } from 'redux-bundler';
 
-import SitesList from '@pages/data-entry/sites-list';
+import SitesList from '@pages/sites-list/SitesList';
 import DataEntry from '@pages/data-entry/datasheets';
 import DataSheet from '@pages/data-summaries/datasheet/dataSheet';
 import DataQuery from '@pages/admin/data-query';

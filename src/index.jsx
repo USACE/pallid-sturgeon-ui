@@ -6,6 +6,9 @@ import App from './App';
 import cache from './cache';
 import getStore from './app-bundles';
 
+import '@trussworks/react-uswds/lib/uswds.css';
+import '@trussworks/react-uswds/lib/index.css';
+
 cache.getAll().then((initialData) => {
   const store = getStore(initialData);
 
