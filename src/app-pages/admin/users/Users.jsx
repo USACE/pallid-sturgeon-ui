@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { mdiAccountPlus } from '@mdi/js';
 
-import AddUserFormModal from './components/modal/addUser';
+import AddUserFormModal from './AddUserModal';
 import Button from '@components/button';
 import Card from '@components/card';
 import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
@@ -13,7 +13,7 @@ import ProjectEditor from '@common/gridCellEditors/projectEditor';
 import RoleFilter from '@components/role-filter';
 import Icon from '@components/icon/icon';
 
-import { rolesList, fieldOfficeList, projectCodeList, NoRoleAccessMessage } from './helper';
+import { rolesList, fieldOfficeList, projectCodeList, NoRoleAccessMessage } from '../helper';
 
 export default connect(
   'doDomainFieldOfficesFetch',

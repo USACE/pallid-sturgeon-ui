@@ -18,16 +18,18 @@ export const createDropdownOptions = (data) => {
 export const createBendsDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.map((d) => {
-    const { description, sampleUnit } = d;
+  return data
+    .map((d) => {
+      const { description, sampleUnit } = d;
 
-    if (!description) return null;
+      if (!description) return null;
 
-    return {
-      value: sampleUnit,
-      text: description,
-    };
-  }).filter((e) => e);
+      return {
+        value: sampleUnit,
+        text: description,
+      };
+    })
+    .filter((e) => e);
 };
 
 export const createRolesDropdownOptions = (data) => {
@@ -92,17 +94,15 @@ export const createAccountsOptions = (data) => {
   if (!data) return [];
 
   return data.map((opt) => ({
-    text: opt.role + ' - Field Office: ' + opt.officeCode + ' - Project: ' + opt.projectCode + ' - ' + projectMap[opt.projectCode],
+    text:
+      opt.role +
+      ' - Field Office: ' +
+      opt.officeCode +
+      ' - Project: ' +
+      opt.projectCode +
+      ' - ' +
+      projectMap[opt.projectCode],
     value: opt.id,
-  }));
-};
-
-export const createUsersOptions = (data) => {
-  if (!data) return [];
-
-  return data.map((opt) => ({
-    text: opt.firstName + ' ' + opt.lastName + ' (' + opt.userName + ')',
-    value: opt.userId,
   }));
 };
 
