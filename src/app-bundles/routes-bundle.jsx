@@ -17,13 +17,13 @@ import SearchReports from '@pages/data-summaries/search-reports';
 import PriorityFish from '@pages/data-summaries/priorityFish';
 import LastLocation from '@pages/data-summaries/lastLocation';
 import TagReplacement from '@pages/data-summaries/tagReplacement';
-import EditUser from '@pages/admin/editUser';
 import MultipleRecordApproval from '@pages/admin/multipleRecordApproval';
 import SiteDatasheet from '@pages/data-entry/datasheets/pages/site-datasheet';
 import TelemetryDsTable from '@pages/data-entry/datasheets/tables/telemetryDsTable';
 import FishDsTable from '@pages/data-entry/datasheets/tables/fishDsTable';
 import SuppDsTable from '@pages/data-entry/datasheets/tables/suppDsTable';
 import ProcedureDsTable from '@pages/data-entry/datasheets/tables/procedureDsTable';
+import Users from '@pages/admin/users/Users';
 
 export default createRouteBundle({
   '': Home,
@@ -31,7 +31,7 @@ export default createRouteBundle({
   '/data-sheet': DataSheet,
   '/data-query': DataQuery,
   '/data-upload': DataUpload,
-  '/edit-user': EditUser,
+  '/users': Users,
   '/error-log': ErrorLog,
   '/find-data-sheet': DataEntry,
   '/genetics-card-summary': GeneticCard,

@@ -21,7 +21,7 @@ const dataSummaryLinks = [
   '/tag-replacement',
 ];
 
-const administrationLinks = ['/data-query', '/multiple-record-approval', '/user-access-requests', '/edit-user'];
+const administrationLinks = ['/data-query', '/multiple-record-approval', '/user-access-requests', '/users'];
 
 const dataEntryLinks = ['/sites-list', '/find-data-sheet'];
 
