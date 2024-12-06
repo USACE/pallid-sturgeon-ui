@@ -4,7 +4,7 @@ import { Label, TextInput as UswdsTextInput } from '@trussworks/react-uswds';
 
 import classNames from 'classnames';
 
-import './TextInput.scss';
+import './textInput.scss';
 
 const TextInput = ({
   className = 'width-full',
