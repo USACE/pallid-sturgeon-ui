@@ -6,7 +6,7 @@ import { Textarea as UswdsTextArea, Label } from '@trussworks/react-uswds';
 
 import useListener from '@hooks/useListener';
 
-import './textarea.scss';
+import './textArea.scss';
 
 const TextArea = ({
   className,
@@ -40,9 +40,7 @@ const TextArea = ({
   } = register(name, { onChange, onBlur, pattern, ...validations });
 
   const countText = useMemo(() => {
-    const countText = inputValue?.length
-      ? maxLength - inputValue.length
-      : maxLength;
+    const countText = inputValue?.length ? maxLength - inputValue.length : maxLength;
     const endWord = inputValue?.length === 0 ? 'allowed' : 'left';
 
     return `${countText} characters ${endWord}`;
@@ -59,11 +57,7 @@ const TextArea = ({
       {label && (
         <Label htmlFor={name}>
           <span id={`${name}_label`}>{label}</span>
-          {required ? (
-            <span className='asterisk-color'>*</span>
-          ) : (
-            <span className='optional-text'>(optional)</span>
-          )}
+          {required ? <span className='asterisk-color'>*</span> : <span className='optional-text'>(optional)</span>}
         </Label>
       )}
       {hint && (
