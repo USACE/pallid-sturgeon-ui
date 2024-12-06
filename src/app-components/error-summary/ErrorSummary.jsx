@@ -1,12 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
+import { mdiChevronDown, mdiChevronUp } from '@mdi/js';
 
-import LinkButton from '@components/link-button/linkButton';
 import Icon from '@components/icon/icon';
+import LinkButton from '@components/link-button/LinkButton';
 
 import { getLabelTextById } from '@src/utils/helpers';
 
 import './errorSummary.scss';
-import { mdiChevronDown, mdiChevronUp } from '@mdi/js';
 
 const cleanAndTruncateLabels = (input, maxLength) => {
   if (typeof input === 'undefined') {
