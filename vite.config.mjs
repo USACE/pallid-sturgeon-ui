@@ -2,7 +2,6 @@ import react from '@vitejs/plugin-react';
 import eslint from 'vite-plugin-eslint';
 import svgrPlugin from 'vite-plugin-svgr';
 import { checker } from 'vite-plugin-checker';
-import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
 
 // https://vitejs.dev/config/
@@ -16,12 +15,6 @@ export default ({ mode }) => {
       react(),
       eslint(),
       svgrPlugin(),
-      visualizer({
-        filename: 'rollup-analyze.json',
-        template: 'raw-data',
-        gzipSize: true,
-        brotliSize: true,
-      }),
       checker({
         eslint: {
           lintCommand: 'eslint "./src/**/*.{js,jsx,ts,tsx}"',
