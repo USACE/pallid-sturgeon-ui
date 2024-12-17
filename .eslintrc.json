@@ -1,4 +1,14 @@
 {
+  "ignorePatterns": ["vite.config.mjs"],
+  "extends": [
+    // "react-app",
+    "react-app/jest",
+    // "plugin:import/errors",
+    "plugin:import/warnings",
+    "plugin:import/typescript",
+    // "plugin:react-hooks/recommended",
+    "prettier"
+  ],
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module",
@@ -6,30 +16,19 @@
       "jsx": true
     }
   },
-  "plugins": [
-    "react"
-  ],
+  "plugins": ["react"],
+  "parser": "@typescript-eslint/parser",
   "rules": {
-    "semi": "error",
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "jsx-quotes": [
-      "error",
-      "prefer-single"
-    ],
-    "arrow-body-style": [
-      "error",
-      "as-needed"
-    ],
-    "indent": [
-      "error",
-      2,
-      {
-        "VariableDeclarator": "first",
-        "SwitchCase": 1
-      }
-    ]
+    "arrow-body-style": ["warn", "as-needed"],
+    "arrow-parens": ["warn", "always"],
+    "jsx-quotes": ["warn", "prefer-single"],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "no-extra-semi": "warn",
+    // "no-unused-vars": "warn",
+    "no-use-before-define": 2,
+    "quotes": ["warn", "single", { "avoidEscape": true }],
+    "react/react-in-jsx-scope": 0,
+    // "react-hooks/exhaustive-deps": 2,
+    "semi": "warn"
   }
 }

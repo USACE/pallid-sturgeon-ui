@@ -1,0 +1,53 @@
+.errorSummary {
+  position: sticky;
+  position: -webkit-sticky;
+  position: -moz-sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.errorSummaryChevron {
+  position: absolute;
+  right: 0.375em;
+  top: 0.375em;
+  cursor: pointer;
+  z-index: 9991;
+}
+
+.error-list-container {
+  max-height: 500px;
+  /* Adjust to your desired max height */
+  column-count: 1;
+  /* Start with a single column */
+  column-gap: 10px;
+  /* Prevent scrolling */
+  transition: all 0.3s ease-in-out;
+  /* Smooth transition */
+  margin-left: 20px;
+}
+
+#error_list_summary,
+#error_list_summary_modal,
+#error_list_summary_form {
+  list-style-type: decimal;
+  /* Remove default list styling */
+  padding: 0;
+  margin: 0;
+  display: contents;
+  /* Allow li items to be direct children of the grid container */
+}
+
+.error-list-container:has(#error_list_summary > li:nth-child(n + 16)) {
+  column-count: 2;
+  /* Switch to two columns when items exceed 15 */
+}
+
+.error-list-container:has(#error_list_summary_modal > li:nth-child(n + 16)) {
+  column-count: 2;
+  /* Switch to two columns when items exceed 15 */
+}
+
+.error-list-container:has(#error_list_summary_form > li:nth-child(n + 16)) {
+  column-count: 2;
+  /* Switch to two columns when items exceed 15 */
+}

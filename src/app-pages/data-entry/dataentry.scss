@@ -1,4 +1,4 @@
-@import '../../style/variables';
+@use '@styles/_variables' as *;
 
 .siteList {
   width: 100%;
@@ -9,8 +9,8 @@
 }
 
 .card-body {
-  padding-top: .2rem !important;
-  padding-bottom: .2rem !important;
+  padding-top: 0.2rem !important;
+  padding-bottom: 0.2rem !important;
 }
 
 .block_container {
@@ -34,12 +34,14 @@
 }
 
 @media screen and (max-width: $small-screen-width) {
-  .offset-8,.offset-6,.offset-10{
-    margin-left:0% !important;
+  .offset-8,
+  .offset-6,
+  .offset-10 {
+    margin-left: 0% !important;
   }
 
   .float-right {
-    float:none !important;
+    float: none !important;
   }
 
   .mt-1 {
@@ -53,13 +55,21 @@
 
 /* Safari */
 @-webkit-keyframes spin {
-  0% { -webkit-transform: rotate(0deg); }
-  100% { -webkit-transform: rotate(360deg); }
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .vertical-align-center {

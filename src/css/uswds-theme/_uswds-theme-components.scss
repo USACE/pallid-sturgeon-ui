@@ -1,0 +1,115 @@
+@use '@styles/_mixins.scss' as mixin;
+@use '@styles/_variables.scss' as *;
+
+// USWDS Style Overrides
+
+// These styles are based on USWDS styling and override conflicting bootstrap styling
+div#root,
+div[role='dialog'] {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  .h1,
+  .h2,
+  .h3,
+  .h4,
+  .h5,
+  .h6 {
+    line-height: 1.2;
+    font-weight: 600;
+  }
+  h1,
+  .h1 {
+    margin: 0 0 0.67em 0;
+    font-size: 2rem;
+  }
+  h2,
+  .h2 {
+    font-size: 1.7rem;
+  }
+  h3,
+  .h3 {
+    font-size: 1.5rem;
+  }
+  h4,
+  .h4 {
+    font-size: 1.2rem;
+  }
+  h5,
+  .h5 {
+    font-size: 1.1rem;
+  }
+  h6,
+  .h6 {
+    font-size: 1rem;
+  }
+
+  h2,
+  h3 {
+    &.usa-alert__heading {
+      line-height: 1em;
+      font-weight: 500;
+    }
+  }
+
+  h3.usa-accordion__heading {
+    font-size: 1.1rem;
+  }
+}
+
+a.usa-link {
+  &:visited {
+    color: $link-color;
+  }
+}
+
+label.usa-label,
+div.usa-label {
+  @include mixin.input-font-styles;
+  max-width: 100%;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 15px;
+
+  .help-icon {
+    margin-top: -1px;
+    margin-left: 0.25rem;
+  }
+  .optional-text {
+    font-style: italic;
+    margin-left: 0.5em;
+  }
+}
+
+.usa-button.usa-tooltip__trigger {
+  background-color: transparent;
+  padding: 0;
+
+  svg {
+    color: $link-color;
+  }
+
+  &:hover {
+    background-color: transparent;
+  }
+}
+
+div.usa-alert {
+  &.callout {
+    border-left-color: #ccc;
+
+    &.usa-alert--no-icon {
+      .usa-alert__body {
+        padding-left: 1rem;
+      }
+    }
+  }
+
+  .usa-alert__body {
+    margin-left: 0px;
+    margin-right: 0px;
+  }
+}

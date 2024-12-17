@@ -1,4 +1,4 @@
-@import '../../style/variables';
+@use '@styles/_variables' as *;
 
 .field-application {
   background-color: $color-primary-dark;

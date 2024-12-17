@@ -1,4 +1,4 @@
-@import '../../../../style/variables';
+@use '@styles/_variables' as *;
 
 .user-text {
   font-size: 20px;

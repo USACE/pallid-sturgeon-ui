@@ -1,4 +1,4 @@
-@import '../../style/variables';
+@use '@styles/_variables' as *;
 
 .nav-tabs {
   border-bottom: 1px solid #c8cacb !important;

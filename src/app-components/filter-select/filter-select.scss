@@ -1,4 +1,4 @@
-@import '../../style/variables';
+@use '@styles/_variables' as *;
 
 .input-group-append {
   margin-left: 5px;

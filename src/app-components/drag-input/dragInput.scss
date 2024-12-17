@@ -1,4 +1,4 @@
-@import '../../style/variables';
+@use '@styles/_variables' as *;
 
 .dropzone {
   border: 1px dashed $color-gray-light;
@@ -8,7 +8,7 @@
   flex-grow: 6;
 
   &.active {
-    border: 1px dashed $color-primary
+    border: 1px dashed $color-primary;
   }
 
   p {
