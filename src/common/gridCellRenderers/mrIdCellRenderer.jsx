@@ -6,15 +6,21 @@ const MrIdCellRenderer = connect(
   'doFetchMoRiverDataEntry',
   'doUpdateUrl',
   'doUpdateCurrentTab',
+  'doUpdateComplexStateField',
+  'selectRouteParams',
   ({
     doFetchMoRiverDataEntry,
     doUpdateUrl,
     doUpdateCurrentTab,
-    uri,
+    doUpdateComplexStateField,
+    routeParams,
     data,
     type,
     tab = 0,
   }) => {
+    const siteID = routeParams?.id;
+    const uri = `/sites-list/${siteID}/missouri-river`;
+
     const getMrId = () => {
       switch (type) {
         case 'home':
@@ -43,22 +49,11 @@ const MrIdCellRenderer = connect(
 
     const handleClick = () => {
       doUpdateCurrentTab(tab);
-      doFetchMoRiverDataEntry(
-        { tableId: getMrId() },
-        () => doUpdateUrl(uri),
-        false
-      );
+      doUpdateComplexStateField({ name: 'isEditForm', value: true });
+      doFetchMoRiverDataEntry({ tableId: getMrId() }, false, true);
     };
 
-    return (
-      <Button
-        size='small'
-        variant='link'
-        className='p-0 mb-1'
-        text={getTypeText()}
-        handleClick={handleClick}
-      />
-    );
+    return <Button size='small' variant='link' className='p-0 mb-1' text={getTypeText()} handleClick={handleClick} />;
   }
 );
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from '@components/button';
@@ -14,18 +14,14 @@ import {
   gearCodeOptions,
   macroOptions,
   microStructureOptions,
-  setSite_1_2Options,
   setSite_3Options,
   u7Options,
 } from './_shared/selectHelper';
-import {
-  createMesoOptions,
-  createStructureFlowOptions,
-  createStructureModOptions,
-} from '@pages/data-entry/helpers';
+import { createMesoOptions, createStructureFlowOptions, createStructureModOptions } from '@pages/data-entry/helpers';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 
 import '../../../data-summaries/data-summary.scss';
+import { formatDate } from '@src/utils/helpers';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -54,7 +50,6 @@ const MissouriRiverForm = connect(
   'doDomainsSetSite2Fetch',
   'doResetMoRiverDataEntryData',
   'selectDataEntryData',
-  'selectBaseData',
   'selectDomainsMeso',
   'selectDomainsStructureFlow',
   'selectDomainsStructureMod',
@@ -64,8 +59,8 @@ const MissouriRiverForm = connect(
   'selectDataEntrySupplementalTotalCount',
   'selectDataEntryProcedureTotalCount',
   'selectCurrentTab',
-  'selectUserRole',
   'selectRouteParams',
+  'selectIsEditForm',
   ({
     doUpdateBaseData,
     doMoRiverDatasheetLoadData,
@@ -79,7 +74,6 @@ const MissouriRiverForm = connect(
     doDomainsSetSite2Fetch,
     doResetMoRiverDataEntryData,
     dataEntryData,
-    baseData,
     domainsMeso,
     domainsStructureFlow,
     domainsStructureMod,
@@ -89,15 +83,14 @@ const MissouriRiverForm = connect(
     dataEntrySupplementalTotalCount,
     dataEntryProcedureTotalCount,
     currentTab,
-    userRole,
     routeParams,
-    edit,
+    isEditForm,
   }) => {
     const initialState = {
       noTurbidity: 'N',
       noVelocity: 'N',
     };
-    const [state, dispatch] = useReducer(reducer, edit ? {} : initialState);
+    const [state, dispatch] = useReducer(reducer, initialState);
 
     const [isAddSuppRow, setIsAddSuppRow] = useState(false);
     const [suppRowId, setSuppRowId] = useState(null);
@@ -108,7 +101,7 @@ const MissouriRiverForm = connect(
     const [isNoTurbidity, setIsNoTurbidity] = useState(false);
     const [isNoVelocity, setIsNoVelocity] = useState(false);
 
-    const isCreate = routeParams.form.split('-')[1] === 'create';
+    const siteId = routeParams?.siteId;
     const formComplete = true;
 
     const handleChange = (e) => {
@@ -131,9 +124,7 @@ const MissouriRiverForm = connect(
       dispatch({
         type: 'UPDATE_INPUT',
         field: e.target.name,
-        payload: isNaN(parseFloat(e.target.value))
-          ? 0
-          : parseFloat(e.target.value),
+        payload: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value),
       });
     };
 
@@ -171,11 +162,7 @@ const MissouriRiverForm = connect(
     };
 
     const doSave = () => {
-      if (edit) {
-        doUpdateMoRiverDataEntry(state);
-      } else {
-        doSaveMoRiverDataEntry(state);
-      }
+      isEditForm ? doUpdateMoRiverDataEntry(state) : doSaveMoRiverDataEntry(state);
     };
 
     const saveIsDisabled = !(
@@ -191,55 +178,29 @@ const MissouriRiverForm = connect(
       !!state['startTime'] &&
       !!state['startlatitude'] &&
       !!state['startlongitude'] &&
-      (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
+      (isEditForm ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
-    const formatDate = (dateStr) => {
-      const subStr = 'T';
-      if (dateStr.includes(subStr)) {
-        return dateStr.split('T')[0];
-      }
-      return dateStr;
-    };
-
     useEffect(() => {
-      if (edit) {
+      // If there is existing Missouri River data entry
+      if (isEditForm) {
         dispatch({
           type: 'INITIALIZE_FORM',
           payload: dataEntryData,
         });
 
         // Format Date
-        if (dataEntryData.setdate) {
-          handleSelect('setdate', formatDate(dataEntryData.setdate));
-        }
+        dataEntryData?.setdate && handleSelect('setdate', formatDate(dataEntryData.setdate));
 
         // Set state of checkboxes
-        if (dataEntryData['noTurbidity'] === 'Y') {
-          setIsNoTurbidity(true);
-        } else {
-          setIsNoTurbidity(false);
-        }
-
-        if (dataEntryData['noVelocity'] === 'Y') {
-          setIsNoVelocity(true);
-        } else {
-          setIsNoVelocity(false);
-        }
+        setIsNoTurbidity(dataEntryData?.noTurbidity === 'Y' ? true : false);
+        setIsNoVelocity(dataEntryData?.noVelocity === 'Y' ? true : false);
       } else {
-        handleSelect('siteId', Number(baseData?.siteId));
-      }
-    }, [edit, dataEntryData]);
-
-    useEffect(() => {
-      if (isCreate) {
-        // reset data if adding new Missouri River datasheet
+        // Reset data if adding new Missouri River datasheet
         doResetMoRiverDataEntryData();
-      } else if (dataEntryData.mrId) {
-        // load data if editing or viewing existing Missouri River datasheet
-        doMoRiverDatasheetLoadData(dataEntryData.mrId);
+        handleSelect('siteId', siteId);
       }
-    }, [isCreate, dataEntryData.mrId, userRole.id]);
+    }, [isEditForm, dataEntryData]);
 
     useEffect(() => {
       // netrivermile in baseData
@@ -251,8 +212,8 @@ const MissouriRiverForm = connect(
         <div className='row'>
           <div className='col-9'>
             <h4>
-              {edit ? '' : 'Create'} Missouri River Datasheet{' '}
-              {edit ? `Overview (ID: ${dataEntryData['mrId']})` : ''}
+              {isEditForm ? '' : 'Create'} Missouri River Datasheet{' '}
+              {isEditForm ? `Overview (ID: ${dataEntryData?.mrId})` : ''}
             </h4>
           </div>
         </div>
@@ -266,9 +227,8 @@ const MissouriRiverForm = connect(
           <Card.Header text='Missouri River and Related Data' />
           <Card.Body>
             <p>
-              Select any tab to view Missouri River, Fish, Supplemental, and
-              Procedure datasheet data for Missouri River ID:{' '}
-              {dataEntryData['mrId']}
+              Select any tab to view Missouri River, Fish, Supplemental, and Procedure datasheet data for Missouri River
+              ID: {dataEntryData?.mrId}
             </p>
             <TabContainer
               tabs={[
@@ -282,11 +242,7 @@ const MissouriRiverForm = connect(
                             label='Setdate'
                             name='setdate'
                             type='date'
-                            value={
-                              state['setdate']
-                                ? state['setdate'].split('T')[0]
-                                : ''
-                            }
+                            value={state['setdate'] ? state['setdate'].split('T')[0] : ''}
                             onChange={handleChange}
                             isRequired
                           />
@@ -336,11 +292,7 @@ const MissouriRiverForm = connect(
                             value={state['gearType']}
                             defaultValue='S'
                             onChange={(val) => handleSelect('gearType', val)}
-                            options={[
-                              { value: 'E' },
-                              { value: 'S' },
-                              { value: 'W' },
-                            ]}
+                            options={[{ value: 'E' }, { value: 'S' }, { value: 'W' }]}
                             isDisabled={!formComplete}
                             isRequired
                           />
@@ -367,10 +319,7 @@ const MissouriRiverForm = connect(
                         </div>
                       </Row>
                       <Row>
-                        <div
-                          className='col-md-4 pb-3'
-                          style={{ borderRight: '1px solid lightgray' }}
-                        >
+                        <div className='col-md-4 pb-3' style={{ borderRight: '1px solid lightgray' }}>
                           <Row>
                             <div className='col-md-6'>
                               <SelectCustomLabel
@@ -438,9 +387,7 @@ const MissouriRiverForm = connect(
                                 label='Micro Structure'
                                 name='microStructure'
                                 value={state['microStructure']}
-                                onChange={(val) =>
-                                  handleSelect('microStructure', val)
-                                }
+                                onChange={(val) => handleSelect('microStructure', val)}
                                 options={microStructureOptions}
                                 isDisabled={!formComplete}
                               />
@@ -450,12 +397,8 @@ const MissouriRiverForm = connect(
                                 label='Structure Flow'
                                 name='structureFlow'
                                 value={state['structureFlow']}
-                                onChange={(val) =>
-                                  handleSelect('structureFlow', val)
-                                }
-                                options={createStructureFlowOptions(
-                                  domainsStructureFlow
-                                )}
+                                onChange={(val) => handleSelect('structureFlow', val)}
+                                options={createStructureFlowOptions(domainsStructureFlow)}
                                 isDisabled={!formComplete}
                               />
                             </div>
@@ -464,12 +407,8 @@ const MissouriRiverForm = connect(
                                 label='Structure Mod'
                                 name='structureMod'
                                 value={state['structureMod']}
-                                onChange={(val) =>
-                                  handleSelect('structureMod', val)
-                                }
-                                options={createStructureModOptions(
-                                  domainsStructureMod
-                                )}
+                                onChange={(val) => handleSelect('structureMod', val)}
+                                options={createStructureModOptions(domainsStructureMod)}
                                 isDisabled={!formComplete}
                               />
                             </div>
@@ -480,12 +419,8 @@ const MissouriRiverForm = connect(
                                 label='Set Site 1'
                                 name='setSite1'
                                 value={state['setSite1']}
-                                onChange={(val) =>
-                                  handleSelect('setSite1', val)
-                                }
-                                options={createStructureModOptions(
-                                  domainsSetSite1
-                                )}
+                                onChange={(val) => handleSelect('setSite1', val)}
+                                options={createStructureModOptions(domainsSetSite1)}
                                 isDisabled={!formComplete}
                               />
                             </div>
@@ -494,12 +429,8 @@ const MissouriRiverForm = connect(
                                 label='Set Site 2'
                                 name='setSite2'
                                 value={state['setSite2']}
-                                onChange={(val) =>
-                                  handleSelect('setSite2', val)
-                                }
-                                options={createStructureModOptions(
-                                  domainsSetSite2
-                                )}
+                                onChange={(val) => handleSelect('setSite2', val)}
+                                options={createStructureModOptions(domainsSetSite2)}
                                 isDisabled={!formComplete}
                               />
                             </div>
@@ -508,9 +439,7 @@ const MissouriRiverForm = connect(
                                 label='Set Site 3'
                                 name='setSite3'
                                 value={state['setSite3']}
-                                onChange={(val) =>
-                                  handleSelect('setSite3', val)
-                                }
+                                onChange={(val) => handleSelect('setSite3', val)}
                                 options={setSite_3Options}
                                 isDisabled={!formComplete}
                               />
@@ -520,10 +449,7 @@ const MissouriRiverForm = connect(
                       </Row>
 
                       <Row>
-                        <div
-                          className='col-md-5 pb-3'
-                          style={{ borderRight: '1px solid lightgray' }}
-                        >
+                        <div className='col-md-5 pb-3' style={{ borderRight: '1px solid lightgray' }}>
                           <Row>
                             <div className='col-md-4'>
                               <Input
@@ -798,9 +724,7 @@ const MissouriRiverForm = connect(
                                 label='Habitat R/N'
                                 name='habitatrn'
                                 value={state['habitatrn']}
-                                onChange={(val) =>
-                                  handleSelect('habitatrn', val)
-                                }
+                                onChange={(val) => handleSelect('habitatrn', val)}
                                 options={[
                                   { value: 'R', text: 'R - Random' },
                                   { value: 'N', text: 'N - Non-random' },
@@ -924,9 +848,7 @@ const MissouriRiverForm = connect(
                                 name='watervel'
                                 value={Number(state['watervel'])}
                                 defaultValue={0}
-                                onChange={(val) =>
-                                  handleSelect('watervel', val)
-                                }
+                                onChange={(val) => handleSelect('watervel', val)}
                                 options={[
                                   { value: 0, text: 'Not reliable' },
                                   { value: 1, text: 'Eddy' },
@@ -1082,7 +1004,7 @@ const MissouriRiverForm = connect(
                             value={state['lastEditComment']}
                             onChange={handleChange}
                             isDisabled={!formComplete}
-                            isRequired={edit}
+                            isRequired={isEditForm}
                           />
                           <Row className='mt-2'>
                             <div className='col-md-9 pt-1 text-right'>
@@ -1096,7 +1018,7 @@ const MissouriRiverForm = connect(
                                 value={state['editInitials']}
                                 onChange={handleChange}
                                 isDisabled={!formComplete}
-                                isRequired={edit}
+                                isRequired={isEditForm}
                               />
                             </div>
                           </Row>
@@ -1111,7 +1033,7 @@ const MissouriRiverForm = connect(
                               size='small'
                               variant='success'
                               className='btn-width'
-                              text={edit ? 'Apply Changes' : 'Save'}
+                              text={isEditForm ? 'Apply Changes' : 'Save'}
                               handleClick={() => doSave()}
                               isDisabled={saveIsDisabled}
                             />
@@ -1125,10 +1047,7 @@ const MissouriRiverForm = connect(
                   title: `Fish (${dataEntryFishTotalCount})`,
                   content: (
                     <>
-                      <FishDsTable
-                        setIsAddRow={setIsAddSuppRow}
-                        setRowId={setSuppRowId}
-                      />
+                      <FishDsTable setIsAddRow={setIsAddSuppRow} setRowId={setSuppRowId} />
                     </>
                   ),
                 },
@@ -1149,10 +1068,7 @@ const MissouriRiverForm = connect(
                   title: `Procedure (${dataEntryProcedureTotalCount})`,
                   content: (
                     <>
-                      <ProcedureDsTable
-                        isAddRow={isAddProcRow}
-                        rowId={procRowId}
-                      />
+                      <ProcedureDsTable isAddRow={isAddProcRow} rowId={procRowId} />
                     </>
                   ),
                 },

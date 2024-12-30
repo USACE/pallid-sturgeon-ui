@@ -11,27 +11,21 @@ import '@pages/data-summaries/data-summary.scss';
 import Icon from '@components/icon/icon';
 import { mdiHelpCircle } from '@mdi/js';
 
+const datasheetTypeOptions = [
+  { value: 'missouriRiver', text: 'Missouri River' },
+  { value: 'fish', text: 'Fish' },
+  { value: 'supplemental', text: 'Supplemental' },
+  { value: 'telemetry', text: 'Telemetry' },
+  { value: 'procedures', text: 'Procedures' },
+  { value: 'searchEffort', text: 'Search Effort' },
+];
+
 const FindDataSheet = connect(
   'doFetchMoRiverDataEntry',
-  'doFetchSupplementalDataEntry',
-  'doFetchFishDataEntry',
   'doFetchSearchDataEntry',
-  'doFetchTelemetryDataEntry',
-  'doFetchProcedureDataEntry',
-  'doUpdateUrl',
   'doUpdateCurrentTab',
   'selectUserRole',
-  ({
-    doFetchMoRiverDataEntry,
-    doFetchSupplementalDataEntry,
-    doFetchFishDataEntry,
-    doFetchSearchDataEntry,
-    doFetchTelemetryDataEntry,
-    doFetchProcedureDataEntry,
-    doUpdateUrl,
-    doUpdateCurrentTab,
-    userRole,
-  }) => {
+  ({ doFetchMoRiverDataEntry, doFetchSearchDataEntry, doUpdateCurrentTab, userRole }) => {
     const [pitTag, setPitTag] = useState('');
     const [tableId, setTableId] = useState('');
     const [fieldId, setFieldId] = useState('');
@@ -52,27 +46,27 @@ const FindDataSheet = connect(
 
       switch (dataSheetType) {
         case 'missouriRiver':
-          doFetchMoRiverDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doFetchMoRiverDataEntry(params, true, true);
           doUpdateCurrentTab(0);
           break;
         case 'fish':
-          doFetchFishDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doFetchMoRiverDataEntry(params, true, true);
           doUpdateCurrentTab(1);
           break;
         case 'supplemental':
-          doFetchSupplementalDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doFetchMoRiverDataEntry(params, true, true);
           doUpdateCurrentTab(2);
           break;
         case 'procedures':
-          doFetchProcedureDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doFetchMoRiverDataEntry(params, true, true);
           doUpdateCurrentTab(3);
           break;
         case 'searchEffort':
-          doFetchSearchDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'), true);
+          doFetchSearchDataEntry(params, true, true);
           doUpdateCurrentTab(0);
           break;
         case 'telemetry':
-          doFetchTelemetryDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'), true);
+          doFetchSearchDataEntry(params, true, true);
           doUpdateCurrentTab(1);
           break;
         default:
@@ -96,14 +90,7 @@ const FindDataSheet = connect(
                       onChange={(value) => setDataSheetType(value)}
                       value={dataSheetType}
                       placeholderText='Datasheet Type...'
-                      options={[
-                        { value: 'missouriRiver', text: 'Missouri River' },
-                        { value: 'fish', text: 'Fish' },
-                        { value: 'supplemental', text: 'Supplemental' },
-                        { value: 'telemetry', text: 'Telemetry' },
-                        { value: 'procedures', text: 'Procedures' },
-                        { value: 'searchEffort', text: 'Search Effort' },
-                      ]}
+                      options={datasheetTypeOptions}
                     />
                   </div>
                 </div>

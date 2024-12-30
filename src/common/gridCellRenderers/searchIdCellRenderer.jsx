@@ -6,20 +6,27 @@ const SearchIdCellRenderer = connect(
   'doFetchSearchDataEntry',
   'doUpdateUrl',
   'doUpdateCurrentTab',
+  'doUpdateComplexStateField',
+  'selectRouteParams',
   ({
     doFetchSearchDataEntry,
     doUpdateUrl,
     doUpdateCurrentTab,
-    uri,
+    doUpdateComplexStateField,
+    routeParams,
     data,
     type,
     tab,
   }) => {
+    const siteID = routeParams?.id;
+    const uri = `/sites-list/${siteID}/search-effort`;
+
     const params = { tableId: data.seId };
 
     const handleChange = () => {
       doUpdateCurrentTab(tab);
-      doFetchSearchDataEntry(params, () => doUpdateUrl(uri), false);
+      doUpdateComplexStateField({ name: 'isEditForm', value: true });
+      doFetchSearchDataEntry(params, false, true);
     };
 
     const getTypeText = () => {
@@ -33,15 +40,7 @@ const SearchIdCellRenderer = connect(
       }
     };
 
-    return (
-      <Button
-        size='small'
-        variant='link'
-        className='p-0 mb-1'
-        text={getTypeText()}
-        handleClick={handleChange}
-      />
-    );
+    return <Button size='small' variant='link' className='p-0 mb-1' text={getTypeText()} handleClick={handleChange} />;
   }
 );
 

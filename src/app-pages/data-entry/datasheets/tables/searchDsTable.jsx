@@ -1,4 +1,3 @@
-import React from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { mdiDownload, mdiPlus } from '@mdi/js';
@@ -10,16 +9,22 @@ import SearchIdCellRenderer from '@common/gridCellRenderers/searchIdCellRenderer
 
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+const telemetryCellStyle = (params) => ({
+  backgroundColor: params.data.bkgColor,
+});
 
 const SearchDsTable = connect(
   'doUpdateUrl',
+  'doUpdateComplexStateField',
   'selectSearchEffortSitesDatasheetData',
-  ({ doUpdateUrl, searchEffortSitesDatasheetData }) => {
-    const telemetryCellStyle = (params) => ({
-      backgroundColor: params.data.bkgColor,
-    });
+  'selectRouteParams',
+  ({ doUpdateUrl, doUpdateComplexStateField, searchEffortSitesDatasheetData, routeParams }) => {
+    const siteId = routeParams?.id;
+
+    const handleAddButtonClick = () => {
+      doUpdateComplexStateField({ name: 'isEditForm', value: false });
+      doUpdateUrl(`/sites-list/${siteId}/search-effort`);
+    };
 
     return (
       <>
@@ -33,7 +38,7 @@ const SearchDsTable = connect(
               title='Add Search Effort Datasheet'
               icon={<Icon path={mdiPlus} />}
               className='btn-width'
-              handleClick={() => doUpdateUrl('/sites-list/datasheet/searchEffort-create')}
+              handleClick={handleAddButtonClick}
             />
           </div>
           <div className='col-md-3 col-xs-12'>
@@ -64,7 +69,6 @@ const SearchDsTable = connect(
               headerName='SE ID'
               cellRenderer='searchIdCellRenderer'
               cellRendererParams={{
-                uri: '/sites-list/datasheet/searchEffort-edit',
                 type: 'searchEffort',
               }}
               sortable
@@ -77,7 +81,6 @@ const SearchDsTable = connect(
               cellStyle={telemetryCellStyle}
               cellRenderer='searchIdCellRenderer'
               cellRendererParams={{
-                uri: '/sites-list/datasheet/searchEffort-edit',
                 type: 'telemetry',
                 tab: 1,
               }}
