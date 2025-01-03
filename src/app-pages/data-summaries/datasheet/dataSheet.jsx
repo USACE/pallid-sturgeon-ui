@@ -282,27 +282,27 @@ export default connect(
             <TabContainer
               tabs={[
                 {
-                  title: `Missouri River (${datasheet.missouriRiver.totalCount})`,
+                  title: `Missouri River (${datasheet?.missouriRiver?.totalCount || 0})`,
                   content: <MissouriRiverTable />,
                 },
                 {
-                  title: `Fish (${datasheet.fish.totalCount})`,
+                  title: `Fish (${datasheet?.fish?.totalCount || 0})`,
                   content: <FishTable />,
                 },
                 {
-                  title: `Supplemental (${datasheet.supplemental.totalCount})`,
+                  title: `Supplemental (${datasheet?.supplemental?.totalCount || 0})`,
                   content: <SupplementalTable />,
                 },
                 {
-                  title: `Procedure (${datasheet.procedure.totalCount})`,
+                  title: `Procedure (${datasheet?.procedure?.totalCount || 0})`,
                   content: <ProcedureTable />,
                 },
                 {
-                  title: `Search Effort (${datasheet.searchEffort.totalCount})`,
+                  title: `Search Effort (${datasheet?.searchEffort?.totalCount || 0})`,
                   content: <SearchTable />,
                 },
                 {
-                  title: `Telemetry (${datasheet.telemetry.totalCount})`,
+                  title: `Telemetry (${datasheet?.telemetry?.totalCount || 0})`,
                   content: <TelemetryTable />,
                 },
               ]}
