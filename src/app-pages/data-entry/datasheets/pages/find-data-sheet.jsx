@@ -22,10 +22,23 @@ const datasheetTypeOptions = [
 
 const FindDataSheet = connect(
   'doFetchMoRiverDataEntry',
+  'doFetchFishDataEntry',
+  'doFetchSupplementalDataEntry',
+  'doFetchProcedureDataEntry',
   'doFetchSearchDataEntry',
+  'doFetchTelemetryDataEntry',
   'doUpdateCurrentTab',
   'selectUserRole',
-  ({ doFetchMoRiverDataEntry, doFetchSearchDataEntry, doUpdateCurrentTab, userRole }) => {
+  ({
+    doFetchMoRiverDataEntry,
+    doFetchFishDataEntry,
+    doFetchSupplementalDataEntry,
+    doFetchProcedureDataEntry,
+    doFetchSearchDataEntry,
+    doFetchTelemetryDataEntry,
+    doUpdateCurrentTab,
+    userRole,
+  }) => {
     const [pitTag, setPitTag] = useState('');
     const [tableId, setTableId] = useState('');
     const [fieldId, setFieldId] = useState('');
@@ -46,27 +59,27 @@ const FindDataSheet = connect(
 
       switch (dataSheetType) {
         case 'missouriRiver':
-          doFetchMoRiverDataEntry(params, true, true);
+          doFetchMoRiverDataEntry(params, true, true, true);
           doUpdateCurrentTab(0);
           break;
         case 'fish':
-          doFetchMoRiverDataEntry(params, true, true);
+          doFetchFishDataEntry(params, true, true);
           doUpdateCurrentTab(1);
           break;
         case 'supplemental':
-          doFetchMoRiverDataEntry(params, true, true);
+          doFetchSupplementalDataEntry(params, true, true);
           doUpdateCurrentTab(2);
           break;
         case 'procedures':
-          doFetchMoRiverDataEntry(params, true, true);
+          doFetchProcedureDataEntry(params, true, true);
           doUpdateCurrentTab(3);
           break;
         case 'searchEffort':
-          doFetchSearchDataEntry(params, true, true);
+          doFetchSearchDataEntry(params, true, true, true);
           doUpdateCurrentTab(0);
           break;
         case 'telemetry':
-          doFetchSearchDataEntry(params, true, true);
+          doFetchTelemetryDataEntry(params, true, true);
           doUpdateCurrentTab(1);
           break;
         default:

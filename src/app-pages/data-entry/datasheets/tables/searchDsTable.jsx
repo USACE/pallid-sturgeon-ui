@@ -19,7 +19,7 @@ const SearchDsTable = connect(
   'selectSearchEffortSitesDatasheetData',
   'selectRouteParams',
   ({ doUpdateUrl, doUpdateComplexStateField, searchEffortSitesDatasheetData, routeParams }) => {
-    const siteId = routeParams?.id;
+    const siteId = routeParams?.siteId;
 
     const handleAddButtonClick = () => {
       doUpdateComplexStateField({ name: 'isEditForm', value: false });

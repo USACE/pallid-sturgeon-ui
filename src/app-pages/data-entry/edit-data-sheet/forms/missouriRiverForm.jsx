@@ -39,7 +39,6 @@ const reducer = (state, action) => {
 
 const MissouriRiverForm = connect(
   'doUpdateBaseData',
-  'doMoRiverDatasheetLoadData',
   'doSaveMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
   'doUpdateCurrentTab',
@@ -63,7 +62,6 @@ const MissouriRiverForm = connect(
   'selectIsEditForm',
   ({
     doUpdateBaseData,
-    doMoRiverDatasheetLoadData,
     doSaveMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
     doUpdateCurrentTab,
@@ -213,7 +211,7 @@ const MissouriRiverForm = connect(
           <div className='col-9'>
             <h4>
               {isEditForm ? '' : 'Create'} Missouri River Datasheet{' '}
-              {isEditForm ? `Overview (ID: ${dataEntryData?.mrId})` : ''}
+              {isEditForm ? `Overview (ID: ${routeParams.mrId})` : ''}
             </h4>
           </div>
         </div>

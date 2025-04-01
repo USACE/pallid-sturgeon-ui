@@ -125,7 +125,7 @@ const SearchEffortForm = connect(
           <div className='col-9'>
             <h4>
               {isEditForm ? '' : 'Create'} Search Effort Datasheet{' '}
-              {isEditForm ? `Overview (ID: ${dataEntryData.seId})` : ''}
+              {isEditForm ? `Overview (ID: ${routeParams.seId})` : ''}
             </h4>
           </div>
         </Row>

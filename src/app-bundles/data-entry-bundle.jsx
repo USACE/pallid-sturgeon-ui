@@ -31,28 +31,7 @@ export default {
     return (state = initialData, { type, payload }) => {
       switch (type) {
         // Fetch
-        case 'MO_RIVER_DATA_ENTRY_FETCH_START':
-        case 'FISH_DATA_ENTRY_FETCH_START':
-          return {
-            ...state,
-            lastParams: payload,
-          };
-        case 'SUPPLEMENTAL_DATA_ENTRY_FETCH_START':
-          return {
-            ...state,
-            lastParams: payload,
-          };
-        case 'PROCEDURE_DATA_ENTRY_FETCH_START':
-          return {
-            ...state,
-            lastParams: payload,
-          };
-        case 'SEARCH_DATA_ENTRY_FETCH_START':
-          return {
-            ...state,
-            lastParams: payload,
-          };
-        case 'TELEMETRY_DATA_ENTRY_FETCH_START':
+        case 'DATA_ENTRY_FETCH_START':
           return {
             ...state,
             lastParams: payload,
@@ -206,18 +185,20 @@ export default {
   // DATA ENTRY FETCHES
 
   doFetchMoRiverDataEntry:
-    (params, ignoreToast = false, loadData = false) =>
+    (params, ignoreToast = false, loadData = false, callback = false) =>
     ({ dispatch, store, apiGet }) => {
-      dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_START', payload: params });
+      dispatch({ type: 'DATA_ENTRY_FETCH_START', payload: params });
       const toastId = ignoreToast ? toast.loading('Finding Missouri River datasheet(s)...') : null;
 
       const url = `/psapi/moriverDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
         if (!err) {
-          const mrID = body?.items?.[0]?.mrId;
-          const mrFID = body?.items?.[0]?.mrFid;
-          const siteID = body?.items?.[0]?.siteId;
+          const mrId = body?.items?.[0]?.mrId;
+          const mrFid = body?.items?.[0]?.mrFid;
+          const siteId = body?.items?.[0]?.siteId;
+
+          store.doSitesFetch({ siteId: siteId });
 
           dispatch({
             type: 'DATA_ENTRY_UPDATED_DATA',
@@ -226,14 +207,11 @@ export default {
               type: 'missouriRiver',
             },
           });
-
-          // Update base data
-          store.doSitesFetch(siteID);
           dispatch({
             type: 'UPDATE_BASE_DATA',
             payload: {
-              mrId: mrID,
-              mrFid: mrFID,
+              mrId: mrId,
+              mrFid: mrFid,
             },
           });
 
@@ -241,9 +219,11 @@ export default {
             ignoreToast && tWarning(toastId, 'No Missouri River datasheet(s) found.');
           } else {
             ignoreToast && tSuccess(toastId, 'Missouri River datasheet(s) found!');
-            store.doUpdateUrl(`/sites-list/${siteID}/missouri-river`);
-            store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
-            loadData && store.doMoRiverDatasheetLoadData(mrID);
+            if (callback) {
+              store.doUpdateUrl(`/sites-list/${siteId}/missouri-river/${mrId}`);
+              store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
+              loadData && store.doMoRiverDatasheetLoadData(mrId);
+            }
           }
         } else {
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_FETCH_ERROR', payload: err });
@@ -253,33 +233,42 @@ export default {
     },
 
   doFetchFishDataEntry:
-    (params, callback = null, ignoreToast = false) =>
+    (params, callback = false, ignoreToast = false) =>
     ({ dispatch, store, apiGet }) => {
-      dispatch({ type: 'FISH_DATA_ENTRY_FETCH_START', payload: params });
+      dispatch({ type: 'DATA_ENTRY_FETCH_START', payload: params });
       const toastId = ignoreToast ? toast.loading('Finding Fish datasheet(s)...') : null;
 
       const url = `/psapi/fishDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
         if (!err) {
+          const mrId = body?.items?.[0]?.mrId;
+          const mrFid = body?.items?.[0]?.mrFid;
+          const siteId = body?.items?.[0]?.siteId;
+
+          store.doSitesFetch({ siteId: siteId });
+
           dispatch({
             type: 'DATA_ENTRY_UPDATE_FISH_DATA',
             payload: body,
           });
-
-          // Update base data
-          store.doSitesFetch(body?.items?.[0]?.siteId);
+          dispatch({
+            type: 'UPDATE_BASE_DATA',
+            payload: {
+              mrId: mrId,
+              mrFid: mrFid,
+            },
+          });
 
           if (store.selectDataEntryFishTotalCount() === 0) {
-            if (ignoreToast) {
-              tWarning(toastId, 'No Fish datasheet(s) found.');
-            }
+            ignoreToast && tWarning(toastId, 'No Fish datasheet(s) found.');
           } else {
-            if (ignoreToast) {
-              tSuccess(toastId, 'Fish datasheet(s) found!');
-            }
-            if (callback && typeof callback === 'function') {
-              callback();
+            ignoreToast && tSuccess(toastId, 'Fish datasheet(s) found!');
+            if (callback) {
+              store.doUpdateUrl(`/sites-list/${siteId}/missouri-river/${mrId}`);
+              store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
+              store.doFetchMoRiverDataEntry({ tableId: mrId }, false, false, true);
+              store.doMoRiverDatasheetLoadData(mrId);
             }
           }
         } else {
@@ -290,10 +279,10 @@ export default {
     },
 
   doFetchSupplementalDataEntry:
-    (params, callback = null, ignoreToast = false) =>
+    (params, callback = false, ignoreToast = false) =>
     ({ dispatch, store, apiGet }) => {
       dispatch({
-        type: 'SUPPLEMENTAL_DATA_ENTRY_FETCH_START',
+        type: 'DATA_ENTRY_FETCH_START',
         payload: params,
       });
       const toastId = ignoreToast ? toast.loading('Finding Supplemental datasheet(s)...') : null;
@@ -302,24 +291,33 @@ export default {
 
       apiGet(url, (err, body) => {
         if (!err) {
+          const mrId = body?.items?.[0]?.mrId;
+          const mrFid = body?.items?.[0]?.mrFid;
+          const siteId = body?.items?.[0]?.siteId;
+
+          store.doSitesFetch({ siteId: siteId });
+
           dispatch({
             type: 'DATA_ENTRY_UPDATE_SUPPLEMENTAL_DATA',
             payload: body,
           });
-
-          // Update base data
-          store.doSitesFetch(body?.items?.[0]?.siteId);
+          dispatch({
+            type: 'UPDATE_BASE_DATA',
+            payload: {
+              mrId: mrId,
+              mrFid: mrFid,
+            },
+          });
 
           if (store.selectDataEntrySupplementalTotalCount() === 0) {
-            if (ignoreToast) {
-              tWarning(toastId, 'No Supplemental datasheet(s) found.');
-            }
+            ignoreToast && tWarning(toastId, 'No Supplemental datasheet(s) found.');
           } else {
-            if (ignoreToast) {
-              tSuccess(toastId, 'Supplemental datasheet(s) found!');
-            }
-            if (callback && typeof callback === 'function') {
-              callback();
+            ignoreToast && tSuccess(toastId, 'Supplemental datasheet(s) found!');
+            if (callback) {
+              store.doUpdateUrl(`/sites-list/${siteId}/missouri-river/${mrId}`);
+              store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
+              store.doFetchMoRiverDataEntry({ tableId: mrId }, false, false, true);
+              store.doMoRiverDatasheetLoadData(mrId);
             }
           }
         } else {
@@ -333,33 +331,42 @@ export default {
     },
 
   doFetchProcedureDataEntry:
-    (params, callback = null, ignoreToast = false) =>
+    (params, callback = false, ignoreToast = false) =>
     ({ dispatch, store, apiGet }) => {
-      dispatch({ type: 'PROCEDURE_DATA_ENTRY_FETCH_START', payload: params });
+      dispatch({ type: 'DATA_ENTRY_FETCH_START', payload: params });
       const toastId = ignoreToast ? toast.loading('Finding Procedure datasheet(s)...') : null;
 
       const url = `/psapi/procedureDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
         if (!err) {
+          const mrId = body?.items?.[0]?.mrId;
+          const mrFid = body?.items?.[0]?.mrFid;
+          const siteId = body?.items?.[0]?.siteId;
+
+          store.doSitesFetch({ sitedId: siteId });
+
           dispatch({
             type: 'DATA_ENTRY_UPDATE_PROCEDURE_DATA',
             payload: body,
           });
-
-          // Update base data
-          store.doSitesFetch(body?.items?.[0]?.siteId);
+          dispatch({
+            type: 'UPDATE_BASE_DATA',
+            payload: {
+              mrId: mrId,
+              mrFid: mrFid,
+            },
+          });
 
           if (store.selectDataEntryProcedureTotalCount() === 0) {
-            if (ignoreToast) {
-              tWarning(toastId, 'No Procedure datasheet(s) found.');
-            }
+            ignoreToast && tWarning(toastId, 'No Procedure datasheet(s) found.');
           } else {
-            if (ignoreToast) {
-              tSuccess(toastId, 'Procedure datasheet(s) found!');
-            }
-            if (callback && typeof callback === 'function') {
-              callback();
+            ignoreToast && tSuccess(toastId, 'Procedure datasheet(s) found!');
+            if (callback) {
+              store.doUpdateUrl(`/sites-list/${siteId}/missouri-river/${mrId}`);
+              store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
+              store.doFetchMoRiverDataEntry({ tableId: mrId }, false, false, true);
+              store.doMoRiverDatasheetLoadData(mrId);
             }
           }
         } else {
@@ -370,17 +377,19 @@ export default {
     },
 
   doFetchSearchDataEntry:
-    (params, ignoreToast = false, loadData = false) =>
+    (params, ignoreToast = false, loadData = false, callback = false) =>
     ({ dispatch, store, apiGet }) => {
-      dispatch({ type: 'SEARCH_DATA_ENTRY_FETCH_START', payload: params });
+      dispatch({ type: 'DATA_ENTRY_FETCH_START', payload: params });
       const toastId = ignoreToast ? toast.loading('Finding Search Effort datasheet(s)...') : null;
 
       const url = `/psapi/searchDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
         if (!err) {
-          const seID = body?.items?.[0]?.seId;
-          const siteID = body?.items?.[0]?.siteId;
+          const seId = body?.items?.[0]?.seId;
+          const siteId = body?.items?.[0]?.siteId;
+
+          store.doSitesFetch({ siteId: siteId });
 
           dispatch({
             type: 'DATA_ENTRY_UPDATED_DATA',
@@ -389,17 +398,22 @@ export default {
               type: 'searchEffort',
             },
           });
-
-          // Update base data
-          store.doSitesFetch(siteID);
+          dispatch({
+            type: 'UPDATE_BASE_DATA',
+            payload: {
+              seId: seId,
+            },
+          });
 
           if (store.selectDataEntryTotalCount() === 0) {
             ignoreToast && tWarning(toastId, 'No Search Effort datasheet(s) found');
           } else {
             ignoreToast && tSuccess(toastId, 'Search Effort datasheet(s) found!');
-            store.doUpdateUrl(`/sites-list/${siteID}/search-effort`);
-            store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
-            loadData && store.doSearchEffortDatasheetLoadData(seID);
+            if (callback) {
+              store.doUpdateUrl(`/sites-list/${siteId}/search-effort/${seId}`);
+              store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
+              loadData && store.doSearchEffortDatasheetLoadData(seId);
+            }
           }
         } else {
           dispatch({ type: 'SEARCH_DATA_ENTRY_FETCH_ERROR', payload: err });
@@ -409,33 +423,40 @@ export default {
     },
 
   doFetchTelemetryDataEntry:
-    (params, callback = null, ignoreToast = false) =>
+    (params, callback = false, ignoreToast = false) =>
     ({ dispatch, store, apiGet }) => {
-      dispatch({ type: 'TELEMETRY_DATA_ENTRY_FETCH_START', payload: params });
+      dispatch({ type: 'DATA_ENTRY_FETCH_START', payload: params });
       const toastId = ignoreToast ? toast.loading('Finding Telemetry datasheet(s)...') : null;
 
       const url = `/psapi/telemetryDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
         if (!err) {
+          const seId = body?.items?.[0]?.seId;
+          const siteId = body?.items?.[0]?.siteId;
+
+          store.doSitesFetch({ siteId: siteId });
+
           dispatch({
             type: 'DATA_ENTRY_UPDATE_TELEMETRY_DATA',
             payload: body,
           });
-
-          // Update base data
-          store.doSitesFetch(body?.items?.[0]?.siteId);
+          dispatch({
+            type: 'UPDATE_BASE_DATA',
+            payload: {
+              seId: seId,
+            },
+          });
 
           if (store.selectDataEntryTelemetryTotalCount() === 0) {
-            if (ignoreToast) {
-              tWarning(toastId, 'No Telemetry datasheet(s) found.');
-            }
+            ignoreToast && tWarning(toastId, 'No Telemetry datasheet(s) found.');
           } else {
-            if (ignoreToast) {
-              tSuccess(toastId, 'Telemetry datasheet(s) found!');
-            }
-            if (callback && typeof callback === 'function') {
-              callback();
+            ignoreToast && tSuccess(toastId, 'Telemetry datasheet(s) found!');
+            if (callback) {
+              store.doUpdateUrl(`/sites-list/${siteId}/search-effort/${seId}`);
+              store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
+              store.doFetchSearchDataEntry({ tableId: seId }, false, false, true);
+              store.doSearchEffortDatasheetLoadData(seId);
             }
           }
         } else {
@@ -647,7 +668,7 @@ export default {
 
   doUpdateSearchDataEntry:
     (formData) =>
-    ({ dispatch, store, apiPut }) => {
+    ({ dispatch, apiPut }) => {
       const toastId = toast.loading('Saving datasheet...');
 
       const url = '/psapi/searchDataEntry';

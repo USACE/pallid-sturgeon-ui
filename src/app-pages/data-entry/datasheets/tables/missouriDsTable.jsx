@@ -29,7 +29,7 @@ const MissouriDsTable = connect(
   'selectMoriverSitesDatasheetData',
   'selectRouteParams',
   ({ doUpdateUrl, doUpdateComplexStateField, moriverSitesDatasheetData, routeParams }) => {
-    const siteId = routeParams?.id;
+    const siteId = routeParams?.siteId;
 
     const handleAddButtonClick = () => {
       doUpdateComplexStateField({ name: 'isEditForm', value: false });
