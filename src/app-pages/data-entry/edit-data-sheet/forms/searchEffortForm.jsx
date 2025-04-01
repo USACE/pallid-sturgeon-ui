@@ -7,6 +7,7 @@ import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 import Approval from '@pages/data-entry/datasheets/components/approval';
 import TabContainer from '@components/tab/tabContainer';
 import TelemetryDsTable from '@pages/data-entry/datasheets/tables/telemetryDsTable';
+import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import { searchTypeOptions } from './_shared/selectHelper';
@@ -27,7 +28,6 @@ const reducer = (state, action) => {
 };
 
 const SearchEffortForm = connect(
-  'doSearchEffortDatasheetLoadData',
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'doUpdateCurrentTab',
@@ -38,7 +38,6 @@ const SearchEffortForm = connect(
   'selectRouteParams',
   'selectIsEditForm',
   ({
-    doSearchEffortDatasheetLoadData,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     doUpdateCurrentTab,
@@ -52,6 +51,24 @@ const SearchEffortForm = connect(
     const initialState = {};
     const [state, dispatch] = useReducer(reducer, initialState);
     const siteId = routeParams?.siteId;
+    const seId = routeParams.seId;
+
+    const breadcrumbLinks = [
+      {
+        text: 'Sites List',
+        href: '/sites-list',
+        current: false,
+      },
+      {
+        text: siteId,
+        href: `/sites-list/${siteId}`,
+        current: false,
+      },
+      {
+        text: `Search Effort - ${seId}`,
+        current: true,
+      },
+    ];
 
     const handleChange = (e) => {
       dispatch({
@@ -120,12 +137,12 @@ const SearchEffortForm = connect(
     }, [isEditForm, dataEntryData]);
 
     return (
-      <>
+      <div className='container-fluid'>
+        <Breadcrumb paths={breadcrumbLinks} />
         <Row>
           <div className='col-9'>
             <h4>
-              {isEditForm ? '' : 'Create'} Search Effort Datasheet{' '}
-              {isEditForm ? `Overview (ID: ${routeParams.seId})` : ''}
+              {isEditForm ? '' : 'Create'} Search Effort Datasheet {isEditForm ? `Overview (ID: ${seId})` : ''}
             </h4>
           </div>
         </Row>
@@ -315,7 +332,7 @@ const SearchEffortForm = connect(
             />
           </Card.Body>
         </Card>
-      </>
+      </div>
     );
   }
 );

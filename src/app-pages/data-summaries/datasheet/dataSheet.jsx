@@ -16,11 +16,19 @@ import ProcedureTable from './tables/procedureTable';
 import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 import SearchTable from './tables/searchTable';
+import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { createDropdownOptions } from './datasheetHelpers';
 import { SelectCustomLabel } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import '../data-summary.scss';
+
+const breadcrumbLinks = [
+  {
+    text: 'Datasheet',
+    current: true,
+  },
+];
 
 export default connect(
   'doDatasheetLoadData',
@@ -113,6 +121,7 @@ export default connect(
 
     return (
       <div className='container-fluid'>
+        <Breadcrumb paths={breadcrumbLinks} />
         <Card className='mb-3'>
           <Card.Header text='Datasheet Filters' />
           <Card.Body>

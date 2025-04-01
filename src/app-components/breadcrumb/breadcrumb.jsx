@@ -1,45 +1,37 @@
-import { mdiHome } from '@mdi/js';
-
-import Icon from '@components/icon/icon';
-
-import { hrefAsString } from '@src/utils';
-
+import { BreadcrumbBar, Breadcrumb as BreadcrumbUSWDS, BreadcrumbLink, Icon } from '@trussworks/react-uswds';
 import './breadcrumb.scss';
 
-const Breadcrumb = ({ home = true, pathname }) => {
-  const paths = pathname.split('/');
+const Breadcrumb = ({ home = true, paths, href = '/', hrefText = 'Home' }) => {
   const pathLength = paths.length;
 
   return (
-    <div className='breadcrumb-container'>
-      <nav aria-label='breadcrumb'>
-        <ol className='breadcrumb-list'>
-          {home && (
-            <li className='breadcrumb-item'>
-              <a href='/'>
-                <Icon className='pr-1' path={mdiHome} />
-                Home
-              </a>
-            </li>
-          )}
-          {paths.map((p, i) => {
-            if (!i || i === pathLength - 1) return null;
-            return (
-              <li className='breadcrumb-item' key={p}>
-                {/* <a href={`/${p}`}> */}
-                <p>
-                  {hrefAsString(p)}
-                  {/* </a> */}
-                </p>
-              </li>
-            );
-          })}
-          <li className='breadcrumb-item active' aria-current='page'>
-            {hrefAsString(paths[pathLength - 1])}
-          </li>
-        </ol>
-      </nav>
-    </div>
+    <BreadcrumbBar className='breadcrumb-list'>
+      {home && (
+        <BreadcrumbUSWDS>
+          <BreadcrumbLink href={href}>
+            <Icon.Home className='mr-1' color='#0c66bb' size={'16px'} aria-hidden='true' focusable='false' />
+            {hrefText}
+          </BreadcrumbLink>
+        </BreadcrumbUSWDS>
+      )}
+      {paths.map((item, index) => {
+        if (pathLength - 1 !== index) {
+          return (
+            <BreadcrumbUSWDS key={index}>
+              <BreadcrumbLink href={item.href}>
+                <span>{item.text}</span>
+              </BreadcrumbLink>
+            </BreadcrumbUSWDS>
+          );
+        } else {
+          return (
+            <BreadcrumbUSWDS current className='breadcrumb-item active'>
+              <span>{paths[pathLength - 1].text}</span>
+            </BreadcrumbUSWDS>
+          );
+        }
+      })}
+    </BreadcrumbBar>
   );
 };
 

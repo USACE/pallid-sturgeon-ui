@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from '@components/card';
@@ -7,6 +7,7 @@ import DataHeader from '../components/dataHeader';
 
 import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
+import Breadcrumb from '@src/app-components/breadcrumb';
 
 const SiteDatasheet = connect(
   'doSitesDatasheetLoadData',
@@ -24,6 +25,19 @@ const SiteDatasheet = connect(
     const [currentTab, setCurrentTab] = useState(0);
     const siteId = baseData?.siteId ?? null;
 
+    const breadcrumbLinks = [
+      {
+        text: 'Sites List',
+        href: '/sites-list',
+        current: false,
+      },
+      {
+        text: siteId,
+        href: `/sites-list/${siteId}`,
+        current: false,
+      },
+    ];
+
     useEffect(() => {
       const params = { siteId: siteId };
       doUpdateSitesDatasheetParams(params);
@@ -35,6 +49,7 @@ const SiteDatasheet = connect(
 
     return (
       <div className='container-fluid'>
+        <Breadcrumb paths={breadcrumbLinks} />
         <div className='row'>
           <div className='col'>
             <h4>Datasheets for Site ID: {siteId}</h4>
@@ -47,9 +62,8 @@ const SiteDatasheet = connect(
           <Card.Header text='Datasheet Workflows' />
           <Card.Body>
             <p>
-              Select any tab to view Missouri River or Search Effort datasheet
-              data for Site ID: {siteId}. Click on the datasheet ID number to
-              view/edit data and any related data.
+              Select any tab to view Missouri River or Search Effort datasheet data for Site ID: {siteId}. Click on the
+              datasheet ID number to view/edit data and any related data.
             </p>
             <TabContainer
               tabs={[

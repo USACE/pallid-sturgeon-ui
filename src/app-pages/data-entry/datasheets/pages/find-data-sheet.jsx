@@ -1,15 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
+import { mdiHelpCircle } from '@mdi/js';
 
 import Button from '@components/button';
+import Breadcrumb from '@src/app-components/breadcrumb';
 import Select from '@components/select';
+import Icon from '@components/icon/icon';
 
 import { Input, Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import '../../dataentry.scss';
 import '@pages/data-summaries/data-summary.scss';
-import Icon from '@components/icon/icon';
-import { mdiHelpCircle } from '@mdi/js';
 
 const datasheetTypeOptions = [
   { value: 'missouriRiver', text: 'Missouri River' },
@@ -18,6 +19,13 @@ const datasheetTypeOptions = [
   { value: 'telemetry', text: 'Telemetry' },
   { value: 'procedures', text: 'Procedures' },
   { value: 'searchEffort', text: 'Search Effort' },
+];
+
+const breadcrumbLinks = [
+  {
+    text: 'Find Datasheet',
+    current: true,
+  },
 ];
 
 const FindDataSheet = connect(
@@ -90,6 +98,7 @@ const FindDataSheet = connect(
 
     return (
       <>
+        <Breadcrumb paths={breadcrumbLinks} />
         <div className='row d-flex flex-row'>
           <div className='col-md-3 col-xs-12'>
             <Row>

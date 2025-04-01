@@ -9,6 +9,7 @@ import TabContainer from '@components/tab';
 import FishDsTable from '@pages/data-entry/datasheets/tables/fishDsTable';
 import SuppDsTable from '@pages/data-entry/datasheets/tables/suppDsTable';
 import ProcedureDsTable from '@pages/data-entry/datasheets/tables/procedureDsTable';
+import Breadcrumb from '@src/app-components/breadcrumb';
 
 import {
   gearCodeOptions,
@@ -19,9 +20,9 @@ import {
 } from './_shared/selectHelper';
 import { createMesoOptions, createStructureFlowOptions, createStructureModOptions } from '@pages/data-entry/helpers';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
+import { formatDate } from '@src/utils/helpers';
 
 import '../../../data-summaries/data-summary.scss';
-import { formatDate } from '@src/utils/helpers';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -100,7 +101,25 @@ const MissouriRiverForm = connect(
     const [isNoVelocity, setIsNoVelocity] = useState(false);
 
     const siteId = routeParams?.siteId;
+    const mrId = routeParams.mrId;
     const formComplete = true;
+
+    const breadcrumbLinks = [
+      {
+        text: 'Sites List',
+        href: '/sites-list',
+        current: false,
+      },
+      {
+        text: siteId,
+        href: `/sites-list/${siteId}`,
+        current: false,
+      },
+      {
+        text: `Missouri River - ${mrId}`,
+        current: true,
+      },
+    ];
 
     const handleChange = (e) => {
       dispatch({
@@ -206,12 +225,12 @@ const MissouriRiverForm = connect(
     }, [state['netrivermile']]);
 
     return (
-      <>
+      <div className='container-fluid'>
+        <Breadcrumb paths={breadcrumbLinks} />
         <div className='row'>
           <div className='col-9'>
             <h4>
-              {isEditForm ? '' : 'Create'} Missouri River Datasheet{' '}
-              {isEditForm ? `Overview (ID: ${routeParams.mrId})` : ''}
+              {isEditForm ? '' : 'Create'} Missouri River Datasheet {isEditForm ? `Overview (ID: ${mrId})` : ''}
             </h4>
           </div>
         </div>
@@ -1076,7 +1095,7 @@ const MissouriRiverForm = connect(
             />
           </Card.Body>
         </Card>
-      </>
+      </div>
     );
   }
 );
