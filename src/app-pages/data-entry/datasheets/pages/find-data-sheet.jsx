@@ -1,34 +1,49 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
+import { mdiHelpCircle } from '@mdi/js';
 
 import Button from '@components/button';
+import Breadcrumb from '@src/app-components/breadcrumb';
 import Select from '@components/select';
+import Icon from '@components/icon/icon';
 
 import { Input, Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import '../../dataentry.scss';
 import '@pages/data-summaries/data-summary.scss';
-import Icon from '@components/icon/icon';
-import { mdiHelpCircle } from '@mdi/js';
+
+const datasheetTypeOptions = [
+  { value: 'missouriRiver', text: 'Missouri River' },
+  { value: 'fish', text: 'Fish' },
+  { value: 'supplemental', text: 'Supplemental' },
+  { value: 'telemetry', text: 'Telemetry' },
+  { value: 'procedures', text: 'Procedures' },
+  { value: 'searchEffort', text: 'Search Effort' },
+];
+
+const breadcrumbLinks = [
+  {
+    text: 'Find Datasheet',
+    current: true,
+  },
+];
 
 const FindDataSheet = connect(
   'doFetchMoRiverDataEntry',
-  'doFetchSupplementalDataEntry',
   'doFetchFishDataEntry',
+  'doFetchSupplementalDataEntry',
+  'doFetchProcedureDataEntry',
   'doFetchSearchDataEntry',
   'doFetchTelemetryDataEntry',
-  'doFetchProcedureDataEntry',
-  'doUpdateUrl',
   'doUpdateCurrentTab',
   'selectUserRole',
   ({
     doFetchMoRiverDataEntry,
-    doFetchSupplementalDataEntry,
     doFetchFishDataEntry,
+    doFetchSupplementalDataEntry,
+    doFetchProcedureDataEntry,
     doFetchSearchDataEntry,
     doFetchTelemetryDataEntry,
-    doFetchProcedureDataEntry,
-    doUpdateUrl,
     doUpdateCurrentTab,
     userRole,
   }) => {
@@ -52,27 +67,27 @@ const FindDataSheet = connect(
 
       switch (dataSheetType) {
         case 'missouriRiver':
-          doFetchMoRiverDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doFetchMoRiverDataEntry(params, true, true, true);
           doUpdateCurrentTab(0);
           break;
         case 'fish':
-          doFetchFishDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doFetchFishDataEntry(params, true, true);
           doUpdateCurrentTab(1);
           break;
         case 'supplemental':
-          doFetchSupplementalDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doFetchSupplementalDataEntry(params, true, true);
           doUpdateCurrentTab(2);
           break;
         case 'procedures':
-          doFetchProcedureDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/missouriRiver-edit'), true);
+          doFetchProcedureDataEntry(params, true, true);
           doUpdateCurrentTab(3);
           break;
         case 'searchEffort':
-          doFetchSearchDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'), true);
+          doFetchSearchDataEntry(params, true, true, true);
           doUpdateCurrentTab(0);
           break;
         case 'telemetry':
-          doFetchTelemetryDataEntry(params, () => doUpdateUrl('/sites-list/datasheet/searchEffort-edit'), true);
+          doFetchTelemetryDataEntry(params, true, true);
           doUpdateCurrentTab(1);
           break;
         default:
@@ -83,6 +98,7 @@ const FindDataSheet = connect(
 
     return (
       <>
+        <Breadcrumb paths={breadcrumbLinks} />
         <div className='row d-flex flex-row'>
           <div className='col-md-3 col-xs-12'>
             <Row>
@@ -96,14 +112,7 @@ const FindDataSheet = connect(
                       onChange={(value) => setDataSheetType(value)}
                       value={dataSheetType}
                       placeholderText='Datasheet Type...'
-                      options={[
-                        { value: 'missouriRiver', text: 'Missouri River' },
-                        { value: 'fish', text: 'Fish' },
-                        { value: 'supplemental', text: 'Supplemental' },
-                        { value: 'telemetry', text: 'Telemetry' },
-                        { value: 'procedures', text: 'Procedures' },
-                        { value: 'searchEffort', text: 'Search Effort' },
-                      ]}
+                      options={datasheetTypeOptions}
                     />
                   </div>
                 </div>

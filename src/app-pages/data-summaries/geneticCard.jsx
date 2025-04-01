@@ -8,6 +8,7 @@ import Card from '@components/card';
 import Pagination from '@components/pagination';
 import Select from '@components/select';
 import Icon from '@components/icon/icon';
+import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { dropdownYearsToNow } from '@src/utils';
 import { Input } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
@@ -15,6 +16,13 @@ import { Input } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 const yesNoOptions = [
   { value: 0, text: 'No' },
   { value: 1, text: 'Yes' },
+];
+
+const breadcrumbLinks = [
+  {
+    text: 'Genetic Card Summary',
+    current: true,
+  },
 ];
 
 export default connect(
@@ -46,9 +54,9 @@ export default connect(
 
     return (
       <div className='container-fluid'>
-        <h4>Genetic Card Summary</h4>
-        <Card className='mt-3'>
-          <Card.Header text='Filters' />
+        <Breadcrumb paths={breadcrumbLinks} />
+        <Card>
+          <Card.Header text='Genetic Card Filters' />
           <Card.Body>
             <Icon focusable={false} path={mdiHelpCircle} />
             <span className='info-message ml-2'>

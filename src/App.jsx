@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { ToastContainer } from 'react-toastify';
 
@@ -15,6 +15,8 @@ import './css/bootstrap/css/bootstrap.water.min.css';
 import '@styles/index.scss';
 import '@styles/uswds-theme/_uswds-theme-components.scss';
 import '@styles/_buttons.scss';
+import 'ag-grid-community/dist/styles/ag-grid.css';
+import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 export default connect(
   'doModalOpen',

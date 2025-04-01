@@ -26,7 +26,7 @@ const SiteIdCellRenderer = connect(
     value,
   }) => {
     const handleCallback = () => {
-      doUpdateUrl('/sites-list/datasheet');
+      doUpdateUrl(`/sites-list/${data?.siteId}`);
     };
 
     const handleClick = () => {

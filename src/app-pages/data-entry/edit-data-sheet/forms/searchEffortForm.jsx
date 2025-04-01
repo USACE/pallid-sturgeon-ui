@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from '@components/button';
@@ -7,9 +7,11 @@ import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 import Approval from '@pages/data-entry/datasheets/components/approval';
 import TabContainer from '@components/tab/tabContainer';
 import TelemetryDsTable from '@pages/data-entry/datasheets/tables/telemetryDsTable';
+import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import { searchTypeOptions } from './_shared/selectHelper';
+import { formatDate } from '@src/utils/helpers';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -26,36 +28,47 @@ const reducer = (state, action) => {
 };
 
 const SearchEffortForm = connect(
-  'doSearchEffortDatasheetLoadData',
-  'doFetchSearchDataEntry',
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'doUpdateCurrentTab',
   'doResetTelemetryDataEntries',
   'selectDataEntryData',
-  'selectSitesData',
   'selectDataEntryTelemetryTotalCount',
   'selectCurrentTab',
-  'selectUserRole',
   'selectRouteParams',
+  'selectIsEditForm',
   ({
-    doSearchEffortDatasheetLoadData,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     doUpdateCurrentTab,
     doResetTelemetryDataEntries,
     dataEntryData,
-    sitesData,
     dataEntryTelemetryTotalCount,
     currentTab,
-    userRole,
     routeParams,
-    edit,
+    isEditForm,
   }) => {
     const initialState = {};
     const [state, dispatch] = useReducer(reducer, initialState);
-    const siteId = edit ? state['siteId'] : sitesData[0].siteId;
-    const isCreate = routeParams.form.split('-')[1] === 'create';
+    const siteId = routeParams?.siteId;
+    const seId = routeParams.seId;
+
+    const breadcrumbLinks = [
+      {
+        text: 'Sites List',
+        href: '/sites-list',
+        current: false,
+      },
+      {
+        text: siteId,
+        href: `/sites-list/${siteId}`,
+        current: false,
+      },
+      {
+        text: `Search Effort - ${seId}`,
+        current: true,
+      },
+    ];
 
     const handleChange = (e) => {
       dispatch({
@@ -77,9 +90,7 @@ const SearchEffortForm = connect(
       dispatch({
         type: 'UPDATE_INPUT',
         field: e.target.name,
-        value: isNaN(parseFloat(e.target.value))
-          ? 0
-          : parseFloat(e.target.value),
+        value: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value),
       });
     };
 
@@ -92,22 +103,8 @@ const SearchEffortForm = connect(
     };
 
     const doSave = () => {
-      if (edit) {
-        doUpdateSearchDataEntry(state);
-      } else {
-        doSaveSearchDataEntry(state);
-      }
+      isEditForm ? doUpdateSearchDataEntry(state) : doSaveSearchDataEntry(state);
     };
-
-    useEffect(() => {
-      if (isCreate) {
-        // reset data if adding new Search Effort datasheet
-        doResetTelemetryDataEntries();
-      } else if (dataEntryData.seId) {
-        // load data if editing or viewing existing Search Effort datasheet
-        doSearchEffortDatasheetLoadData(dataEntryData.seId);
-      }
-    }, [dataEntryData.seId]);
 
     const saveIsDisabled = !(
       !!state['searchDate'] &&
@@ -119,41 +116,33 @@ const SearchEffortForm = connect(
       !!state['stopTime'] &&
       !!state['stopLatitude'] &&
       !!state['stopLongitude'] &&
-      (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
+      (isEditForm ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
-    const formatDate = (dateStr) => {
-      const subStr = 'T';
-      if (dateStr.includes(subStr)) {
-        return dateStr.split('T')[0];
-      }
-      return dateStr;
-    };
-
     useEffect(() => {
-      if (edit) {
+      if (isEditForm) {
         dispatch({
           type: 'INITIALIZE_FORM',
           payload: dataEntryData,
         });
 
         // Format Date
-        if (dataEntryData.searchDate) {
-          handleSelect('searchDate', formatDate(dataEntryData.searchDate));
-        }
+        dataEntryData.searchDate && handleSelect('searchDate', formatDate(dataEntryData.searchDate));
       } else {
+        // Reset data if adding new Search Effort datasheet
+        doResetTelemetryDataEntries();
         handleSelect('siteId', siteId);
         handleSelect('dsId', 1);
       }
-    }, [edit, dataEntryData]);
+    }, [isEditForm, dataEntryData]);
 
     return (
-      <>
+      <div className='container-fluid'>
+        <Breadcrumb paths={breadcrumbLinks} />
         <Row>
           <div className='col-9'>
             <h4>
-              {edit ? '' : 'Create'} Search Effort Datasheet{' '}
-              {edit ? `Overview (ID: ${dataEntryData['seId']})` : ''}
+              {isEditForm ? '' : 'Create'} Search Effort Datasheet {isEditForm ? `Overview (ID: ${seId})` : ''}
             </h4>
           </div>
         </Row>
@@ -167,8 +156,8 @@ const SearchEffortForm = connect(
           <Card.Header text='Search Effort and Related Data' />
           <Card.Body>
             <p>
-              Select any tab to view Search Effort and Telemetry datasheet data
-              for Search Effort ID: {dataEntryData.seId}{' '}
+              Select any tab to view Search Effort and Telemetry datasheet data for Search Effort ID:{' '}
+              {dataEntryData.seId}{' '}
             </p>
             <TabContainer
               tabs={[
@@ -182,11 +171,7 @@ const SearchEffortForm = connect(
                             name='searchDate'
                             label='Search Date'
                             type='date'
-                            value={
-                              state['searchDate']
-                                ? state['searchDate'].split('T')[0]
-                                : ''
-                            }
+                            value={state['searchDate'] ? state['searchDate'].split('T')[0] : ''}
                             onChange={handleChange}
                             isRequired
                           />
@@ -207,9 +192,7 @@ const SearchEffortForm = connect(
                             options={searchTypeOptions}
                             value={state['searchTypeCode']}
                             defaultValue={state['searchTypeCode']}
-                            onChange={(val) =>
-                              handleSelect('searchTypeCode', val)
-                            }
+                            onChange={(val) => handleSelect('searchTypeCode', val)}
                             isRequired
                           />
                         </div>
@@ -296,7 +279,7 @@ const SearchEffortForm = connect(
                           />
                         </div>
                       </Row>
-                      {edit && (
+                      {isEditForm && (
                         <Row>
                           <div className='col-md-5 col-xs-12'>
                             <TextArea
@@ -304,7 +287,7 @@ const SearchEffortForm = connect(
                               label='Edit Comments'
                               value={state['lastEditComment']}
                               onChange={handleChange}
-                              isRequired={edit}
+                              isRequired={isEditForm}
                             />
                           </div>
                           <div className='col-md-2 col-xs-12'>
@@ -313,7 +296,7 @@ const SearchEffortForm = connect(
                               label='Edit Initials'
                               value={state['editInitials']}
                               onChange={handleChange}
-                              isRequired={edit}
+                              isRequired={isEditForm}
                             />
                           </div>
                         </Row>
@@ -324,7 +307,7 @@ const SearchEffortForm = connect(
                             <Button
                               size='small'
                               variant='success'
-                              text={edit ? 'Apply Changes' : 'Save'}
+                              text={isEditForm ? 'Apply Changes' : 'Save'}
                               className='btn-width'
                               handleClick={() => doSave()}
                               isDisabled={saveIsDisabled}
@@ -349,7 +332,7 @@ const SearchEffortForm = connect(
             />
           </Card.Body>
         </Card>
-      </>
+      </div>
     );
   }
 );

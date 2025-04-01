@@ -5,7 +5,6 @@ import DataEntry from '@pages/data-entry/datasheets';
 import DataSheet from '@pages/data-summaries/datasheet/dataSheet';
 import DataQuery from '@pages/admin/data-query';
 import DataUpload from '@pages/data-upload/dataUpload';
-import EditDataSheet from '@pages/data-entry/edit-data-sheet/editDataSheet';
 import ErrorLog from '@pages/utilities/errorLog';
 import GeneticCard from '@pages/data-summaries/geneticCard';
 import Home from '@pages/home/home';
@@ -19,11 +18,9 @@ import LastLocation from '@pages/data-summaries/lastLocation';
 import TagReplacement from '@pages/data-summaries/tagReplacement';
 import MultipleRecordApproval from '@pages/admin/multipleRecordApproval';
 import SiteDatasheet from '@pages/data-entry/datasheets/pages/site-datasheet';
-import TelemetryDsTable from '@pages/data-entry/datasheets/tables/telemetryDsTable';
-import FishDsTable from '@pages/data-entry/datasheets/tables/fishDsTable';
-import SuppDsTable from '@pages/data-entry/datasheets/tables/suppDsTable';
-import ProcedureDsTable from '@pages/data-entry/datasheets/tables/procedureDsTable';
 import Users from '@pages/admin/users/Users';
+import MissouriRiverForm from '@src/app-pages/data-entry/edit-data-sheet/forms/missouriRiverForm';
+import SearchEffortForm from '@src/app-pages/data-entry/edit-data-sheet/forms/searchEffortForm';
 
 export default createRouteBundle({
   '': Home,
@@ -42,12 +39,11 @@ export default createRouteBundle({
   '/priority-fish': PriorityFish,
   '/search-reports': SearchReports,
   '/sites-list': SitesList,
-  '/sites-list/datasheet': SiteDatasheet,
-  '/sites-list/datasheet/telemetry': TelemetryDsTable,
-  '/sites-list/datasheet/fish': FishDsTable,
-  '/sites-list/datasheet/supplemental': SuppDsTable,
-  '/sites-list/datasheet/procedure': ProcedureDsTable,
-  '/sites-list/datasheet/:form': EditDataSheet,
+  '/sites-list/:siteId': SiteDatasheet,
+  '/sites-list/:siteId/missouri-river': SiteDatasheet,
+  '/sites-list/:siteId/search-effort': SiteDatasheet,
+  '/sites-list/:siteId/missouri-river/:mrId': MissouriRiverForm,
+  '/sites-list/:siteId/search-effort/:seId': SearchEffortForm,
   '/tag-replacement': TagReplacement,
   '/user-access-requests': UserList,
   '*': NotFound,

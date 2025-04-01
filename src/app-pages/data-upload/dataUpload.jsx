@@ -6,16 +6,19 @@ import Button from '@components/button';
 import Card from '@components/card';
 import DragInput from '@components/drag-input';
 import Select from '@components/select';
+import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { keyAsText } from '@src/utils';
-import {
-  getIsRequired,
-  reduceCsvState,
-  formatAsNumber,
-  formatJsonKey,
-} from './helper';
+import { getIsRequired, reduceCsvState, formatAsNumber, formatJsonKey } from './helper';
 
 import './dataupload.scss';
+
+const breadcrumbLinks = [
+  {
+    text: 'Data Upload',
+    current: true,
+  },
+];
 
 export default connect(
   'doFetchUploadSessionLogs',
@@ -53,8 +56,7 @@ export default connect(
 
       if (file) {
         Papa.parse(file, {
-          complete: (result) =>
-            dispatch({ type: 'update', key, data: result.data }),
+          complete: (result) => dispatch({ type: 'update', key, data: result.data }),
           transformHeader: formatJsonKey,
           transform: formatAsNumber,
           skipEmptyLines: true,
@@ -87,11 +89,11 @@ export default connect(
 
     return (
       <div className='container-fluid w-75'>
+        <Breadcrumb paths={breadcrumbLinks} />
         <Card>
           <Card.Header text='File Upload' />
           <Card.Body>
-            Select the version of the Field App used to generate your
-            datasheets.
+            Select the version of the Field App used to generate your datasheets.
             <div className='mt-2'>
               <Select
                 className='w-25 d-inline-block mb-1 mr-4'
@@ -114,10 +116,7 @@ export default connect(
             {version && (
               <>
                 <hr />
-                <p>
-                  Upload files to each of the required fields denoted by an
-                  asterisk (*):
-                </p>
+                <p>Upload files to each of the required fields denoted by an asterisk (*):</p>
                 {fileKeys.map((key) => {
                   const isRequired = getIsRequired(key, files);
 
@@ -152,9 +151,7 @@ export default connect(
           <Card.Body>
             {uploadLogs.length ? (
               <>
-                <div>{`Date Created: ${
-                  uploadLogs[0].dateCreated.split('T')[0]
-                }`}</div>
+                <div>{`Date Created: ${uploadLogs[0].dateCreated.split('T')[0]}`}</div>
                 {uploadLogs.map((log, index) => (
                   <div key={index} className='text log'>
                     {log.debugText}

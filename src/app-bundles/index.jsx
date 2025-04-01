@@ -1,8 +1,4 @@
-import {
-  composeBundles,
-  createCacheBundle,
-  createUrlBundle,
-} from 'redux-bundler';
+import { composeBundles, createCacheBundle, createUrlBundle } from 'redux-bundler';
 import createAuthBundle from './auth-bundle';
 import createJwtApiBundle from './create-jwt-api-bundle';
 import cache from '../cache';
@@ -25,6 +21,7 @@ import sitesDatasheetBundle from './sites-datasheet-bundle';
 import exportsBundle from './exports/exports-bundle';
 import loadingBundle from './loading-bundle';
 import baseDataBundle from './base-data-bundle';
+import complexStateBundle from './complex-state-bundle';
 
 // Mock Token User
 const mockTokenApplicationAdmin =
@@ -40,8 +37,7 @@ export default composeBundles(
   createJwtApiBundle({
     root: import.meta.env.VITE_API_URL,
     tokenSelector: 'selectAuthToken',
-    unless: {
-    },
+    unless: {},
   }),
   createCacheBundle({
     cacheFn: cache.set,
@@ -64,5 +60,6 @@ export default composeBundles(
   sitesDatasheetBundle,
   exportsBundle,
   loadingBundle,
-  baseDataBundle
+  baseDataBundle,
+  complexStateBundle
 );
