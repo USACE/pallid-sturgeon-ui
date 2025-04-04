@@ -15,15 +15,16 @@ const SiteDatasheet = connect(
   'selectBaseData',
   'selectMoriverSitesDatasheetTotalResults',
   'selectSearchEffortSitesDatasheetTotalResults',
+  'selectRouteParams',
   ({
     doSitesDatasheetLoadData,
     doUpdateSitesDatasheetParams,
-    baseData,
     moriverSitesDatasheetTotalResults,
     searchEffortSitesDatasheetTotalResults,
+    routeParams,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const siteId = baseData?.siteId ?? null;
+    const siteId = routeParams?.siteId ?? null;
 
     const breadcrumbLinks = [
       {
