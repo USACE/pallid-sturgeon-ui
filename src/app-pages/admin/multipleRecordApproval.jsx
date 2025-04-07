@@ -8,13 +8,21 @@ import RoleFilter from '@components/role-filter';
 
 import { dropdownYearsToNow } from '@src/utils';
 import { NoRoleAccessMessage } from './helper';
+import Breadcrumb from '@src/app-components/breadcrumb';
+
+const breadcrumbLinks = [
+  {
+    text: 'Multiple Record Approval',
+    current: true,
+  },
+];
 
 const MultipleRecordApproval = () => (
   <RoleFilter allowRoles={['ADMINISTRATOR']} alt={() => <NoRoleAccessMessage className='p-2' />}>
     <div className='container-fluid'>
-      <h4>Multiple Record Approval</h4>
-      <Card className='mt-3'>
-        <Card.Header text='Instructions' />
+      <Breadcrumb paths={breadcrumbLinks} />
+      <Card>
+        <Card.Header text='Multiple Record Approval Filters' />
         <Card.Body>
           <Icon path={mdiHelpCircle} />
           <span className='info-message ml-2'>Multiple record approval is a two-step process:</span>

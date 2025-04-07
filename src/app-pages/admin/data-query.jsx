@@ -12,6 +12,14 @@ import Icon from '@components/icon/icon';
 import { dropdownYearsToNow } from '@src/utils';
 import { dataQueries, NoRoleAccessMessage } from './helper';
 import { createDropdownOptions } from '@pages/data-entry/helpers';
+import Breadcrumb from '@src/app-components/breadcrumb';
+
+const breadcrumbLinks = [
+  {
+    text: 'Data Query',
+    current: true,
+  },
+];
 
 export default connect('doDomainProjectsFetch', 'selectDomains', ({ doDomainProjectsFetch, domains }) => {
   useEffect(() => {
@@ -23,9 +31,9 @@ export default connect('doDomainProjectsFetch', 'selectDomains', ({ doDomainProj
   return (
     <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN']} alt={() => <NoRoleAccessMessage className='p-2' />}>
       <div className='container-fluid'>
-        <h4>Data Query</h4>
-        <Card className='mt-3'>
-          <Card.Header text='Filters' />
+        <Breadcrumb paths={breadcrumbLinks} />
+        <Card>
+          <Card.Header text='Query Filters' />
           <Card.Body>
             <Icon path={mdiHelpCircle} />
             <span className='info-message ml-2'>

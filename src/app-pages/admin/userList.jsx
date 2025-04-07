@@ -15,6 +15,14 @@ import {
 import { NoRoleAccessMessage } from './helper';
 
 import './admin.scss';
+import Breadcrumb from '@src/app-components/breadcrumb';
+
+const breadcrumbLinks = [
+  {
+    text: 'User Access Requests',
+    current: true,
+  },
+];
 
 export default connect(
   'doFetchUserAccessRequests',
@@ -121,6 +129,7 @@ export default connect(
     return (
       <RoleFilter allowRoles={['ADMINISTRATOR']} alt={() => <NoRoleAccessMessage className='p-2' />}>
         <div className='col-md-9'>
+          <Breadcrumb paths={breadcrumbLinks} />
           <table className='table table-bordered'>
             <thead>
               <tr>
