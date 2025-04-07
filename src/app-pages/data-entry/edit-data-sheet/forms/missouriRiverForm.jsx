@@ -116,7 +116,7 @@ const MissouriRiverForm = connect(
         current: false,
       },
       {
-        text: `Missouri River - ${mrId}`,
+        text: `Missouri River - ${mrId ? mrId : 'Create'}`,
         current: true,
       },
     ];
