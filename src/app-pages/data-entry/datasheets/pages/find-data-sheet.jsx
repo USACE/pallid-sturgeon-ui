@@ -21,13 +21,6 @@ const datasheetTypeOptions = [
   { value: 'searchEffort', text: 'Search Effort' },
 ];
 
-const breadcrumbLinks = [
-  {
-    text: 'Find Datasheet',
-    current: true,
-  },
-];
-
 const FindDataSheet = connect(
   'doFetchMoRiverDataEntry',
   'doFetchFishDataEntry',
@@ -98,7 +91,6 @@ const FindDataSheet = connect(
 
     return (
       <>
-        <Breadcrumb paths={breadcrumbLinks} />
         <div className='row d-flex flex-row'>
           <div className='col-md-3 col-xs-12'>
             <Row>

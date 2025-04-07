@@ -14,6 +14,14 @@ import RoleFilter from '@components/role-filter';
 import Icon from '@components/icon/icon';
 
 import { rolesList, fieldOfficeList, projectCodeList, NoRoleAccessMessage } from '../helper';
+import Breadcrumb from '@src/app-components/breadcrumb';
+
+const breadcrumbLinks = [
+  {
+    text: 'Users',
+    current: true,
+  },
+];
 
 export default connect(
   'doDomainFieldOfficesFetch',
@@ -48,8 +56,8 @@ export default connect(
     return (
       <RoleFilter allowRoles={['ADMINISTRATOR']} alt={() => <NoRoleAccessMessage className='p-2' />}>
         <div className='container-fluid'>
-          <h4>Edit User</h4>
-          <Card className='mt-3'>
+          <Breadcrumb paths={breadcrumbLinks} />
+          <Card>
             <Card.Header text='User List' />
             <Card.Body>
               <Button
