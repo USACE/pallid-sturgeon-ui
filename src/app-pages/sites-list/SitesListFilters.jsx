@@ -49,7 +49,7 @@ const SitesListFilter = connect(
 
     const defaultValues = {
       year: new Date().getFullYear(),
-      project: userRole?.projectCode,
+      project: Number(userRole?.projectCode) ?? '',
       seasonCode: '',
       bend: '',
       segmentCode: '',
@@ -111,7 +111,6 @@ const SitesListFilter = connect(
                 <SelectInput
                   name='project'
                   label='Project'
-                  defaultOption={userRole?.projectCode ?? ''}
                   readOnly={userRole?.projectCode === '2'}
                   showOptionalText={false}
                 >
