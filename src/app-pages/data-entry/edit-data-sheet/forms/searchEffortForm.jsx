@@ -65,7 +65,7 @@ const SearchEffortForm = connect(
         current: false,
       },
       {
-        text: `Search Effort - ${seId}`,
+        text: `Search Effort - ${seId ? seId : 'Create'}`,
         current: true,
       },
     ];
