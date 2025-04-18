@@ -63,10 +63,10 @@ export default {
       const url = `/psapi/searchDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body.status) {
           dispatch({
             type: 'SEARCH_REPORTS_UPDATED_ITEMS',
-            payload: body,
+            payload: body?.data,
           });
           dispatch({ type: 'SEARCH_REPORTS_FETCH_FINISHED' });
         } else {

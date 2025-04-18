@@ -167,10 +167,10 @@ const homeDataBundle = {
       const url = '/psapi/downloadInfo';
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body.status) {
           dispatch({
             type: 'SET_DOWNLOAD_INFO_VERSION_DATA',
-            payload: body,
+            payload: body?.data,
           });
         } else {
           dispatch({ type: 'FETCH_DOWNLOAD_INFO_ERROR' });
@@ -271,10 +271,10 @@ const homeDataBundle = {
       const url = `/psapi/unapprovedDataSheets${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body.status) {
           dispatch({
             type: 'SET_UNAPPROVED_DATA_DATA',
-            payload: body,
+            payload: body?.data,
           });
         } else {
           dispatch({ type: 'FETCH_UNAPPROVED_DATA_ERROR' });
@@ -296,10 +296,10 @@ const homeDataBundle = {
       const url = `/psapi/bafiDataSheets${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body.status) {
           dispatch({
             type: 'SET_BAFI_DATA_DATA',
-            payload: body,
+            payload: body?.data,
           });
         } else {
           dispatch({ type: 'FETCH_BAFI_DATA_ERROR' });
@@ -322,10 +322,10 @@ const homeDataBundle = {
       const url = `/psapi/uncheckedDataSheets${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body.status) {
           dispatch({
             type: 'SET_UNCHECKED_DATA_DATA',
-            payload: body,
+            payload: body?.data,
           });
         } else {
           dispatch({ type: 'FETCH_UNCHECKED_DATA_ERROR' });

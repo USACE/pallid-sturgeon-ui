@@ -165,8 +165,8 @@ export default {
       const url = `/psapi/missouriDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
-          dispatch({ type: 'UPDATE_MORIVER_DATA_SUMMARY_DATA', payload: body });
+        if (!err && body.status) {
+          dispatch({ type: 'UPDATE_MORIVER_DATA_SUMMARY_DATA', payload: body?.data });
           dispatch({ type: 'MORIVER_DATA_SUMMARY_FETCH_FINISHED' });
         } else {
           dispatch({ type: 'MORIVER_DATA_SUMMARY_FETCH_ERROR', payload: err });
@@ -192,8 +192,8 @@ export default {
       const url = `/psapi/fishDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
-          dispatch({ type: 'UPDATE_FISH_DATA_SUMMARY_DATA', payload: body });
+        if (!err && body.status) {
+          dispatch({ type: 'UPDATE_FISH_DATA_SUMMARY_DATA', payload: body?.data });
           dispatch({ type: 'FISH_DATA_SUMMARY_FETCH_FINISHED' });
         } else {
           dispatch({ type: 'FISH_DATA_SUMMARY_FETCH_ERROR', payload: err });
@@ -219,8 +219,8 @@ export default {
       const url = `/psapi/suppDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
-          dispatch({ type: 'UPDATE_SUPP_DATA_SUMMARY_DATA', payload: body });
+        if (!err && body.status) {
+          dispatch({ type: 'UPDATE_SUPP_DATA_SUMMARY_DATA', payload: body?.data });
           dispatch({ type: 'SUPP_DATA_SUMMARY_FETCH_FINISHED' });
         } else {
           dispatch({ type: 'SUPP_DATA_SUMMARY_FETCH_ERROR', payload: err });
@@ -246,10 +246,10 @@ export default {
       const url = `/psapi/procedureDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body.status) {
           dispatch({
             type: 'UPDATE_PROCEDURE_DATA_SUMMARY_DATA',
-            payload: body,
+            payload: body?.data,
           });
           dispatch({ type: 'PROCEDURE_DATA_SUMMARY_FETCH_FINISHED' });
         } else {
@@ -279,8 +279,8 @@ export default {
       const url = `/psapi/searchDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
-          dispatch({ type: 'UPDATE_SEARCH_DATA_SUMMARY_DATA', payload: body });
+        if (!err && body.status) {
+          dispatch({ type: 'UPDATE_SEARCH_DATA_SUMMARY_DATA', payload: body?.data });
           dispatch({ type: 'SEARCH_DATA_SUMMARY_FETCH_FINISHED' });
         } else {
           dispatch({ type: 'SEARCH_DATA_SUMMARY_FETCH_ERROR', payload: err });
@@ -308,10 +308,10 @@ export default {
       const url = `/psapi/telemetryDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body.status) {
           dispatch({
             type: 'UPDATE_TELEMETRY_DATA_SUMMARY_DATA',
-            payload: body,
+            payload: body?.data,
           });
           dispatch({ type: 'TELEMETRY_DATA_SUMMARY_FETCH_FINISHED' });
         } else {

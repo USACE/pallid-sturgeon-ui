@@ -87,8 +87,8 @@ export default {
 
       apiGet(url, (err, body) => {
         store.doSetLoadingState(false);
-        if (!err) {
-          dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body });
+        if (!err && body.status) {
+          dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body?.data });
           siteId && dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.items?.[0] });
         } else {
           dispatch({ type: 'SITES_FETCH_ERROR', payload: err });

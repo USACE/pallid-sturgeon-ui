@@ -62,10 +62,10 @@ const geneticCardSummaryBundle = {
       const url = `/psapi/geneticDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body.status) {
           dispatch({
             type: 'GENETIC_CARD_SUMMARY_UPDATED_DATA',
-            payload: body,
+            payload: body?.data,
           });
           tSuccess(toastId, 'Successfully loaded genetic card summary data.');
         } else {
