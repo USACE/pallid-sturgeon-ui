@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify';
 import { tSuccess, tError, tWarning } from '@common/toast/toastHelper';
 import { queryFromObject } from '@src/utils';
+import { ApiStatuses } from '@src/utils/enums';
 
 export default {
   name: 'dataEntry',
@@ -193,7 +194,7 @@ export default {
       const url = `/psapi/moriverDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err && body.status) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const mrId = body?.items?.[0]?.mrId;
           const mrFid = body?.items?.[0]?.mrFid;
           const siteId = body?.items?.[0]?.siteId;
@@ -241,7 +242,7 @@ export default {
       const url = `/psapi/fishDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err && body.status) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const mrId = body?.items?.[0]?.mrId;
           const mrFid = body?.items?.[0]?.mrFid;
           const siteId = body?.items?.[0]?.siteId;
@@ -290,7 +291,7 @@ export default {
       const url = `/psapi/supplementalDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err && body.status) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const mrId = body?.items?.[0]?.mrId;
           const mrFid = body?.items?.[0]?.mrFid;
           const siteId = body?.items?.[0]?.siteId;
@@ -339,7 +340,7 @@ export default {
       const url = `/psapi/procedureDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err && body.status) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const mrId = body?.items?.[0]?.mrId;
           const mrFid = body?.items?.[0]?.mrFid;
           const siteId = body?.items?.[0]?.siteId;
@@ -385,7 +386,7 @@ export default {
       const url = `/psapi/searchDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err && body.status) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const seId = body?.items?.[0]?.seId;
           const siteId = body?.items?.[0]?.siteId;
 
@@ -431,7 +432,7 @@ export default {
       const url = `/psapi/telemetryDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err && body.status) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const seId = body?.items?.[0]?.seId;
           const siteId = body?.items?.[0]?.siteId;
 

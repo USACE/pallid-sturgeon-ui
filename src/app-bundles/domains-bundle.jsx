@@ -1,4 +1,5 @@
 import { queryFromObject } from '@src/utils';
+import { ApiStatuses } from '@src/utils/enums';
 
 export default {
   name: 'domains',
@@ -103,7 +104,7 @@ export default {
         });
 
       apiGet(filter === true ? urlFilter : url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_PROJECTS',
           payload: body?.data,
@@ -131,7 +132,7 @@ export default {
         new URLSearchParams(year === null ? params : { ...params, year: year });
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_SEASONS',
           payload: body?.data,
@@ -157,7 +158,7 @@ export default {
         });
 
       apiGet(url, (_err, body) => {
-        if (!_err && body.status) {
+        if (!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_SEGMENTS',
           payload: body?.data,
@@ -177,7 +178,7 @@ export default {
       const url = `/psapi/sampleUnit${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_BENDS',
           payload: body?.data,
@@ -197,7 +198,7 @@ export default {
       const url = '/psapi/bendRn';
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_BENDRN',
           payload: body?.data,
@@ -217,7 +218,7 @@ export default {
       const url = `/psapi/fieldOffices${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_FIELD_OFFICES',
           payload: body?.data,
@@ -237,7 +238,7 @@ export default {
       const url = '/psapi/sampleUnitTypes';
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_SAMPLE_UNIT_TYPES',
           payload: body?.data,
@@ -257,7 +258,7 @@ export default {
       const url = `/psapi/meso${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_MESO',
           payload: body?.data,
@@ -277,7 +278,7 @@ export default {
       const url = `/psapi/structureFlow${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_STRUCTURE_FLOW',
           payload: body?.data,
@@ -297,7 +298,7 @@ export default {
       const url = `/psapi/structureMod${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_STRUCTURE_MOD',
           payload: body?.data,
@@ -317,7 +318,7 @@ export default {
       const url = `/psapi/species${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_SPECIES',
           payload: body?.data,
@@ -337,7 +338,7 @@ export default {
       const url = `/psapi/ftPrefix${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if (!_err && body.status) {
+        if (!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_FT_PREFIXES',
           payload: body?.data,
@@ -357,7 +358,7 @@ export default {
       const url = `/psapi/mr${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_MR',
           payload: body?.data,
@@ -377,7 +378,7 @@ export default {
       const url = `/psapi/otolith${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_OTOLITH',
           payload: body?.data,
@@ -397,7 +398,7 @@ export default {
       const url = `/psapi/setsite1${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_SET_SITE_1',
           payload: body?.data,
@@ -417,7 +418,7 @@ export default {
       const url = `/psapi/setsite2${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_SET_SITE_2',
           payload: body?.data,
@@ -437,7 +438,7 @@ export default {
       const url = '/psapi/years';
 
       apiGet(url, (_err, body) => {
-        if(!_err && body.status) {
+        if(!_err && body?.status === ApiStatuses.Success) {
         dispatch({
           type: 'DOMAIN_UPDATED_YEARS',
           payload: body?.data,

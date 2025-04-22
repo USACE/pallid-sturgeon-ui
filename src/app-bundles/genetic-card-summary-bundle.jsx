@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify';
 import { tSuccess, tError } from '@common/toast/toastHelper';
 import { queryFromObject } from '@src/utils';
+import { ApiStatuses } from '@src/utils/enums';
 
 const geneticCardSummaryBundle = {
   name: 'geneticCardSummary',
@@ -62,7 +63,7 @@ const geneticCardSummaryBundle = {
       const url = `/psapi/geneticDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err && body.status) {
+        if (!err && body?.status === ApiStatuses.Success) {
           dispatch({
             type: 'GENETIC_CARD_SUMMARY_UPDATED_DATA',
             payload: body?.data,

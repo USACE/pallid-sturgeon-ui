@@ -1,4 +1,5 @@
 import { queryFromObject } from '@src/utils';
+import { ApiStatuses } from '@src/utils/enums';
 
 export default {
   name: 'searchReports',
@@ -63,7 +64,7 @@ export default {
       const url = `/psapi/searchDataSummary${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err && body.status) {
+        if (!err && body?.status === ApiStatuses.Success) {
           dispatch({
             type: 'SEARCH_REPORTS_UPDATED_ITEMS',
             payload: body?.data,
