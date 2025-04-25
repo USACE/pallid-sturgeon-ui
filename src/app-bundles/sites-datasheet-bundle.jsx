@@ -1,4 +1,5 @@
 import { queryFromObject } from '@src/utils';
+import { ApiStatuses } from '@src/utils/enums';
 
 const sitesDatasheetBundle = {
   name: 'sitesDatasheet',
@@ -93,8 +94,8 @@ const sitesDatasheetBundle = {
       const url = `/psapi/missouriDatasheets${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
-          dispatch({ type: 'UPDATE_MORIVER_SITES_DATASHEET', payload: body });
+        if (!err && body?.status === ApiStatuses.Success) {
+          dispatch({ type: 'UPDATE_MORIVER_SITES_DATASHEET', payload: body?.data });
         } else {
           dispatch({
             type: 'MORIVER_SITES_DATASHEETS_FETCH_ERROR',
@@ -120,10 +121,10 @@ const sitesDatasheetBundle = {
       const url = `/psapi/searchDatasheets${query}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body?.status === ApiStatuses.Success) {
           dispatch({
             type: 'UPDATE_SEARCH_EFFORT_SITES_DATASHEET',
-            payload: body,
+            payload: body?.data,
           });
         } else {
           dispatch({

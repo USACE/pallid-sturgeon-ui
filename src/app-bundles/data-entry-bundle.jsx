@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify';
 import { tSuccess, tError, tWarning } from '@common/toast/toastHelper';
 import { queryFromObject } from '@src/utils';
+import { ApiStatuses } from '@src/utils/enums';
 
 export default {
   name: 'dataEntry',
@@ -193,7 +194,7 @@ export default {
       const url = `/psapi/moriverDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const mrId = body?.items?.[0]?.mrId;
           const mrFid = body?.items?.[0]?.mrFid;
           const siteId = body?.items?.[0]?.siteId;
@@ -203,7 +204,7 @@ export default {
           dispatch({
             type: 'DATA_ENTRY_UPDATED_DATA',
             payload: {
-              data: body,
+              data: body?.data,
               type: 'missouriRiver',
             },
           });
@@ -241,7 +242,7 @@ export default {
       const url = `/psapi/fishDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const mrId = body?.items?.[0]?.mrId;
           const mrFid = body?.items?.[0]?.mrFid;
           const siteId = body?.items?.[0]?.siteId;
@@ -250,7 +251,7 @@ export default {
 
           dispatch({
             type: 'DATA_ENTRY_UPDATE_FISH_DATA',
-            payload: body,
+            payload: body?.data,
           });
           dispatch({
             type: 'UPDATE_BASE_DATA',
@@ -290,7 +291,7 @@ export default {
       const url = `/psapi/supplementalDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const mrId = body?.items?.[0]?.mrId;
           const mrFid = body?.items?.[0]?.mrFid;
           const siteId = body?.items?.[0]?.siteId;
@@ -299,7 +300,7 @@ export default {
 
           dispatch({
             type: 'DATA_ENTRY_UPDATE_SUPPLEMENTAL_DATA',
-            payload: body,
+            payload: body?.data,
           });
           dispatch({
             type: 'UPDATE_BASE_DATA',
@@ -339,7 +340,7 @@ export default {
       const url = `/psapi/procedureDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const mrId = body?.items?.[0]?.mrId;
           const mrFid = body?.items?.[0]?.mrFid;
           const siteId = body?.items?.[0]?.siteId;
@@ -348,7 +349,7 @@ export default {
 
           dispatch({
             type: 'DATA_ENTRY_UPDATE_PROCEDURE_DATA',
-            payload: body,
+            payload: body?.data,
           });
           dispatch({
             type: 'UPDATE_BASE_DATA',
@@ -385,7 +386,7 @@ export default {
       const url = `/psapi/searchDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const seId = body?.items?.[0]?.seId;
           const siteId = body?.items?.[0]?.siteId;
 
@@ -394,7 +395,7 @@ export default {
           dispatch({
             type: 'DATA_ENTRY_UPDATED_DATA',
             payload: {
-              data: body,
+              data: body?.data,
               type: 'searchEffort',
             },
           });
@@ -431,7 +432,7 @@ export default {
       const url = `/psapi/telemetryDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
-        if (!err) {
+        if (!err && body?.status === ApiStatuses.Success) {
           const seId = body?.items?.[0]?.seId;
           const siteId = body?.items?.[0]?.siteId;
 
@@ -439,7 +440,7 @@ export default {
 
           dispatch({
             type: 'DATA_ENTRY_UPDATE_TELEMETRY_DATA',
-            payload: body,
+            payload: body?.data,
           });
           dispatch({
             type: 'UPDATE_BASE_DATA',

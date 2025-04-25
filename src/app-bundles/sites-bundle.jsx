@@ -2,6 +2,7 @@ import { queryFromObject } from '@src/utils';
 
 import { toast } from 'react-toastify';
 import { tSuccess, tError } from '@common/toast/toastHelper';
+import { ApiStatuses } from '@src/utils/enums';
 
 export default {
   name: 'sites',
@@ -87,8 +88,8 @@ export default {
 
       apiGet(url, (err, body) => {
         store.doSetLoadingState(false);
-        if (!err) {
-          dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body });
+        if (!err && body?.status === ApiStatuses.Success) {
+          dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body?.data });
           siteId && dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.items?.[0] });
         } else {
           dispatch({ type: 'SITES_FETCH_ERROR', payload: err });
