@@ -68,21 +68,32 @@ export default {
       const pageSize = store.selectSitesPageSize();
       const pageNumber = store.selectSitesPageNumber();
 
-      const queryAllSites = queryFromObject({
-        ...filterParams,
-        size: pageSize,
-        page: pageNumber,
-      });
+      let actualSiteId = null;
+      if(siteId) {
+        if(typeof siteId === 'object') {
+          actualSiteId = Number(siteId.siteId);
+        } else {
+          actualSiteId = Number(siteId);
+        }
+      }
 
-      const queryById = queryFromObject({
-        ...filterParams,
-        ...siteId,
-        size: pageSize,
-        page: pageNumber,
-      });
+      let url = '';
 
-      const url = `/psapi/siteDataEntry${siteId ? queryById : queryAllSites}`;
-
+      if(actualSiteId) {
+        const queryById = queryFromObject({
+          ...filterParams,
+          siteId: actualSiteId,
+        });
+        url = `/psapi/siteDataEntry${queryById}`;
+      } else {
+        const queryAllSites = queryFromObject({
+          ...filterParams,
+          size: pageSize,
+          page: pageNumber,
+        });
+        url = `/psapi/siteDataEntry${queryAllSites}`;
+      }
+      
       store.doSetLoadingState(true);
       store.doSetLoadingMessage('Fetching Sites...');
 
@@ -90,7 +101,14 @@ export default {
         store.doSetLoadingState(false);
         if (!err && body?.status === ApiStatuses.Success) {
           dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body?.data });
-          siteId && dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.items?.[0] });
+
+          if(actualSiteId) {
+            if(body?.data?.items?.length) {
+              dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.data?.items?.[0] });
+            } else if (body?.data) {
+              dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.data });
+            }
+          }
         } else {
           dispatch({ type: 'SITES_FETCH_ERROR', payload: err });
         }
