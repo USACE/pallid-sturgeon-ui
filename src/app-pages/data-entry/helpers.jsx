@@ -35,7 +35,7 @@ export const createBendsDropdownOptions = (data) => {
 export const createRolesDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.data.map((opt) => ({
+  return data.data.data.map((opt) => ({
     text: opt.description,
     value: opt.id,
   }));
