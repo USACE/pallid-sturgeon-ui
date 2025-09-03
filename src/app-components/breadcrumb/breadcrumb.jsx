@@ -18,7 +18,7 @@ const Breadcrumb = ({ home = true, paths, href = '/', hrefText = 'Home' }) => {
         if (pathLength - 1 !== index) {
           return (
             <BreadcrumbUSWDS key={index}>
-              <BreadcrumbLink href={item.href}>
+              <BreadcrumbLink key={index} href={item.href}>
                 <span>{item.text}</span>
               </BreadcrumbLink>
             </BreadcrumbUSWDS>
