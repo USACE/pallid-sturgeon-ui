@@ -195,10 +195,9 @@ export default {
 
       apiGet(url, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
-          const mrId = body?.items?.[0]?.mrId;
-          const mrFid = body?.items?.[0]?.mrFid;
-          const siteId = body?.items?.[0]?.siteId;
-
+          const mrId = body?.data?.items?.[0]?.mrId;
+          const mrFid = body?.data?.items?.[0]?.mrFid;
+          const siteId = body?.data?.items?.[0]?.siteId;
           store.doSitesFetch({ siteId: siteId });
 
           dispatch({
@@ -243,10 +242,9 @@ export default {
 
       apiGet(url, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
-          const mrId = body?.items?.[0]?.mrId;
-          const mrFid = body?.items?.[0]?.mrFid;
-          const siteId = body?.items?.[0]?.siteId;
-
+          const mrId = body?.data?.items?.[0]?.mrId;
+          const mrFid = body?.data?.items?.[0]?.mrFid;
+          const siteId = body?.data?.items?.[0]?.siteId;
           store.doSitesFetch({ siteId: siteId });
 
           dispatch({
@@ -292,10 +290,9 @@ export default {
 
       apiGet(url, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
-          const mrId = body?.items?.[0]?.mrId;
-          const mrFid = body?.items?.[0]?.mrFid;
-          const siteId = body?.items?.[0]?.siteId;
-
+          const mrId = body?.data?.items?.[0]?.mrId;
+          const mrFid = body?.data?.items?.[0]?.mrFid;
+          const siteId = body?.data?.items?.[0]?.siteId;
           store.doSitesFetch({ siteId: siteId });
 
           dispatch({
@@ -341,10 +338,9 @@ export default {
 
       apiGet(url, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
-          const mrId = body?.items?.[0]?.mrId;
-          const mrFid = body?.items?.[0]?.mrFid;
-          const siteId = body?.items?.[0]?.siteId;
-
+          const mrId = body?.data?.items?.[0]?.mrId;
+          const mrFid = body?.data?.items?.[0]?.mrFid;
+          const siteId = body?.data?.items?.[0]?.siteId;
           store.doSitesFetch({ sitedId: siteId });
 
           dispatch({
@@ -387,9 +383,8 @@ export default {
 
       apiGet(url, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
-          const seId = body?.items?.[0]?.seId;
-          const siteId = body?.items?.[0]?.siteId;
-
+          const seId = body?.data?.items?.[0]?.seId;
+          const siteId = body?.data?.items?.[0]?.siteId;
           store.doSitesFetch({ siteId: siteId });
 
           dispatch({
@@ -433,9 +428,8 @@ export default {
 
       apiGet(url, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
-          const seId = body?.items?.[0]?.seId;
-          const siteId = body?.items?.[0]?.siteId;
-
+          const seId = body?.data?.items?.[0]?.seId;
+          const siteId = body?.data?.items?.[0]?.siteId;
           store.doSitesFetch({ siteId: siteId });
 
           dispatch({
