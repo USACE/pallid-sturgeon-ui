@@ -89,23 +89,20 @@ export default {
         }),
       };
 
-      apiPost(url, payload, (err, _body) => {
-        if (!err) {
+      apiPost(url, payload, (err, body) => {
+        if (!err && typeof body !== 'string') {
           dispatch({
             type: 'UPDATE_UPLOAD',
-            payload: _body,
+            payload: body,
           });
           dispatch({ type: 'UPLOAD_FILES_FINISHED' });
           tSuccess(toastId, 'Successfully uploaded all files!');
           store.doFetchUploadSessionLogs({
-            uploadSessionId: _body.uploadSessionId,
+            uploadSessionId: body.uploadSessionId,
           });
         } else {
           dispatch({ type: 'UPLOAD_FILES_ERROR', payload: err });
-          tError(
-            toastId,
-            'Failed to upload files. Please verify file formats and try again.'
-          );
+          tError(toastId, 'Failed to upload files. Please verify file formats and try again.');
         }
       });
     },
