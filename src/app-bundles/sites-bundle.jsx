@@ -68,20 +68,31 @@ export default {
       const pageSize = store.selectSitesPageSize();
       const pageNumber = store.selectSitesPageNumber();
 
-      const queryAllSites = queryFromObject({
-        ...filterParams,
-        size: pageSize,
-        page: pageNumber,
-      });
+      let actualSiteId = null;
+      if (siteId) {
+        if (typeof siteId === 'object') {
+          actualSiteId = Number(siteId.siteId);
+        } else {
+          actualSiteId = Number(siteId);
+        }
+      }
 
-      const queryById = queryFromObject({
-        ...filterParams,
-        ...siteId,
-        size: pageSize,
-        page: pageNumber,
-      });
+      let url = '';
 
-      const url = `/psapi/siteDataEntry${siteId ? queryById : queryAllSites}`;
+      if (actualSiteId) {
+        const queryById = queryFromObject({
+          ...filterParams,
+          siteId: actualSiteId,
+        });
+        url = `/psapi/siteDataEntry${queryById}`;
+      } else {
+        const queryAllSites = queryFromObject({
+          ...filterParams,
+          size: pageSize,
+          page: pageNumber,
+        });
+        url = `/psapi/siteDataEntry${queryAllSites}`;
+      }
 
       store.doSetLoadingState(true);
       store.doSetLoadingMessage('Fetching Sites...');
