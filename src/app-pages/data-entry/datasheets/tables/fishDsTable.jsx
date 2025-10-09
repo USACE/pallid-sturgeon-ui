@@ -25,6 +25,43 @@ import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 
+const getNextEditCol = useCallback((curr, cols, dir) => {
+  let i = curr + dir;
+  while (i >= 0 && i < cols.length) {
+    const isEditable = !!cols[i].getColDef().editable;
+    if (isEditable) return i;
+    i += step;
+    // +1 -> Tab (to forward)
+  }
+  return -1;
+  // -1 -> Shift + Tab (to backward)
+}, []);
+
+const tabToNextCell = useCallback(
+  (params) => {
+    if (!params || !params?.previousCellPosition || !params?.columnApi) return false;
+    const { columnApi, backwards, previousCellPosition } = params;
+    const step = backwards ? -1 : 1;
+
+    const currColId = previousCellPosition.column.getColId();
+    if (!currColId) return false;
+
+    const displayedCols = columnApi.getAllDisplayedColumns();
+
+    const currIdx = displayedCols.findIndex((c) => c.getColId() === currColId);
+    if (currIdx === -1) return false;
+
+    const nextIdx = getNextEditCol(currIdx, displayedCols, step);
+    if (nextIdx === -1) return false;
+
+    return {
+      rowIndex: previousCellPosition.rowIndex,
+      column: displayedCols[nextIdx],
+    };
+  },
+  [getNextEditCol]
+);
+
 const FishDsTable = connect(
   'doUpdateFishDataEntry',
   'doSaveFishDataEntry',
@@ -133,11 +170,12 @@ const FishDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}
+            tabToNextCell={tabToNextCell}
+            tabToPreviousCell={tabToNextCell}
             suppressClickEdit
             defaultColDef={{
               width: 100,
               editable: true,
-              lockPinned: true,
             }}
             editType='fullRow'
             onRowValueChanged={({ data }) =>
