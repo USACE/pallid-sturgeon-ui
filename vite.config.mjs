@@ -1,7 +1,7 @@
 import react from '@vitejs/plugin-react';
-import eslint from 'vite-plugin-eslint';
 import svgrPlugin from 'vite-plugin-svgr';
 import { checker } from 'vite-plugin-checker';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
 
 // https://vitejs.dev/config/
@@ -12,13 +12,15 @@ export default ({ mode }) => {
   return defineConfig({
     base: basePath === '' ? '/' : basePath,
     plugins: [
-      react(),
-      eslint(),
+      react({ include: ['**/*.jsx'] }),
       svgrPlugin(),
+      visualizer({
+        filename: 'rollup-analyze.json',
+        template: 'raw-data',
+        gzipSize: true,
+        brotliSize: true,
+      }),
       checker({
-        eslint: {
-          lintCommand: 'eslint "./src/**/*.{js,jsx,ts,tsx}"',
-        },
         overlay: {
           initialIsOpen: false,
           position: 'br',
@@ -27,11 +29,6 @@ export default ({ mode }) => {
     ],
     css: {
       devSourcemap: false,
-      preprocessorOptions: {
-        scss: {
-          api: 'modern-compiler', // or "modern"
-        },
-      },
     },
     build: {
       outDir: 'build',
@@ -40,6 +37,12 @@ export default ({ mode }) => {
     server: {
       open: true,
       port: 3000,
+    },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      css: true,
+      setupFiles: './src/test/setup.ts',
     },
     optimizeDeps: {
       esbuildOptions: {
