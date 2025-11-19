@@ -58,16 +58,12 @@ const SitesFormModal = connect(
       uploadedBy: data?.uploadedBy ?? '',
     };
 
-    const bendComboOptions = useMemo(
-      () =>
-        bends
-          ? bends.map((item) => ({
-              value: item.sampleUnit,
-              label: item.description,
-            }))
-          : [],
-      []
-    );
+    const bendComboOptions = bends
+      ? bends.map((item) => ({
+          value: item.sampleUnit,
+          label: item.description,
+        }))
+      : [];
 
     const segmentComboOptions = useMemo(
       () =>
