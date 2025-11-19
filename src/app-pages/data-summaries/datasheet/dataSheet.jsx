@@ -52,7 +52,7 @@ export default connect(
     userRole,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
+    const [yearFilter, setYearFilter] = useState(new Date().getFullYear() - 1);
     const [monthFilter, setMonthFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState(userRole ? userRole.projectCode : '');
     const [approvalFilter, setApprovalFilter] = useState('');
@@ -135,7 +135,7 @@ export default connect(
                   onChange={(val) => setYearFilter(val)}
                   value={yearFilter}
                   options={domainsYears && domainsYears.map((item) => ({ value: item.year }))}
-                  defaultValue={new Date().getFullYear()}
+                  defaultValue={new Date().getFullYear() - 1}
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
