@@ -54,13 +54,6 @@ export default {
       store.doSitesFetch();
     },
 
-  doNewSiteLoadData:
-    () =>
-    ({ dispatch, store }) => {
-      dispatch({ type: 'LOADING_NEW_SITE_INIT_DATA' });
-      store.doDomainBendRnFetch();
-    },
-
   doSitesFetch:
     (siteId) =>
     ({ dispatch, store, apiGet }) => {

@@ -18,11 +18,13 @@ const cellStyle = (params) => ({
 
 const SitesListTable = connect(
   'doModalOpen',
+  'doDomainBendRnFetch',
   'selectSitesData',
   'selectExportData',
-  ({ doModalOpen, sitesData, exportData }) => {
+  ({ doModalOpen, doDomainBendRnFetch, sitesData, exportData }) => {
     const handleAddButton = () => {
       doModalOpen(SitesFormModal);
+      doDomainBendRnFetch();
     };
 
     return (
