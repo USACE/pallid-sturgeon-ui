@@ -9,6 +9,8 @@ import PageContent from '@components/page-content';
 import LoadingModal from './common/modals/loading';
 import LandingModal from './common/modals/landing';
 import NavBar from '@components/navigation';
+import SyncBadge from './app-components/offline/SyncBadge';
+import QuickCreate from './app-components/offline/QuickCreate';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './css/bootstrap/css/bootstrap.water.min.css';
@@ -39,7 +41,32 @@ export default connect(
         {loadingState && <LoadingModal text={loadingMessage} />}
         <ToastContainer autoClose={3500} hideProgressBar={false} />
         <NavBar />
-        <PageContent>{auth.token ? <Route /> : <Hero />}</PageContent>
+        {/* offline sync badge - below the navbar */}
+        <div
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 5,
+            display: 'flex',
+            justifyContent: 'flex-end',
+            padding: '6px 12px',
+          }}
+        >
+          <SyncBadge />
+        </div>
+        <PageContent>
+          {auth.token ? (
+            <>
+              {/* TEMP: QuickCreate button for testing */}
+              <div style={{ padding: 12 }}>
+                <QuickCreate />
+              </div>
+              <Route />
+            </>
+          ) : (
+            <Hero />
+          )}
+        </PageContent>
         <Modal closeWithEscape />
         <Footer />
       </>

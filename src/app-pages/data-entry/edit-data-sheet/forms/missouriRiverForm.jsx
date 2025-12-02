@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState, useRef, useCallback } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from '@components/button';
@@ -24,6 +24,11 @@ import { formatDate } from '@src/utils/helpers';
 
 import '../../../data-summaries/data-summary.scss';
 
+import { db } from '../../../../offline/db';
+import { createMoRiver } from '../../../../offline/api';
+
+import { seedMesoCacheIfEmpty, getMesoOptionsForMacro } from '../../../../offline/mesoOptionCache';
+
 const reducer = (state, action) => {
   switch (action.type) {
     case 'UPDATE_INPUT':
@@ -33,6 +38,8 @@ const reducer = (state, action) => {
       };
     case 'INITIALIZE_FORM':
       return Object.assign({}, state, action.payload);
+    case 'RESET_FORM':
+      return { ...action.payload, startTime: '', recorder: '', lastEditComment: '' };
     default:
       return state;
   }
@@ -88,6 +95,9 @@ const MissouriRiverForm = connect(
     const initialState = {
       noTurbidity: 'N',
       noVelocity: 'N',
+      startTime: '',
+      recorder: '',
+      lastEditComment: '',
     };
     const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -100,9 +110,23 @@ const MissouriRiverForm = connect(
     const [isNoTurbidity, setIsNoTurbidity] = useState(false);
     const [isNoVelocity, setIsNoVelocity] = useState(false);
 
+    const [mesoOptions, setMesoOptions] = useState([]);
+
     const siteId = routeParams?.siteId;
     const mrId = routeParams.mrId;
     const formComplete = true;
+
+    const [clientId, setClientId] = useState(null);
+    useEffect(() => {
+      let cid = sessionStorage.getItem('moriver-draft');
+      if (!cid) {
+        cid = (crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`).toString();
+        sessionStorage.setItem('moriver-draft', cid);
+      }
+      setClientId(cid);
+    }, []);
+
+    const [localStatus, setLocalStatus] = useState('draft');
 
     const breadcrumbLinks = [
       {
@@ -121,12 +145,32 @@ const MissouriRiverForm = connect(
       },
     ];
 
+    const debounceT = useRef(null);
+    const saveDraft = useCallback(
+      (patch) => {
+        if (!clientId) return;
+        clearTimeout(debounceT.current);
+        debounceT.current = setTimeout(async () => {
+          const current = await db.moriver.get(clientId);
+          const next = {
+            ...(current || { clientId, version: current?.version ?? 0 }),
+            ...patch,
+            _status: current?._status || 'draft',
+          };
+          await db.moriver.put(next);
+          setLocalStatus(next._status || 'draft');
+        }, 150);
+      },
+      [clientId, setLocalStatus]
+    );
+
     const handleChange = (e) => {
       dispatch({
         type: 'UPDATE_INPUT',
         field: e.target.name,
         payload: e.target.value,
       });
+      saveDraft({ [e.target.name]: e.target.value });
     };
 
     const handleNumber = (e) => {
@@ -135,6 +179,7 @@ const MissouriRiverForm = connect(
         field: e.target.name,
         payload: isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value),
       });
+      saveDraft({ [e.target.value]: isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value) });
     };
 
     const handleFloat = (e) => {
@@ -143,6 +188,7 @@ const MissouriRiverForm = connect(
         field: e.target.name,
         payload: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value),
       });
+      saveDraft({ [e.target.value]: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value) });
     };
 
     const handleSelect = (field, val) => {
@@ -178,27 +224,116 @@ const MissouriRiverForm = connect(
       handleSelect('noVelocity', val === false ? 'N' : 'Y');
     };
 
-    const doSave = () => {
+    const doSave = async () => {
+      console.log('[doSave] called, online =', navigator.onLine);
+
+      const requiredFields = Boolean(
+        state.setdate &&
+          state.subsample &&
+          state.subsamplepass &&
+          state.subsamplen &&
+          state.gearType &&
+          state.recorder &&
+          state.macro &&
+          state.meso &&
+          state.temp
+      );
+      if (!requiredFields) {
+        alert('Please fill all required fields before saving');
+        return;
+      }
+
+      const asNum = (v) => (v === '' || v == null ? undefined : Number(v));
+
+      if (!navigator.onLine) {
+        console.log('[doSave] offline branch hit');
+
+        const payload = {
+          clientId,
+          siteId: state.siteId != null ? Number(state.siteId) : Number(routeParams.siteId),
+          setdate: state.setdate,
+          gear_type: state.gearType,
+          gear: state.gear,
+          recorder: state.recorder,
+          macro: state.macro,
+          meso: state.meso,
+          temp: asNum(state.temp),
+          width: asNum(state.width),
+          micro: state.micro,
+          micro_structure: state.microStructure,
+          structure_flow: state.structureFlow,
+          structure_mod: state.structureMod,
+          set_site_1: state.setSite1,
+          set_site_2: state.setSite2,
+          set_site_3: state.setSite3,
+          starttime: state.startTime,
+          startlatitude: asNum(state.startlatitude),
+          startlongitude: asNum(state.startlongitude),
+          distance: asNum(state.distance),
+          depth1: asNum(state.depth1),
+          depth2: asNum(state.depth2),
+          depth3: asNum(state.depth3),
+          stoptime: state.stoptime,
+          stoplatitude: asNum(state.stoplatitude),
+          stoplongitude: asNum(state.stoplongitude),
+          u1: state.u1,
+          u2: state.u2,
+          u3: state.u3,
+          u4: state.u4,
+          u5: state.u5,
+          u6: state.u6,
+          u7: state.u7,
+          structurenumber: state.structurenumber,
+          netrivermile: asNum(state.netrivermile),
+          conductivity: asNum(state.conductivity),
+          do: asNum(state.dissolvedOxygen),
+          usgs: state.usgs,
+          riverstage: asNum(state.riverstage),
+          discharge: asNum(state.discharge),
+          habitatrn: state.habitatrn,
+          turbidity: asNum(state.turbidity),
+          no_turbidity: state.noTurbidity,
+          cobble: asNum(state.cobble),
+          silt: asNum(state.silt),
+          organic: asNum(state.organic),
+          sand: asNum(state.sand),
+          watervel: asNum(state.watervel),
+          gravel: asNum(state.gravel),
+          velocitybot1: asNum(state.velocitybot1),
+          velocity08_1: asNum(state.velocity081),
+          velocity02or06_1: asNum(state.velocity02or061),
+          velocitybot2: asNum(state.velocitybot2),
+          velocity08_2: asNum(state.velocity082),
+          velocity02or06_2: asNum(state.velocity02or062),
+          velocitybot3: asNum(state.velocitybot3),
+          velocity08_3: asNum(state.velocity083),
+          velocity02or06_3: asNum(state.velocity02or063),
+          no_velocity: state.noVelocity,
+          last_edit_comment: state.lastEditComment || 'Offline demo queued entry',
+          edit_initials: state.editInitials,
+          // _status: 'queued',
+        };
+
+        await createMoRiver(payload);
+
+        dispatch({ type: 'RESET_FORM', payload: initialState });
+
+        if (typeof setLocalStatus === 'function') {
+          setLocalStatus('queued');
+        }
+
+        window.alert('Saved locally (queued). Go online and press "Sync now".');
+        return;
+      }
       isEditForm ? doUpdateMoRiverDataEntry(state) : doSaveMoRiverDataEntry(state);
+      dispatch({ type: 'RESET_FORM', payload: initialState });
     };
 
-    const saveIsDisabled = !(
-      !!state['setdate'] &&
-      !!state['subsample'] &&
-      !!state['subsamplepass'] &&
-      !!state['subsamplen'] &&
-      !!state['gearType'] &&
-      !!state['recorder'] &&
-      !!state['macro'] &&
-      !!state['meso'] &&
-      !!state['temp'] &&
-      !!state['startTime'] &&
-      !!state['startlatitude'] &&
-      !!state['startlongitude'] &&
-      (isEditForm ? !!state['editInitials'] && !!state['lastEditComment'] : true)
-    );
-
+    const didInitRef = useRef(false);
     useEffect(() => {
+      if (didInitRef.current) return;
+      didInitRef.current = true;
+
       // If there is existing Missouri River data entry
       if (isEditForm) {
         dispatch({
@@ -210,19 +345,52 @@ const MissouriRiverForm = connect(
         dataEntryData?.setdate && handleSelect('setdate', formatDate(dataEntryData.setdate));
 
         // Set state of checkboxes
-        setIsNoTurbidity(dataEntryData?.noTurbidity === 'Y' ? true : false);
-        setIsNoVelocity(dataEntryData?.noVelocity === 'Y' ? true : false);
+        setIsNoTurbidity(dataEntryData?.noTurbidity === 'Y');
+        setIsNoVelocity(dataEntryData?.noVelocity === 'Y');
       } else {
         // Reset data if adding new Missouri River datasheet
         doResetMoRiverDataEntryData();
-        handleSelect('siteId', siteId);
+        handleSelect('siteId', Number(routeParams?.siteId));
       }
-    }, [isEditForm, dataEntryData]);
+    }, []);
 
     useEffect(() => {
       // netrivermile in baseData
       doUpdateBaseData('netrivermile', state['netrivermile']);
     }, [state['netrivermile']]);
+
+    useEffect(() => {
+      seedMesoCacheIfEmpty().catch((e) => {
+        console.error('Failed to seed meso cache', e);
+      });
+    }, []);
+
+    useEffect(() => {
+      if (!state['macro']) {
+        setMesoOptions([]);
+        return;
+      }
+
+      let cancelled = false;
+
+      (async () => {
+        try {
+          const rows = await getMesoOptionsForMacro(state['macro']);
+          if (!cancelled) {
+            setMesoOptions(rows);
+          }
+        } catch (e) {
+          console.error('Failed to load meso options from cache', e);
+          if (!cancelled) {
+            setMesoOptions([]);
+          }
+        }
+      })();
+
+      return () => {
+        cancelled = true;
+      };
+    }, [state['macro']]);
 
     return (
       <div className='container-fluid'>
@@ -355,7 +523,7 @@ const MissouriRiverForm = connect(
                                 name='meso'
                                 value={state['meso']}
                                 onChange={(val) => handleSelect('meso', val)}
-                                options={createMesoOptions(domainsMeso)}
+                                options={createMesoOptions(mesoOptions)}
                                 isDisabled={!formComplete}
                                 isRequired
                               />
@@ -1052,7 +1220,7 @@ const MissouriRiverForm = connect(
                               className='btn-width'
                               text={isEditForm ? 'Apply Changes' : 'Save'}
                               handleClick={() => doSave()}
-                              isDisabled={saveIsDisabled}
+                              // isDisabled={saveIsDisabled}
                             />
                           </div>
                         </div>

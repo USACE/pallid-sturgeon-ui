@@ -1,4 +1,5 @@
 import Keycloak from '@components/keycloak';
+import { getAccessFromRefresh } from '../offline/offlineTokenClient';
 
 const keycloakUrl = import.meta.env.VITE_KEYCLOAK_URL;
 const redirectUrl = import.meta.env.VITE_REDIRECT_URL;
@@ -73,6 +74,32 @@ const createAuthBundle = (options) => ({
         );
       },
     });
+    window.keycloak = keycloak;
+
+    window.getAuthTokenAsync = async () => {
+      try {
+        const t1 = store.selectAuthToken?.();
+        if (t1) return t1;
+
+        if (typeof keycloak?.getToken === 'function') {
+          const t2 = await keycloak.getToken();
+          if (t2) return t2;
+        }
+        if (typeof keycloak?.updateToken === 'function') {
+          await keycloak.updateToken(30).catch(() => {});
+          const t3 = keycloak?.token;
+          if (t3) return t3;
+        }
+
+        if (typeof getAccessFromRefresh === 'function') {
+          const t4 = await getAccessFromRefresh();
+          if (t4) return t4;
+        }
+      } catch (e) {
+        console.warn('getAuthTokenAsync error', e);
+      }
+      return null;
+    }
 
     keycloak.checkForSession();
   },

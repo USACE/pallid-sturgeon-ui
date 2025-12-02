@@ -13,7 +13,7 @@ const Approval = ({ checkby, complete, qc }) => (
     <Card.Body>
       <Row>
         <div className='col-md-1'>
-          <Input label='Checked By' name='checkby' value={checkby} isDisabled />
+          <Input label='Checked By' name='checkby' value={checkby} />
         </div>
         <div className='col-md-1 text-center col-sm-2'>
           <label>
@@ -28,7 +28,7 @@ const Approval = ({ checkby, complete, qc }) => (
             // onClick={() => dispatch({ type: 'update', field: 'complete', value: !!complete ? '' : '1' })}
             onChange={() => {}}
             // disabled={!formComplete}
-            disabled
+            // disabled
           />
         </div>
         <div className='col-md-1 col-sm-6'>
@@ -38,7 +38,7 @@ const Approval = ({ checkby, complete, qc }) => (
             value={qc}
             // onChange={e => dispatch({ type: 'update', field: 'qc', value: e.target.value })}
             // disabled={!formComplete}
-            isDisabled
+            // isDisabled
           />
         </div>
         <div className='col-md-2 offset-6'>
