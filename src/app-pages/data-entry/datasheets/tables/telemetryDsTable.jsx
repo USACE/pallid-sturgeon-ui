@@ -19,6 +19,7 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
+import { tabToNextCell } from './helpers';
 
 // tableId = 4604 For testing
 
@@ -107,6 +108,8 @@ const TelemetryDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}
+            tabToNextCell={tabToNextCell}
+            tabToPreviousCell={tabToNextCell}
             suppressClickEdit
             defaultColDef={{
               width: 100,

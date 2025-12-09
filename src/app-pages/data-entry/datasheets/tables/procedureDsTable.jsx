@@ -26,6 +26,7 @@ import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import { tabToNextCell } from './helpers';
 
 const ProcedureDsTable = connect(
   'doModalOpen',
@@ -100,6 +101,8 @@ const ProcedureDsTable = connect(
           <AgGridReact
             getRowNodeId={(params) => String(params.sid)}
             ref={gridRef}
+            tabToNextCell={tabToNextCell}
+            tabToPreviousCell={tabToNextCell}
             suppressClickEdit
             rowHeight={35}
             rowData={items}
