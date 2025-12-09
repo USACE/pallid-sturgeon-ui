@@ -23,6 +23,7 @@ import {
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import { tabToNextCell } from './helpers';
 
 const SuppDsTable = connect(
   'doModalOpen',
@@ -109,6 +110,8 @@ const SuppDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             ref={gridRef}
+            tabToNextCell={tabToNextCell}
+            tabToPreviousCell={tabToNextCell}
             suppressClickEdit
             rowHeight={35}
             rowData={items}
