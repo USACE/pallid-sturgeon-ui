@@ -87,6 +87,9 @@ const NavBar = connect(
                     Utilities
                   </NavItem>
                 </RoleFilter>
+                <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
+                  <NavItem href={['/map']}>Map</NavItem>
+                </RoleFilter>
                 <RoleFilter allowRoles={['ADMINISTRATOR']}>
                   <NavItem href={administrationLinks}>Admin</NavItem>
                 </RoleFilter>

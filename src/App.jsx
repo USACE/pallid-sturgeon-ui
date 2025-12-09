@@ -17,6 +17,7 @@ import '@styles/uswds-theme/_uswds-theme-components.scss';
 import '@styles/_buttons.scss';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'leaflet/dist/leaflet.css';
 
 export default connect(
   'doModalOpen',
