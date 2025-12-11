@@ -26,42 +26,6 @@ const createDropdownOptions = (data) => {
   });
 };
 
-const schema = yup.object().shape({
-  setdate: yup.string().required(ValidationMessages.FieldRequired),
-  // Cannot have duplicate subsample numbers with same site_id and pass
-  subsample: yup.number().required(ValidationMessages.FieldRequired).moreThan(0, 'Value cannot be zero'),
-  subsamplepass: yup
-    .number()
-    .required(ValidationMessages.FieldRequired)
-    .moreThan(0, 'Value cannot be zero')
-    .max(9, 'The value cannot be greater than 9'),
-  subsamplen: yup.string().required(ValidationMessages.FieldRequired),
-  gearType: yup.string().required(ValidationMessages.FieldRequired),
-  gear: yup.string().required(ValidationMessages.FieldRequired),
-  recorder: yup.string().required(ValidationMessages.FieldRequired),
-  macro: yup.string().required(ValidationMessages.FieldRequired),
-  meso: yup.string().required(ValidationMessages.FieldRequired),
-  micro: yup.number().nullable(),
-  microStructure: yup.string().nullable(),
-  structureFlow: yup.string().nullable(),
-  structureMod: yup.string().nullable(),
-  temp: yup.number().required(ValidationMessages.FieldRequired),
-  width: yup.number().nullable(),
-  setSite1: yup.string().nullable(),
-  setSite2: yup.string().nullable(),
-  setSite3: yup.string().nullable(),
-  startTime: yup.string().required(ValidationMessages.FieldRequired),
-  startlatitude: yup.number().required(ValidationMessages.FieldRequired),
-  startlongitude: yup.number().required(ValidationMessages.FieldRequired),
-  u1: yup.string().nullable(),
-  u2: yup.string().nullable(),
-  u3: yup.string().nullable(),
-  u4: yup.string().nullable(),
-  u5: yup.string().nullable(),
-  u6: yup.string().nullable(),
-  u7: yup.string().nullable(),
-});
-
 const MissouriRiverDataEntryForm = connect(
   'selectBaseData',
   'selectDataEntryData',
@@ -103,6 +67,57 @@ const MissouriRiverDataEntryForm = connect(
       },
       [getMacroMesoOptions, setMesoOptions]
     );
+
+    const schema = yup.object().shape({
+      setdate: yup.string().required(ValidationMessages.FieldRequired),
+      // Cannot have duplicate subsample numbers with same site_id and pass
+      subsample: yup
+        .number()
+        .required(ValidationMessages.FieldRequired)
+        .typeError(ValidationMessages.FieldRequired)
+        .moreThan(0, 'Value cannot be zero'),
+      subsamplepass: yup
+        .number()
+        .required(ValidationMessages.FieldRequired)
+        .typeError(ValidationMessages.FieldRequired)
+        .moreThan(0, 'Value cannot be zero')
+        .max(9, 'The value cannot be greater than 9'),
+      subsamplen: yup.string().required(ValidationMessages.FieldRequired),
+      gearType: yup.string().required(ValidationMessages.FieldRequired),
+      gear: yup.string().required(ValidationMessages.FieldRequired),
+      recorder: yup.string().required(ValidationMessages.FieldRequired),
+      macro: yup.string().required(ValidationMessages.FieldRequired),
+      meso: yup.string().required(ValidationMessages.FieldRequired),
+      micro: yup.number().nullable(),
+      microStructure: yup.string().nullable(),
+      structureFlow: yup.string().nullable(),
+      structureMod: yup
+        .string()
+        .test('structure-mod-required', ValidationMessages.FieldRequired, function () {
+          return microSegmentRequired.includes(segmentId) && projectId === 1;
+        })
+        .nullable(),
+      temp: yup
+        .number()
+        .required(ValidationMessages.FieldRequired)
+        .typeError(ValidationMessages.FieldRequired)
+        .positive('Value must be a positive number')
+        .max(99.99, 'Value cannot exceed 99.9'),
+      width: yup.number().nullable(),
+      setSite1: yup.string().nullable(),
+      setSite2: yup.string().nullable(),
+      setSite3: yup.string().nullable(),
+      startTime: yup.string().required(ValidationMessages.FieldRequired),
+      startlatitude: yup.number().required(ValidationMessages.FieldRequired),
+      startlongitude: yup.number().required(ValidationMessages.FieldRequired),
+      u1: yup.string().nullable(),
+      u2: yup.string().nullable(),
+      u3: yup.string().nullable(),
+      u4: yup.string().nullable(),
+      u5: yup.string().nullable(),
+      u6: yup.string().nullable(),
+      u7: yup.string().nullable(),
+    });
 
     const defaultValues = {
       setdate: dataEntryData?.setdate ? formatDate(dataEntryData?.setdate) : '',
@@ -156,6 +171,8 @@ const MissouriRiverDataEntryForm = connect(
     const subsamplepass = watch('subsamplepass');
     const u6 = watch('u6');
     const u7 = watch('u7');
+
+    const isNSTS = u6 === 'NSTS';
 
     // Set R/N value
     useEffect(() => {
@@ -225,7 +242,7 @@ const MissouriRiverDataEntryForm = connect(
           </Grid>
           <Grid row gap='md'>
             <Grid tablet={{ col: 2 }}>
-              <SelectInput name='macro' label='Macro' required={u6 === 'NSTS'}>
+              <SelectInput name='macro' label='Macro' required={isNSTS}>
                 {createDropdownOptions(macros).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.value}
@@ -234,7 +251,7 @@ const MissouriRiverDataEntryForm = connect(
               </SelectInput>
             </Grid>
             <Grid tablet={{ col: 2 }}>
-              <SelectInput name='meso' label='Meso' required={u6 === 'NSTS'}>
+              <SelectInput name='meso' label='Meso' required={isNSTS}>
                 {createDropdownOptions(mesoOptions).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.value}
@@ -249,7 +266,7 @@ const MissouriRiverDataEntryForm = connect(
               <SelectInput
                 name='microStructure'
                 label='Micro Structure'
-                required={(microSegmentRequired.includes(segmentId) && projectId === 2) || u6 === 'NSTS'}
+                required={(microSegmentRequired.includes(segmentId) && projectId === 2) || isNSTS}
               ></SelectInput>
             </Grid>
             <Grid tablet={{ col: 2 }}>
@@ -263,13 +280,18 @@ const MissouriRiverDataEntryForm = connect(
               <SelectInput
                 name='structureMod'
                 label='Structure Mod'
-                required={projectId === 1 ? microSegmentRequired.includes(segmentId) : season === 'IRC'}
+                required={(projectId === 1 ? microSegmentRequired.includes(segmentId) : season === 'IRC') || isNSTS}
               ></SelectInput>
             </Grid>
           </Grid>
           <Grid row gap='md'>
             <Grid tablet={{ col: 2 }}>
-              <TextInput name='temp' label='Temp (c)' type='number' required />
+              <TextInput
+                name='temp'
+                label='Temp (c)'
+                type='number'
+                required={projectId === 1 || projectId === 2 || isNSTS}
+              />
             </Grid>
             <Grid tablet={{ col: 2 }}>
               <TextInput name='width' label='Width' type='number' />
