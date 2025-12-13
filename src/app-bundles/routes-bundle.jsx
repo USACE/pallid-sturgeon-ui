@@ -9,7 +9,7 @@ import ErrorLog from '@pages/utilities/errorLog';
 import GeneticCard from '@pages/data-summaries/geneticCard';
 import Home from '@pages/home/home';
 import Logout from '@pages/logout';
-import Map from '@pages/map/map';
+import MoRiverMap from '@src/app-pages/map/moRiverMap';
 import UserList from '@pages/admin/userList';
 import NotFound from '@pages/404';
 import SearchReports from '@pages/data-summaries/search-reports';
@@ -34,7 +34,7 @@ export default createRouteBundle({
   '/genetics-card-summary': GeneticCard,
   '/last-location': LastLocation,
   '/logout': Logout,
-  '/map': Map,
+  '/map': MoRiverMap,
   '/multiple-record-approval': MultipleRecordApproval,
   '/priority-fish': PriorityFish,
   '/search-reports': SearchReports,

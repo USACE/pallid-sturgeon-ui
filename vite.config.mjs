@@ -61,5 +61,14 @@ export default ({ mode }) => {
         '@hooks': '/src/customHooks',
       },
     },
+    server: {
+      proxy: {
+        '/psapi': {
+          target: 'http://localhost:701',
+          changeOrigin: true,
+          secure: false,
+        }
+      }
+    }
   });
 };
