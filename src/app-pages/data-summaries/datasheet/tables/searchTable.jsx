@@ -1,14 +1,40 @@
 import { connect } from 'redux-bundler-react';
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { AgGridReact } from 'ag-grid-react';
 import { mdiDownload } from '@mdi/js';
 
 import Button from '@components/button';
 import Icon from '@components/icon/icon';
 
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
+import { defaultColDef } from '@src/utils/helpers';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+
+const columnDefs = [
+  { field: 'year' },
+  { field: 'fieldOffice' },
+  { field: 'projectId' },
+  { field: 'segmentId' },
+  { field: 'season' },
+  { field: 'bend' },
+  { field: 'bendRiverMile' },
+  { field: 'bendrn', headerName: 'Bend R/N' },
+  { field: 'seId', headerName: 'Search Effort ID' },
+  { field: 'searchDate', valueGetter: (params) => dateFormatter(params.data.searchDate) },
+  { field: 'searchDay' },
+  { field: 'recorder' },
+  { field: 'searchTypeCode' },
+  { field: 'startTime' },
+  { field: 'startLattitude' },
+  { field: 'startLongitude' },
+  { field: 'stopTime' },
+  { field: 'stopLattitude' },
+  { field: 'stopLongitude' },
+  { field: 'temp' },
+  { field: 'conductivity' },
+  { field: 'checkby' },
+];
 
 const SearchTable = connect(
   'doFetchAllDatasheet',
@@ -27,40 +53,7 @@ const SearchTable = connect(
           handleClick={() => doFetchAllDatasheet('search-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact
-            rowData={data}
-            defaultColDef={{
-              width: 150,
-            }}
-          >
-            <AgGridColumn field='year' sortable unSortIcon />
-            <AgGridColumn field='fieldoffice' sortable unSortIcon />
-            <AgGridColumn field='projectId' sortable unSortIcon />
-            <AgGridColumn field='segmentId' sortable unSortIcon />
-            <AgGridColumn field='season' sortable unSortIcon />
-            <AgGridColumn field='bend' sortable unSortIcon />
-            <AgGridColumn field='bendRiverMile' sortable unSortIcon />
-            <AgGridColumn field='bendrn' sortable unSortIcon />
-            <AgGridColumn field='seId' headerName='Search Effort ID' sortable unSortIcon />
-            <AgGridColumn
-              field='searchDate'
-              valueGetter={(params) => dateFormatter(params.data.searchDate)}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='searchDay' sortable unSortIcon />
-            <AgGridColumn field='recorder' sortable unSortIcon />
-            <AgGridColumn field='searchTypeCode' sortable unSortIcon />
-            <AgGridColumn field='startTime' sortable unSortIcon />
-            <AgGridColumn field='startLattitude' sortable unSortIcon />
-            <AgGridColumn field='startLongitude' sortable unSortIcon />
-            <AgGridColumn field='stopTime' sortable unSortIcon />
-            <AgGridColumn field='stopLattitude' sortable unSortIcon />
-            <AgGridColumn field='stopLongitude' sortable unSortIcon />
-            <AgGridColumn field='temp' sortable unSortIcon />
-            <AgGridColumn field='conductivity' sortable unSortIcon />
-            <AgGridColumn field='checkby' sortable unSortIcon />
-          </AgGridReact>
+          <AgGridReact rowData={data} defaultColDef={defaultColDef} columnDefs={columnDefs} />
         </div>
       </>
     );

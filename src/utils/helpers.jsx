@@ -12,3 +12,5 @@ export const formatDate = (dateStr) => {
   }
   return dateStr;
 };
+
+export const defaultColDef = { width: 150, sortable: true, unSortIcon: true };

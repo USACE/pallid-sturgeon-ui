@@ -1,12 +1,40 @@
 import { connect } from 'redux-bundler-react';
-import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
-import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
+import { AgGridReact } from 'ag-grid-react';
 
 import Pagination from '@components/pagination';
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+
+const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
+
+const frameworkComponents = { mrIdCellRenderer: MrIdCellRenderer };
+
+const columnDefs = [
+  {
+    field: 'mrId',
+    headerName: 'MR ID',
+    cellRenderer: 'mrIdCellRenderer',
+    cellRendererParams: {
+      uri: '/sites-list/datasheet/missouriRiver-edit',
+      type: 'missouriRiver',
+    },
+  },
+  { field: 'fId', headerName: 'Fish ID' },
+  { field: 'psb', width: 400, resizable: true },
+  { field: 'year' },
+  { field: 'fieldoffice', headerName: 'Field Office', width: 120, resizable: true },
+  { field: 'segmentId', headerName: 'Segment', width: 120 },
+  { field: 'bend' },
+  { field: 'bendrn', headerName: 'Bend R/N' },
+  { field: 'bendrivermile', width: 150 },
+  { field: 'panelhook', headerName: 'Panel/Hook', width: 120 },
+  { field: 'recorder' },
+  { field: 'subsample', width: 120 },
+  { field: 'gear' },
+  { field: 'fishcount' },
+];
 
 const BafiDataTable = connect(
   'doSetHomePagination',
@@ -16,66 +44,19 @@ const BafiDataTable = connect(
 
     return (
       <>
-        <div
-          className='ag-theme-balham'
-          style={{ height: '600px', width: '100%' }}
-        >
+        <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
+            defaultColDef={defaultColDef}
             rowData={data}
-            frameworkComponents={{
-              mrIdCellRenderer: MrIdCellRenderer,
-            }}
-          >
-            <AgGridColumn
-              field='mrId'
-              width={100}
-              cellRenderer='mrIdCellRenderer'
-              cellRendererParams={{
-                uri: '/sites-list/datasheet/missouriRiver-edit',
-                type: 'missouriRiver',
-              }}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='fId' width={100} sortable unSortIcon />
-            <AgGridColumn
-              field='psb'
-              width={400}
-              resizable
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='year' width={100} sortable unSortIcon />
-            <AgGridColumn
-              field='fieldoffice'
-              width={120}
-              resizable
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='segmentId' width={120} sortable unSortIcon />
-            <AgGridColumn field='bend' width={100} sortable unSortIcon />
-            <AgGridColumn field='bendrn' width={100} sortable unSortIcon />
-            <AgGridColumn
-              field='bendrivermile'
-              width={150}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='panelhook' width={120} sortable unSortIcon />
-            <AgGridColumn field='recorder' width={100} sortable unSortIcon />
-            <AgGridColumn field='subsample' width={120} sortable unSortIcon />
-            <AgGridColumn field='gear' width={100} sortable unSortIcon />
-            <AgGridColumn field='fishcount' width={100} sortable unSortIcon />
-          </AgGridReact>
+            frameworkComponents={frameworkComponents}
+            columnDefs={columnDefs}
+          />
         </div>
         <Pagination
           className='mt-2'
           itemCount={totalResults}
           defaultItemsPerPage='100'
-          handlePageChange={(pageNumber, pageSize) =>
-            doSetHomePagination({ pageSize, pageNumber })
-          }
+          handlePageChange={(pageNumber, pageSize) => doSetHomePagination({ pageSize, pageNumber })}
         />
       </>
     );

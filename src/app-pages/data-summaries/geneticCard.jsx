@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { AgGridReact } from 'ag-grid-react';
 import { mdiDownload, mdiHelpCircle } from '@mdi/js';
 
 import Button from '@components/button';
@@ -12,6 +12,7 @@ import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { dropdownYearsToNow } from '@src/utils';
 import { Input } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { defaultColDef } from '@src/utils/helpers';
 
 const yesNoOptions = [
   { value: 0, text: 'No' },
@@ -23,6 +24,22 @@ const breadcrumbLinks = [
     text: 'Genetic Card Summary',
     current: true,
   },
+];
+
+const columnDefs = [
+  { field: 'fieldOffice' },
+  { field: 'projectCode', headerName: 'Project' },
+  { field: 'sturgeonType' },
+  { field: 'geneticVialNum', headerName: 'Genetic Vial #' },
+  { field: 'pittag', headerName: 'Pit Tag #' },
+  { field: 'river' },
+  { field: 'riverMile' },
+  { field: 'state' },
+  { field: 'date', valueGetter: (params) => dateFormatter(params.data.date) },
+  { field: 'broodstock' },
+  { field: 'hatchwild', headerName: 'Hatch/Wild' },
+  { field: 'speciesId' },
+  { field: 'archive' },
 ];
 
 export default connect(
@@ -145,27 +162,7 @@ export default connect(
               handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
             />
             <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
-              <AgGridReact
-                rowData={geneticCardSummaryData}
-                defaultColDef={{
-                  width: 125,
-                }}
-              >
-                <AgGridColumn field='year' />
-                <AgGridColumn field='fieldOffice' sortable unSortIcon />
-                <AgGridColumn field='projectCode' headerName='project' sortable unSortIcon />
-                <AgGridColumn field='sturgeonType' sortable unSortIcon />
-                <AgGridColumn field='geneticVialNum' headerName='Genetic Vial #' sortable unSortIcon />
-                <AgGridColumn field='pittag' headerName='Pit Tag #' sortable unSortIcon />
-                <AgGridColumn field='river' sortable unSortIcon />
-                <AgGridColumn field='riverMile' sortable unSortIcon />
-                <AgGridColumn field='state' sortable unSortIcon />
-                <AgGridColumn field='date' sortable unSortIcon />
-                <AgGridColumn field='broodstock' headerName='Broodstock?' sortable unSortIcon />
-                <AgGridColumn field='hatchwild' headerName='Hatch/Wild?' sortable unSortIcon />
-                <AgGridColumn field='speciesId' headerName='Species Id?' sortable unSortIcon />
-                <AgGridColumn field='archive' sortable unSortIcon />
-              </AgGridReact>
+              <AgGridReact rowData={geneticCardSummaryData} defaultColDef={defaultColDef} columnDefs={columnDefs} />
               <Pagination
                 className='mt-3'
                 itemCount={totalResults}

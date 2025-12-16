@@ -1,12 +1,31 @@
 import { connect } from 'redux-bundler-react';
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { AgGridReact } from 'ag-grid-react';
 import { mdiDownload } from '@mdi/js';
 
 import Button from '@components/button';
 import Icon from '@components/icon/icon';
 
+import { defaultColDef } from '@src/utils/helpers';
+
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+
+const columnDefs = [
+  { field: 'uniqueID' },
+  { field: 'fishId', headerName: 'Fish ID' },
+  { field: 'year' },
+  { field: 'fieldOffice' },
+  { field: 'project' },
+  { field: 'segment' },
+  { field: 'season' },
+  { field: 'bend' },
+  { field: 'bendrn', headerName: 'Bend R/N' },
+  { field: 'bendRiverMile' },
+  { field: 'panelhook', headerName: 'Panel/Hook' },
+  { field: 'species' },
+  { field: 'hatcheryOrigin' },
+  { field: 'checkedby' },
+];
 
 const FishTable = connect(
   'doFetchAllDatasheet',
@@ -25,27 +44,7 @@ const FishTable = connect(
           handleClick={() => doFetchAllDatasheet('fish-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact
-            rowData={data}
-            defaultColDef={{
-              width: 150,
-            }}
-          >
-            <AgGridColumn field='uniqueID' sortable unSortIcon />
-            <AgGridColumn field='fishId' headerName='Fish ID' sortable unSortIcon />
-            <AgGridColumn field='year' />
-            <AgGridColumn field='fieldOffice' sortable unSortIcon />
-            <AgGridColumn field='project' />
-            <AgGridColumn field='segment' />
-            <AgGridColumn field='season' />
-            <AgGridColumn field='bend' />
-            <AgGridColumn field='bendrn' headerName='Bend R/N' />
-            <AgGridColumn field='bendRiverMile' />
-            <AgGridColumn field='panelhook' headerName='Panel/Hook' />
-            <AgGridColumn field='species' />
-            <AgGridColumn field='hatcheryOrigin' />
-            <AgGridColumn field='checkedby' />
-          </AgGridReact>
+          <AgGridReact rowData={data} defaultColDef={defaultColDef} columnDefs={columnDefs} />
         </div>
       </>
     );

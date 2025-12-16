@@ -1,13 +1,45 @@
 import { connect } from 'redux-bundler-react';
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { AgGridReact } from 'ag-grid-react';
 import { mdiDownload } from '@mdi/js';
 
 import Button from '@components/button';
 import Icon from '@components/icon/icon';
 
+import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
+import { defaultColDef } from '@src/utils/helpers';
+
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
-import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
+
+const columnDefs = [
+  { field: 'year' },
+  { field: 'fieldOffice' },
+  { field: 'project' },
+  { field: 'segment' },
+  { field: 'season' },
+  { field: 'bend' },
+  { field: 'tId', headerName: 'Telemetry ID' },
+  { field: 'seId', headerName: 'Search Effort ID' },
+  { field: 'siteId', headerName: 'Site ID' },
+  { field: 'searchDate', valueGetter: (params) => dateFormatter(params.data.searchDate) },
+  { field: 'searchDay' },
+  { field: 'radioTagNum', headerName: 'Radio Tag Number' },
+  { field: 'frequencyIdCode', headerName: 'Frequency' },
+  { field: 'captureTime' },
+  { field: 'captureLatitude' },
+  { field: 'captureLongitude' },
+  { field: 'positionConfidence' },
+  { field: 'macroId', headerName: 'Macro' },
+  { field: 'mesoId', headerName: 'Meso' },
+  { field: 'depth' },
+  { field: 'temp' },
+  { field: 'conductivity' },
+  { field: 'turbidity' },
+  { field: 'silt' },
+  { field: 'sand' },
+  { field: 'gravel' },
+  { field: 'comments' },
+];
 
 const TelemetryTable = connect(
   'doFetchAllDatasheet',
@@ -26,45 +58,7 @@ const TelemetryTable = connect(
           handleClick={() => doFetchAllDatasheet('telemetry-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact
-            rowData={data}
-            defaultColDef={{
-              width: 150,
-            }}
-          >
-            <AgGridColumn field='year' sortable unSortIcon />
-            <AgGridColumn field='fieldOffice' sortable unSortIcon />
-            <AgGridColumn field='project' sortable unSortIcon />
-            <AgGridColumn field='segment' sortable unSortIcon />
-            <AgGridColumn field='season' sortable unSortIcon />
-            <AgGridColumn field='bend' sortable unSortIcon />
-            <AgGridColumn headerName='Telemetry ID' field='tId' sortable unSortIcon />
-            <AgGridColumn headerName='Search Effort ID' field='seId' sortable unSortIcon />
-            <AgGridColumn headerName='Site ID' field='siteId' sortable unSortIcon />
-            <AgGridColumn
-              field='searchDate'
-              valueGetter={(params) => dateFormatter(params.data.searchDate)}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='searchDay' sortable unSortIcon />
-            <AgGridColumn headerName='Radio Tag Number' field='radioTagNum' sortable unSortIcon />
-            <AgGridColumn headerName='Frequency' field='frequencyIdCode' sortable unSortIcon />
-            <AgGridColumn field='captureTime' sortable unSortIcon />
-            <AgGridColumn field='captureLatitude' sortable unSortIcon />
-            <AgGridColumn field='captureLongitude' sortable unSortIcon />
-            <AgGridColumn field='positionConfidence' sortable unSortIcon />
-            <AgGridColumn field='macroId' sortable unSortIcon />
-            <AgGridColumn field='mesoId' sortable unSortIcon />
-            <AgGridColumn field='depth' sortable unSortIcon />
-            <AgGridColumn field='temp' sortable unSortIcon />
-            <AgGridColumn field='conductivity' sortable unSortIcon />
-            <AgGridColumn field='turbidity' sortable unSortIcon />
-            <AgGridColumn field='silt' sortable unSortIcon />
-            <AgGridColumn field='sand' sortable unSortIcon />
-            <AgGridColumn field='gravel' sortable unSortIcon />
-            <AgGridColumn field='comments' sortable unSortIcon />
-          </AgGridReact>
+          <AgGridReact rowData={data} defaultColDef={defaultColDef} columnDefs={columnDefs} />
         </div>
       </>
     );

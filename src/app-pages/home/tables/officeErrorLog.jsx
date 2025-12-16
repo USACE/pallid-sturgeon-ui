@@ -1,62 +1,33 @@
 import { connect } from 'redux-bundler-react';
-import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
-import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
+import { AgGridReact } from 'ag-grid-react';
 
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
+
+import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
-const OfficeErrorLogTable = connect(
-  'selectErrorLogData',
-  ({ errorLogData }) => (
-    <>
-      <div
-        className='ag-theme-balham'
-        style={{ height: '600px', width: '100%' }}
-      >
-        <AgGridReact
-          rowData={errorLogData}
-          frameworkComponents={{
-            mrIdCellRenderer: MrIdCellRenderer,
-          }}
-        >
-          <AgGridColumn field='elId' width={100} sortable unSortIcon />
-          <AgGridColumn
-            field='errorEntryDate'
-            width={150}
-            sortable
-            unSortIcon
-          />
-          <AgGridColumn
-            field='errorDescription'
-            width={350}
-            resizable
-            sortable
-            unSortIcon
-          />
-          <AgGridColumn field='errorFixed' width={130} sortable unSortIcon />
-          <AgGridColumn field='siteId' width={100} sortable unSortIcon />
-          <AgGridColumn field='year' width={100} sortable unSortIcon />
-          <AgGridColumn field='worksheetId' width={130} sortable unSortIcon />
-          <AgGridColumn
-            field='worksheetTypeId'
-            width={150}
-            sortable
-            unSortIcon
-          />
-          <AgGridColumn field='fieldId' width={100} sortable unSortIcon />
-          <AgGridColumn field='formId' width={100} sortable unSortIcon />
-          <AgGridColumn
-            field='errorFixedDate'
-            width={150}
-            sortable
-            unSortIcon
-          />
-        </AgGridReact>
-      </div>
-    </>
-  )
-);
+const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
+
+const columnDefs = [
+  { field: 'elId', headerName: 'Error Log ID' },
+  { field: 'errorEntryDate', width: 150, valueGetter: (params) => dateFormatter(params.data.errorEntryDate) },
+  { field: 'errorDescription', width: 350, resizable: true },
+  { field: 'errorFixed', width: 130 },
+  { field: 'siteId', headerName: 'Site ID' },
+  { field: 'year' },
+  { field: 'worksheetId', headerName: 'Worksheet ID' },
+  { field: 'worksheetTypeId', headerName: 'Worksheet Type ID' },
+  { field: 'fieldId', headerName: 'Field ID' },
+  { field: 'formId', headerName: 'Form ID' },
+  { field: 'errorFixedDate', width: 150, valueGetter: (params) => dateFormatter(params.data.errorFixedDate) },
+];
+
+const OfficeErrorLogTable = connect('selectErrorLogData', ({ errorLogData }) => (
+  <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
+    <AgGridReact defaultColDef={defaultColDef} rowData={errorLogData} columnDefs={columnDefs} />
+  </div>
+));
 
 export default OfficeErrorLogTable;
