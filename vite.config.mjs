@@ -37,6 +37,13 @@ export default ({ mode }) => {
     server: {
       open: true,
       port: 3000,
+      proxy: {
+        '/psapi': {
+          target: 'http://localhost:701',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     test: {
       globals: true,
@@ -61,14 +68,5 @@ export default ({ mode }) => {
         '@hooks': '/src/customHooks',
       },
     },
-    server: {
-      proxy: {
-        '/psapi': {
-          target: 'http://localhost:701',
-          changeOrigin: true,
-          secure: false,
-        }
-      }
-    }
   });
 };

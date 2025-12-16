@@ -4,24 +4,30 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { connect } from 'redux-bundler-react';
 
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
 /**
  * useEffect -> renders maps
  * useRef -> stores references to DOM w/o re-rendering
  * L -> Leaflet global namespace
  */
-const TEST_MR_FID = '20220510-125356339-038';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: markerIcon2x,
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 const MoRiverMap = connect(
   'selectAuthToken',
   'selectApiRoot',
-  // 'doFetchMoRiverDataEntry',
-  // 'selectDataEntryData',
   ({ authToken, apiRoot }) => {
     const containerRef = useRef(null); // points to div that Leaflet renders map onto
     const instanceRef = useRef(null); // stores Leaflet map instance
     const markerLayerRef = useRef(null); // holds marker
-
-    // const [markerRows, setMarkerRows] = useState([]);
 
     useEffect(() => {
       if (!containerRef.current || instanceRef.current) return;
@@ -37,34 +43,40 @@ const MoRiverMap = connect(
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
 
-      //tileLayer -> defines where to pull map tiles
-      // {s} subdomain, {z} zoom, {x} tile row, {y} tile column placeholders
-      // .addTo(map) -> places layer into map
-
       markerLayerRef.current = L.layerGroup().addTo(map);
 
       return () => {
         map.remove();
         instanceRef.current = null;
+        markerLayerRef.current = null;
       };
     }, []);
     // remove map if component unmounts
 
     useEffect(() => {
-      //debugger;
-      fetch('/__map_probe__').catch(() => {});
-      if (!authToken || !instanceRef.current || !markerLayerRef.current) return;
+      const map = instanceRef.current;
+      const layer = markerLayerRef.current;
 
-      if (!instanceRef.current) console.warn('[MoRiverMap] map not ready yet');
-      if (!markerLayerRef.current) console.warn('[MoRiverMap] marker layer not ready yet');
-      if (!authToken) console.warn('[MoRiverMap] no auth token yet');
+      if (!map || !layer) return;
+
+      const testLatitude = 35.4689;
+      const testLongitude = -97.52;
+
+      layer.clearLayers();
+      L.circleMarker([testLatitude, testLongitude], { radius: 20 }).bindPopup('TEST MARKER').addTo(layer);
+
+      if (!authToken) {
+        console.warn('[MoRiverMap] no auth token yet - showing test marker only');
+        return;
+      }
 
       const base = apiRoot && typeof apiRoot === 'string' ? apiRoot : 'http://localhost:701';
-      // const qs = TEST_YEAR ? `?year=${encodeURIComponent(TEST_YEAR)}` : '';
-      const url = `${base}/psapi/moriverDataEntry?fieldId=${encodeURIComponent(TEST_MR_FID)}&page=0&pageSize=500`;
+      const url = `${base}/psapi/moriverLocations?page=0&pageSize=5000`;
 
       const run = async () => {
         try {
+          console.log('[MoRiverMap] fetching:', url);
+
           const res = await fetch(url, {
             method: 'GET',
             headers: {
@@ -75,70 +87,77 @@ const MoRiverMap = connect(
 
           if (!res.ok) {
             const errText = await res.text();
-            console.error('[MoRiverMap] marker fetch failed', {
+            console.error('[MoRiverMap] locations fetch failed', {
               status: res.status,
               url,
               errText: errText.slice(0, 800),
             });
-            throw new Error(`MoRiver list fetch failed: ${res.status}`);
+            return;
           }
 
           const json = await res.json();
-
-          const rows = json?.items ?? [];
-
-          console.log('[MoRiverMap] rows:', rows.length);
-          console.log('[MoRiverMap] sample row:', rows[0]);
-
-          //   setMarkerRows(Array.isArray(items) ? items : []);
-          // } catch (e) {
-          //   console.error('[MoRiverMap] Failed to load marker rows:', e);
-          //   setMarkerRows([]);
-          // }
-
-          // doFetchMoRiverDataEntry({ tableId: 240861 }, false, true, true);
-
-          const layer = markerLayerRef.current;
-          layer.clearLayers();
-
-          // const rows = Array.isArray(dataEntryData) ? dataEntryData : [dataEntryData];
+          const rows = json?.data?.items || json?.items || [];
+          console.log('[MoRiverMap] rows:', rows.length, rows[0]);
 
           const bounds = [];
+          let added = 0;
 
-          rows.forEach((r) => {
-            const lat = r.startlatitude;
-            const lng = r.startlongitude;
+          (rows || [])
+            .filter((r) => {
+              const lat = Number(r.startlatitude);
+              const lng = Number(r.startlongitude);
+              return Number.isFinite(lat) && Number.isFinite(lng) && lat > 0 && lng < 0;
+            })
+            .slice(0, 100)
+            .forEach((r) => {
+              const lat = Number(r.startlatitude);
+              const lng = Number(r.startlongitude);
 
-            if (lat == null || lng == null) {
-              console.warn('[MoRiverMap] missing lat/lng for mr_id:', r.mr_id, { lat, lng });
-              return;
-            }
-            // const mrId = r.mr_id ?? '';
-            // const siteId = r.site_id ?? '';
-            // const fieldOffice = r.fieldoffice ?? '';
-            // const year = r.setdate ? String(r.setdate).slice(0, 4) : '';
+              const mrId = r.mrId ?? '';
+              const siteId = r.siteId ?? '';
+              const fieldOffice = r.fieldOffice ?? r.fieldoffice ?? '';
+              const year = r.setdate ? String(r.setdate).slice(0, 4) : '';
 
-            const marker = L.marker([Number(lat), Number(lng)], { radius: 40 });
+              const m = L.marker([lat, lng]);
 
-            marker.bindTooltip(
-              `mrId: ${r.mrId}<br/>siteId: ${r.siteId}<br/>office: ${r.fieldOffice}<br/>year: ${
-                r.setdate ? String(r.setdate).slice(0, 4) : ''
-              }`,
-              { sticky: true }
-            );
+              m.bindTooltip(
+                `<div style="font-size:12px; line-height:1.3">
+              <div><b>MRID: </b>${mrId}</div>
+              <div><b>Site Id: </b>${siteId}</div>
+              <div><b>Office: </b>${fieldOffice}</div>
+              <div><b>Year: </b>${year}</div>
+              </div>`,
+                {
+                  sticky: true,
+                  direction: 'top',
+                  opacity: 0.95,
+                }
+              );
 
-            marker.bindPopup(`
-                <div style="min-width:220px>
-                <div><b>Missouri River Location</b></div>
-                <div>mrId: ${r.mrId}</div>
-                <div>siteId: ${r.siteId}</div>
-                <div>fieldOffice: ${r.fieldOffice}</div>
-                <div>year: ${r.setdate ? String(r.setdate).slice(0, 4) : ''}</div>
-                </div>`);
+              m.bindPopup(`
+                <div style="min-width:240px; font-family: Arial, sans-serif;">
+                <div style="font-size:14px; font-weight:700; margin-bottom:6px;">
+                Missouri River Location
+                </div>
 
-            marker.addTo(layer);
-            bounds.push([Number(lat), Number(lng)]);
-          });
+              <div style="display:grid; grid-template-columns:90px 1fr; gap:4px 8px; font-size:12px;">
+              <div style="opacity:0.7;">MRID: </div><div>${mrId}</div>
+              <div style="opacity:0.7;">Site Id: </div><div>${siteId}</div>
+              <div style="opacity:0.7;">Office: </div><div>${fieldOffice}</div>
+              <div style="opacity:0.7;">Year: </div><div>${year}</div>
+              </div>
+              
+              <hr style="margin:8px 0; opacity:0.3;" />
+              
+              <div style="font-size:11px; opacity:0.75;">
+              Note: click "Download office" (coming soon) to cache markers for offline
+              </div>
+              </div>`);
+
+              m.addTo(layer);
+              bounds.push([lat, lng]);
+              added++;
+            });
 
           if (bounds.length === 1) {
             map.setView(bounds[0], 12);
@@ -154,11 +173,8 @@ const MoRiverMap = connect(
     }, [authToken, apiRoot]);
 
     return (
-      <div style={{ border: '3px solid red', padding: 8 }}>
-        <b>MoRiverMap mounted</b>
-        <div style={{ height: '600px', width: '100%' }}>
-          <div ref={containerRef} style={{ height: '100%', width: '100%' }} />
-        </div>
+      <div style={{ height: '600px', width: '100%' }}>
+        <div ref={containerRef} style={{ height: '100%', width: '100%' }} />
       </div>
     );
   }
