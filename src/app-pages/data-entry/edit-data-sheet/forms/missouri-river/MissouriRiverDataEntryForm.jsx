@@ -37,8 +37,6 @@ const MissouriRiverDataEntryForm = connect(
     const [gearCodeOptions, setGearCodeOptions] = useState(gearCodes);
     const [mesoOptions, setMesoOptions] = useState(mesos);
 
-    console.warn('baseData: ', baseData);
-
     const getSeasonGearOfficeOptions = (season, fieldOffice, project) => {
       const options = filteredGearCodes.filter(
         (item) => item.fieldOfficeCode === fieldOffice && item.seasonCode === season && item.projectCode === project
@@ -108,8 +106,19 @@ const MissouriRiverDataEntryForm = connect(
       setSite2: yup.string().nullable(),
       setSite3: yup.string().nullable(),
       startTime: yup.string().required(ValidationMessages.FieldRequired),
-      startlatitude: yup.number().required(ValidationMessages.FieldRequired),
-      startlongitude: yup.number().required(ValidationMessages.FieldRequired),
+      startlatitude: yup
+        .number()
+        .required(ValidationMessages.FieldRequired)
+        .test('latitude-test', 'Value must be between 36 and 50 or 0', function (value) {
+          return (value >= 36 && value <= 50) || value === 0;
+        })
+        .nullable(),
+      startlongitude: yup
+        .number()
+        .required(ValidationMessages.FieldRequired)
+        .test('longitude-test', 'Value must be between -115 and -90 or 0', function (value) {
+          return (value >= -115 && value <= -90) || value === 0;
+        }),
       u1: yup.string().nullable(),
       u2: yup.string().nullable(),
       u3: yup.string().nullable(),
