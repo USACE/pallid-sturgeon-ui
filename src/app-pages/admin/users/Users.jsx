@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { AgGridReact } from 'ag-grid-react';
 import { mdiAccountPlus } from '@mdi/js';
 
 import AddUserFormModal from './AddUserModal';
@@ -15,11 +15,58 @@ import Icon from '@components/icon/icon';
 
 import { rolesList, fieldOfficeList, projectCodeList, NoRoleAccessMessage } from '../helper';
 import Breadcrumb from '@src/app-components/breadcrumb';
+import { defaultColDef } from '@src/utils/helpers';
 
 const breadcrumbLinks = [
   {
     text: 'Users',
     current: true,
+  },
+];
+
+const defaultColDefObj = { ...defaultColDef, editable: true, lockPinned: true };
+
+const frameworkComponents = {
+  editCellRenderer: EditCellRenderer,
+  fieldOfficeEditor: FieldOfficeEditor,
+  rolesEditor: RolesEditor,
+  projectEditor: ProjectEditor,
+};
+
+const columnDefs = [
+  {
+    field: 'edit',
+    width: 90,
+    pinned: true,
+    lockPosition: true,
+    cellRenderer: 'editCellRenderer',
+    cellRendererParams: { type: 'user' },
+    editable: false,
+  },
+  { field: 'firstName', editable: false },
+  { field: 'lastName', editable: false },
+  {
+    field: 'roleId',
+    headerName: 'Role',
+    cellEditor: 'rolesEditor',
+    cellEditorParams: { roles },
+    cellRenderer: (params) => rolesList[params.value],
+  },
+  {
+    field: 'officeId',
+    headerName: 'Field Office',
+    width: 300,
+    cellEditor: 'fieldOfficeEditor',
+    cellEditorParams: { fieldOffices, isId: true },
+    cellRenderer: (params) => fieldOfficeList[params.value],
+  },
+  {
+    field: 'projectCode',
+    headerName: 'Project',
+    width: 300,
+    cellEditor: 'projectEditor',
+    cellEditorParams: { projects },
+    cellRenderer: (params) => projectCodeList[params.value],
   },
 ];
 
@@ -75,56 +122,10 @@ export default connect(
                   rowData={usersData}
                   editType='fullRow'
                   onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
-                  defaultColDef={{
-                    width: 150,
-                    editable: true,
-                    lockPinned: true,
-                  }}
-                  frameworkComponents={{
-                    editCellRenderer: EditCellRenderer,
-                    fieldOfficeEditor: FieldOfficeEditor,
-                    rolesEditor: RolesEditor,
-                    projectEditor: ProjectEditor,
-                  }}
-                >
-                  <AgGridColumn
-                    field='edit'
-                    width={90}
-                    pinned
-                    lockPosition
-                    cellRenderer='editCellRenderer'
-                    cellRendererParams={{
-                      type: 'user',
-                    }}
-                    editable={false}
-                  />
-                  <AgGridColumn field='firstName' editable={false} />
-                  <AgGridColumn field='lastName' editable={false} />
-                  <AgGridColumn field='email' width={250} editable={false} />
-                  <AgGridColumn
-                    field='roleId'
-                    headerName='Role'
-                    cellEditor='rolesEditor'
-                    cellEditorParams={{ roles }}
-                    cellRenderer={(params) => rolesList[params.value]}
-                  />
-                  <AgGridColumn
-                    field='officeId'
-                    headerName='Field Office'
-                    width={300}
-                    cellEditor='fieldOfficeEditor'
-                    cellEditorParams={{ fieldOffices, isId: true }}
-                    cellRenderer={(params) => fieldOfficeList[params.value]}
-                  />
-                  <AgGridColumn
-                    field='projectCode'
-                    headerName='Project'
-                    width={300}
-                    cellEditor='projectEditor'
-                    cellEditorParams={{ projects }}
-                    cellRenderer={(params) => projectCodeList[params.value]}
-                  />
-                </AgGridReact>
+                  defaultColDef={defaultColDefObj}
+                  frameworkComponents={frameworkComponents}
+                  columnDefs={columnDefs}
+                />
               </div>
             </Card.Body>
           </Card>

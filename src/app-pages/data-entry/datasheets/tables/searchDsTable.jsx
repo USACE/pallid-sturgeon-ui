@@ -1,5 +1,5 @@
 import { connect } from 'redux-bundler-react';
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { AgGridReact } from 'ag-grid-react';
 import { mdiDownload, mdiPlus } from '@mdi/js';
 
 import Button from '@components/button';
@@ -8,10 +8,44 @@ import Icon from '@components/icon/icon';
 import SearchIdCellRenderer from '@common/gridCellRenderers/searchIdCellRenderer';
 
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { defaultColDef } from '@src/utils/helpers';
 
 const telemetryCellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
 });
+
+const frameworkComponents = { searchIdCellRenderer: SearchIdCellRenderer };
+
+const columnDefs = [
+  {
+    field: 'seID',
+    headerName: 'SE ID',
+    width: 100,
+    cellRenderer: 'searchIdCellRenderer',
+    cellRendererParams: { type: 'searchEffort' },
+  },
+  {
+    field: 'telemetryCount',
+    headerName: 'Telemetry',
+    width: 130,
+    cellStyle: telemetryCellStyle,
+    cellRenderer: 'searchIdCellRenderer',
+    cellRendererParams: { type: 'telemetry', tab: 1 },
+  },
+  { field: 'searchTypeCode' },
+  { field: 'startTime', width: 100 },
+  { field: 'startLatitude', headerName: 'fId' },
+  { field: 'startLongitude', headerName: 'mrSiteId' },
+  { field: 'stopTime', width: 100 },
+  { field: 'stopLatitude' },
+  { field: 'stopLongitude' },
+  { field: 'temp', width: 100 },
+  { field: 'conductivity', width: 125 },
+  { field: 'recorder', width: 100 },
+  { field: 'editInitials', width: 125 },
+  { field: 'lastEditComment', width: 200 },
+  { field: 'uploadedBy', width: 200 },
+];
 
 const SearchDsTable = connect(
   'doUpdateUrl',
@@ -57,50 +91,10 @@ const SearchDsTable = connect(
           <AgGridReact
             rowHeight={35}
             rowData={searchEffortSitesDatasheetData}
-            defaultColDef={{
-              width: 100,
-            }}
-            frameworkComponents={{
-              searchIdCellRenderer: SearchIdCellRenderer,
-            }}
-          >
-            <AgGridColumn
-              field='seId'
-              headerName='SE ID'
-              cellRenderer='searchIdCellRenderer'
-              cellRendererParams={{
-                type: 'searchEffort',
-              }}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='telemetryCount'
-              headerName='Telemetry'
-              width={130}
-              cellStyle={telemetryCellStyle}
-              cellRenderer='searchIdCellRenderer'
-              cellRendererParams={{
-                type: 'telemetry',
-                tab: 1,
-              }}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='searchTypeCode' width={150} sortable unSortIcon />
-            <AgGridColumn field='startTime' sortable unSortIcon />
-            <AgGridColumn field='startLatitude' width={150} sortable unSortIcon />
-            <AgGridColumn field='startLongitude' width={150} sortable unSortIcon />
-            <AgGridColumn field='stopTime' sortable unSortIcon />
-            <AgGridColumn field='stopLatitude' width={150} sortable unSortIcon />
-            <AgGridColumn field='stopLongitude' width={150} sortable unSortIcon />
-            <AgGridColumn field='temp' sortable unSortIcon />
-            <AgGridColumn field='conductivity' width={125} sortable unSortIcon />
-            <AgGridColumn field='recorder' sortable unSortIcon />
-            <AgGridColumn field='editInitials' width={125} sortable unSortIcon />
-            <AgGridColumn field='lastEditComment' width={200} sortable unSortIcon />
-            <AgGridColumn field='uploadedBy' width={200} sortable unSortIcon />
-          </AgGridReact>
+            defaultColDef={defaultColDef}
+            frameworkComponents={frameworkComponents}
+            columnDefs={columnDefs}
+          />
         </div>
       </>
     );

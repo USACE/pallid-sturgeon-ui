@@ -25,6 +25,17 @@ import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 import { tabToNextCell } from './helpers';
+import { defaultColDef } from '@src/utils/helpers';
+
+const defaultColDefObj = { ...defaultColDef, width: 100, editable: true };
+const frameworkComponents = {
+  editCellRenderer: EditCellRenderer,
+  selectEditor: SelectEditor,
+  numberEditor: NumberEditor,
+  floatEditor: FloatEditor,
+  textEditor: TextEditor,
+  suppLinkCellRenderer: SuppLinkCellRenderer,
+};
 
 const FishDsTable = connect(
   'doUpdateFishDataEntry',
@@ -58,6 +69,66 @@ const FishDsTable = connect(
       mrId: dataEntryLastParams.mrId,
     };
 
+    const columnDefs = [
+      {
+        field: 'Actions',
+        pinned: true,
+        lockPosition: true,
+        cellRenderer: 'editCellRenderer',
+        cellRendererParams: {
+          doModalOpen: doModalOpen,
+          setIsEditingRow: setIsEditingRow,
+          type: 'fish',
+        },
+        editable: false,
+      },
+      { field: 'fid', headerName: 'Fish ID', editable: false },
+      { field: 'ffid', headerName: 'Field ID', width: 200, resizable: true },
+      {
+        field: 'supplink',
+        headerName: 'Supp Link',
+        width: 130,
+        cellRenderer: 'suppLinkCellRenderer',
+        cellRendererParams: {
+          setIsAddRow: setIsAddRow,
+          setRowId: setRowId,
+        },
+        editable: false,
+      },
+      {
+        field: 'species',
+        cellEditor: 'selectEditor',
+        cellEditorParams: {
+          options: createMesoOptions(domainsSpecies),
+          isRequired: true,
+        },
+      },
+      { field: 'length', cellEditor: 'floatEditor' },
+      { field: 'weight', cellEditor: 'floatEditor' },
+      { field: 'countF', headerName: 'count', cellEditor: 'numberEditor' },
+      {
+        field: 'ftPrefix',
+        headerName: 'FT Prefix',
+        cellEditor: 'selectEditor',
+        cellEditorParams: {
+          options: createMesoOptions(domainsFtPrefixes),
+          isRequired: false,
+        },
+      },
+      {
+        field: 'mR',
+        headerName: 'M/R',
+        cellEditor: 'selectEditor',
+        cellEditorParams: {
+          options: createMesoOptions(domainsMr),
+          isRequired: false,
+        },
+      },
+      { field: 'floyTag', headerName: 'Floy Tag' },
+      { field: 'geneticsVialNumber', headerName: 'Genetics Vial #', width: 125 },
+      { field: 'condition', cellEditor: 'numberEditor', editable: false },
+    ];
+
     const addRow = useCallback(() => {
       gridRef.current.api.applyTransaction({ add: [{}] });
     }, []);
@@ -82,6 +153,15 @@ const FishDsTable = connect(
         }
       });
       gridRef.current.api.refreshCells({ columns: ['supplink'] });
+    };
+
+    const onRowValueChanged = ({ data }) => {
+      !data.fid
+        ? doSaveFishDataEntry({ ...initialState, ...data }, { mrId: dataEntryLastParams.mrId, id: userRole.id })
+        : doUpdateFishDataEntry(data, {
+            mrId: dataEntryLastParams.mrId,
+            id: userRole.id,
+          });
     };
 
     useEffect(() => {
@@ -137,29 +217,12 @@ const FishDsTable = connect(
             tabToNextCell={tabToNextCell}
             tabToPreviousCell={tabToNextCell}
             suppressClickEdit
-            defaultColDef={{
-              width: 100,
-              editable: true,
-            }}
+            defaultColDef={defaultColDefObj}
             editType='fullRow'
-            onRowValueChanged={({ data }) =>
-              !data.fid
-                ? doSaveFishDataEntry({ ...initialState, ...data }, { mrId: dataEntryLastParams.mrId, id: userRole.id })
-                : doUpdateFishDataEntry(data, {
-                    mrId: dataEntryLastParams.mrId,
-                    id: userRole.id,
-                  })
-            }
+            onRowValueChanged={onRowValueChanged}
             rowHeight={35}
             rowData={dataEntryFishData.items}
-            frameworkComponents={{
-              editCellRenderer: EditCellRenderer,
-              selectEditor: SelectEditor,
-              numberEditor: NumberEditor,
-              floatEditor: FloatEditor,
-              textEditor: TextEditor,
-              suppLinkCellRenderer: SuppLinkCellRenderer,
-            }}
+            frameworkComponents={frameworkComponents}
           >
             <AgGridColumn
               field='Actions'
