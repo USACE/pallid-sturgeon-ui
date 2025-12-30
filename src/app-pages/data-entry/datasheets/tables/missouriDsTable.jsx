@@ -24,7 +24,7 @@ const procCellStyle = (params) => ({
   backgroundColor: params.data.procBkgColor,
 });
 
-const frameworkComponents = {
+const components = {
   editCellRenderer: EditCellRenderer,
   mrIdCellRenderer: MrIdCellRenderer,
 };
@@ -119,7 +119,7 @@ const MissouriDsTable = connect(
             rowHeight={35}
             rowData={moriverSitesDatasheetData}
             defaultColDef={defaultColDef}
-            frameworkComponents={frameworkComponents}
+            components={components}
             columnDefs={columnDefs}
           />
         </div>

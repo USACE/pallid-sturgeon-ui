@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
-import { AgGridColumn, AgGridReact } from 'ag-grid-react';
+import { AgGridReact } from 'ag-grid-react';
 import { mdiContentCopy, mdiDownload, mdiPlus } from '@mdi/js';
 
 import Button from '@components/button';
@@ -21,14 +21,14 @@ import {
 import { createDropdownOptions, createMesoOptions } from '@pages/data-entry/helpers';
 import SuppLinkCellRenderer from '@common/gridCellRenderers/suppLinkCellRenderer';
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
-
-import '@pages/data-summaries/data-summary.scss';
-import '@pages/data-entry/dataentry.scss';
 import { tabToNextCell } from './helpers';
 import { defaultColDef } from '@src/utils/helpers';
 
+import '@pages/data-summaries/data-summary.scss';
+import '@pages/data-entry/dataentry.scss';
+
 const defaultColDefObj = { ...defaultColDef, width: 100, editable: true };
-const frameworkComponents = {
+const components = {
   editCellRenderer: EditCellRenderer,
   selectEditor: SelectEditor,
   numberEditor: NumberEditor,
@@ -127,6 +127,49 @@ const FishDsTable = connect(
       { field: 'floyTag', headerName: 'Floy Tag' },
       { field: 'geneticsVialNumber', headerName: 'Genetics Vial #', width: 125 },
       { field: 'condition', cellEditor: 'numberEditor', editable: false },
+      {
+        field: 'finCurl',
+        cellEditor: 'selectEditor',
+        cellEditorParams: { options: finCurlOptions, isRequired: false },
+      },
+      {
+        field: 'otolith',
+        cellEditor: 'selectEditor',
+        cellEditorParams: {
+          options: createDropdownOptions(domainsOtolith),
+          isRequired: false,
+        },
+      },
+      {
+        field: 'raySpine',
+        cellEditor: 'selectEditor',
+        cellEditorParams: { options: raySpineOptions, isRequired: false },
+      },
+      { field: 'KN', cellEditor: 'numberEditor', editable: false },
+      {
+        field: 'scale',
+        cellEditor: 'selectEditor',
+        cellEditorParams: { options: scaleOptions, isRequired: false },
+      },
+      { field: 'RSD', cellEditor: 'numberEditor', editable: false },
+      {
+        field: 'bait',
+        cellEditor: 'selectEditor',
+        cellEditorParams: { options: baitOptions, isRequired: false },
+      },
+      {
+        field: 'editInitials',
+        cellEditor: 'textEditor',
+        cellEditorParams: { isRequired: true },
+      },
+      {
+        field: 'lastEditComment',
+        cellEditor: 'textEditor',
+        cellEditorParams: { isRequired: true },
+        width: 200,
+        resizable: true,
+      },
+      { field: 'uploadedBy', width: 150, resizable: true, editable: false },
     ];
 
     const addRow = useCallback(() => {
@@ -222,108 +265,9 @@ const FishDsTable = connect(
             onRowValueChanged={onRowValueChanged}
             rowHeight={35}
             rowData={dataEntryFishData.items}
-            frameworkComponents={frameworkComponents}
-          >
-            <AgGridColumn
-              field='Actions'
-              width={100}
-              pinned
-              lockPosition
-              cellRenderer='editCellRenderer'
-              cellRendererParams={{
-                type: 'fish',
-                doModalOpen: doModalOpen,
-                setIsEditingRow: setIsEditingRow,
-              }}
-              editable={false}
-            />
-            <AgGridColumn field='fid' headerName='Fish ID' editable={false} />
-            <AgGridColumn field='ffid' headerName='Field ID' width={200} resizable sortable unSortIcon />
-            <AgGridColumn
-              field='supplink'
-              headerName='Supp Link'
-              width={130}
-              cellRenderer='suppLinkCellRenderer'
-              cellRendererParams={{
-                setIsAddRow: setIsAddRow,
-                setRowId: setRowId,
-              }}
-              editable={false}
-            />
-            <AgGridColumn field='panelHook' headerName='Panel Hook' />
-            <AgGridColumn
-              field='species'
-              cellEditor='selectEditor'
-              cellEditorParams={{
-                options: createMesoOptions(domainsSpecies),
-                isRequired: true,
-              }}
-            />
-            <AgGridColumn field='length' cellEditor='floatEditor' />
-            <AgGridColumn field='weight' cellEditor='floatEditor' />
-            <AgGridColumn field='countF' headerName='Count' cellEditor='numberEditor' />
-            <AgGridColumn
-              field='ftPrefix'
-              headerName='FT Prefix'
-              cellEditor='selectEditor'
-              cellEditorParams={{
-                options: createMesoOptions(domainsFtPrefixes),
-                isRequired: false,
-              }}
-            />
-            <AgGridColumn
-              field='mR'
-              headerName='M/R'
-              cellEditor='selectEditor'
-              cellEditorParams={{
-                options: createMesoOptions(domainsMr),
-                isRequired: false,
-              }}
-            />
-            <AgGridColumn field='floyTag' headerName='Floy Tag' />
-            <AgGridColumn field='geneticsVialNumber' width={125} headerName='Genetics Vial #' />
-            <AgGridColumn field='condition' cellEditor='numberEditor' editable={false} />
-            <AgGridColumn
-              field='finCurl'
-              cellEditor='selectEditor'
-              cellEditorParams={{ options: finCurlOptions, isRequired: false }}
-            />
-            <AgGridColumn
-              field='otolith'
-              cellEditor='selectEditor'
-              cellEditorParams={{
-                options: createDropdownOptions(domainsOtolith),
-                isRequired: false,
-              }}
-            />
-            <AgGridColumn
-              field='raySpine'
-              headerName='Ray Spine'
-              cellEditor='selectEditor'
-              cellEditorParams={{ options: raySpineOptions, isRequired: false }}
-            />
-            <AgGridColumn headerName='KN' cellEditor='numberEditor' editable={false} />
-            <AgGridColumn
-              field='scale'
-              cellEditor='selectEditor'
-              cellEditorParams={{ options: scaleOptions, isRequired: false }}
-            />
-            <AgGridColumn headerName='RSD' cellEditor='numberEditor' editable={false} />
-            <AgGridColumn
-              field='bait'
-              cellEditor='selectEditor'
-              cellEditorParams={{ options: baitOptions, isRequired: false }}
-            />
-            <AgGridColumn field='editInitials' cellEditor='textEditor' cellEditorParams={{ isRequired: true }} />
-            <AgGridColumn
-              field='lastEditComment'
-              cellEditor='textEditor'
-              cellEditorParams={{ isRequired: true }}
-              width={200}
-              resizable
-            />
-            <AgGridColumn field='uploadedBy' width={150} resizable editable={false} />
-          </AgGridReact>
+            components={components}
+            columnDefs={columnDefs}
+          />
         </div>
       </div>
     );

@@ -4,13 +4,13 @@ import { AgGridReact } from 'ag-grid-react';
 import Pagination from '@components/pagination';
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
 
 const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
 
-const frameworkComponents = { mrIdCellRenderer: MrIdCellRenderer };
+const components = { mrIdCellRenderer: MrIdCellRenderer };
 
 const columnDefs = [
   { field: 'ch', headerName: 'Error Log ID' },
@@ -35,7 +35,7 @@ const UnapprovedDataTable = connect(
     return (
       <>
         <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
-          <AgGridReact defaultColDef={defaultColDef} rowData={data} frameworkComponents={frameworkComponents} />
+          <AgGridReact defaultColDef={defaultColDef} rowData={data} components={components} />
           {/* <AgGridColumn field='ch' width={100} sortable unSortIcon />
             <AgGridColumn
               field='mrId'

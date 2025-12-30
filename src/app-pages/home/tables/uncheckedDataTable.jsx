@@ -4,11 +4,11 @@ import { AgGridReact } from 'ag-grid-react';
 import Pagination from '@components/pagination';
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 
 const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
-const frameworkComponents = { mrIdCellRenderer: MrIdCellRenderer };
+const components = { mrIdCellRenderer: MrIdCellRenderer };
 const missouriRiverFormUri = '/sites-list/datasheet/missouriRiver-edit';
 
 const columnDefs = [
@@ -44,12 +44,7 @@ const UncheckedDataTable = connect(
     return (
       <>
         <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
-          <AgGridReact
-            rowData={data}
-            frameworkComponents={frameworkComponents}
-            defaultColDef={defaultColDef}
-            columnDefs={columnDefs}
-          />
+          <AgGridReact rowData={data} components={components} defaultColDef={defaultColDef} columnDefs={columnDefs} />
         </div>
         <Pagination
           className='mt-2'

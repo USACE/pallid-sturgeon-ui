@@ -1,6 +1,7 @@
 import ReactDOM from 'react-dom';
 import { Provider } from 'redux-bundler-react';
 import { getNavHelper } from 'internal-nav-helper';
+import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
 
 import App from './App';
 import cache from './cache';
@@ -8,6 +9,8 @@ import getStore from './app-bundles';
 
 import '@trussworks/react-uswds/lib/uswds.css';
 import '@trussworks/react-uswds/lib/index.css';
+
+ModuleRegistry.registerModules([AllCommunityModule]);
 
 cache.getAll().then((initialData) => {
   const store = getStore(initialData);

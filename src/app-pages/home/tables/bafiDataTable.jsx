@@ -4,12 +4,12 @@ import { AgGridReact } from 'ag-grid-react';
 import Pagination from '@components/pagination';
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 
 const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
 
-const frameworkComponents = { mrIdCellRenderer: MrIdCellRenderer };
+const components = { mrIdCellRenderer: MrIdCellRenderer };
 
 const columnDefs = [
   {
@@ -45,12 +45,7 @@ const BafiDataTable = connect(
     return (
       <>
         <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
-          <AgGridReact
-            defaultColDef={defaultColDef}
-            rowData={data}
-            frameworkComponents={frameworkComponents}
-            columnDefs={columnDefs}
-          />
+          <AgGridReact defaultColDef={defaultColDef} rowData={data} components={components} columnDefs={columnDefs} />
         </div>
         <Pagination
           className='mt-2'

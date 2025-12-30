@@ -5,8 +5,8 @@ import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
 import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 
 const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
 

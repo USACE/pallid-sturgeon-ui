@@ -14,7 +14,7 @@ const telemetryCellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
 });
 
-const frameworkComponents = { searchIdCellRenderer: SearchIdCellRenderer };
+const components = { searchIdCellRenderer: SearchIdCellRenderer };
 
 const columnDefs = [
   {
@@ -92,7 +92,7 @@ const SearchDsTable = connect(
             rowHeight={35}
             rowData={searchEffortSitesDatasheetData}
             defaultColDef={defaultColDef}
-            frameworkComponents={frameworkComponents}
+            components={components}
             columnDefs={columnDefs}
           />
         </div>

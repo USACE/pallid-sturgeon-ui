@@ -8,8 +8,8 @@ import Icon from '@components/icon/icon';
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 import { defaultColDef } from '@src/utils/helpers';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 
 const columnDefs = [
   { field: 'year' },

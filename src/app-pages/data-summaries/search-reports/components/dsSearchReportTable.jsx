@@ -1,8 +1,8 @@
 import { AgGridReact } from 'ag-grid-react';
 import { defaultColDef } from '@src/utils/helpers';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 
 const columnDefs = [
   { field: 'seId' },

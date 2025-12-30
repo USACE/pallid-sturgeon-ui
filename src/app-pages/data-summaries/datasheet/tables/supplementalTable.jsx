@@ -6,8 +6,8 @@ import Button from '@components/button';
 import Icon from '@components/icon/icon';
 import { defaultColDef } from '@src/utils/helpers';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 
 const columnDefs = [
   { field: 'fishCode' },

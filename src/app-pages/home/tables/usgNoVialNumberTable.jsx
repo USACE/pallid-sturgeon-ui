@@ -3,11 +3,11 @@ import { AgGridReact } from 'ag-grid-react';
 
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 
 const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
-const frameworkComponents = { mrIdCellRenderer: MrIdCellRenderer };
+const components = { mrIdCellRenderer: MrIdCellRenderer };
 const missouriRiverFormUri = '/sites-list/datasheet/missouriRiver-edit';
 
 const columnDefs = [
@@ -32,7 +32,7 @@ const UsgNoVialNumbersTable = connect('selectUsgNoVialNumbersData', ({ usgNoVial
   <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
     <AgGridReact
       rowData={usgNoVialNumbersData}
-      frameworkComponents={frameworkComponents}
+      components={components}
       defaultColDef={defaultColDef}
       columnDefs={columnDefs}
     />

@@ -1,6 +1,6 @@
 import React, { useRef, useCallback } from 'react';
 import { connect } from 'redux-bundler-react';
-import { AgGridReact, AgGridColumn } from 'ag-grid-react';
+import { AgGridReact } from 'ag-grid-react';
 import { mdiContentCopy, mdiDownload, mdiPlus } from '@mdi/js';
 
 import Button from '@components/button';
@@ -14,14 +14,22 @@ import FloatEditor from '@common/gridCellEditors/floatEditor';
 
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { frequencyIdOptions } from '@pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
+import { tabToNextCell } from './helpers';
+import { defaultColDef } from '@src/utils/helpers';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
-import { tabToNextCell } from './helpers';
 
-// tableId = 4604 For testing
+const defaultColDefObj = { ...defaultColDef, width: 100, editable: true };
+const components = {
+  editCellRenderer: EditCellRenderer,
+  selectEditor: SelectEditor,
+  numberEditor: NumberEditor,
+  textEditor: TextEditor,
+  floatEditor: FloatEditor,
+};
 
 const TelemetryDsTable = connect(
   'doModalOpen',
@@ -42,6 +50,59 @@ const TelemetryDsTable = connect(
   }) => {
     const { items } = dataEntryTelemetryData;
     const gridRef = useRef();
+
+    const columnDefs = [
+      {
+        field: 'Actions',
+        pinned: true,
+        lockPosition: true,
+        cellRenderer: 'editCellRenderer',
+        cellRendererParams: {
+          doModalOpen: doModalOpen,
+          type: 'telemetry',
+        },
+        editable: false,
+      },
+      { field: 'tId', headerName: 'T ID', editable: false },
+      { field: 'tFid' },
+      { field: 'bend', cellEditor: 'floatEditor' },
+      { field: 'bendRiverMile', editable: false },
+      {
+        field: 'radioTagNum',
+        headerName: 'Radio Tag #',
+        cellEditor: 'numberEditor',
+        cellEditorParams: { isRequired: true },
+        width: 125,
+      },
+      {
+        field: 'frequencyIdCode',
+        headerName: 'Frequency Id',
+        cellEditor: 'selectEditor',
+        cellEditorParams: {
+          options: frequencyIdOptions,
+          type: 'number',
+          isRequired: true,
+        },
+        width: 125,
+      },
+      { field: 'captureDate', headerName: 'Capture Time', width: 125 },
+      { field: 'captureLatitude', cellEditor: 'floatEditor', cellEditorParams: { isRequired: true }, width: 150 },
+      { field: 'captureLongitude', cellEditor: 'floatEditor', cellEditorParams: { isRequired: true }, width: 150 },
+      { field: 'positionConfidence', cellEditor: 'floatEditor', cellEditorParams: { isRequired: true }, width: 175 },
+      { field: 'mesoId' },
+      { field: 'depth', cellEditor: 'floatEditor' },
+      { field: 'macroId' },
+      { field: 'conductivity', cellEditor: 'floatEditor', width: 125 },
+      { field: 'turbidity', cellEditor: 'floatEditor' },
+      { field: 'silt', cellEditor: 'floatEditor' },
+      { field: 'sand', cellEditor: 'floatEditor' },
+      { field: 'gravel', cellEditor: 'floatEditor' },
+      { field: 'comments', width: 200 },
+      { field: 'editInitials', width: 125 },
+      { field: 'lastEditComment', width: 200, resizable: true },
+      { field: 'checkby' },
+      { field: 'uploadedBy', width: 200, editable: false },
+    ];
 
     const rowData = items?.map((item) => ({
       ...item,
@@ -66,6 +127,15 @@ const TelemetryDsTable = connect(
         delete row['uploadedBy'];
         gridRef.current.api.applyTransaction({ add: [row] });
       }
+    };
+
+    const onRowValueChanged = ({ data }) => {
+      !data.tId
+        ? doSaveTelemetryDataEntry({ ...initialState, ...data }, { seId: dataEntryLastParams.seId, id: userRole.id })
+        : doUpdateTelemetryDataEntry(data, {
+            seId: dataEntryLastParams.seId,
+            id: userRole.id,
+          });
     };
 
     return (
@@ -111,111 +181,14 @@ const TelemetryDsTable = connect(
             tabToNextCell={tabToNextCell}
             tabToPreviousCell={tabToNextCell}
             suppressClickEdit
-            defaultColDef={{
-              width: 100,
-              editable: true,
-              lockPinned: true,
-            }}
+            defaultColDef={defaultColDefObj}
             editType='fullRow'
-            onRowValueChanged={({ data }) =>
-              !data.tId
-                ? doSaveTelemetryDataEntry(
-                    { ...initialState, ...data },
-                    { seId: dataEntryLastParams.seId, id: userRole.id }
-                  )
-                : doUpdateTelemetryDataEntry(data, {
-                    seId: dataEntryLastParams.seId,
-                    id: userRole.id,
-                  })
-            }
+            onRowValueChanged={onRowValueChanged}
             rowHeight={35}
             rowData={rowData}
-            frameworkComponents={{
-              editCellRenderer: EditCellRenderer,
-              selectEditor: SelectEditor,
-              numberEditor: NumberEditor,
-              textEditor: TextEditor,
-              floatEditor: FloatEditor,
-            }}
-          >
-            <AgGridColumn
-              field='Actions'
-              width={100}
-              pinned
-              lockPosition
-              cellRenderer='editCellRenderer'
-              cellRendererParams={{
-                type: 'telemetry',
-                doModalOpen: doModalOpen,
-              }}
-              editable={false}
-            />
-            <AgGridColumn field='tId' headerName='T ID' sortable unSortIcon editable={false} />
-            <AgGridColumn field='tFid' sortable unSortIcon />
-            <AgGridColumn field='bend' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='bendRiverMile' sortable unSortIcon editable={false} />
-            <AgGridColumn
-              field='radioTagNum'
-              headerName='Radio Tag #'
-              cellEditor='numberEditor'
-              cellEditorParams={{ isRequired: true }}
-              width={125}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='frequencyIdCode'
-              headerName='Frequency Id'
-              cellEditor='selectEditor'
-              cellEditorParams={{
-                options: frequencyIdOptions,
-                type: 'number',
-                isRequired: true,
-              }}
-              width={125}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='captureDate' headerName='Capture Time' width={125} sortable unSortIcon />
-            <AgGridColumn
-              field='captureLatitude'
-              cellEditor='floatEditor'
-              cellEditorParams={{ isRequired: true }}
-              width={150}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='captureLongitude'
-              cellEditor='floatEditor'
-              cellEditorParams={{ isRequired: true }}
-              width={150}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn
-              field='positionConfidence'
-              cellEditor='floatEditor'
-              cellEditorParams={{ isRequired: true }}
-              width={175}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='mesoId' sortable unSortIcon />
-            <AgGridColumn field='depth' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='macroId' sortable unSortIcon />
-            <AgGridColumn field='temp' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='conductivity' cellEditor='floatEditor' width={125} sortable unSortIcon />
-            <AgGridColumn field='turbidity' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='silt' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='sand' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='gravel' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='comments' width={200} sortable unSortIcon />
-            <AgGridColumn field='editInitials' width={125} sortable unSortIcon />
-            <AgGridColumn field='lastEditComment' width={200} sortable unSortIcon />
-            <AgGridColumn field='checkby' sortable unSortIcon />
-            <AgGridColumn field='uploadedBy' width={200} sortable unSortIcon editable={false} />
-          </AgGridReact>
+            components={components}
+            columnDefs={columnDefs}
+          />
         </div>
       </div>
     );

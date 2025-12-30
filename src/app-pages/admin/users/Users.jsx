@@ -26,49 +26,12 @@ const breadcrumbLinks = [
 
 const defaultColDefObj = { ...defaultColDef, editable: true, lockPinned: true };
 
-const frameworkComponents = {
+const components = {
   editCellRenderer: EditCellRenderer,
   fieldOfficeEditor: FieldOfficeEditor,
   rolesEditor: RolesEditor,
   projectEditor: ProjectEditor,
 };
-
-const columnDefs = [
-  {
-    field: 'edit',
-    width: 90,
-    pinned: true,
-    lockPosition: true,
-    cellRenderer: 'editCellRenderer',
-    cellRendererParams: { type: 'user' },
-    editable: false,
-  },
-  { field: 'firstName', editable: false },
-  { field: 'lastName', editable: false },
-  {
-    field: 'roleId',
-    headerName: 'Role',
-    cellEditor: 'rolesEditor',
-    cellEditorParams: { roles },
-    cellRenderer: (params) => rolesList[params.value],
-  },
-  {
-    field: 'officeId',
-    headerName: 'Field Office',
-    width: 300,
-    cellEditor: 'fieldOfficeEditor',
-    cellEditorParams: { fieldOffices, isId: true },
-    cellRenderer: (params) => fieldOfficeList[params.value],
-  },
-  {
-    field: 'projectCode',
-    headerName: 'Project',
-    width: 300,
-    cellEditor: 'projectEditor',
-    cellEditorParams: { projects },
-    cellRenderer: (params) => projectCodeList[params.value],
-  },
-];
 
 export default connect(
   'doDomainFieldOfficesFetch',
@@ -92,6 +55,43 @@ export default connect(
     domains,
   }) => {
     const { projects, fieldOffices } = domains;
+
+    const columnDefs = [
+      {
+        field: 'edit',
+        width: 90,
+        pinned: true,
+        lockPosition: true,
+        cellRenderer: 'editCellRenderer',
+        cellRendererParams: { type: 'user' },
+        editable: false,
+      },
+      { field: 'firstName', editable: false },
+      { field: 'lastName', editable: false },
+      {
+        field: 'roleId',
+        headerName: 'Role',
+        cellEditor: 'rolesEditor',
+        cellEditorParams: { roles },
+        cellRenderer: (params) => rolesList[params.value],
+      },
+      {
+        field: 'officeId',
+        headerName: 'Field Office',
+        width: 300,
+        cellEditor: 'fieldOfficeEditor',
+        cellEditorParams: { fieldOffices, isId: true },
+        cellRenderer: (params) => fieldOfficeList[params.value],
+      },
+      {
+        field: 'projectCode',
+        headerName: 'Project',
+        width: 300,
+        cellEditor: 'projectEditor',
+        cellEditorParams: { projects },
+        cellRenderer: (params) => projectCodeList[params.value],
+      },
+    ];
 
     useEffect(() => {
       doDomainFieldOfficesFetch({ showAll: true });
@@ -123,7 +123,7 @@ export default connect(
                   editType='fullRow'
                   onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
                   defaultColDef={defaultColDefObj}
-                  frameworkComponents={frameworkComponents}
+                  components={components}
                   columnDefs={columnDefs}
                 />
               </div>

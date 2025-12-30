@@ -12,7 +12,7 @@ import Icon from '@components/icon/icon';
 import '@pages/data-summaries/data-summary.scss';
 import { defaultColDef } from '@src/utils/helpers';
 
-const frameworkComponents = {
+const components = {
   siteIdCellRenderer: SiteIdCellRenderer,
 };
 
@@ -82,7 +82,7 @@ const SitesListTable = connect(
           <AgGridReact
             columnDefs={columnDefs}
             defaultColDef={defaultColDef}
-            frameworkComponents={frameworkComponents}
+            components={components}
             rowData={sitesData}
             rowHeight={35}
           />
