@@ -1,3 +1,7 @@
 @use 'bulma/variables' as *;
 @use 'bulma/bulma.sass' as *;
 @use 'bulma/overrides' as *;
+
+@use 'ag-grid-community/styles/ag-grid.css' as *;
+@use 'ag-grid-community/styles/ag-theme-balham.css' as *;
+@use 'ag-grid-community/styles/ag-theme-quartz.css' as *;

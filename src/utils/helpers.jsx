@@ -13,4 +13,4 @@ export const formatDate = (dateStr) => {
   return dateStr;
 };
 
-export const defaultColDef = { width: 150, sortable: true, unSortIcon: true };
+export const commonColDef = { width: 150, sortable: true, unSortIcon: true };

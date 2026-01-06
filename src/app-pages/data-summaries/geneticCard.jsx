@@ -12,7 +12,7 @@ import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { dropdownYearsToNow } from '@src/utils';
 import { Input } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { defaultColDef } from '@src/utils/helpers';
+import { commonColDef } from '@src/utils/helpers';
 
 const yesNoOptions = [
   { value: 0, text: 'No' },
@@ -162,7 +162,7 @@ export default connect(
               handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
             />
             <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
-              <AgGridReact rowData={geneticCardSummaryData} defaultColDef={defaultColDef} columnDefs={columnDefs} />
+              <AgGridReact rowData={geneticCardSummaryData} defaultColDef={commonColDef} columnDefs={columnDefs} />
               <Pagination
                 className='mt-3'
                 itemCount={totalResults}

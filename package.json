@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@ag-grid-community/core": "^32.3.9",
+    "@ag-grid-community/theming": "^32.3.9",
     "@babel/eslint-parser": "^7.25.9",
     "@corpsmap/corpsmap": "^4.0.36",
     "@eslint/js": "^9.37.0",

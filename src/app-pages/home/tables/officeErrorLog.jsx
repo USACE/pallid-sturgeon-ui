@@ -1,14 +1,13 @@
 import { connect } from 'redux-bundler-react';
 import { AgGridReact } from 'ag-grid-react';
 
-import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
-
 import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
+import { commonColDef } from '@src/utils/helpers';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 
-const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
+const defaultColDef = { ...commonColDef, width: 100 };
 
 const columnDefs = [
   { field: 'elId', headerName: 'Error Log ID' },

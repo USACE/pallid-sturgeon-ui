@@ -3,15 +3,14 @@ import { AgGridReact } from 'ag-grid-react';
 
 import Pagination from '@components/pagination';
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
+import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
+import { commonColDef } from '@src/utils/helpers';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
-import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
 
-const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
-
+const defaultColDef = { ...commonColDef, width: 100 };
 const components = { mrIdCellRenderer: MrIdCellRenderer };
-
 const columnDefs = [
   { field: 'ch', headerName: 'Error Log ID' },
   { field: 'mrId' },
@@ -35,33 +34,7 @@ const UnapprovedDataTable = connect(
     return (
       <>
         <div className='ag-theme-balham' style={{ height: '600px', width: '100%' }}>
-          <AgGridReact defaultColDef={defaultColDef} rowData={data} components={components} />
-          {/* <AgGridColumn field='ch' width={100} sortable unSortIcon />
-            <AgGridColumn
-              field='mrId'
-              width={100}
-              cellRenderer='mrIdCellRenderer'
-              cellRendererParams={{
-                uri: '/sites-list/datasheet/missouriRiver-edit',
-                type: 'missouriRiver',
-              }}
-              sortable
-              unSortIcon
-            />
-            <AgGridColumn field='fp' width={400} resizable sortable unSortIcon />
-            <AgGridColumn field='segmentDescription' width={350} resizable sortable unSortIcon />
-            <AgGridColumn field='bend' width={100} sortable unSortIcon />
-            <AgGridColumn field='subsample' width={120} sortable unSortIcon />
-            <AgGridColumn field='recorder' width={100} sortable unSortIcon />
-            <AgGridColumn field='checkby' width={100} sortable unSortIcon />
-            <AgGridColumn field='netrivermile' width={120} sortable unSortIcon />
-            <AgGridColumn field='siteId' width={100} sortable unSortIcon />
-            <AgGridColumn field='projectId' width={120} sortable unSortIcon />
-            <AgGridColumn field='segmentId' width={120} sortable unSortIcon />
-            <AgGridColumn field='season' width={100} sortable unSortIcon />
-            <AgGridColumn field='fieldoffice' width={120} sortable unSortIcon />
-            <AgGridColumn field='sampleUnitType' width={150} sortable unSortIcon />
-            <AgGridColumn field='gear' width={100} sortable unSortIcon /> */}
+          <AgGridReact defaultColDef={defaultColDef} rowData={data} components={components} columnDefs={columnDefs} />
         </div>
         <Pagination
           className='mt-2'

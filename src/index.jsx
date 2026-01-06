@@ -10,6 +10,10 @@ import getStore from './app-bundles';
 import '@trussworks/react-uswds/lib/uswds.css';
 import '@trussworks/react-uswds/lib/index.css';
 
+import 'ag-grid-community/styles/ag-grid.css';
+import 'ag-grid-community/styles/ag-theme-balham.css';
+import 'ag-grid-community/styles/ag-theme-quartz.css';
+
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 cache.getAll().then((initialData) => {

@@ -21,12 +21,12 @@ import {
   YNTextOptions,
 } from '@pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 import { tabToNextCell } from './helpers';
-import { defaultColDef } from '@src/utils/helpers';
+import { commonColDef } from '@src/utils/helpers';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 
-const defaultColDefObj = { ...defaultColDef, width: 100, editable: true };
+const defaultColDef = { ...commonColDef, width: 100, editable: true };
 const components = {
   editCellRenderer: EditCellRenderer,
   procLinkCellRenderer: ProcLinkCellRenderer,
@@ -291,7 +291,7 @@ const SuppDsTable = connect(
             suppressClickEdit
             rowHeight={35}
             rowData={items}
-            defaultColDef={defaultColDefObj}
+            defaultColDef={defaultColDef}
             editType='fullRow'
             onRowValueChanged={onRowValueChanged}
             components={components}

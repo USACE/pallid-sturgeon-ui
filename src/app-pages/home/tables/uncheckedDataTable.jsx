@@ -3,11 +3,12 @@ import { AgGridReact } from 'ag-grid-react';
 
 import Pagination from '@components/pagination';
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
+import { commonColDef } from '@src/utils/helpers';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
 
-const defaultColDef = { width: 100, sortable: true, unSortIcon: true };
+const defaultColDef = { ...commonColDef, width: 100 };
 const components = { mrIdCellRenderer: MrIdCellRenderer };
 const missouriRiverFormUri = '/sites-list/datasheet/missouriRiver-edit';
 

@@ -1,5 +1,5 @@
 import { AgGridReact } from 'ag-grid-react';
-import { defaultColDef } from '@src/utils/helpers';
+import { commonColDef } from '@src/utils/helpers';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
@@ -24,7 +24,7 @@ const columnDefs = [
 
 const DSSearchReportTable = ({ rowData }) => (
   <div className='ag-theme-balham' style={{ width: '100%', height: '600px' }}>
-    <AgGridReact rowData={rowData} defaultColDef={defaultColDef} columnDefs={columnDefs} />
+    <AgGridReact rowData={rowData} defaultColDef={commonColDef} columnDefs={columnDefs} />
   </div>
 );
 

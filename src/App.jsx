@@ -15,8 +15,9 @@ import './css/bootstrap/css/bootstrap.water.min.css';
 import '@styles/index.scss';
 import '@styles/uswds-theme/_uswds-theme-components.scss';
 import '@styles/_buttons.scss';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-balham.css';
+// import 'ag-grid-community/styles/ag-grid.css';
+// import 'ag-grid-community/styles/ag-theme-balham.css';
+// import 'ag-grid-community/styles/ag-theme-quartz.css';
 
 export default connect(
   'doModalOpen',

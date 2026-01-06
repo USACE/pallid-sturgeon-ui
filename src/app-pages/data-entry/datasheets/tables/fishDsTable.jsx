@@ -22,12 +22,12 @@ import { createDropdownOptions, createMesoOptions } from '@pages/data-entry/help
 import SuppLinkCellRenderer from '@common/gridCellRenderers/suppLinkCellRenderer';
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { tabToNextCell } from './helpers';
-import { defaultColDef } from '@src/utils/helpers';
+import { commonColDef } from '@src/utils/helpers';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 
-const defaultColDefObj = { ...defaultColDef, width: 100, editable: true };
+const defaultColDef = { ...commonColDef, width: 100, editable: true };
 const components = {
   editCellRenderer: EditCellRenderer,
   selectEditor: SelectEditor,
@@ -260,7 +260,7 @@ const FishDsTable = connect(
             tabToNextCell={tabToNextCell}
             tabToPreviousCell={tabToNextCell}
             suppressClickEdit
-            defaultColDef={defaultColDefObj}
+            defaultColDef={defaultColDef}
             editType='fullRow'
             onRowValueChanged={onRowValueChanged}
             rowHeight={35}

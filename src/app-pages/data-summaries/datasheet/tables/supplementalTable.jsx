@@ -4,7 +4,7 @@ import { mdiDownload } from '@mdi/js';
 
 import Button from '@components/button';
 import Icon from '@components/icon/icon';
-import { defaultColDef } from '@src/utils/helpers';
+import { commonColDef } from '@src/utils/helpers';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-balham.css';
@@ -46,7 +46,7 @@ const SupplementalTable = connect(
           handleClick={() => doFetchAllDatasheet('supplemental-datasheet')}
         />
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
-          <AgGridReact rowData={data} defaultColDef={defaultColDef} columnDefs={columnDefs} />
+          <AgGridReact rowData={data} defaultColDef={commonColDef} columnDefs={columnDefs} />
         </div>
       </>
     );

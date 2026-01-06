@@ -9,8 +9,9 @@ import SiteIdCellRenderer from '@src/app-pages/sites-list/sites-list-table/siteI
 import ExportButton from '@components/button/exportButton';
 import Icon from '@components/icon/icon';
 
+import { commonColDef } from '@src/utils/helpers';
+
 import '@pages/data-summaries/data-summary.scss';
-import { defaultColDef } from '@src/utils/helpers';
 
 const components = {
   siteIdCellRenderer: SiteIdCellRenderer,
@@ -81,7 +82,7 @@ const SitesListTable = connect(
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             columnDefs={columnDefs}
-            defaultColDef={defaultColDef}
+            defaultColDef={commonColDef}
             components={components}
             rowData={sitesData}
             rowHeight={35}

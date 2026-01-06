@@ -10,7 +10,7 @@ import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { defaultColDef } from '@src/utils/helpers';
+import { commonColDef } from '@src/utils/helpers';
 
 const fishCellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
@@ -118,7 +118,7 @@ const MissouriDsTable = connect(
           <AgGridReact
             rowHeight={35}
             rowData={moriverSitesDatasheetData}
-            defaultColDef={defaultColDef}
+            defaultColDef={commonColDef}
             components={components}
             columnDefs={columnDefs}
           />

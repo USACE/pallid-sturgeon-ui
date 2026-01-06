@@ -2,7 +2,9 @@ import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact } from 'ag-grid-react';
 import { mdiAccountPlus } from '@mdi/js';
+import { themeQuartz } from '@ag-grid-community/theming';
 
+import Breadcrumb from '@src/app-components/breadcrumb';
 import AddUserFormModal from './AddUserModal';
 import Button from '@components/button';
 import Card from '@components/card';
@@ -14,23 +16,16 @@ import RoleFilter from '@components/role-filter';
 import Icon from '@components/icon/icon';
 
 import { rolesList, fieldOfficeList, projectCodeList, NoRoleAccessMessage } from '../helper';
-import Breadcrumb from '@src/app-components/breadcrumb';
-import { defaultColDef } from '@src/utils/helpers';
+import { commonColDef } from '@src/utils/helpers';
 
-const breadcrumbLinks = [
-  {
-    text: 'Users',
-    current: true,
-  },
-];
+const breadcrumbLinks = [{ text: 'Users', current: true }];
 
-const defaultColDefObj = { ...defaultColDef, editable: true, lockPinned: true };
-
+const defaultColDef = { ...commonColDef, editable: true, lockPinned: true };
 const components = {
   editCellRenderer: EditCellRenderer,
   fieldOfficeEditor: FieldOfficeEditor,
-  rolesEditor: RolesEditor,
   projectEditor: ProjectEditor,
+  rolesEditor: RolesEditor,
 };
 
 export default connect(
@@ -65,6 +60,9 @@ export default connect(
         cellRenderer: 'editCellRenderer',
         cellRendererParams: { type: 'user' },
         editable: false,
+        sortable: false,
+        unSortIcon: false,
+        resizable: false,
       },
       { field: 'firstName', editable: false },
       { field: 'lastName', editable: false },
@@ -78,7 +76,7 @@ export default connect(
       {
         field: 'officeId',
         headerName: 'Field Office',
-        width: 300,
+        width: 400,
         cellEditor: 'fieldOfficeEditor',
         cellEditorParams: { fieldOffices, isId: true },
         cellRenderer: (params) => fieldOfficeList[params.value],
@@ -115,16 +113,16 @@ export default connect(
                 icon={<Icon path={mdiAccountPlus} />}
                 handleClick={() => doModalOpen(AddUserFormModal)}
               />
-              <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
+              <div className='ag-theme-quartz mt-3' style={{ width: '100%', height: '600px' }}>
                 <AgGridReact
-                  suppressClickEdit
-                  rowHeight={35}
-                  rowData={usersData}
+                  columnDefs={columnDefs}
+                  components={components}
+                  defaultColDef={defaultColDef}
                   editType='fullRow'
                   onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
-                  defaultColDef={defaultColDefObj}
-                  components={components}
-                  columnDefs={columnDefs}
+                  rowData={usersData}
+                  theme={themeQuartz}
+                  rowHeight={45}
                 />
               </div>
             </Card.Body>

@@ -8,7 +8,7 @@ import Icon from '@components/icon/icon';
 import SearchIdCellRenderer from '@common/gridCellRenderers/searchIdCellRenderer';
 
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { defaultColDef } from '@src/utils/helpers';
+import { commonColDef } from '@src/utils/helpers';
 
 const telemetryCellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
@@ -91,7 +91,7 @@ const SearchDsTable = connect(
           <AgGridReact
             rowHeight={35}
             rowData={searchEffortSitesDatasheetData}
-            defaultColDef={defaultColDef}
+            defaultColDef={commonColDef}
             components={components}
             columnDefs={columnDefs}
           />
