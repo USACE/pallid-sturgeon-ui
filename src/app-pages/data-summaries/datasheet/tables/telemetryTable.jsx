@@ -37,7 +37,8 @@ const TelemetryTable = connect(
             <AgGridColumn field='project' sortable unSortIcon />
             <AgGridColumn field='segment' sortable unSortIcon />
             <AgGridColumn field='season' sortable unSortIcon />
-            <AgGridColumn field='bend' sortable unSortIcon />
+            <AgGridColumn headerName='Site Bend' field='bend' sortable unSortIcon />
+            <AgGridColumn headerName='Bend R/M' field='t_bend' sortable unSortIcon />
             <AgGridColumn headerName='Telemetry ID' field='tId' sortable unSortIcon />
             <AgGridColumn headerName='Search Effort ID' field='seId' sortable unSortIcon />
             <AgGridColumn headerName='Site ID' field='siteId' sortable unSortIcon />
