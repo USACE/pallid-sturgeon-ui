@@ -143,16 +143,16 @@ export default {
     },
 
   doDomainSegmentsFetch:
-    () =>
+    ({ office, project }) =>
     ({ dispatch, apiGet, store }) => {
-      const fieldOffice = store.selectUserRole()?.officeCode;
-      const project = store.selectUserRole()?.projectCode;
+      const fieldOffice = office ?? store.selectUserRole()?.officeCode;
+      const projectVal = project ?? store.selectUserRole()?.projectCode;
 
       const url =
         '/psapi/segments?' +
         new URLSearchParams({
           office: fieldOffice,
-          project: project,
+          project: projectVal,
         });
 
       apiGet(url, (_err, body) => {

@@ -19,6 +19,7 @@ const breadcrumbLinks = [
 const SitesList = connect(
   'doDomainBendsFetch',
   'doDataEntryLoadData',
+  'doDomainFieldOfficesFetch',
   'doDomainSeasonsFetch',
   'doDomainSegmentsFetch',
   'doSetSitesPagination',
@@ -26,15 +27,19 @@ const SitesList = connect(
   ({
     doDomainBendsFetch,
     doDataEntryLoadData,
+    doDomainFieldOfficesFetch,
     doDomainSeasonsFetch,
     doDomainSegmentsFetch,
     doSetSitesPagination,
     sitesTotalResults,
+    office,
+    project,
   }) => {
     // Load data
     useEffect(() => {
       doDataEntryLoadData();
-      doDomainSegmentsFetch();
+      doDomainFieldOfficesFetch();
+      doDomainSegmentsFetch({ office, project });
       doDomainSeasonsFetch();
       doDomainBendsFetch();
     }, []);

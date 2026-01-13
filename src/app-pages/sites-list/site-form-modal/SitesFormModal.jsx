@@ -73,7 +73,7 @@ const SitesFormModal = connect(
               label: item.description,
             }))
           : [],
-      []
+      [segments]
     );
 
     const defaultValues = {
@@ -139,7 +139,7 @@ const SitesFormModal = connect(
               value: item.code,
               text: `${item.code} - ${item.description}`,
             })),
-      []
+      [project, sampleUnitTypes]
     );
 
     const handleChange = (e) => {
@@ -153,12 +153,12 @@ const SitesFormModal = connect(
         setValue('segmentId', null);
         setValue('season', null);
         setValue('sampleUnitType', null);
-        doDomainSegmentsFetch();
+        doDomainSegmentsFetch({ office: getValues('fieldoffice'), project: e?.target?.value });
       }
 
       if (name === 'fieldoffice') {
         setValue('segmentId', null);
-        doDomainSegmentsFetch();
+        doDomainSegmentsFetch({ office: e?.target?.value, project: getValues('projectId') });
       }
 
       if (name === 'segmentId') {
@@ -216,7 +216,9 @@ const SitesFormModal = connect(
     // Update Segment options if fieldoffice and projectId values change
     useEffect(() => {
       if (office && project) {
-        doDomainSegmentsFetch();
+        doDomainSegmentsFetch({ office, project });
+        setValue('segmentId', null);
+        setValue('bend', null);
       }
     }, [office, project]);
 
@@ -308,6 +310,7 @@ const SitesFormModal = connect(
                 onChange={handleChange}
                 tooltip={sitesFormTooltipContent.segment}
                 readOnly={!office || !project}
+                closeMenuOnSelect
                 required
               />
               <SelectInput
@@ -345,6 +348,7 @@ const SitesFormModal = connect(
                 tooltip={sitesFormTooltipContent.sampleUnit}
                 readOnly={!segment || !sampleUnitType}
                 required={bend !== 0}
+                closeMenuOnSelect
               />
               <SelectInput name='bendrn' label='Bend R/N' required>
                 {createDropdownOptions(bendRn).map((item, index) => (
