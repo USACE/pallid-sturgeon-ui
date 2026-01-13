@@ -11,33 +11,35 @@ const EditCellRenderer = connect(
   ({ doModalOpen, api, columnApi, rowIndex, data, type, setIsEditingRow }) => {
     const [isEditing, setIsEditing] = useState(false);
 
+    const dataTypeMapping = {
+      missouriRiver: data.mrId,
+      fish: data.fid,
+      supplemental: data.sId,
+      searchEffort: data.seId,
+      telemetry: data.tId,
+      procedure: data.pId,
+    };
+
     const saveChangesToRow = () => {
+      // api.stopEditing(false);
       api.stopEditing(false);
+
+      const rowNode =
+        api.getEditingCells()?.[0]?.rowIndex !== undefined
+          ? api.getDisplayedRowAtIndex(api.getEditingCells()[0].rowIndex)
+          : null;
+
+      if (!rowNode) return;
+      // 🔑 Force new object reference
+      const updatedData = { ...rowNode.data };
+      rowNode.setData(updatedData);
+
       setIsEditing(false);
     };
 
     const cancelRowEdits = () => {
       api.stopEditing(true);
       setIsEditing(false);
-    };
-
-    const getType = () => {
-      switch (type) {
-        case 'missouriRiver':
-          return data.mrId;
-        case 'fish':
-          return data.fid;
-        case 'supplemental':
-          return data.sId;
-        case 'searchEffort':
-          return data.seId;
-        case 'telemetry':
-          return data.tId;
-        case 'procedure':
-          return data.pId;
-        default:
-          return <>Unknown data type.</>;
-      }
     };
 
     useEffect(() => {
@@ -93,7 +95,7 @@ const EditCellRenderer = connect(
                 icon={<Icon path={mdiTrashCanOutline} />}
                 handleClick={() =>
                   doModalOpen(ConfirmDelete, {
-                    value: getType(),
+                    value: dataTypeMapping[type] ?? 'Unknown data type.',
                     data: data,
                     type: type,
                   })

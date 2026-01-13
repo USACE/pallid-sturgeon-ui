@@ -1,8 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact } from 'ag-grid-react';
 import { mdiAccountPlus } from '@mdi/js';
-import { themeQuartz } from '@ag-grid-community/theming';
 
 import Breadcrumb from '@src/app-components/breadcrumb';
 import AddUserFormModal from './AddUserModal';
@@ -20,7 +19,6 @@ import { commonColDef } from '@src/utils/helpers';
 
 const breadcrumbLinks = [{ text: 'Users', current: true }];
 
-const defaultColDef = { ...commonColDef, editable: true, lockPinned: true };
 const components = {
   editCellRenderer: EditCellRenderer,
   fieldOfficeEditor: FieldOfficeEditor,
@@ -49,53 +47,71 @@ export default connect(
     roles,
     domains,
   }) => {
-    const { projects, fieldOffices } = domains;
+    const [rowData, setRowData] = useState(usersData);
+    const [columnDefs] = useMemo(
+      () => [
+        {
+          field: 'edit',
+          width: 90,
+          pinned: true,
+          lockPosition: true,
+          cellRenderer: 'editCellRenderer',
+          cellRendererParams: { type: 'user' },
+          editable: false,
+          sortable: false,
+          unSortIcon: false,
+          resizable: false,
+        },
+        {
+          field: 'firstName',
+          editable: false,
+        },
+        {
+          field: 'lastName',
+          editable: false,
+        },
+        {
+          field: 'roleId',
+          headerName: 'Role',
+          editable: true,
+          cellEditor: RolesEditor,
+          cellEditorParams: { options: roles },
+          cellRenderer: (params) => rolesList[params.value],
+          // **Add valueSetter** to update rowData
+          valueSetter: (params) => {
+            console.warn('params: ', params);
+            if (params.newValue !== params.oldValue) {
+              params.data.role = params.newValue;
+              return true; // tells AG Grid the value changed
+            }
+            return false;
+          },
+        },
+        {
+          field: 'officeId',
+          headerName: 'Field Office',
+          width: 400,
+          cellRenderer: (params) => fieldOfficeList[params.value],
+        },
+        {
+          field: 'projectCode',
+          headerName: 'Project',
+          width: 300,
+          cellRenderer: (params) => projectCodeList[params.value],
+        },
+      ],
+      []
+    );
 
-    const columnDefs = [
-      {
-        field: 'edit',
-        width: 90,
-        pinned: true,
-        lockPosition: true,
-        cellRenderer: 'editCellRenderer',
-        cellRendererParams: { type: 'user' },
-        editable: false,
-        sortable: false,
-        unSortIcon: false,
-        resizable: false,
-      },
-      { field: 'firstName', editable: false },
-      { field: 'lastName', editable: false },
-      {
-        field: 'roleId',
-        headerName: 'Role',
-        cellEditor: 'rolesEditor',
-        cellEditorParams: { roles },
-        cellRenderer: (params) => rolesList[params.value],
-      },
-      {
-        field: 'officeId',
-        headerName: 'Field Office',
-        width: 400,
-        cellEditor: 'fieldOfficeEditor',
-        cellEditorParams: { fieldOffices, isId: true },
-        cellRenderer: (params) => fieldOfficeList[params.value],
-      },
-      {
-        field: 'projectCode',
-        headerName: 'Project',
-        width: 300,
-        cellEditor: 'projectEditor',
-        cellEditorParams: { projects },
-        cellRenderer: (params) => projectCodeList[params.value],
-      },
-    ];
+    const defaultColDef = useMemo(() => ({ ...commonColDef, editable: true, lockPinned: true }), []);
+
+    const onRowValueChanged = (params) => {
+      console.log('Row updated:', params.data);
+      setRowData([...rowData]); // optional: force state update
+    };
 
     useEffect(() => {
-      doDomainFieldOfficesFetch({ showAll: true });
-      doDomainProjectsFetch(false);
       doFetchUsers();
-      doFetchRoles();
     }, []);
 
     return (
@@ -115,14 +131,19 @@ export default connect(
               />
               <div className='ag-theme-quartz mt-3' style={{ width: '100%', height: '600px' }}>
                 <AgGridReact
+                  className='ag-theme-quartz'
                   columnDefs={columnDefs}
                   components={components}
-                  defaultColDef={defaultColDef}
                   editType='fullRow'
-                  onRowValueChanged={({ data }) => doUpdateRoleOffice(data)}
-                  rowData={usersData}
-                  theme={themeQuartz}
+                  defaultColDef={defaultColDef}
+                  onCellValueChanged={() => console.warn('cell value changed')}
+                  onRowValueChanged={onRowValueChanged}
+                  onRowEditingStarted={() => console.warn('editing started')}
+                  onRowEditingStopped={() => console.warn('editing stopped')}
+                  rowData={rowData}
                   rowHeight={45}
+                  theme='legacy'
+                  stopEditingWhenCellsLoseFocus={true}
                 />
               </div>
             </Card.Body>
