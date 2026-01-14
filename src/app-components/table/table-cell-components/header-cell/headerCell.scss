@@ -1,0 +1,70 @@
+@use '@styles/_variables';
+
+.header-buttons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  .remove-button,
+  .add-button {
+    margin-left: 5px;
+    white-space: nowrap;
+  }
+  input[type='checkbox']:hover {
+    cursor: pointer;
+  }
+  .drag-input {
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    .mb-1 {
+      padding: 0 !important; /* Override Bootstrap styling */
+    }
+  }
+  .dropzone p {
+    padding: 5px !important; /* Override Bootstrap styling */
+  }
+  .mr-2.mb-1.w-100 {
+    width: auto !important; /* Override Bootstrap styling */
+  }
+}
+
+@mixin button-styles($bg-color, $hover-color) {
+  @each $property, $value in variables.$button-styles {
+    #{$property}: $value;
+  }
+  background-color: $bg-color;
+
+  &:hover {
+    background-color: $hover-color;
+  }
+}
+
+@mixin disabled-button-styles {
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.usa-button {
+  &.add-button,
+  &.use-add-button {
+    @include button-styles(variables.$color-button, variables.$color-button-hover);
+    &:disabled {
+      @include disabled-button-styles;
+    }
+  }
+
+  &.remove-button,
+  &.use-remove-button {
+    @include button-styles(variables.$color-button-red, variables.$color-button-hover-dark);
+    &:disabled {
+      @include disabled-button-styles;
+    }
+  }
+}
+
+.double-max-width-important {
+  max-width: 200% !important;
+  width: 100% !important;
+}

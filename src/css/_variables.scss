@@ -32,3 +32,25 @@ $small-screen-width: 576px;
 $medium-screen-width: 768px;
 $large-screen-width: 992px;
 $extra-large-screen-width: 1200px;
+
+// Tables
+$color-tanstack-table-header: #f0f0f0;
+$color-tanstack-table-select: rgba(134, 176, 240, 0.25);
+$color-hover-stepper: rgba(0, 0, 0, 0.06); // transparent so that it does not overlap focus outline
+
+$color-sidebar-active: #c83800;
+
+// Buttons
+$color-button: #2c3e50;
+$color-button-hover: #343a40;
+$color-button-red: #d43929;
+$color-button-hover-dark: #585a5c;
+$color-button-disabled: #454545;
+$border-color: rgba(44, 62, 80, 0.5);
+
+$button-styles: (
+  width: auto,
+  font-size: 0.9rem,
+  padding: 10px 10px,
+  font-weight: normal,
+);
