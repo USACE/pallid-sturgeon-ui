@@ -11,6 +11,7 @@ import { TableCell } from '@src/app-components/table/table-cell-components/Table
 
 import { frequencyIdOptions } from '../../edit-data-sheet/forms/_shared/selectHelper';
 import { ValidationMessages } from '@src/utils/enums';
+import { latRegex, lngRegex } from '@src/utils/regex';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
@@ -35,7 +36,6 @@ const TelemetryDataEntry = connect(
     const { items } = dataEntryTelemetryData;
 
     const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
-    const lastRow = dataEntryTelemetryData.items[dataEntryTelemetryData.totalCount - 1];
     const [tableKey, setTableKey] = useState(0);
     const [tableErrors, setTableErrors] = useState();
     const [data, setData] = useState(rowData);
@@ -45,11 +45,42 @@ const TelemetryDataEntry = connect(
 
     const defaultValues = { seId: dataEntryLastParams.seId };
 
+    // Field validations
     const schema = yup.object().shape({
       bend: yup.string().nullable(),
       radioTagNum: yup.number().required(ValidationMessages.FieldRequired),
       frequencyIdCode: yup.number().required(ValidationMessages.SelectRequired),
       captureDate: yup.string().nullable(),
+      captureLatitude: yup
+        .string()
+        .test(
+          'latFormat',
+          'Latitude format is incorrect. Must be +-XX.XXXXXX and include at least 6 decimal places.',
+          (val) => latRegex.test(val)
+        )
+        .required(ValidationMessages.FieldRequired),
+      captureLongitude: yup
+        .string()
+        .test(
+          'lngFormat',
+          'Longitude format is incorrect. Must be +-XXX.XXXXXX and include at least 6 decimal places.',
+          (val) => lngRegex.test(val)
+        )
+        .required(ValidationMessages.FieldRequired),
+      positionConfidence: yup.number().required(ValidationMessages.FieldRequired),
+      mesoId: yup.string().nullable(),
+      depth: yup.number().nullable(),
+      macroId: yup.string().nullable(),
+      temp: yup.number().nullable(),
+      conductivity: yup.number().nullable(),
+      turbidity: yup.number().nullable(),
+      silt: yup.number().nullable(),
+      sand: yup.number().nullable(),
+      gravel: yup.number().nullable(),
+      comments: yup.string().nullable(),
+      editInitials: yup.string().nullable(),
+      lastEditComment: yup.string().nullable(),
+      checkby: yup.string().nullable(),
     });
 
     const methods = useForm({
@@ -100,11 +131,11 @@ const TelemetryDataEntry = connect(
           header: 'Frequency ID',
           cell: TableCell,
           size: 200,
-          meta: { 
+          meta: {
             type: 'select',
             required: true,
             options: frequencyIdOptions,
-           },
+          },
         }),
         columnHelper.accessor('captureDate', {
           header: 'Capture Time',
@@ -125,12 +156,14 @@ const TelemetryDataEntry = connect(
           meta: { type: 'text', required: true },
         }),
         columnHelper.accessor('positionConfidence', {
+          // select?
           header: 'Position Confidence',
           cell: TableCell,
           size: 200,
-          meta: { type: 'text', required: true },
+          meta: { type: 'number', required: true },
         }),
         columnHelper.accessor('mesoId', {
+          // select?
           header: 'Meso',
           cell: TableCell,
           size: 200,
@@ -140,9 +173,10 @@ const TelemetryDataEntry = connect(
           header: 'Depth',
           cell: TableCell,
           size: 200,
-          meta: { type: 'text' },
+          meta: { type: 'number' },
         }),
         columnHelper.accessor('macroId', {
+          // select?
           header: 'Macro',
           cell: TableCell,
           size: 200,
@@ -152,37 +186,37 @@ const TelemetryDataEntry = connect(
           header: 'Temp',
           cell: TableCell,
           size: 200,
-          meta: { type: 'text' },
+          meta: { type: 'number' },
         }),
         columnHelper.accessor('conductivity', {
           header: 'Conductivity',
           cell: TableCell,
           size: 200,
-          meta: { type: 'text' },
+          meta: { type: 'number' },
         }),
         columnHelper.accessor('turbidity', {
           header: 'Turbidity',
           cell: TableCell,
           size: 200,
-          meta: { type: 'text' },
+          meta: { type: 'number' },
         }),
         columnHelper.accessor('silt', {
           header: 'Silt',
           cell: TableCell,
           size: 200,
-          meta: { type: 'text' },
+          meta: { type: 'number' },
         }),
         columnHelper.accessor('sand', {
           header: 'Sand',
           cell: TableCell,
           size: 200,
-          meta: { type: 'text' },
+          meta: { type: 'number' },
         }),
         columnHelper.accessor('gravel', {
           header: 'Gravel',
           cell: TableCell,
           size: 200,
-          meta: { type: 'text' },
+          meta: { type: 'number' },
         }),
         columnHelper.accessor('comments', {
           header: 'Comments',
@@ -218,7 +252,7 @@ const TelemetryDataEntry = connect(
     );
 
     const handleAddMultipleRows = (rows) => {
-    // Handle any data mapping or formatting here
+      // Handle any data mapping or formatting here
       setData((oldData) => {
         const newRows = [...oldData, ...rows];
         return newRows;
@@ -261,9 +295,11 @@ const TelemetryDataEntry = connect(
     //Reset the dirty states of the fields after a save.
     // useResetDirtyFields(isTouched, requestAPIData, reset, trigger);
 
+    console.warn('telemetry data: ', data);
+
     return (
-        <FormProvider {...methods}>
-            <DataEntryTable
+      <FormProvider {...methods}>
+        <DataEntryTable
           addRow={() => setData((prev) => (prev ? [...prev, {}] : [{}]))}
           columns={tableColumns}
           data={data}
@@ -278,7 +314,7 @@ const TelemetryDataEntry = connect(
           updateSourceData={handleUpdateData}
           validationSchema={schema}
         />
-        </FormProvider>
+      </FormProvider>
     );
   }
 );
