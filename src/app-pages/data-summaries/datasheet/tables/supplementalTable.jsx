@@ -32,6 +32,9 @@ const SupplementalTable = connect(
             }}
           >
             <AgGridColumn field='fishCode' />
+            <AgGridColumn field='length' />
+            <AgGridColumn field='weight' />
+            <AgGridColumn field='condition' />
             <AgGridColumn field='fishId' headerName='Fish ID' sortable unSortIcon />
             <AgGridColumn field='uniqueID' sortable unSortIcon />
             <AgGridColumn field='year' />
@@ -42,6 +45,7 @@ const SupplementalTable = connect(
             <AgGridColumn field='bend' />
             <AgGridColumn field='bendrn' headerName='Bend R/N' />
             <AgGridColumn field='bendRiverMile' />
+            <AgGridColumn field='netRiverMile' headerName= 'Net River Mile' />
             <AgGridColumn field='hatcheryOrigin' />
             <AgGridColumn field='checkedby' />
           </AgGridReact>
