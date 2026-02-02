@@ -21,16 +21,18 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 export default connect(
   'doModalOpen',
   'doModalClose',
+  'doGetAllLookupData',
   'selectRoute',
   'selectAuth',
   'selectLoadingState',
   'selectLoadingMessage',
-  ({ doModalOpen, doModalClose, route: Route, auth, loadingState, loadingMessage }) => {
+  ({ doModalOpen, doModalClose, doGetAllLookupData, route: Route, auth, loadingState, loadingMessage }) => {
     useEffect(() => {
       if (!auth.token && !sessionStorage.getItem('isLoggedIn')) {
         doModalOpen(LandingModal);
       } else {
         doModalClose(LandingModal);
+        doGetAllLookupData();
       }
     }, [auth, doModalClose, doModalOpen, sessionStorage.getItem('isLoggedIn')]);
 
