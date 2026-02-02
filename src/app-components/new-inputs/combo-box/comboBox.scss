@@ -1,0 +1,10 @@
+@use '@styles/_mixins' as mixin;
+@use '@styles/_variables' as *;
+
+div.usa-hint {
+  &.warning-message {
+    font-style: italic;
+    font-size: 15px;
+    color: $color-black;
+  }
+}
