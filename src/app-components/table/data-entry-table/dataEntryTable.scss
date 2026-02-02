@@ -1,0 +1,239 @@
+@use '@styles/_variables';
+
+.w3-container {
+  border: 1px solid black;
+  padding: 20px;
+  margin: 10px;
+}
+
+table {
+  border-collapse: collapse;
+  margin: 5px 0;
+  font-size: 14px;
+  font-family: sans-serif;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  border: 1px solid black;
+  padding: 20px;
+}
+
+.table-container {
+  overflow-x: scroll;
+  width: 100%;
+}
+
+table input,
+table select {
+  border: 1px solid #000;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+table input:disabled,
+table select:disabled {
+  background-color: variables.$color-primary-light;
+  border: 1px solid variables.$color-primary;
+}
+
+table select:invalid,
+table input:invalid {
+  background-color: #fa9595;
+}
+
+.cell-error .d-flex.align-items-center > input {
+  background-color: #fa9595;
+  height: 30px;
+}
+
+.cell-error .d-flex.align-items-center > div > div {
+  background-color: #fa9595;
+  height: 30px;
+}
+
+.input-error > div {
+  background-color: #fa9595;
+  border: 1px solid black;
+  border-radius: 4px;
+  color: black;
+}
+
+table .edit-cell-action button[name='edit'] {
+  color: #ffb918;
+}
+
+table .edit-cell-action button[name='cancel'] {
+  color: #7b7b7b;
+}
+
+table .edit-cell-action button[name='done'] {
+  color: #4bbd7f;
+}
+
+table .edit-cell-action button[name='remove'] {
+  color: red;
+  background-color: rgb(230, 208, 208);
+}
+
+table .edit-cell-action {
+  display: flex;
+  gap: 5px;
+}
+
+th.bottom-btns {
+  font-weight: normal;
+}
+
+table .bottom-btns {
+  background-color: transparent;
+  color: black;
+}
+
+table .bottom-btns button {
+  background-color: transparent;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  color: variables.$link-color;
+}
+
+table .bottom-btns button:disabled {
+  color: variables.$color-gray-dark;
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+.w3-table-all th,
+.w3-table-all td {
+  border-bottom: 1px solid #000;
+  border-right: 1px solid #000;
+  border-top: 1px solid #000;
+  padding: 8px;
+}
+
+.w3-table-all th {
+  background-color: variables.$color-tanstack-table-header;
+  color: black;
+}
+
+.w3-table-all td:first-child {
+  border-top: 1px solid #000;
+  border-right: none;
+}
+
+.w3-table-all th:first-child {
+  border-top: 1px solid #000;
+  border-right: none;
+}
+
+tbody tr.selected-row:nth-child(even) {
+  background-color: variables.$color-tanstack-table-select;
+}
+
+tbody tr.selected-row:nth-child(odd) {
+  background-color: variables.$color-tanstack-table-select;
+}
+
+.resizer {
+  display: inline-block;
+  background: rgba(0, 0, 0, 0.5);
+  width: 5px;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translateX(50%);
+  cursor: col-resize;
+}
+
+.resizer.isResizing {
+  background: variables.$link-color;
+  opacity: 1;
+}
+
+@media (hover: hover) {
+  .resizer {
+    opacity: 0;
+  }
+
+  *:hover > .resizer {
+    opacity: 1;
+  }
+}
+
+.resizer-handle {
+  width: 10px;
+  height: 100%;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  cursor: ew-resize;
+  transition: background-color 0.3s ease;
+}
+
+.row-error {
+  border-style: solid;
+  border-width: 0 0 0 4px !important;
+  border-color: red !important;
+}
+
+.cell-error {
+  div {
+    height: 33px;
+    span:empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      &:after {
+        content: '⚠';
+        font-size: large;
+        color: red;
+      }
+      flex: 1;
+    }
+  }
+}
+
+.error-message {
+  color: red;
+}
+
+table {
+  th {
+    text-align: center;
+
+    .red-asterisk {
+      color: #dd0000;
+      margin-left: 4px; // Adjust as needed for spacing
+      font-size: large;
+    }
+  }
+}
+
+.table-container {
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: #a9aeb1;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: #484848;
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #333;
+  }
+}
+
+.box-shadow-1px {
+  ::before {
+    box-shadow: 0 0 0 1px #1b1b1b !important;
+  }
+}
+
+.input-error {
+  background-color: #fa9595 !important;
+}
