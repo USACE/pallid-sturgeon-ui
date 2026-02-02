@@ -1,8 +1,9 @@
 import { useFormContext } from 'react-hook-form';
-
+import classNames from 'classnames';
+import { mdiAlert } from '@mdi/js';
 import { Label, TextInput as UswdsTextInput } from '@trussworks/react-uswds';
 
-import classNames from 'classnames';
+import Icon from '@src/app-components/icon/icon';
 
 import './textInput.scss';
 
@@ -21,6 +22,7 @@ const TextInput = ({
   required,
   uppercase,
   validations,
+  warning,
   ...customProps
 }) => {
   const classes = classNames(className, { 'text-uppercase': uppercase });
@@ -76,6 +78,12 @@ const TextInput = ({
         {...rest}
         {...customProps}
       />
+      {warning && (
+        <div className='usa-hint warning-message' id={`${name}_hint`}>
+          <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+          {warning}
+        </div>
+      )}
     </>
   );
 };
