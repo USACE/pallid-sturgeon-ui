@@ -98,7 +98,7 @@ export const getBaseDefaultValues = ({ baseData }) => ({
 export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData }) => ({
   ...getBaseDefaultValues({ baseData }),
   setdate: dataEntryData?.setdate ? formatDate(dataEntryData?.setdate) : '',
-  subsample: dataEntryData?.setdate ?? 1,
+  subsample: dataEntryData?.subsample ?? 1,
   subsamplepass: dataEntryData?.subsamplepass ?? '',
   subsamplen: dataEntryData?.subsamplen ?? 'R',
   gearType: dataEntryData?.gearType ?? '',

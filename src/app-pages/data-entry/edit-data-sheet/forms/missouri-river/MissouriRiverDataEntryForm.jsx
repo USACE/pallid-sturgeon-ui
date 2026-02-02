@@ -94,6 +94,7 @@ const MissouriRiverDataEntryForm = connect(
       setValue,
     } = methods;
 
+    const setdate = watch('setdate');
     const macro = watch('macro');
     const gearCode = watch('gear');
     const gearType = watch('gearType');
@@ -104,6 +105,8 @@ const MissouriRiverDataEntryForm = connect(
     const structureMod = watch('structureMod');
     const u6 = watch('u6');
     const u7 = watch('u7');
+
+    console.warn('VALUES: ', getValues());
 
     const isNsts = u6 === 'NSTS';
     const isMicroRequired = microSegmentRequired.includes(segmentId);
@@ -136,7 +139,6 @@ const MissouriRiverDataEntryForm = connect(
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>
               <TextInput name='setdate' label='Setdate' type='date' required />
-              {/* @TODO: Add a button to autocomplete field with current date */}
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <TextInput name='subsample' label='Subsample' type='number' required />
