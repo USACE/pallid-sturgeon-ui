@@ -21,171 +21,295 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-const MoRiverMap = connect('selectAuthToken', 'selectApiRoot', ({ authToken, apiRoot }) => {
-  const containerRef = useRef(null); // points to div that Leaflet renders map onto
-  const instanceRef = useRef(null); // stores Leaflet map instance
-  const markerLayerRef = useRef(null); // holds marker
+const getYear = (setdate) => {
+  if (!setdate) return null;
+  const s = String(setdate);
 
-  const [allRows, setAllRows] = useState([]);
-  const [selectedOffices, setSelectedOffices] = useState([]);
+  const m1 = s.match(/^(\d{4})/);
+  if (m1) return Number(m1[1]);
 
-  const normalizedOffice = (v) =>
-    String(v ?? '')
-      .trim()
-      .toUpperCase();
+  const d = new Date(setdate);
+  if (!Number.isNaN(d.getTime())) return d.getFullYear();
+  return null;
 
-  useEffect(() => {
-    if (!containerRef.current || instanceRef.current) return;
-    // ^DOM isn't ready yet     ^prevent creating multiple map instances
+  // const s = String(setdate).trim();
+  // const m = s.match(/^(\d{1,2})-([A_Z]{3})-(\d{2,4})$/i);
+  // if (m) {
+  //   const yy = m[3];
+  //   if (yy.length === 4) return Number(yy);
+  //   const two = Number(yy);
+  //   return two <= 79 ? 2000 + two : 1900 + two;
+  // }
 
-    const map = L.map(containerRef.current).setView(
-      [39.5, -98.35], //lat,long - standard US location
-      4 //zoom
-    );
-    instanceRef.current = map; // ensure access/removal of this map later
+  // const y4 = s.match(/(19\d{2}|20\d{2})/);
+  // if (y4) return Number(y4[1]);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-    }).addTo(map);
+  // return null;
+};
 
-    markerLayerRef.current = L.layerGroup().addTo(map);
+const MoRiverMap = connect(
+  'selectAuthToken',
+  'selectApiRoot',
+  'selectUserRole',
+  'doUpdateUrl',
+  'selectRouteParams',
+  'doFetchMoRiverDataEntry',
+  ({ authToken, apiRoot, userRole, doUpdateUrl, routeParams, doFetchMoRiverDataEntry }) => {
+    const containerRef = useRef(null); // points to div that Leaflet renders map onto
+    const instanceRef = useRef(null); // stores Leaflet map instance
+    const markerLayerRef = useRef(null); // holds marker
 
-    return () => {
-      map.remove();
-      instanceRef.current = null;
-      markerLayerRef.current = null;
-    };
-  }, []);
-  // remove map if component unmounts
+    const [allRows, setAllRows] = useState([]);
+    const [selectedOffices, setSelectedOffices] = useState([]);
 
-  useEffect(() => {
-    const map = instanceRef.current;
-    const layer = markerLayerRef.current;
+    const [selectedYear, setSelectedYear] = useState(String(new Date().getFullYear()));
 
-    if (!map || !layer) return;
+    const normalizedOffice = (v) =>
+      String(v ?? '')
+        .trim()
+        .toUpperCase();
 
-    const testLatitude = 35.4689;
-    const testLongitude = -97.52;
+    const allowedOfficeSet = useMemo(() => {
+      const role = (userRole?.role || '').toUpperCase();
+      const office = normalizedOffice(userRole?.officeCode);
 
-    layer.clearLayers();
-    L.circleMarker([testLatitude, testLongitude], { radius: 20 }).bindPopup('TEST MARKER').addTo(layer);
+      if (role === 'ADMINISTRATOR') return null;
+      if (office) return new Set([office]);
 
-    if (!authToken) {
-      console.warn('[MoRiverMap] no auth token yet - showing test marker only');
-      setAllRows([]);
-      return;
-    }
+      return null;
+    }, [userRole]);
 
-    const base = apiRoot && typeof apiRoot === 'string' ? apiRoot : 'http://localhost:701';
-    const url = `${base}/psapi/moriverLocations?page=0&pageSize=5000`;
+    useEffect(() => {
+      if (!containerRef.current || instanceRef.current) return;
+      // ^DOM isn't ready yet     ^prevent creating multiple map instances
 
-    const run = async () => {
-      try {
-        console.log('[MoRiverMap] fetching:', url);
+      const map = L.map(containerRef.current).setView(
+        [39.5, -98.35], //lat,long - standard US location
+        4 //zoom
+      );
+      instanceRef.current = map; // ensure access/removal of this map later
 
-        const res = await fetch(url, {
-          method: 'GET',
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-            Accept: 'application/json',
-          },
-        });
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors',
+      }).addTo(map);
 
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error('[MoRiverMap] locations fetch failed', {
-            status: res.status,
-            url,
-            errText: errText.slice(0, 800),
-          });
-          setAllRows([]);
-          return;
-        }
+      markerLayerRef.current = L.layerGroup().addTo(map);
 
-        const json = await res.json();
-        const rows = json?.data?.items || json?.items || [];
-        const arr = Array.isArray(rows) ? rows : [];
-        setAllRows(arr);
+      return () => {
+        map.remove();
+        instanceRef.current = null;
+        markerLayerRef.current = null;
+      };
+    }, []);
+    // remove map if component unmounts
 
-        console.log('[MoRiverMap] rows:', arr.length, arr[0]);
-      } catch (err) {
-        console.error('Failed to load marker rows:', err);
+    useEffect(() => {
+      const map = instanceRef.current;
+      const layer = markerLayerRef.current;
+
+      if (!map || !layer) return;
+
+      const testLatitude = 35.4689;
+      const testLongitude = -97.52;
+
+      layer.clearLayers();
+      L.circleMarker([testLatitude, testLongitude], { radius: 20 }).bindPopup('TEST MARKER').addTo(layer);
+
+      if (!authToken) {
+        console.warn('[MoRiverMap] no auth token yet - showing test marker only');
         setAllRows([]);
+        return;
       }
+
+      const base = apiRoot && typeof apiRoot === 'string' ? apiRoot : 'http://localhost:701';
+      const url = `${base}/psapi/moriverLocations?page=0&pageSize=5000&orderby=mr_id desc`;
+
+      const run = async () => {
+        try {
+          console.log('[MoRiverMap] fetching:', url);
+
+          const res = await fetch(url, {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+              Accept: 'application/json',
+            },
+          });
+
+          if (!res.ok) {
+            const errText = await res.text();
+            console.error('[MoRiverMap] locations fetch failed', {
+              status: res.status,
+              url,
+              errText: errText.slice(0, 800),
+            });
+            setAllRows([]);
+            return;
+          }
+
+          const json = await res.json();
+          const rows = json?.data?.items || json?.items || [];
+          const arr = Array.isArray(rows) ? rows : [];
+          setAllRows(arr);
+
+          console.log('[MoRiverMap] rows:', arr.length, arr[0]);
+        } catch (err) {
+          console.error('Failed to load marker rows:', err);
+          setAllRows([]);
+        }
+      };
+
+      run();
+    }, [authToken, apiRoot]);
+
+    const yearOptions = useMemo(() => {
+      const years = Array.from(new Set(allRows.map((r) => getYear(r.setdate)).filter(Boolean))).sort((a, b) => b - a);
+      return years;
+    }, [allRows]);
+
+    useEffect(() => {
+      if (!yearOptions.length) return;
+
+      const sel = Number(selectedYear);
+      if (!yearOptions.includes(sel)) {
+        console.warn('[MoRiverMap] selectedYear not in data; falling back:', selectedYear, '->', yearOptions[0]);
+        setSelectedYear(String(yearOptions[0]));
+      }
+    }, [yearOptions, selectedYear]);
+
+    const filteredRows = useMemo(() => {
+      const isAdmin = userRole?.role === 'ADMINISTRATOR';
+      const userOffice = normalizedOffice(userRole?.officeCode);
+
+      // const selectedSet = new Set(selectedOffices.map(normalizedOffice));
+      // const yearNum = Number(selectedYear);
+
+      return (allRows || [])
+        .filter((r) => {
+          const lat = Number(r.startlatitude);
+          const lng = Number(r.startlongitude);
+          return Number.isFinite(lat) && Number.isFinite(lng) && lat > 0 && lng < 0;
+        })
+        .filter((r) => {
+          // const y = getYear(r.setdate);
+          // if (!y) return false;
+          // return y === yearNum;
+          if (!selectedYear) return true;
+          return String(r.setdate).startsWith(String(selectedYear));
+        })
+        .filter((r) => {
+          // if (selectedSet.size === 0) return true;
+          const office = normalizedOffice(r.fieldOffice || r.fieldoffice || '');
+          // if (allowedOfficeSet && !allowedOfficeSet.has(office)) if (selectedSet.size === 0) return true;
+          // return selectedSet.has(office);
+          if (!isAdmin) {
+            return office === userOffice;
+          }
+          if (selectedOffices.length === 0) return true;
+          return selectedOffices.map(normalizedOffice).includes(office);
+        });
+    }, [allRows, selectedOffices, selectedYear, userRole]);
+
+    // const yearOfficeScopedRows = useMemo(() => {
+    //   return (allRows || [])
+    //     .filter((r) => {
+    //       const lat = Number(r.startlatitude);
+    //       const lng = Number(r.startlongitude);
+    //       return Number.isFinite(lat) && Number.isFinite(lng) && lat > 0 && lng < 0;
+    //     })
+    //     .filter((r) => {
+    //       const y = getYear(r.setdate);
+    //       return y != null && Number(y) === Number(selectedYear);
+    //     })
+    //     .filter((r) => {
+    //       const office = normalizedOffice(r.fieldOffice || r.fieldoffice);
+    //       if (allowedOfficeSet && !allowedOfficeSet.has(office)) return false;
+    //       return true;
+    //     });
+    // }, [allRows, selectedYear, allowedOfficeSet]);
+
+    const officeCounts = useMemo(() => {
+      const counts = {};
+      for (const r of allRows) {
+        const office = normalizedOffice(r.fieldOffice || r.fieldoffice || '');
+        if (!office) continue;
+        counts[office] = (counts[office] || 0) + 1;
+      }
+      return counts;
+    }, [allRows]);
+
+    const officeList = useMemo(() => {
+      return Object.keys(officeCounts).sort();
+    }, [officeCounts]);
+
+    const toggleOffice = (office) => {
+      const norm = normalizedOffice(office);
+      setSelectedOffices((prev) => {
+        const set = new Set(prev.map(normalizedOffice));
+        if (set.has(norm)) set.delete(norm);
+        else set.add(norm);
+        return Array.from(set);
+      });
     };
 
-    run();
-  }, [authToken, apiRoot]);
+    const clearOffices = () => setSelectedOffices([]);
 
-  const officeCounts = useMemo(() => {
-    const counts = {};
-    for (const r of allRows) {
-      const office = (r.fieldOffice || '').trim();
-      if (!office) continue;
-      counts[office] = (counts[office] || 0) + 1;
-    }
-    return counts;
-  }, [allRows]);
+    useEffect(() => {
+      const map = instanceRef.current;
+      const layer = markerLayerRef.current;
+      if (!map || !layer) return;
 
-  const officeList = useMemo(() => {
-    return Object.keys(officeCounts).sort();
-  }, [officeCounts]);
+      const testLatitude = 35.4689;
+      const testLongitude = -97.52;
 
-  const filteredRows = useMemo(() => {
-    const selectedSet = new Set(selectedOffices.map(normalizedOffice));
+      layer.clearLayers();
+      L.circleMarker([testLatitude, testLongitude], { radius: 20 }).bindPopup('TEST MARKER').addTo(layer);
 
-    return (allRows || [])
-      .filter((r) => {
+      const bounds = [];
+      let added = 0;
+
+      const buildBtnUrl = ({ year, project, mrId, siteId }) => {
+        const qs =
+          `year=${encodeURIComponent(year ?? '')}` +
+          `&project=${encodeURIComponent(project ?? '')}` +
+          `&id=${encodeURIComponent(mrId ?? '')}` +
+          `&siteId=${encodeURIComponent(siteId ?? '')}`;
+        return `/site-data-entry?${qs}`;
+      };
+
+      (filteredRows || []).slice(0, 100).forEach((r) => {
         const lat = Number(r.startlatitude);
         const lng = Number(r.startlongitude);
-        return lat > 0 && lng < 0;
-      })
-      .filter((r) => {
-        if (selectedSet.size === 0) return true;
-        return selectedSet.has(normalizedOffice(r.fieldOffice));
-      });
-  }, [allRows, selectedOffices]);
 
-  useEffect(() => {
-    const map = instanceRef.current;
-    const layer = markerLayerRef.current;
-    if (!map || !layer) return;
+        const mrId = r.mrId ?? '';
+        const siteId = r.siteId ?? '';
+        const fieldOffice = r.fieldOffice ?? r.fieldoffice ?? '';
+        const year = getYear(r.setdate) ?? '';
+        const project = r.project;
+        const url = buildBtnUrl({ year, project, mrId, siteId });
+        const siteIdFromRoute = routeParams?.siteId;
+        const targetSiteId = siteId || siteIdFromRoute;
+        const route = `/sites-list/${targetSiteId}/missouri-river/${mrId}`;
 
-    const testLatitude = 35.4689;
-    const testLongitude = -97.52;
+        const btnId = `open-form-${mrId}-${siteId}`;
 
-    layer.clearLayers();
-    L.circleMarker([testLatitude, testLongitude], { radius: 20 }).bindPopup('TEST MARKER').addTo(layer);
+        const m = L.marker([lat, lng]);
 
-    const bounds = [];
-    let added = 0;
-
-    filteredRows.slice(0, 100).forEach((r) => {
-      const lat = Number(r.startlatitude);
-      const lng = Number(r.startlongitude);
-
-      const mrId = r.mrId ?? '';
-      const siteId = r.siteId ?? '';
-      const fieldOffice = r.fieldOffice ?? r.fieldoffice ?? '';
-      const year = r.setdate ? String(r.setdate).slice(0, 4) : '';
-
-      const m = L.marker([lat, lng]);
-
-      m.bindTooltip(
-        `<div style="font-size:12px; line-height:1.3">
+        m.bindTooltip(
+          `<div style="font-size:12px; line-height:1.3">
               <div><b>MRID: </b>${mrId}</div>
               <div><b>Site Id: </b>${siteId}</div>
               <div><b>Office: </b>${fieldOffice}</div>
               <div><b>Year: </b>${year}</div>
               </div>`,
-        {
-          sticky: true,
-          direction: 'top',
-          opacity: 0.95,
-        }
-      );
+          {
+            sticky: true,
+            direction: 'top',
+            opacity: 0.95,
+          }
+        );
 
-      m.bindPopup(`
+        m.bindPopup(`
                 <div style="min-width:240px; font-family: Arial, sans-serif;">
                 <div style="font-size:14px; font-weight:700; margin-bottom:6px;">
                 Missouri River Location
@@ -200,120 +324,174 @@ const MoRiverMap = connect('selectAuthToken', 'selectApiRoot', ({ authToken, api
               
               <hr style="margin:8px 0; opacity:0.3;" />
               
-              <div style="font-size:11px; opacity:0.75;">
-              Note: click "Download office" (coming soon) to cache markers for offline
+              <div style="display:flex; gap:8px;">
+              <button id="${btnId}" type="button" class="open-form-btn" style="padding:8px 10px; border-radius:6px; border 1px solid #ddd; background: #f7f7f7; cursor: pointer; font-weight:600;">
+              Open datasheet
+              </button>
               </div>
               </div>`);
 
-      m.addTo(layer);
-      bounds.push([lat, lng]);
-      added++;
-    });
+        m.on('popupopen', () => {
+          const el = document.getElementById(btnId);
+          if (!el) return;
 
-    console.log('[MoRiverMap] rendered markers:', added);
+          el.onclick = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
 
-    if (bounds.length === 1) {
-      map.setView(bounds[0], 12);
-    } else if (bounds.length > 1) {
-      map.fitBounds(bounds, { padding: [30, 30] });
-    }
-  }, [filteredRows]);
+            doFetchMoRiverDataEntry({ tableId: mrId }, true, true, true);
+          };
+        });
 
-  const toggleOffice = (office) => {
-    const norm = normalizedOffice(office);
-    setSelectedOffices((prev) => {
-      const set = new Set(prev.map(normalizedOffice));
-      if (set.has(norm)) set.delete(norm);
-      else set.add(norm);
-      return Array.from(set);
-    });
-  };
+        m.addTo(layer);
+        bounds.push([lat, lng]);
+        added++;
+      });
 
-  const clearOffices = () => setSelectedOffices([]);
+      if (bounds.length === 1) {
+        map.setView(bounds[0], 12);
+      } else if (bounds.length > 1) {
+        map.fitBounds(bounds, { padding: [30, 30] });
+      }
 
-  useEffect(() => {
-    if (!allRows.length) return;
-    console.log('[MoRiverMap] offices:', officeList);
-    console.log('[MoRiverMap] officeCounts sample:', officeCounts[officeList[0]]);
-  }, [allRows, officeList, officeCounts]);
+      console.log('[MoRiverMap] rendered markers:', added);
+    }, [filteredRows]);
 
-  return (
-    <div style={{ display: 'flex', height: '700px' }}>
-      {/* Left Filter Panel */}
-      <div style={{ width: 320, padding: 16, borderRight: '1px solid #ddd', overflowY: 'auto', background: '#fff' }}>
-        <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Missouri River Locations</div>
+    // useEffect(() => {
+    //   if (!allRows.length) return;
+    //   console.log('[MoRiverMap] offices:', officeList);
+    //   console.log('[MoRiverMap] officeCounts sample:', officeCounts[officeList[0]]);
+    // }, [allRows, officeList, officeCounts]);
 
-        {/* <div style={{ marginBottom: 12 }}>
+    return (
+      <div style={{ display: 'flex', height: '700px' }}>
+        {/* Left Filter Panel */}
+        <div style={{ width: 320, padding: 16, borderRight: '1px solid #ddd', overflowY: 'auto', background: '#fff' }}>
+          <div style={{ fontSize: 22, fontWeight: 700, marginBottom: 8 }}>Missouri River Locations</div>
+
+          {/* <div style={{ marginBottom: 12 }}>
           <div style={{ fontSize: 13, marginBottom: 6 }}>Filter</div>
         </div> */}
 
-        <div style={{ margin: '10px 0', fontSize: 14 }}>
-          <b>Results Count:</b> {filteredRows.length}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', marginTop: 10 }}>
-          <div style={{ fontWeight: 700, fontSize: 14 }}>Field Offices</div>
-          {selectedOffices.length > 0 && (
-            <button
-              onClick={clearOffices}
-              style={{
-                marginLeft: 'auto',
-                border: 'none',
-                background: 'transparent',
-                color: '#0066cc',
-                cursor: 'pointer',
-              }}
+          {/* Year selector */}
+          <div style={{ marginBottom: 12 }}>
+            <div style={{ fontSize: 13, marginBottom: 6 }}>Year</div>
+            <select
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value)}
+              style={{ width: '100%', padding: 8, borderRadius: 6, border: '1px solid #ccc' }}
             >
-              Clear
-            </button>
+              {/* Keep a small range for now; you can expand later */}
+              {yearOptions.length === 0 ? (
+                <option value={selectedYear}>{selectedYear}</option>
+              ) : (
+                yearOptions.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))
+              )}
+            </select>
+            {/* <div style={{ marginTop: 6, fontSize: 11, color: '#667' }}>Default is current year ({currentYear})</div> */}
+          </div>
+
+          <div style={{ margin: '10px 0', fontSize: 14 }}>
+            <b>Results Count:</b> {filteredRows.length}
+          </div>
+
+          {userRole?.role === 'ADMINISTRATOR' && (
+            <div style={{ display: 'flex', alignItems: 'center', marginTop: 10 }}>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>Field Offices</div>
+              {selectedOffices.length > 0 && (
+                <button
+                  onClick={clearOffices}
+                  style={{
+                    marginLeft: 'auto',
+                    border: 'none',
+                    background: 'transparent',
+                    color: '#0066cc',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           )}
-        </div>
 
-        <div style={{ marginTop: 10 }}>
-          {officeList.length === 0 && (
-            <div style={{ fontSize: 12, color: '#667' }}>No offices found.</div>
+          <div style={{ marginTop: 10 }}>
+            {officeList.length === 0 && (
+              <div style={{ fontSize: 12, color: '#667' }}>
+                No offices found for {selectedYear} (or user has restricted access).
+              </div>
+            )}
+          </div>
+
+          {userRole?.role === 'ADMINISTRATOR' && (
+            <>
+              {officeList.map((office) => {
+                const count = officeCounts[office] || 0;
+                const checked = selectedOffices.map(normalizedOffice).includes(normalizedOffice(office));
+
+                return (
+                  <label
+                    key={office}
+                    style={{ display: 'flex', alignItems: 'center', padding: '6px 0', cursor: 'pointer', fontSize: 13 }}
+                  >
+                    <input
+                      type='checkbox'
+                      checked={checked}
+                      onChange={() => toggleOffice(office)}
+                      style={{ marginRight: 10 }}
+                    />
+                    <span>{office}</span>
+                    <span
+                      style={{
+                        marginLeft: 'auto',
+                        fontSize: 12,
+                        color: '#444',
+                        background: '#f2f2f2',
+                        padding: '2px 8px',
+                        borderRadius: 999,
+                      }}
+                    >
+                      {count}
+                    </span>
+                  </label>
+                );
+              })}
+            </>
           )}
+          {userRole?.role !== 'ADMINISTRATOR' && (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', padding: '6px 0', fontSize: 13 }}>
+                {/* <div style={{ width: 22, marginRight: 10 }} /> */}
+                <span style={{ fontWeight: 600 }}>Field Office</span>
 
-          {officeList.map((office) => {
-            const count = officeCounts[office] || 0;
-            const checked = selectedOffices.map(normalizedOffice).includes(normalizedOffice(office));
-
-            return (
-              <label
-                key={office}
-                style={{ display: 'flex', alignItems: 'center', padding: '6px 0', cursor: 'pointer', fontSize: 13 }}
-              >
-                <input
-                  type='checkbox'
-                  checked={checked}
-                  onChange={() => toggleOffice(office)}
-                  style={{ marginRight: 10 }}
-                />
-                <span>{office}</span>
                 <span
                   style={{
                     marginLeft: 'auto',
                     fontSize: 12,
-                    color: '#444',
-                    background: '#f2f2f2',
-                    padding: '2px 8px',
+                    color: '#333',
+                    background: '#eafeff',
+                    padding: '2px 10px',
                     borderRadius: 999,
                   }}
                 >
-                  {count}
+                  {userRole?.officeCode}
                 </span>
-              </label>
-            );
-          })}
+              </div>
+            </>
+          )}
+        </div>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <div style={{ height: '600px', width: '100%' }}>
+            <div ref={containerRef} style={{ height: '100%', width: '100%' }} />
+          </div>
         </div>
       </div>
-      <div style={{ flex: 1, position: 'relative' }}>
-        <div style={{ height: '600px', width: '100%' }}>
-          <div ref={containerRef} style={{ height: '100%', width: '100%' }} />
-        </div>
-      </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default MoRiverMap;
