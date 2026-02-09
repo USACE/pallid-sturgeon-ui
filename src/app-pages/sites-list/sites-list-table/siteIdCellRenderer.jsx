@@ -35,7 +35,7 @@ const SiteIdCellRenderer = connect(
         doDomainBendRnFetch();
         doFetchUsers();
         doDomainSeasonsFetch();
-        doDomainSegmentsFetch();
+        doDomainSegmentsFetch({ office: data?.fieldoffice, project: data?.projectId });
         doModalOpen(SitesFormModal, { edit: true, data: data });
       } else {
         doSitesFetch({ siteId: data?.siteId }, handleCallback());

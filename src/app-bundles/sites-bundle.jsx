@@ -94,7 +94,9 @@ export default {
         store.doSetLoadingState(false);
         if (!err && body?.status === ApiStatuses.Success) {
           dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body?.data });
-          siteId && dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.data?.items?.[0] });
+          if (actualSiteId) {
+            siteId && dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.data?.items?.[0] });
+          }
         } else {
           dispatch({ type: 'SITES_FETCH_ERROR', payload: err });
         }
