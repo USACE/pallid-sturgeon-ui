@@ -1,6 +1,6 @@
 import { useFormContext } from 'react-hook-form';
 import { Label, Select, Tooltip } from '@trussworks/react-uswds';
-import { mdiHelpCircle } from '@mdi/js';
+import { mdiAlert, mdiHelpCircle } from '@mdi/js';
 import classnames from 'classnames';
 
 import Icon from '@components/icon/icon';
@@ -23,6 +23,7 @@ const SelectInput = ({
   validations,
   tooltip,
   hint,
+  warning,
   ...customProps
 }) => {
   const {
@@ -91,6 +92,12 @@ const SelectInput = ({
           {children}
         </Select>
       </div>
+      {warning && (
+        <div className='usa-hint warning-message' id={`${name}_hint`}>
+          <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+          {warning}
+        </div>
+      )}
     </>
   );
 };

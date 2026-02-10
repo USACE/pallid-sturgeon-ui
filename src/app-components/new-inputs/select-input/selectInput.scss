@@ -38,3 +38,11 @@
 .select-container {
   @include select-container-styles;
 }
+
+div.usa-hint {
+  &.warning-message {
+    font-style: italic;
+    font-size: 15px;
+    color: $color-black;
+  }
+}

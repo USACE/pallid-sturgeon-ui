@@ -1,11 +1,13 @@
 import { Controller, useFormContext } from 'react-hook-form';
 import Select from 'react-select';
 import { Label, Tooltip } from '@trussworks/react-uswds';
+import { mdiAlert, mdiHelpCircle } from '@mdi/js';
 
 import { baseStyle, customSelectStyles, customSelectStylesNonRequired } from './comboBoxHelper';
 
 import Icon from '@components/icon/icon';
-import { mdiHelpCircle } from '@mdi/js';
+
+import './comboBox.scss';
 
 const ComboBox = ({
   closeMenuOnSelect = false,
@@ -21,6 +23,7 @@ const ComboBox = ({
   readOnly,
   required,
   tooltip,
+  warning,
 }) => {
   const {
     control,
@@ -78,6 +81,12 @@ const ComboBox = ({
           </>
         )}
       />
+      {warning && (
+        <div className='usa-hint warning-message' id={`${name}_hint`}>
+          <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+          {warning}
+        </div>
+      )}
     </>
   );
 };

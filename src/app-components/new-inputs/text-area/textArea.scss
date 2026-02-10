@@ -25,3 +25,11 @@ textarea.usa-textarea.read-only-multiselect {
   @include m.input-styles;
   background-color: $color-primary-light !important;
 }
+
+div.usa-hint {
+  &.warning-message {
+    font-style: italic;
+    font-size: 15px;
+    color: $color-black;
+  }
+}

@@ -1,10 +1,11 @@
 import { useMemo, useRef } from 'react';
 import { useFormContext } from 'react-hook-form';
 import classNames from 'classnames';
-
+import { mdiAlert } from '@mdi/js';
 import { Textarea as UswdsTextArea, Label } from '@trussworks/react-uswds';
 
 import useListener from '@hooks/useListener';
+import Icon from '@src/app-components/icon/icon';
 
 import './textArea.scss';
 
@@ -21,6 +22,7 @@ const TextArea = ({
   required,
   rowCount = 3,
   validations,
+  warning,
 }) => {
   const {
     formState: { errors },
@@ -84,6 +86,12 @@ const TextArea = ({
         {...rest}
       />
       <div className='usa-hint'>{countText}</div>
+      {warning && (
+        <div className='usa-hint warning-message' id={`${name}_hint`}>
+          <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+          {warning}
+        </div>
+      )}
     </div>
   );
 };
