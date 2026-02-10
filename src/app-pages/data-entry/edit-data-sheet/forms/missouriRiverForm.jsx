@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useState } from 'react';
+import { useEffect, useReducer, useState, useRef } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Button from '@components/button';
@@ -21,6 +21,7 @@ import {
 import { createMesoOptions, createStructureFlowOptions, createStructureModOptions } from '@pages/data-entry/helpers';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import { formatDate } from '@src/utils/helpers';
+import { useGpsCapture } from '@src/app-pages/map/gpsCapture';
 
 import '../../../data-summaries/data-summary.scss';
 
@@ -36,6 +37,12 @@ const reducer = (state, action) => {
     default:
       return state;
   }
+};
+
+const GPS_OPTIONS = {
+  enableHighAccuracy: true,
+  timeout: 15000,
+  maximumAge: 0,
 };
 
 const MissouriRiverForm = connect(
@@ -100,6 +107,9 @@ const MissouriRiverForm = connect(
     const [isNoTurbidity, setIsNoTurbidity] = useState(false);
     const [isNoVelocity, setIsNoVelocity] = useState(false);
 
+    const didInitEditRef = useRef(false);
+    const didInitCreateRef = useRef(false);
+
     const siteId = routeParams?.siteId;
     const mrId = routeParams.mrId;
     const formComplete = true;
@@ -120,6 +130,57 @@ const MissouriRiverForm = connect(
         current: true,
       },
     ];
+
+    // const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
+
+    // const fmtTimeHHMM = (iso) => {
+    //   try {
+    //     const d = new Date(iso);
+    //     const hh = String(d.getHours()).padStart(2, '0');
+    //     const mm = String(d.getMinutes()).padStart(2, '0');
+    //     return `${hh}:${mm}`;
+    //   } catch {
+    //     return '';
+    //   }
+    // };
+
+    // const handleCaptureStart = async () => {
+    //   try {
+    //     const { best } = await captureBestOf(5, 700);
+
+    //     setField('startlatitude', best.lat);
+    //     setField('startlongitude', best.lng);
+
+    //     setField('starttime', fmtTimeHHMM(best.capturedAt));
+
+    //     window.alert(`Captured START\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+    //   } catch (e) {
+    //     console.error(e);
+    //     window.alert(`GPS capture failed: ${e.message}`);
+    //   }
+    // };
+
+    // const handleCaptureStop = async () => {
+    //   try {
+    //     const { best } = await captureBestOf(5, 700);
+
+    //     setField('stoplatitude', best.lat);
+    //     setField('stoplongitude', best.lng);
+    //     setField('stoptime', fmtTimeHHMM(best.capturedAt));
+
+    //     window.alert(`Captured STOP\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+    //   } catch (e) {
+    //     console.error(e);
+    //     window.alert(`GPS capture failed: ${e.message}`);
+    //   }
+    // };
+
+    // const setField = (field, value) =>
+    //   dispatch({
+    //     type: 'UPDATE_INPUT',
+    //     field,
+    //     payload: value,
+    //   });
 
     const handleChange = (e) => {
       dispatch({
@@ -200,24 +261,48 @@ const MissouriRiverForm = connect(
 
     useEffect(() => {
       // If there is existing Missouri River data entry
-      if (isEditForm) {
-        dispatch({
-          type: 'INITIALIZE_FORM',
-          payload: dataEntryData,
-        });
+      if (!isEditForm) {
+        const key = String(siteId ?? '');
+        if (didInitCreateRef.current === key) return;
 
-        // Format Date
-        dataEntryData?.setdate && handleSelect('setdate', formatDate(dataEntryData.setdate));
+        didInitCreateRef.current = key;
+        didInitEditRef.current = false;
 
-        // Set state of checkboxes
-        setIsNoTurbidity(dataEntryData?.noTurbidity === 'Y' ? true : false);
-        setIsNoVelocity(dataEntryData?.noVelocity === 'Y' ? true : false);
-      } else {
-        // Reset data if adding new Missouri River datasheet
         doResetMoRiverDataEntryData();
         handleSelect('siteId', siteId);
+        setIsNoTurbidity(false);
+        setIsNoVelocity(false);
+        return;
       }
-    }, [isEditForm, dataEntryData]);
+      const mrIdLoaded = dataEntryData?.mrId;
+      if (!mrIdLoaded) return;
+
+      if (didInitEditRef.current === mrIdLoaded) return;
+      didInitEditRef.current = mrIdLoaded;
+      didInitCreateRef.current = false;
+
+      dispatch({
+        type: 'INITIALIZE_FORM',
+        payload: dataEntryData,
+      });
+
+      // Format Date
+      // dataEntryData?.setdate && handleSelect('setdate', formatDate(dataEntryData.setdate));
+
+      // // Set state of checkboxes
+      // setIsNoTurbidity(dataEntryData?.noTurbidity === 'Y' ? true : false);
+      // setIsNoVelocity(dataEntryData?.noVelocity === 'Y' ? true : false);
+      // } else {
+      //   // Reset data if adding new Missouri River datasheet
+      //   doResetMoRiverDataEntryData();
+      //   handleSelect('siteId', siteId);
+      // }
+      if (dataEntryData?.setdate) {
+        handleSelect('setdate', formatDate(dataEntryData.setdate));
+      }
+      setIsNoTurbidity(dataEntryData?.noTurbidity === 'Y');
+      setIsNoVelocity(dataEntryData?.noVelocity === 'Y');
+    }, [isEditForm, siteId, dataEntryData?.mrId]);
 
     useEffect(() => {
       // netrivermile in baseData
@@ -502,6 +587,19 @@ const MissouriRiverForm = connect(
                                 isRequired
                               />
                             </div>
+                            {/* <div className='col-md-3'>
+                              <button type='button' onClick={handleCaptureStart}>
+                                Capture Start GPS
+                              </button>
+                              <button type='button' onClick={handleCaptureStop}>
+                                Capture Stop GPS
+                              </button>
+
+                              <span style={{ fontSize: 12, opacity: 0.75 }}>
+                                GPS: {permission}
+                                {lastError ? ` - ${lastError.message}` : ''}
+                              </span>
+                            </div> */}
                           </Row>
                           <Row>
                             <div className='col-md-3'>
