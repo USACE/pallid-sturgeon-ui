@@ -54,13 +54,13 @@ const DisplayIcon = ({ onClick, iconSize, isError, title }) => {
 };
 
 const Tooltip = connect(
-  'doModalOpen',
-  ({ doModalOpen, content, header, iconSize = 'medium', isError, title = 'view more information' }) => {
+  'doSecondaryModalOpen',
+  ({ doSecondaryModalOpen, content, header, iconSize = 'medium', isError, title = 'view more information' }) => {
     const handleTooltipOpen = useCallback(() => {
       const contentLength = getContentLength(content);
       if (!contentLength) return;
 
-      doModalOpen(TooltipModal, {
+      doSecondaryModalOpen(TooltipModal, {
         isError: isError,
         msg: content,
         size: 'md',
