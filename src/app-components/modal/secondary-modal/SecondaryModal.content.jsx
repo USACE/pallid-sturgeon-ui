@@ -4,7 +4,7 @@ import ModalHeader from './SecondaryModal.header';
 import useListener from '@hooks/useListener';
 import classNames from 'classnames';
 
-import '@components/modal/modal.scss';
+import '../primary-modal/modal.scss';
 
 const sizeMap = {
   sm: false,
