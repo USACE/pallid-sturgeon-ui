@@ -1,0 +1,30 @@
+@use '@styles/_variables';
+
+.secondary-modal-header {
+  padding: 1rem 1rem;
+  border-bottom: 1px solid variables.$color-form-light;
+  border-top-left-radius: calc(0.3rem - 1px);
+  border-top-right-radius: calc(0.3rem - 1px);
+  margin-bottom: 0 !important;
+
+  .modal-title {
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
+.secondary-modal-icon {
+  font-size: 1.7rem;
+  pointer-events: none;
+  min-width: 1.5rem;
+}
+
+#secondary-modal-content {
+  .primary-modal-footer {
+    margin-bottom: 0;
+  }
+}
+
+div.usa-modal[data-secondary-modal] .modal-body {
+  padding-bottom: 10px;
+}
