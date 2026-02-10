@@ -1,6 +1,5 @@
 import React, { useRef, useCallback, useEffect, useState, useMemo } from 'react';
 import { connect } from 'redux-bundler-react';
-import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import { createColumnHelper } from '@tanstack/react-table';
@@ -9,9 +8,8 @@ import _isEqual from 'lodash/isEqual';
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
 
-import { frequencyIdOptions } from '../../edit-data-sheet/forms/_shared/selectHelper';
-import { ValidationMessages } from '@src/utils/enums';
-import { latRegex, lngRegex } from '@src/utils/regex';
+import { frequencyIdOptions } from '../../../edit-data-sheet/forms/_shared/selectHelper';
+import { telemetryDataEntrySchema } from './TelemetryDataEntry.validation';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
@@ -45,46 +43,8 @@ const TelemetryDataEntry = connect(
 
     const defaultValues = { seId: dataEntryLastParams.seId };
 
-    // Field validations
-    const schema = yup.object().shape({
-      bend: yup.string().nullable(),
-      radioTagNum: yup.number().required(ValidationMessages.FieldRequired),
-      frequencyIdCode: yup.number().required(ValidationMessages.SelectRequired),
-      captureDate: yup.string().nullable(),
-      captureLatitude: yup
-        .string()
-        .test(
-          'latFormat',
-          'Latitude format is incorrect. Must be +-XX.XXXXXX and include at least 6 decimal places.',
-          (val) => latRegex.test(val)
-        )
-        .required(ValidationMessages.FieldRequired),
-      captureLongitude: yup
-        .string()
-        .test(
-          'lngFormat',
-          'Longitude format is incorrect. Must be +-XXX.XXXXXX and include at least 6 decimal places.',
-          (val) => lngRegex.test(val)
-        )
-        .required(ValidationMessages.FieldRequired),
-      positionConfidence: yup.number().required(ValidationMessages.FieldRequired),
-      mesoId: yup.string().nullable(),
-      depth: yup.number().nullable(),
-      macroId: yup.string().nullable(),
-      temp: yup.number().nullable(),
-      conductivity: yup.number().nullable(),
-      turbidity: yup.number().nullable(),
-      silt: yup.number().nullable(),
-      sand: yup.number().nullable(),
-      gravel: yup.number().nullable(),
-      comments: yup.string().nullable(),
-      editInitials: yup.string().nullable(),
-      lastEditComment: yup.string().nullable(),
-      checkby: yup.string().nullable(),
-    });
-
     const methods = useForm({
-      resolver: yupResolver(schema),
+      resolver: yupResolver(telemetryDataEntrySchema),
       mode: 'onBlur',
       defaultValues: defaultValues,
     });
@@ -295,8 +255,6 @@ const TelemetryDataEntry = connect(
     //Reset the dirty states of the fields after a save.
     // useResetDirtyFields(isTouched, requestAPIData, reset, trigger);
 
-    console.warn('telemetry data: ', data);
-
     return (
       <FormProvider {...methods}>
         <DataEntryTable
@@ -312,7 +270,7 @@ const TelemetryDataEntry = connect(
           rowErrorCallback={setTableErrors}
           tableVersion='TelemetryTable'
           updateSourceData={handleUpdateData}
-          validationSchema={schema}
+          validationSchema={telemetryDataEntrySchema}
         />
       </FormProvider>
     );

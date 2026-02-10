@@ -12,7 +12,7 @@ import Breadcrumb from '@src/app-components/breadcrumb';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import { searchTypeOptions } from './_shared/selectHelper';
 import { formatDate } from '@src/utils/helpers';
-import TelemetryDataEntry from '../../datasheets/tables/TelemetryDataEntry';
+import TelemetryDataEntry from '../../datasheets/tables/telemetry/TelemetryDataEntry';
 
 const reducer = (state, action) => {
   switch (action.type) {
