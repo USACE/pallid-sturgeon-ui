@@ -10,7 +10,7 @@ import './textInput.scss';
 const TextInput = ({
   className = 'width-full',
   hint,
-  showOptionalText = true,
+  showOptionalText = false,
   label,
   type = 'text',
   maxLength = type === 'text' ? 256 : null,

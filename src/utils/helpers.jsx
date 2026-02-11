@@ -7,7 +7,8 @@ export const getLabelTextById = (id) => {
 
 export const formatDate = (dateStr) => {
   const subStr = 'T';
-  if (dateStr.includes(subStr)) {
+  if (!dateStr) return;
+  if (dateStr?.includes(subStr)) {
     return dateStr.split('T')[0];
   }
   return dateStr;

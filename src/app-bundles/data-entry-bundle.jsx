@@ -3,6 +3,8 @@ import { tSuccess, tError, tWarning } from '@common/toast/toastHelper';
 import { queryFromObject } from '@src/utils';
 import { ApiStatuses } from '@src/utils/enums';
 
+const rootUrl = '/psapi/DataEntry/';
+
 export default {
   name: 'dataEntry',
   getReducer: () => {
@@ -191,7 +193,7 @@ export default {
       dispatch({ type: 'DATA_ENTRY_FETCH_START', payload: params });
       const toastId = ignoreToast ? toast.loading('Finding Missouri River datasheet(s)...') : null;
 
-      const url = `/psapi/moriverDataEntry${queryFromObject(params)}`;
+      const url = `${rootUrl}getMoriverDataEntry${queryFromObject(params)}`;
 
       apiGet(url, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
@@ -463,15 +465,15 @@ export default {
 
   // DATA ENTRY INSERTS
 
-  doSaveMoRiverDataEntry:
+  doAddMoRiverDataEntry:
     (formData) =>
     ({ dispatch, store, apiPost }) => {
       const toastId = toast.loading('Saving datasheet...');
 
-      const url = '/psapi/moriverDataEntry';
+      const url = `${rootUrl}addMoriverDataEntry`;
 
-      apiPost(url, formData, (err, _body) => {
-        if (!err) {
+      apiPost(url, formData, (err, body) => {
+        if (!err && body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
           store.doUpdateUrl('/sites-list/datasheet');
@@ -587,10 +589,10 @@ export default {
     ({ dispatch, store, apiPut }) => {
       const toastId = toast.loading('Saving datasheet...');
 
-      const url = '/psapi/moriverDataEntry';
+      const url = `${rootUrl}updateMoriverDataEntry`;
 
-      apiPut(url, formData, (err, _body) => {
-        if (!err) {
+      apiPut(url, formData, (err, body) => {
+        if (!err && body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
           store.doUpdateUrl('/sites-list/datasheet');

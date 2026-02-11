@@ -12,7 +12,7 @@ const SelectInput = ({
   className = 'width-full',
   defaultOption = '-Select Option-',
   group,
-  showOptionalText = true,
+  showOptionalText = false,
   label,
   name,
   onBlur = () => {},
