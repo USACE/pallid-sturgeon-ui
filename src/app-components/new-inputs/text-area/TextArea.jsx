@@ -21,6 +21,7 @@ const TextArea = ({
   readOnly,
   required,
   rowCount = 3,
+  showOptionalText = false,
   validations,
   warning,
 }) => {
@@ -59,7 +60,11 @@ const TextArea = ({
       {label && (
         <Label htmlFor={name}>
           <span id={`${name}_label`}>{label}</span>
-          {required ? <span className='asterisk-color'>*</span> : <span className='optional-text'>(optional)</span>}
+          {required ? (
+            <span className='asterisk-color'>*</span>
+          ) : (
+            showOptionalText && <span className='optional-text'> (optional)</span>
+          )}
         </Label>
       )}
       {hint && (

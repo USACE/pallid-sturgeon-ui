@@ -11,7 +11,7 @@ import './comboBox.scss';
 
 const ComboBox = ({
   closeMenuOnSelect = false,
-  showOptionalText = true,
+  showOptionalText = false,
   handleBlur,
   handleChange,
   isLoading,
