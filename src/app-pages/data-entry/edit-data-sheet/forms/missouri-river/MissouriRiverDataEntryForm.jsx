@@ -16,6 +16,8 @@ import '../../../dataentry.scss';
 
 const microSegmentRequired = [8, 9, 10, 11, 13, 14];
 
+const u6Options = [{ value: 'MNCF' }, { value: 'NSTS' }];
+
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
 const createDropdownOptions = (data) => {
@@ -29,6 +31,13 @@ const createDropdownOptions = (data) => {
       text: description,
     };
   });
+};
+
+const removeDuplicates = (arr) => {
+  const serializedArray = arr.map(JSON.stringify);
+  const uniqueSet = new Set(serializedArray);
+  const uniqueArray = Array.from(uniqueSet).map(JSON.parse);
+  return uniqueArray;
 };
 
 const MissouriRiverDataEntryForm = connect(
@@ -46,10 +55,18 @@ const MissouriRiverDataEntryForm = connect(
       macroMesos,
       microHabitats,
       microStructures,
+      estimations,
+      u7Options,
+      microSetSite,
+      setSite3Options,
     } = lookupData;
     const { fieldoffice, season, projectId, segmentId } = baseData;
     const [gearCodeOptions, setGearCodeOptions] = useState(gearCodes);
     const [mesoOptions, setMesoOptions] = useState(mesos);
+    const [structureFlowOptions, setStructureFlowOptions] = useState([]);
+    const [structureModOptions, setStructureModOptions] = useState([]);
+    const [ss1Options, setSs1Options] = useState([]);
+    const [ss2Options, setSs2Options] = useState([]);
 
     const getSeasonGearOfficeOptions = (season, fieldOffice, project) => {
       const options = filteredGearCodes.filter(
@@ -63,9 +80,34 @@ const MissouriRiverDataEntryForm = connect(
       return options.map((item) => ({ code: item.mesoHabitatCode }));
     };
 
-    const getMicroStructureFlowOptions = (microStructure) => {
-      const options = microHabitats.filter((item) => item.microStructureCode === microStructure);
-      return options.map((item) => ({ code: item.structureFlowCode, description: item.structureFlow }));
+    const getStructureFlowOptions = (microStructure) => {
+      const options = microHabitats.filter((item) => Number(item.microStructureCode) === Number(microStructure));
+      const filteredOptions = options.map((item) => ({
+        code: item.structureFlowCode,
+        description: item.structureFlow,
+      }));
+      return removeDuplicates(filteredOptions);
+    };
+
+    const getStructureModOptions = (structureFlow) => {
+      const options = microHabitats.filter((item) => Number(item.structureFlowCode) === Number(structureFlow));
+      const filteredOptions = options.map((item) => ({
+        code: item.structureModCode,
+        description: item.structureMod,
+      }));
+      return removeDuplicates(filteredOptions);
+    };
+
+    const getSs1Options = (microStructure) => {
+      const options = microSetSite.filter((item) => Number(item.microStructureCode) === Number(microStructure));
+      const filteredOptions = options.map((item) => ({ code: item.ss1Code, description: item.ss1Description }));
+      return removeDuplicates(filteredOptions);
+    };
+
+    const getSs2Options = (setSite1) => {
+      const options = microSetSite.filter((item) => Number(item.ss1Code) === Number(setSite1));
+      const filteredOptions = options.map((item) => ({ code: item.ss2Code, description: item.ss2Description }));
+      return removeDuplicates(filteredOptions);
     };
 
     const handleMesoOptions = useCallback(
@@ -106,12 +148,11 @@ const MissouriRiverDataEntryForm = connect(
     const subsamplepass = watch('subsamplepass');
     const micro = watch('micro');
     const microStructure = watch('microStructure');
+    const setSite1 = watch('setSite1');
     const structureFlow = watch('structureFlow');
-    const structureMod = watch('structureMod');
     const u6 = watch('u6');
     const u7 = watch('u7');
 
-    const isNsts = u6 === 'NSTS';
     const isMicroRequired = microSegmentRequired.includes(segmentId);
 
     // Set R/N value
@@ -130,6 +171,26 @@ const MissouriRiverDataEntryForm = connect(
       setValue('meso', '', { shouldValidate: true });
       handleMesoOptions(mesos, gearType, gearCode, macro, season);
     }, [mesos, gearType, gearCode, macro, season]);
+
+    // Set Structure Flow and SetSite1 options and reset values when necessary
+    useEffect(() => {
+      setValue('setSite1', '', { shouldValidate: true });
+      setValue('structureFlow', '', { shouldValidate: true });
+      setSs1Options(getSs1Options(microStructure));
+      setStructureFlowOptions(getStructureFlowOptions(microStructure));
+    }, [microStructure]);
+
+    // Set Structure Mod options and reset Structure Mod value when necessary
+    useEffect(() => {
+      setValue('structureMod', '', { shouldValidate: true });
+      setStructureModOptions(getStructureModOptions(structureFlow));
+    }, [structureFlow]);
+
+    // Set SetSite1 options and reset SetSite1 value when necessary
+    useEffect(() => {
+      setValue('setSite2', '', { shouldValidate: true });
+      setSs2Options(getSs2Options(setSite1));
+    }, [setSite1]);
 
     useEffect(() => {
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
@@ -192,7 +253,7 @@ const MissouriRiverDataEntryForm = connect(
             <Grid tablet={{ col: 4 }} className='border-right'>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 6 }}>
-                  <SelectInput name='macro' label='Macro' required={isNsts} readOnly={!isNsts}>
+                  <SelectInput name='macro' label='Macro'>
                     {createDropdownOptions(macros).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.value}
@@ -201,7 +262,7 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 6 }}>
-                  <SelectInput name='meso' label='Meso' required={isNsts} readOnly={!isNsts}>
+                  <SelectInput name='meso' label='Meso'>
                     {createDropdownOptions(mesoOptions).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.value}
@@ -212,12 +273,7 @@ const MissouriRiverDataEntryForm = connect(
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 6 }}>
-                  <TextInput
-                    name='temp'
-                    label='Temp (c)'
-                    type='number'
-                    required={projectId === 1 || projectId === 2 || isNsts}
-                  />
+                  <TextInput name='temp' label='Temp (c)' type='number' required />
                 </Grid>
                 <Grid tablet={{ col: 6 }}>
                   <TextInput name='width' label='Width' type='number' />
@@ -228,26 +284,10 @@ const MissouriRiverDataEntryForm = connect(
             <Grid tablet={{ col: 8 }}>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput
-                    type='number'
-                    name='micro'
-                    label='Micro'
-                    required={isMicroRequired || projectId === 2}
-                    readOnly={microStructure || structureFlow || structureMod}
-                  />
+                  <TextInput type='number' name='micro' label='Micro' required />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput
-                    name='microStructure'
-                    label='Micro Structure'
-                    required={
-                      (!micro ? isMicroRequired : false) ||
-                      projectId === 1 ||
-                      projectId == 2 ||
-                      isNsts ||
-                      season === 'IRC'
-                    }
-                  >
+                  <SelectInput name='microStructure' label='Micro Structure' required>
                     {createDropdownOptions(microStructures).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -257,36 +297,50 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
                   <SelectInput name='structureFlow' label='Structure Flow' required={!micro ? isMicroRequired : false}>
-                    {createDropdownOptions(getMicroStructureFlowOptions(microStructure)).map((item, index) => (
+                    {createDropdownOptions(structureFlowOptions).map((item, index) => (
                       <option key={index + 1} value={item.value}>
-                        {item.value}
+                        {item.text}
                       </option>
                     ))}
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput
-                    name='structureMod'
-                    label='Structure Mod'
-                    required={
-                      (!micro ? isMicroRequired : false) ||
-                      projectId === 1 ||
-                      projectId == 2 ||
-                      isNsts ||
-                      season === 'IRC'
-                    }
-                  ></SelectInput>
+                  <SelectInput name='structureMod' label='Structure Mod' required>
+                    {createDropdownOptions(structureModOptions).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </Grid>
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }} offset={3}>
-                  <SelectInput name='setSite1' label='Set Site 1'></SelectInput>
+                  <SelectInput name='setSite1' label='Set Site 1'>
+                    {createDropdownOptions(ss1Options).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='setSite2' label='Set Site 2'></SelectInput>
+                  <SelectInput name='setSite2' label='Set Site 2'>
+                    {createDropdownOptions(ss2Options).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='setSite3' label='Set Site 3'></SelectInput>
+                  <SelectInput name='setSite3' label='Set Site 3'>
+                    {createDropdownOptions(setSite3Options).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </Grid>
               </Grid>
             </Grid>
@@ -359,10 +413,22 @@ const MissouriRiverDataEntryForm = connect(
                   <TextInput name='u5' label='U5' />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='u6' label='U6'></SelectInput>
+                  <SelectInput name='u6' label='U6'>
+                    {u6Options.map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.value}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='u7' label='U7'></SelectInput>
+                  <SelectInput name='u7' label='U7'>
+                    {createDropdownOptions(u7Options).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </Grid>
               </Grid>
               <Grid row gap='md'>
@@ -389,7 +455,13 @@ const MissouriRiverDataEntryForm = connect(
             <Grid tablet={{ col: 4 }} className='border-right'>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 5 }} offset={2}>
-                  <SelectInput name='cobble' label='Cobble'></SelectInput>
+                  <SelectInput name='cobble' label='Cobble'>
+                    {createDropdownOptions(estimations).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 5 }}>
                   <TextInput name='silt' label='Silt' />
@@ -397,18 +469,20 @@ const MissouriRiverDataEntryForm = connect(
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 5 }} offset={2}>
-                  <SelectInput name='organic' label='Organic'></SelectInput>
+                  <SelectInput name='organic' label='Organic'>
+                    {createDropdownOptions(estimations).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 5 }}>
                   <TextInput name='sand' label='Sand' />
                 </Grid>
               </Grid>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }} offset={2}>
-                  {/* @TODO: A hidden field??? */}
-                  <SelectInput name='watervel' label='Water Velocity'></SelectInput>
-                </Grid>
-                <Grid tablet={{ col: 5 }}>
+                <Grid tablet={{ col: 5 }} offset={7}>
                   <TextInput name='gravel' label='Gravel' />
                 </Grid>
               </Grid>
@@ -434,18 +508,6 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
                   <TextInput name='velocity02or062' label='2-Velocity (0.2 or 0.6)' />
-                </Grid>
-              </Grid>
-              {/* 3-Velocity are hidden fields??? */}
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='velocitybot3' label='3-Velocity (bot)' />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='velocity083' label='3-Velocity (0.8 or 0.5)' />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='velocity02or063' label='3-Velocity (0.2 or 0.6)' />
                 </Grid>
               </Grid>
             </Grid>
