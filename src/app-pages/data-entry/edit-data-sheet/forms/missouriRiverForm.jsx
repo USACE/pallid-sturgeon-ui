@@ -131,56 +131,58 @@ const MissouriRiverForm = connect(
       },
     ];
 
-    // const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
+    const setField = (field, value) =>
+      dispatch({
+        type: 'UPDATE_INPUT',
+        field,
+        payload: value,
+      });
 
-    // const fmtTimeHHMM = (iso) => {
-    //   try {
-    //     const d = new Date(iso);
-    //     const hh = String(d.getHours()).padStart(2, '0');
-    //     const mm = String(d.getMinutes()).padStart(2, '0');
-    //     return `${hh}:${mm}`;
-    //   } catch {
-    //     return '';
-    //   }
-    // };
+    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
 
-    // const handleCaptureStart = async () => {
-    //   try {
-    //     const { best } = await captureBestOf(5, 700);
+    const fmtTimeHHMMSS = (iso) => {
+      try {
+        const d = new Date(iso);
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        const ss = String(d.getSeconds()).padStart(2, '0');
+        return `${hh}:${mm}:${ss}`;
+      } catch {
+        return '';
+      }
+    };
 
-    //     setField('startlatitude', best.lat);
-    //     setField('startlongitude', best.lng);
+    const handleCaptureStart = async () => {
+      try {
+        const { best } = await captureBestOf(5, 700);
 
-    //     setField('starttime', fmtTimeHHMM(best.capturedAt));
+        setField('startlatitude', best.lat);
+        setField('startlongitude', best.lng);
+        setField('startTime', fmtTimeHHMMSS(best.capturedAt));
 
-    //     window.alert(`Captured START\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
-    //   } catch (e) {
-    //     console.error(e);
-    //     window.alert(`GPS capture failed: ${e.message}`);
-    //   }
-    // };
+        setField('starttime', fmtTimeHHMM(best.capturedAt));
 
-    // const handleCaptureStop = async () => {
-    //   try {
-    //     const { best } = await captureBestOf(5, 700);
+        window.alert(`Captured START\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+      } catch (e) {
+        console.error(e);
+        window.alert(`GPS capture failed: ${e?.message || e}`);
+      }
+    };
 
-    //     setField('stoplatitude', best.lat);
-    //     setField('stoplongitude', best.lng);
-    //     setField('stoptime', fmtTimeHHMM(best.capturedAt));
+    const handleCaptureStop = async () => {
+      try {
+        const { best } = await captureBestOf(5, 700);
 
-    //     window.alert(`Captured STOP\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
-    //   } catch (e) {
-    //     console.error(e);
-    //     window.alert(`GPS capture failed: ${e.message}`);
-    //   }
-    // };
+        setField('stoplatitude', best.lat);
+        setField('stoplongitude', best.lng);
+        setField('stoptime', fmtTimeHHMMSS(best.capturedAt));
 
-    // const setField = (field, value) =>
-    //   dispatch({
-    //     type: 'UPDATE_INPUT',
-    //     field,
-    //     payload: value,
-    //   });
+        window.alert(`Captured STOP\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+      } catch (e) {
+        console.error(e);
+        window.alert(`GPS capture failed: ${e?.message || e}`);
+      }
+    };
 
     const handleChange = (e) => {
       dispatch({
@@ -587,19 +589,22 @@ const MissouriRiverForm = connect(
                                 isRequired
                               />
                             </div>
-                            {/* <div className='col-md-3'>
-                              <button type='button' onClick={handleCaptureStart}>
-                                Capture Start GPS
-                              </button>
-                              <button type='button' onClick={handleCaptureStop}>
-                                Capture Stop GPS
-                              </button>
-
+                          </Row>
+                          <Row className='mt-2'>
+                            <div className='col-md-12 d-flex align-items-center' style={{ gap: 8, flexWrap: 'wrap' }}>
+                              <Button
+                                size='small'
+                                variant='secondary'
+                                className='btn-width'
+                                text='Capture Start GPS'
+                                onClick={handleCaptureStart}
+                                isDisabled={!formComplete}
+                              />
                               <span style={{ fontSize: 12, opacity: 0.75 }}>
                                 GPS: {permission}
                                 {lastError ? ` - ${lastError.message}` : ''}
                               </span>
-                            </div> */}
+                            </div>
                           </Row>
                           <Row>
                             <div className='col-md-3'>
@@ -676,6 +681,18 @@ const MissouriRiverForm = connect(
                                 value={state['stoplongitude'] || ''}
                                 placeholder='ex: 12.34567'
                                 onChange={handleNumber}
+                                isDisabled={!formComplete}
+                              />
+                            </div>
+                          </Row>
+                          <Row className='mt-2'>
+                            <div className='col-md-12 d-flex align-items-center' style={{ gap: 8, flexWrap: 'wrap' }}>
+                              <Button
+                                size='small'
+                                variant='secondary'
+                                className='btn-width'
+                                text='Capture Stop GPS'
+                                onClick={handleCaptureStop}
                                 isDisabled={!formComplete}
                               />
                             </div>
