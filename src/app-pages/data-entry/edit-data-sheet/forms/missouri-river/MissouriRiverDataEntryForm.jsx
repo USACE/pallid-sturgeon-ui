@@ -10,13 +10,15 @@ import SelectInput from '@src/app-components/new-inputs/select-input/SelectInput
 import TextInput from '@src/app-components/new-inputs/text-input/TextInput';
 import TextArea from '@src/app-components/new-inputs/text-area/TextArea';
 
-import { getMissouriRiverDefaultValues, getMissouriRiverSchema } from './MissouriRiverDataEntryForm.validation';
+import {
+  getMissouriRiverDefaultValues,
+  missouriRiverSchema,
+  microSegmentRequired,
+  gearReqFields,
+} from './MissouriRiverDataEntryForm.validation';
+import { missouriRiverTooltip, u6Options } from './MissouriRiverDataEntryForm.helper';
 
 import '../../../dataentry.scss';
-
-const microSegmentRequired = [8, 9, 10, 11, 13, 14];
-
-const u6Options = [{ value: 'MNCF' }, { value: 'NSTS' }];
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -128,8 +130,8 @@ const MissouriRiverDataEntryForm = connect(
     );
 
     const methods = useForm({
-      defaultValues: getMissouriRiverDefaultValues({ dataEntryData }),
-      resolver: yupResolver(getMissouriRiverSchema({ microSegmentRequired, segmentId, projectId })),
+      defaultValues: getMissouriRiverDefaultValues({ baseData, dataEntryData }),
+      resolver: yupResolver(missouriRiverSchema),
       mode: 'onBlur',
       stateOptions: [],
     });
@@ -146,14 +148,55 @@ const MissouriRiverDataEntryForm = connect(
     const gearCode = watch('gear');
     const gearType = watch('gearType');
     const subsamplepass = watch('subsamplepass');
-    const micro = watch('micro');
     const microStructure = watch('microStructure');
-    const setSite1 = watch('setSite1');
     const structureFlow = watch('structureFlow');
+    const structureMod = watch('structureMod');
+    const setSite1 = watch('setSite1');
+    const setSite2 = watch('setSite2');
+    const setSite3 = watch('setSite3');
+    const temp = watch('temp');
+    const depth1 = watch('depth1');
+    const depth2 = watch('depth2');
+    const depth3 = watch('depth3');
+    const velocitybot1 = watch('velocitybot1');
+    const velocity081 = watch('velocity081');
     const u6 = watch('u6');
     const u7 = watch('u7');
 
-    const isMicroRequired = microSegmentRequired.includes(segmentId);
+    const microRequired = () => {
+      if (
+        (Number(projectId) === 1 && microSegmentRequired.includes(segmentId)) ||
+        (Number(projectId) == 2 && season === 'IRC')
+      ) {
+        if (!u6) {
+          return true;
+        }
+        return false;
+      }
+      return false;
+    };
+
+    const isStartTimeDisabled =
+      gearCode.startsWith('LDN') &&
+      (velocitybot1 === null || velocitybot1 === '') &&
+      (velocity081 === null || velocity081 === '');
+
+    const getTempWarning = () => {
+      if (temp > 30) {
+        return 'Temp is greater than 30';
+      } else if (temp >= 12.8 && gearCode.startsWith('GN')) {
+        return 'Temp >= 12.8 for a gill net gear code';
+      } else {
+        return;
+      }
+    };
+
+    const getDepthWarning = (depth) => {
+      if (depth > 10) {
+        return 'Depth is greater than 10';
+      }
+      return;
+    };
 
     // Set R/N value
     useEffect(() => {
@@ -171,6 +214,20 @@ const MissouriRiverDataEntryForm = connect(
       setValue('meso', '', { shouldValidate: true });
       handleMesoOptions(mesos, gearType, gearCode, macro, season);
     }, [mesos, gearType, gearCode, macro, season]);
+
+    // Populate Micro using the following six fields; Micro Structure, Structure flow, structure mod, set site 1, set site 2, set site 3
+    useEffect(() => {
+      if (microStructure || structureFlow || structureMod || setSite1 || setSite2 || setSite3) {
+        const str =
+          String(microStructure || 0) +
+          String(structureFlow || 0) +
+          String(structureMod || 0) +
+          String(setSite1 || 0) +
+          String(setSite2 || 0) +
+          String(setSite3 || 0);
+        setValue('micro', str, { shouldValidate: true });
+      }
+    }, [microStructure, structureFlow, structureMod, setSite1, setSite2, setSite3]);
 
     // Set Structure Flow and SetSite1 options and reset values when necessary
     useEffect(() => {
@@ -192,9 +249,23 @@ const MissouriRiverDataEntryForm = connect(
       setSs2Options(getSs2Options(setSite1));
     }, [setSite1]);
 
+    // Both Velocity (bot) 1 and Velocity (o.8 or 0.5) 1 must be filled out before setting the start time when using a Larval Drift Net gear.
+    useEffect(() => {
+      if (gearCode.startsWith('LDN') && velocitybot1 === null && velocity081 === null) {
+        // Reset start time under these conditions
+        setValue('startTime', '', { shouldValidate: true });
+      }
+    }, [gearCode, velocitybot1, velocity081]);
+
     useEffect(() => {
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
     }, [errors, setFocus]);
+
+    useEffect(() => {
+      if (u6) {
+        trigger();
+      }
+    }, [u6]);
 
     // useEffect(() => {
     //   // netrivermile in baseData
@@ -253,7 +324,7 @@ const MissouriRiverDataEntryForm = connect(
             <Grid tablet={{ col: 4 }} className='border-right'>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 6 }}>
-                  <SelectInput name='macro' label='Macro'>
+                  <SelectInput name='macro' label='Macro' required={!u6} readOnly={u6}>
                     {createDropdownOptions(macros).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.value}
@@ -262,7 +333,7 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 6 }}>
-                  <SelectInput name='meso' label='Meso'>
+                  <SelectInput name='meso' label='Meso' required={!u6} readOnly={u6}>
                     {createDropdownOptions(mesoOptions).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.value}
@@ -273,7 +344,14 @@ const MissouriRiverDataEntryForm = connect(
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 6 }}>
-                  <TextInput name='temp' label='Temp (c)' type='number' required />
+                  <TextInput
+                    name='temp'
+                    label='Temp (c)'
+                    type='number'
+                    required={!u6}
+                    readOnly={u6}
+                    warning={getTempWarning()}
+                  />
                 </Grid>
                 <Grid tablet={{ col: 6 }}>
                   <TextInput name='width' label='Width' type='number' />
@@ -284,7 +362,7 @@ const MissouriRiverDataEntryForm = connect(
             <Grid tablet={{ col: 8 }}>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput type='number' name='micro' label='Micro' required />
+                  <TextInput name='micro' label='Micro' required={microRequired()} />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
                   <SelectInput name='microStructure' label='Micro Structure' required>
@@ -296,7 +374,7 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='structureFlow' label='Structure Flow' required={!micro ? isMicroRequired : false}>
+                  <SelectInput name='structureFlow' label='Structure Flow' required={microStructure}>
                     {createDropdownOptions(structureFlowOptions).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -305,7 +383,7 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='structureMod' label='Structure Mod' required>
+                  <SelectInput name='structureMod' label='Structure Mod' required={structureFlow}>
                     {createDropdownOptions(structureModOptions).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -316,7 +394,7 @@ const MissouriRiverDataEntryForm = connect(
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }} offset={3}>
-                  <SelectInput name='setSite1' label='Set Site 1'>
+                  <SelectInput name='setSite1' label='Set Site 1' required={structureMod}>
                     {createDropdownOptions(ss1Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -325,7 +403,7 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='setSite2' label='Set Site 2'>
+                  <SelectInput name='setSite2' label='Set Site 2' required={setSite1}>
                     {createDropdownOptions(ss2Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -334,7 +412,7 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='setSite3' label='Set Site 3'>
+                  <SelectInput name='setSite3' label='Set Site 3' required={setSite2}>
                     {createDropdownOptions(setSite3Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -350,27 +428,61 @@ const MissouriRiverDataEntryForm = connect(
             <Grid tablet={{ col: 5 }} className='border-right'>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 4 }}>
-                  <TextInput name='startTime' label='Start Time' required />
+                  <TextInput
+                    name='startTime'
+                    label='Start Time'
+                    required={!u6 || isStartTimeDisabled}
+                    readOnly={u6 || isStartTimeDisabled}
+                    tooltip={isStartTimeDisabled ? missouriRiverTooltip.startTimeTooltip : null}
+                  />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>
-                  <TextInput name='startLatitude' label='Start Latitude' type='number' required />
+                  <TextInput name='startLatitude' label='Start Latitude' type='number' required={!u6} readOnly={u6} />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>
-                  <TextInput name='startLongitude' label='Start Longitude' type='number' required />
+                  <TextInput name='startLongitude' label='Start Longitude' type='number' required={!u6} readOnly={u6} />
                 </Grid>
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='distance' label='Distance' />
+                  <TextInput
+                    name='distance'
+                    label='Distance'
+                    type='number'
+                    required={gearReqFields.distance.includes(gearCode) || !u6}
+                    readOnly={!gearReqFields.distance.includes(gearCode) || u6}
+                    tooltip={!gearReqFields.distance.includes(gearCode) ? missouriRiverTooltip.distanceTooltip : null}
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='depth1' label='1-Depth' />
+                  <TextInput
+                    name='depth1'
+                    label='1-Depth'
+                    required={gearReqFields.depth1.includes(gearCode) || !u6}
+                    readOnly={!gearReqFields.depth1.includes(gearCode) || u6}
+                    type='number'
+                    warning={getDepthWarning(depth1)}
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='depth2' label='2-Depth' />
+                  <TextInput
+                    name='depth2'
+                    label='2-Depth'
+                    required={gearReqFields.depth2.includes(gearCode) || !u6}
+                    readOnly={!gearReqFields.depth2.includes(gearCode) || u6}
+                    type='number'
+                    warning={getDepthWarning(depth2)}
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='depth3' label='3-Depth' />
+                  <TextInput
+                    name='depth3'
+                    label='3-Depth'
+                    required={gearReqFields.depth3.includes(gearCode) || !u6}
+                    readOnly={!gearReqFields.depth3.includes(gearCode) || u6}
+                    type='number'
+                    warning={getDepthWarning(depth3)}
+                  />
                 </Grid>
               </Grid>
               <Grid row gap='md'>
@@ -393,13 +505,13 @@ const MissouriRiverDataEntryForm = connect(
             <Grid tablet={{ col: 7 }}>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 1 }}>
-                  <TextInput name='u1' label='U1' required={projectId === 3} />
+                  <TextInput name='u1' label='U1' required={Number(projectId) === 3} />
                 </Grid>
                 <Grid tablet={{ col: 1 }}>
                   <TextInput
                     name='u2'
                     label='U2'
-                    required={projectId === 2 && gearCode === 'Trotline'}
+                    required={Number(projectId) === 2 && gearCode === 'Trotline'}
                     type={gearCode === 'Trotline' ? 'number' : 'text'}
                   />
                 </Grid>
@@ -433,7 +545,11 @@ const MissouriRiverDataEntryForm = connect(
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='structurenumber' label='Structure Number' />
+                  <TextInput
+                    name='structurenumber'
+                    label='Structure Number'
+                    required={Number(projectId) === 2 && season === 'HS'}
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
                   <TextInput name='netrivermile' label='Net River Mile' />
@@ -450,7 +566,7 @@ const MissouriRiverDataEntryForm = connect(
 
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 1 }}>
-              <TextInput name='turbidity' label='Turbidity' />
+              <TextInput name='turbidity' label='Turbidity' type='number' />
             </Grid>
             <Grid tablet={{ col: 4 }} className='border-right'>
               <Grid row gap='md'>
@@ -464,7 +580,7 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 5 }}>
-                  <TextInput name='silt' label='Silt' />
+                  <TextInput name='silt' label='Silt' type='number' />
                 </Grid>
               </Grid>
               <Grid row gap='md'>
@@ -478,36 +594,72 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 5 }}>
-                  <TextInput name='sand' label='Sand' />
+                  <TextInput name='sand' label='Sand' type='number' />
                 </Grid>
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 5 }} offset={7}>
-                  <TextInput name='gravel' label='Gravel' />
+                  <TextInput name='gravel' label='Gravel' type='number' />
                 </Grid>
               </Grid>
             </Grid>
             <Grid tablet={{ col: 7 }}>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='velocitybot1' label='1-Velocity (bot)' />
+                  <TextInput
+                    name='velocitybot1'
+                    label='1-Velocity (bot)'
+                    required={gearReqFields.velocitybot1.includes(gearCode) || !u6}
+                    readOnly={!gearReqFields.velocitybot1.includes(gearCode) || u6}
+                    type='number'
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='velocity081' label='1-Velocity (0.8 or 0.5)' />
+                  <TextInput
+                    name='velocity081'
+                    label='1-Velocity (0.8 or 0.5)'
+                    required={gearReqFields.velocity081.includes(gearCode) || !u6}
+                    readOnly={!gearReqFields.velocity081.includes(gearCode) || u6}
+                    type='number'
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='velocity02or061' label='1-Velocity (0.2 or 0.6)' />
+                  <TextInput
+                    name='velocity02or061'
+                    label='1-Velocity (0.2 or 0.6)'
+                    required={!u6}
+                    readOnly={u6}
+                    type='number'
+                  />
                 </Grid>
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='velocitybot2' label='2-Velocity (bot)' />
+                  <TextInput
+                    name='velocitybot2'
+                    label='2-Velocity (bot)'
+                    required={gearReqFields.velocitybot2.includes(gearCode) || !u6}
+                    readOnly={!gearReqFields.velocitybot2.includes(gearCode) || u6}
+                    type='number'
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='velocity082' label='2-Velocity (0.8 or 0.5)' />
+                  <TextInput
+                    name='velocity082'
+                    label='2-Velocity (0.8 or 0.5)'
+                    required={gearReqFields.velocity082.includes(gearCode) || !u6}
+                    readOnly={!gearReqFields.velocity082.includes(gearCode) || u6}
+                    type='number'
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='velocity02or062' label='2-Velocity (0.2 or 0.6)' />
+                  <TextInput
+                    name='velocity02or062'
+                    label='2-Velocity (0.2 or 0.6)'
+                    required={gearReqFields.velocity02or062.includes(gearCode) || !u6}
+                    readOnly={!gearReqFields.velocity02or062.includes(gearCode) || u6}
+                    type='number'
+                  />
                 </Grid>
               </Grid>
             </Grid>

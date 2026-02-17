@@ -4,6 +4,7 @@ import { mdiAlert } from '@mdi/js';
 import { Label, TextInput as UswdsTextInput } from '@trussworks/react-uswds';
 
 import Icon from '@src/app-components/icon/icon';
+import Tooltip from '@src/app-components/tooltip/Tooltip';
 
 import './textInput.scss';
 
@@ -23,6 +24,8 @@ const TextInput = ({
   uppercase,
   validations,
   warning,
+  tooltip,
+  tooltipClickable,
   ...customProps
 }) => {
   const classes = classNames(className, { 'text-uppercase': uppercase });
@@ -58,6 +61,7 @@ const TextInput = ({
         ) : (
           showOptionalText && <span className='text-italic'> (optional)</span>
         )}
+        {tooltip && <Tooltip clickable={tooltipClickable} content={tooltip} header={label} name={name} />}
       </Label>
       {hint && (
         <div className='usa-hint' id={`${name}_hint`}>
