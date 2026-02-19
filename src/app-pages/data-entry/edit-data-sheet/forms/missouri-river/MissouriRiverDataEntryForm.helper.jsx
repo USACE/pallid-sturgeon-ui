@@ -5,3 +5,5 @@ export const missouriRiverTooltip = {
 };
 
 export const u6Options = [{ value: 'MNCF' }, { value: 'NSTS' }];
+
+export const siltSandGravelReadOnly = ['SD', 'NE', 'MT', 'MR'];

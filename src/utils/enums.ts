@@ -10,6 +10,7 @@ export const projectTypes = {
 export const enum ValidationMessages {
   FieldRequired = 'Value is required',
   SelectRequired = 'Please select an option',
+  IsInteger = 'Value must be an integer',
 }
 
 export const enum ApiStatuses {
