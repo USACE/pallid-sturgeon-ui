@@ -13,10 +13,7 @@ const cleanAndTruncateLabels = (input, maxLength) => {
     return '';
   }
 
-  let cleanedString = input
-    ?.replace(/\*/g, '')
-    ?.replace(/\s*\([^)]{2,}\)\s*/g, '') // Remove anything with more than one character in parentheses
-    ?.replace(/([^\w\s()/+'-])+/g, ''); // Remove punctuation but keep single characters in parentheses and slashes
+  let cleanedString = input?.replace(/\*/g, '');
 
   let truncated = false;
 

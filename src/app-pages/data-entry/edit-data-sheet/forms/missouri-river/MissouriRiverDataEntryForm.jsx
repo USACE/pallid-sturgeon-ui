@@ -16,8 +16,8 @@ import {
   microSegmentRequired,
   gearReqFields,
 } from './MissouriRiverDataEntryForm.validation';
-import { missouriRiverTooltip, siltSandGravelReadOnly, u6Options } from './MissouriRiverDataEntryForm.helper';
 import { filterNullEmptyObjects, formatCoordFlt } from '@src/utils/helpers';
+import Checkbox from '@src/app-components/check-box/Checkbox';
 
 import '../../../dataentry.scss';
 
@@ -40,16 +40,17 @@ const removeDuplicates = (arr) => {
   const serializedArray = arr.map(JSON.stringify);
   const uniqueSet = new Set(serializedArray);
   const uniqueArray = Array.from(uniqueSet).map(JSON.parse);
-  return uniqueArray;
+  return uniqueArray.sort((a, b) => a.code - b.code);
 };
 
 const MissouriRiverDataEntryForm = connect(
+  'doUpdateBaseData',
   'doAddMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
   'selectBaseData',
   'selectDataEntryData',
   'selectLookupData',
-  ({ doAddMoRiverDataEntry, doUpdateMoRiverDataEntry, baseData, dataEntryData, lookupData }) => {
+  ({ doUpdateBaseData, doAddMoRiverDataEntry, doUpdateMoRiverDataEntry, baseData, dataEntryData, lookupData }) => {
     const {
       bendRiverMile,
       bendSelections,
@@ -61,18 +62,30 @@ const MissouriRiverDataEntryForm = connect(
       macroMesos,
       microHabitats,
       microStructures,
-      estimations,
+      u6Options,
       u7Options,
       microSetSite,
+      setSite1Options,
+      setSite2Options,
       setSite3Options,
+      structureFlows,
+      structureMods,
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
+
     const [gearCodeOptions, setGearCodeOptions] = useState(gearCodes);
     const [mesoOptions, setMesoOptions] = useState(mesos);
     const [structureFlowOptions, setStructureFlowOptions] = useState([]);
     const [structureModOptions, setStructureModOptions] = useState([]);
     const [ss1Options, setSs1Options] = useState([]);
     const [ss2Options, setSs2Options] = useState([]);
+
+    const ss3Options = removeDuplicates(
+      setSite3Options?.map((item) => ({
+        code: item.code,
+        description: item.description,
+      }))
+    );
 
     const getUpperLowerRiverMile = (bend, segment) =>
       bendRiverMile?.filter((item) => item.bend === bend && item.segment === segment)?.[0];
@@ -93,33 +106,63 @@ const MissouriRiverDataEntryForm = connect(
     };
 
     const getStructureFlowOptions = (microStructure) => {
-      const options = microHabitats.filter((item) => Number(item.microStructureCode) === Number(microStructure));
-      const filteredOptions = options.map((item) => ({
-        code: item.structureFlowCode,
-        description: item.structureFlow,
-      }));
-      return removeDuplicates(filteredOptions);
+      // When 0 is entered, the tables are no longer used to limit options
+      if (microStructure == null || microStructure == '') return [];
+      if (Number(microStructure) === 0) {
+        return structureFlows;
+      } else {
+        const options = microHabitats.filter((item) => Number(item.microStructureCode) === Number(microStructure));
+        const filteredOptions = options.map((item) => ({
+          code: item.structureFlowCode,
+          description: item.structureFlow,
+        }));
+        return [{ code: 0, description: 'NOT DESCRIBED' }, ...removeDuplicates(filteredOptions)];
+      }
     };
 
     const getStructureModOptions = (structureFlow) => {
-      const options = microHabitats.filter((item) => Number(item.structureFlowCode) === Number(structureFlow));
-      const filteredOptions = options.map((item) => ({
-        code: item.structureModCode,
-        description: item.structureMod,
-      }));
-      return removeDuplicates(filteredOptions);
+      // When 0 is entered, the tables are no longer used to limit options
+      if (structureFlow == null || structureFlow == '') return [];
+      if (Number(structureFlow) === 0) {
+        return structureMods;
+      } else {
+        const options = microHabitats.filter((item) => Number(item.structureFlowCode) === Number(structureFlow));
+        const filteredOptions = options.map((item) => ({
+          code: item.structureModCode,
+          description: item.structureMod,
+        }));
+        return [{ code: 0, description: 'NOT DESCRIBED' }, ...removeDuplicates(filteredOptions)];
+      }
     };
 
     const getSs1Options = (microStructure) => {
-      const options = microSetSite.filter((item) => Number(item.microStructureCode) === Number(microStructure));
-      const filteredOptions = options.map((item) => ({ code: item.ss1Code, description: item.ss1Description }));
-      return removeDuplicates(filteredOptions);
+      // When 0 is entered, the tables are no longer used to limit options
+      if (microStructure == null || microStructure == '') return [];
+      if (Number(microStructure) === 0) {
+        return setSite1Options;
+      } else {
+        const options = microSetSite.filter((item) => Number(item.microStructureCode) === Number(microStructure));
+        const filteredOptions = options.map((item) => ({
+          code: item.ss1Code,
+          description: item.ss1Description,
+        }));
+        return [{ code: 0, description: 'NOT DESCRIBED' }, ...removeDuplicates(filteredOptions)];
+      }
     };
 
     const getSs2Options = (setSite1) => {
-      const options = microSetSite.filter((item) => Number(item.ss1Code) === Number(setSite1));
-      const filteredOptions = options.map((item) => ({ code: item.ss2Code, description: item.ss2Description }));
-      return removeDuplicates(filteredOptions);
+      // When 0 is entered, the tables are no longer used to limit options
+      if (setSite1 == null || setSite1 == '') return [];
+      if (Number(setSite1) === 0) {
+        return setSite2Options;
+      } else {
+        const options = microSetSite.filter((item) => Number(item.ss1Code) === Number(setSite1));
+        const filteredOptions = options.map((item) => ({
+          code: item.ss2Code,
+          description: item.ss2Description,
+        }));
+        return [{ code: 0, description: 'NOT DESCRIBED' }, ...removeDuplicates(filteredOptions)];
+      }
     };
 
     const handleMesoOptions = useCallback(
@@ -154,13 +197,15 @@ const MissouriRiverDataEntryForm = connect(
       setValue,
     } = methods;
 
-    const cobble = watch('cobble');
+    console.warn('VALUES: ', getValues());
+
     const deploymentType = watch('deploymentType');
     const macro = watch('macro');
     const gearCode = watch('gear');
     const gearType = watch('gearType');
     const subsamplepass = watch('subsamplepass');
     const microStructure = watch('microStructure');
+    const netrivermile = watch('netrivermile');
     const structureFlow = watch('structureFlow');
     const structureMod = watch('structureMod');
     const setSite1 = watch('setSite1');
@@ -173,7 +218,6 @@ const MissouriRiverDataEntryForm = connect(
     const depth3 = watch('depth3');
     const velocitybot1 = watch('velocitybot1');
     const velocity081 = watch('velocity081');
-    const u6 = watch('u6');
     const u7 = watch('u7');
 
     const isStartTimeDisabled =
@@ -264,7 +308,7 @@ const MissouriRiverDataEntryForm = connect(
       setSs2Options(getSs2Options(setSite1));
     }, [setSite1]);
 
-    // Both Velocity (bot) 1 and Velocity (o.8 or 0.5) 1 must be filled out before setting the start time when using a Larval Drift Net gear.
+    // Both Velocity (bot) 1 and Velocity (0.8 or 0.5) 1 must be filled out before setting the start time when using a Larval Drift Net gear.
     useEffect(() => {
       if (gearCode.startsWith('LDN') && velocitybot1 === null && velocity081 === null) {
         // Reset start time under these conditions
@@ -284,27 +328,33 @@ const MissouriRiverDataEntryForm = connect(
       }
     }, [gearCode]);
 
+    // netrivermile in baseData
     useEffect(() => {
-      if (Number(cobble) === 3) {
-        setValue('silt', 0, { shouldValidate: true });
-        setValue('sand', 0, { shouldValidate: true });
-        setValue('gravel', 0, { shouldValidate: true });
-      }
-    }, [cobble]);
+      doUpdateBaseData('netrivermile', netrivermile);
+    }, [netrivermile]);
 
     useEffect(() => {
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
     }, [errors, setFocus]);
 
-    // useEffect(() => {
-    //   // netrivermile in baseData
-    //   doUpdateBaseData('netrivermile', state['netrivermile']);
-    // }, [state['netrivermile']]);
-
     return (
       <FormProvider {...methods}>
         {errors && <ErrorSummary errors={errors} />}
         <div className='container-fluid margin-top-1'>
+          <Grid row gap='md' className='padding-bottom-3'>
+            <Grid tablet={{ col: 2 }}>
+              <TextInput name='mrFid' label='MR Field ID (Date-Time-MR#)' required />
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <TextInput name='seFid' label='SE Field ID (Date-Time-SE#)' />
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <Button className={saveBtnClasses} onClick={() => handleSave()} type='button'>
+                Save
+              </Button>
+            </Grid>
+          </Grid>
+
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>
               <TextInput name='setdate' label='Set Date' type='date' required />
@@ -376,7 +426,7 @@ const MissouriRiverDataEntryForm = connect(
                   <TextInput name='temp' label='Temp (c)' type='number' required warning={getTempWarning()} />
                 </Grid>
                 <Grid tablet={{ col: 6 }}>
-                  <TextInput name='width' label='Width' type='number' readOnly />
+                  <TextInput name='width' label='Width' type='number' readOnly={gearType === 'S'} />
                 </Grid>
               </Grid>
             </Grid>
@@ -439,7 +489,7 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
                   <SelectInput name='setSite3' label='Set Site 3' required={setSite2}>
-                    {createDropdownOptions(setSite3Options).map((item, index) => (
+                    {createDropdownOptions(ss3Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
                       </option>
@@ -457,9 +507,8 @@ const MissouriRiverDataEntryForm = connect(
                   <TextInput
                     name='startTime'
                     label='Start Time'
-                    required={isStartTimeDisabled}
+                    required={!isStartTimeDisabled}
                     readOnly={isStartTimeDisabled}
-                    tooltip={isStartTimeDisabled ? missouriRiverTooltip.startTimeTooltip : null}
                   />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>
@@ -476,8 +525,7 @@ const MissouriRiverDataEntryForm = connect(
                     label='Distance'
                     type='number'
                     required={gearReqFields.distance.includes(gearCode)}
-                    readOnly={!gearReqFields.distance.includes(gearCode)}
-                    tooltip={!gearReqFields.distance.includes(gearCode) ? missouriRiverTooltip.distanceTooltip : null}
+                    readOnly={gearType === 'S' && !gearReqFields.distance.includes(gearCode)}
                   />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
@@ -485,7 +533,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='depth1'
                     label='1-Depth'
                     required={gearReqFields.depth1.includes(gearCode)}
-                    readOnly={!gearReqFields.depth1.includes(gearCode)}
+                    readOnly={gearType === 'S' && !gearReqFields.depth1.includes(gearCode)}
                     type='number'
                     warning={getDepthWarning(depth1)}
                   />
@@ -495,7 +543,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='depth2'
                     label='2-Depth'
                     required={gearReqFields.depth2.includes(gearCode)}
-                    readOnly={!gearReqFields.depth2.includes(gearCode)}
+                    readOnly={gearType === 'S' && !gearReqFields.depth2.includes(gearCode)}
                     type='number'
                     warning={getDepthWarning(depth2)}
                   />
@@ -505,7 +553,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='depth3'
                     label='3-Depth'
                     required={gearReqFields.depth3.includes(gearCode)}
-                    readOnly={!gearReqFields.depth3.includes(gearCode)}
+                    readOnly={gearType === 'S' && !gearReqFields.depth3.includes(gearCode)}
                     type='number'
                     warning={getDepthWarning(depth3)}
                   />
@@ -564,8 +612,8 @@ const MissouriRiverDataEntryForm = connect(
                 <Grid tablet={{ col: 3 }}>
                   <SelectInput name='u6' label='U6'>
                     {u6Options.map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.value}
+                      <option key={index + 1} value={item.code}>
+                        {item.description}
                       </option>
                     ))}
                   </SelectInput>
@@ -595,74 +643,77 @@ const MissouriRiverDataEntryForm = connect(
                   <TextInput name='conductivity' label='Conductivity' />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='dissolvedOxygen' label='D.O' />
+                  <TextInput name='dissolvedOxygen' label='Dissolved Oxygen (D.O.)' />
+                </Grid>
+              </Grid>
+              {/* @TODO: Hide USGS, River Stage, Discharge, and Habitat R/N fields in Offline Mode */}
+              <Grid row gap='md'>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='usgs' label='USGS' readOnly />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='riverstage' label='River Stage' readOnly />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='discharge' label='Discharge' readOnly />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='habitatrn' label='Habitat R/N' readOnly />
                 </Grid>
               </Grid>
             </Grid>
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 1 }}>
-              <TextInput name='turbidity' label='Turbidity' type='number' />
+            <Grid tablet={{ col: 2 }}>
+              <Grid row gap='md'>
+                <Grid tablet={{ col: 6 }}>
+                  <TextInput name='turbidity' label='Turbidity' type='number' />
+                </Grid>
+              </Grid>
+              {/* @TODO: Hide No Turbidity and No Velocity fields in Offline Mode */}
+              <Grid row gap='md' className='margin-top-2'>
+                <Grid tablet={{ col: 12 }}>
+                  <Checkbox disabled id='no-turbidity' label='No Turbidity' name='noTurbidity' tile value='Y' />
+                </Grid>
+              </Grid>
+              <Grid row gap='md'>
+                <Grid tablet={{ col: 12 }}>
+                  <Checkbox disabled id='no-velocity' label='No Velocity' name='noVelocity' tile value='Y' />
+                </Grid>
+              </Grid>
             </Grid>
             <Grid tablet={{ col: 4 }} className='border-right'>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }} offset={2}>
-                  <SelectInput name='cobble' label='Cobble'>
-                    {createDropdownOptions(estimations).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
+                <Grid tablet={{ col: 5 }} offset={1}>
+                  <TextInput name='cobble' label='Cobble' readOnly />
                 </Grid>
                 <Grid tablet={{ col: 5 }}>
-                  <TextInput
-                    name='silt'
-                    label='Silt'
-                    type='number'
-                    readOnly={siltSandGravelReadOnly.includes(fieldoffice)}
-                  />
+                  <TextInput name='silt' label='Silt' readOnly />
                 </Grid>
               </Grid>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }} offset={2}>
-                  <SelectInput name='organic' label='Organic'>
-                    {createDropdownOptions(estimations).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
+                <Grid tablet={{ col: 5 }} offset={1}>
+                  <TextInput name='organic' label='Organic' readOnly />
                 </Grid>
                 <Grid tablet={{ col: 5 }}>
-                  <TextInput
-                    name='sand'
-                    label='Sand'
-                    type='number'
-                    readOnly={siltSandGravelReadOnly.includes(fieldoffice)}
-                  />
+                  <TextInput name='sand' label='Sand' readOnly />
                 </Grid>
               </Grid>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }} offset={7}>
-                  <TextInput
-                    name='gravel'
-                    label='Gravel'
-                    type='number'
-                    readOnly={siltSandGravelReadOnly.includes(fieldoffice)}
-                  />
+                <Grid tablet={{ col: 5 }} offset={6}>
+                  <TextInput name='gravel' label='Gravel' readOnly />
                 </Grid>
               </Grid>
             </Grid>
-            <Grid tablet={{ col: 7 }}>
+            <Grid tablet={{ col: 6 }}>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }}>
                   <TextInput
                     name='velocitybot1'
                     label='1-Velocity (bot)'
                     required={gearReqFields.velocitybot1.includes(gearCode)}
-                    readOnly={!gearReqFields.velocitybot1.includes(gearCode)}
+                    readOnly={gearType === 'S' && !gearReqFields.velocitybot1.includes(gearCode)}
                     type='number'
                   />
                 </Grid>
@@ -671,7 +722,11 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity081'
                     label='1-Velocity (0.8 or 0.5)'
                     required={gearReqFields.velocity081.includes(gearCode) || depth2 >= 1.2}
-                    readOnly={!gearReqFields.velocity081.includes(gearCode) || depth2 < 1.2}
+                    readOnly={
+                      gearType === 'S' &&
+                      !gearReqFields.velocity081.includes(gearCode) &&
+                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
+                    }
                     type='number'
                   />
                 </Grid>
@@ -685,7 +740,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocitybot2'
                     label='2-Velocity (bot)'
                     required={gearReqFields.velocitybot2.includes(gearCode)}
-                    readOnly={!gearReqFields.velocitybot2.includes(gearCode)}
+                    readOnly={gearType === 'S' && !gearReqFields.velocitybot2.includes(gearCode)}
                     type='number'
                   />
                 </Grid>
@@ -694,7 +749,11 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity082'
                     label='2-Velocity (0.8 or 0.5)'
                     required={gearReqFields.velocity082.includes(gearCode) || depth2 >= 1.2}
-                    readOnly={!gearReqFields.velocity082.includes(gearCode) || depth2 < 1.2}
+                    readOnly={
+                      gearType === 'S' &&
+                      !gearReqFields.velocity082.includes(gearCode) &&
+                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
+                    }
                     type='number'
                   />
                 </Grid>
@@ -703,7 +762,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity02or062'
                     label='2-Velocity (0.2 or 0.6)'
                     required={gearReqFields.velocity02or062.includes(gearCode)}
-                    readOnly={!gearReqFields.velocity02or062.includes(gearCode)}
+                    readOnly={gearType === 'S' && !gearReqFields.velocity02or062.includes(gearCode)}
                     type='number'
                   />
                 </Grid>
@@ -712,7 +771,7 @@ const MissouriRiverDataEntryForm = connect(
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 4 }} offset={5}>
+            <Grid tablet={{ col: 4 }} offset={6}>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 12 }}>
                   <TextArea name='comments' label='Comments' />
@@ -723,15 +782,6 @@ const MissouriRiverDataEntryForm = connect(
               <Grid row gap='md'>
                 <Grid tablet={{ col: 12 }}>
                   <TextInput name='editInitials' label='Edit Initials' maxLength={3} />
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid tablet={{ col: 2 }}>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 12 }}>
-                  <Button className={saveBtnClasses} onClick={() => handleSave()} type='button'>
-                    Save Data Entry
-                  </Button>
                 </Grid>
               </Grid>
             </Grid>

@@ -178,7 +178,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         then: (schema) =>
           schema.required(ValidationMessages.FieldRequired).test({
             test: (value, { parent: { distance, gear } }) => gear.startsWith('TL') && Number(value) >= Number(distance),
-            message: 'Distance cannot be less than U2 when the gear is trotline',
+            message: 'Distance cannot be greater than U2 when the gear is trotline',
           }),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
@@ -321,7 +321,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when(['depth2', 'gear'], {
-          is: (depth2, gear) => gearReqFields.velocity081.includes(gear) && depth2 >= 1.2,
+          is: (depth2, gear) => gearReqFields.velocity081.includes(gear) || depth2 >= 1.2,
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -360,7 +360,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when(['depth2', 'gear'], {
-          is: (depth2, gear) => gearReqFields.velocity082.includes(gear) && depth2 >= 1.2,
+          is: (depth2, gear) => gearReqFields.velocity082.includes(gear) || depth2 >= 1.2,
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -384,26 +384,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
           test: (value) => value === undefined || Number.isInteger(value * 100),
           message: 'Must have at most 2 decimal places',
         }),
-      cobble: yup.string().nullable().notRequired(),
-      organic: yup.string().nullable().notRequired(),
-      silt: yup
-        .number()
-        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .nullable()
-        .notRequired()
-        .min(0, 'Value cannot be negative'),
-      sand: yup
-        .number()
-        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .nullable()
-        .notRequired()
-        .min(0, 'Value cannot be negative'),
-      gravel: yup
-        .number()
-        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .nullable()
-        .notRequired()
-        .min(0, 'Value cannot be negative'),
+      editInitials: yup.string().max(3, 'Value must be at most 3 characters').nullable().notRequired(),
       comments: yup.string().nullable(),
     },
     [['width', 'width']]
@@ -476,10 +457,19 @@ export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData }) => ({
   velocitybot2: dataEntryData?.velocitybot2 ?? '',
   velocity082: dataEntryData?.velocity082 ?? '',
   velocity02or062: dataEntryData?.velocity02or062 ?? '',
+  editInitials: dataEntryData?.editInitial ?? '',
+  comments: dataEntryData?.comments ?? '',
+  // Historic Data (Read Only)
   cobble: dataEntryData?.cobble ?? '',
   organic: dataEntryData?.organic ?? '',
   silt: dataEntryData?.silt ?? '',
   sand: dataEntryData?.sand ?? '',
   gravel: dataEntryData?.gravel ?? '',
-  comments: dataEntryData?.comments ?? '',
+  usgs: dataEntryData?.usgs ?? '',
+  riverstage: dataEntryData?.riverstage ?? '',
+  discharge: dataEntryData?.discharge ?? '',
+  habitatrn: dataEntryData?.habitatrn ?? '',
+  noTurbidity: dataEntryData?.noTurbidity ?? '',
+  noVelocity: dataEntryData?.noVelocity ?? '',
+  lastEditComment: dataEntryData?.lastEditComment ?? '',
 });
