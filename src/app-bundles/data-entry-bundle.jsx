@@ -550,7 +550,7 @@ export default {
       const url = '/psapi/searchDataEntry';
 
       apiPost(url, formData, (err, _body) => {
-        if (!err) {
+        if (!err && body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_FINISHED' });
           store.doUpdateUrl('/sites-list/datasheet');

@@ -20,7 +20,8 @@ import MultipleRecordApproval from '@pages/admin/multipleRecordApproval';
 import SiteDatasheet from '@pages/data-entry/datasheets/pages/site-datasheet';
 import Users from '@pages/admin/users/Users';
 import MissouriRiverForm from '@src/app-pages/data-entry/edit-data-sheet/forms/missouriRiverForm';
-import SearchEffortForm from '@src/app-pages/data-entry/edit-data-sheet/forms/searchEffortForm';
+// import SearchEffortForm from '@src/app-pages/data-entry/edit-data-sheet/forms/searchEffortForm';
+import SearchEffortOverview from '@src/app-pages/data-entry/datasheets/pages/SearchEffortOverview';
 
 export default createRouteBundle({
   '': Home,
@@ -41,9 +42,9 @@ export default createRouteBundle({
   '/sites-list': SitesList,
   '/sites-list/:siteId': SiteDatasheet,
   '/sites-list/:siteId/missouri-river': MissouriRiverForm,
-  '/sites-list/:siteId/search-effort': SearchEffortForm,
+  '/sites-list/:siteId/search-effort': SearchEffortOverview,
   '/sites-list/:siteId/missouri-river/:mrId': MissouriRiverForm,
-  '/sites-list/:siteId/search-effort/:seId': SearchEffortForm,
+  '/sites-list/:siteId/search-effort/:seId': SearchEffortOverview,
   '/tag-replacement': TagReplacement,
   '/user-access-requests': UserList,
   '*': NotFound,
