@@ -6,7 +6,6 @@ import cache from '../cache';
 import dataEntryBundle from './data-entry-bundle';
 import datasheetPageBundle from './datasheet-page-bundle';
 import domainsBundle from './domains-bundle';
-import notificationBundle from './notification-bundle';
 import modalBundle from './modal-bundle';
 import routesBundle from './routes-bundle';
 import searchReportsPageBundle from './search-reports-page-bundle';
@@ -49,7 +48,6 @@ export default composeBundles(
   geneticCardSummaryBundle,
   homeDataBundle,
   modalBundle,
-  notificationBundle,
   routesBundle,
   searchReportsPageBundle,
   sitesBundle,
