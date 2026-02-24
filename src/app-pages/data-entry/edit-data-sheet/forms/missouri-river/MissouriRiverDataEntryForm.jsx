@@ -80,6 +80,8 @@ const MissouriRiverDataEntryForm = connect(
     const [ss1Options, setSs1Options] = useState([]);
     const [ss2Options, setSs2Options] = useState([]);
 
+    const newForm = dataEntryData?.mrId ? true : false;
+
     const ss3Options = removeDuplicates(
       setSite3Options?.map((item) => ({
         code: item.code,
@@ -189,7 +191,7 @@ const MissouriRiverDataEntryForm = connect(
       stateOptions: [],
     });
     const {
-      formState: { errors, isValid },
+      formState: { errors, isValid, touchedFields },
       setFocus,
       watch,
       getValues,
@@ -198,6 +200,8 @@ const MissouriRiverDataEntryForm = connect(
     } = methods;
 
     console.warn('VALUES: ', getValues());
+
+    const isTouched = Object.keys(touchedFields).length > 0;
 
     const deploymentType = watch('deploymentType');
     const macro = watch('macro');
@@ -218,6 +222,7 @@ const MissouriRiverDataEntryForm = connect(
     const depth3 = watch('depth3');
     const velocitybot1 = watch('velocitybot1');
     const velocity081 = watch('velocity081');
+    const u2 = watch('u2');
     const u7 = watch('u7');
 
     const isStartTimeDisabled =
@@ -242,19 +247,23 @@ const MissouriRiverDataEntryForm = connect(
     };
 
     const handleSave = () => {
-      const values = getValues();
-      // Format any values need for final payload
-      const dataObj = {
-        ...values,
-        bendrivermile: parseFloat(values?.bendrivermile),
-        startLatitude: formatCoordFlt(values.startLatitude) ?? '',
-        startLongitude: formatCoordFlt(values.startLongitude) ?? '',
-        stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
-        stopLongitude: formatCoordFlt(values.stopLongitude) ?? '',
-      };
-      // Filter out any null/empty values for final payload
-      const payload = filterNullEmptyObjects(dataObj);
-      dataEntryData?.mrId ? doUpdateMoRiverDataEntry(payload) : doAddMoRiverDataEntry(payload);
+      if (isValid) {
+        const values = getValues();
+        // Format any values need for final payload
+        const dataObj = {
+          ...values,
+          bendrivermile: parseFloat(values?.bendrivermile),
+          startLatitude: formatCoordFlt(values.startLatitude) ?? '',
+          startLongitude: formatCoordFlt(values.startLongitude) ?? '',
+          stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
+          stopLongitude: formatCoordFlt(values.stopLongitude) ?? '',
+        };
+        // Filter out any null/empty values for final payload
+        const payload = filterNullEmptyObjects(dataObj);
+        dataEntryData?.mrId ? doUpdateMoRiverDataEntry(payload) : doAddMoRiverDataEntry(payload);
+      } else {
+        trigger();
+      }
     };
 
     // Set R/N value
@@ -264,13 +273,13 @@ const MissouriRiverDataEntryForm = connect(
 
     // Set Gear Code options and reset Gear Code value when necessary
     useEffect(() => {
-      setValue('gear', '', { shouldValidate: true });
+      setValue('gear', '');
       setGearCodeOptions(gearType === 'S' ? getSeasonGearOfficeOptions(season, fieldoffice, projectId) : gearCodes);
     }, [gearType]);
 
     // Set Meso options and reset Meso value when necessary
     useEffect(() => {
-      setValue('meso', '', { shouldValidate: true });
+      setValue('meso', '');
       handleMesoOptions(mesos, gearType, gearCode, macro, season);
     }, [mesos, gearType, gearCode, macro, season]);
 
@@ -328,6 +337,10 @@ const MissouriRiverDataEntryForm = connect(
       }
     }, [gearCode]);
 
+    useEffect(() => {
+      trigger('distance');
+    }, [u2]);
+
     // netrivermile in baseData
     useEffect(() => {
       doUpdateBaseData('netrivermile', netrivermile);
@@ -339,7 +352,7 @@ const MissouriRiverDataEntryForm = connect(
 
     return (
       <FormProvider {...methods}>
-        {errors && <ErrorSummary errors={errors} />}
+        {errors && isTouched && <ErrorSummary errors={errors} />}
         <div className='container-fluid margin-top-1'>
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>

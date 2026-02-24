@@ -234,13 +234,13 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .max(999, 'Value cannot exceed 999'),
       netrivermile: yup
         .string()
+        .nullable()
+        .notRequired()
         .test({
           test: (value) =>
             Number(value) <= Number(riverMile?.upperRiverMile) && Number(value) >= Number(riverMile?.lowerRiverMile),
           message: `Net River Mile must be between (or equal to) the ${riverMile?.lowerRiverMile} and ${riverMile?.upperRiverMile} for this bend.`,
-        })
-        .nullable()
-        .notRequired(),
+        }),
       structurenumber: yup.string().when(['project', 'season'], {
         is: (project, season) => Number(project) === 2 && season === 'HS',
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
