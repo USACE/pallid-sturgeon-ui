@@ -339,6 +339,7 @@ const ProcedureDsTable = connect(
             <AgGridColumn field='expectedSpawnYear' cellEditor='numberEditor' width={175} sortable unSortIcon />
             <AgGridColumn field='ultrasoundGonadLength' cellEditor='numberEditor' width={175} sortable unSortIcon />
             <AgGridColumn field='gonadCondition' cellEditor='textEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='serialNum' cellEditor='textEditor' width={150} sortable unSortIcon />
             <AgGridColumn
               field='lastEditComment'
               cellEditor='textEditor'

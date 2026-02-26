@@ -302,6 +302,7 @@ const SuppDsTable = connect(
             <AgGridColumn field='rOb' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn field='mouthwidth' cellEditor='numberEditor' width={125} sortable unSortIcon />
             <AgGridColumn field='recapture' cellEditor='textEditor' sortable unSortIcon />
+            <AgGridColumn field='project37' cellEditor='numberEditor' sortable unSortIcon />
             <AgGridColumn
               field='lastEditComment'
               cellEditor='textEditor'
