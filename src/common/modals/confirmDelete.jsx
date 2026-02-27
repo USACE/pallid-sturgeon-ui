@@ -1,8 +1,9 @@
 import React from 'react';
 import { connect } from 'redux-bundler-react';
 
-import { ModalContent, ModalFooter, ModalHeader } from '@components/modal';
 import { projectMap } from '@pages/data-entry/helpers';
+import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
+import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
 
 const ConfirmDelete = connect(
   'doModalClose',
@@ -72,8 +73,7 @@ const ConfirmDelete = connect(
     };
 
     return (
-      <ModalContent>
-        <ModalHeader title='Confirm Data Deletion' />
+      <ModalContent title='Confirm Data Deletion' size='sm'>
         <section className='modal-body'>
           <div className='container-fluid'>
             Are you sure you want to delete?
@@ -103,9 +103,7 @@ const ConfirmDelete = connect(
                   </div>
                   <div>
                     <b>Project: </b>
-                    <i>
-                      {data.projectCode + ' - ' + projectMap[data.projectCode]}
-                    </i>
+                    <i>{data.projectCode + ' - ' + projectMap[data.projectCode]}</i>
                   </div>
                 </>
               )}

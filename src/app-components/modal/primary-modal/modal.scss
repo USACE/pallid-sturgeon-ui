@@ -1,0 +1,110 @@
+@use '@styles/_variables';
+
+body:has(.usa-modal-overlay) {
+  overflow: hidden;
+}
+
+div.usa-modal__content div.usa-modal__main {
+  max-width: none;
+}
+
+div.usa-modal {
+  color: inherit;
+  font-size: inherit;
+  font-family: inherit;
+  line-height: inherit;
+  overflow: auto;
+  max-height: 94vh;
+  margin: 0;
+
+  div.usa-modal__content {
+    padding: 0;
+  }
+  div.usa-modal__main {
+    padding: 0;
+    margin: 0;
+  }
+  &[data-secondary-modal] {
+    .modal-body {
+      padding-bottom: 5rem;
+    }
+  }
+  &[data-force-action='false'] {
+    .usa-modal__content {
+      .secondary-modal-header {
+        padding-right: 3.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .usa-modal__close {
+        margin: 0;
+        top: 0.75rem;
+        right: 0.5rem;
+        position: absolute;
+        z-index: 1000;
+      }
+    }
+  }
+
+  &.modal-md {
+    max-width: 42rem;
+  }
+
+  &:has(footer) {
+    #primary-modal-content {
+      padding-bottom: 4rem;
+    }
+  }
+
+  .primary-modal-header,
+  .primary-modal-footer {
+    background-color: variables.$color-white;
+    display: flex;
+    position: sticky;
+    z-index: 1000;
+  }
+
+  .primary-modal-header {
+    align-items: flex-start;
+    border-bottom: 1px solid variables.$color-form-light;
+    border-top-left-radius: calc(0.3rem - 1px);
+    border-top-right-radius: calc(0.3rem - 1px);
+    justify-content: space-between;
+    padding: 1rem 1rem;
+    top: 0;
+  }
+
+  .primary-modal-footer {
+    align-items: center;
+    border-top: 1px solid #dee2e6;
+    bottom: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-bottom: -4rem;
+    padding: 0.75rem;
+    &.has-extra-actions {
+      justify-content: space-between;
+
+      .left-group {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+
+        .extra-actions {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+      }
+    }
+
+    button {
+      margin: 0;
+    }
+  }
+}
+
+h1.modal-title {
+  margin-bottom: 0 !important;
+}
