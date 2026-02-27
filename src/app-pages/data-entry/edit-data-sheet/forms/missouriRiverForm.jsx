@@ -160,7 +160,7 @@ const MissouriRiverForm = connect(
         setField('startlongitude', best.lng);
         setField('startTime', fmtTimeHHMMSS(best.capturedAt));
 
-        setField('starttime', fmtTimeHHMM(best.capturedAt));
+        setField('starttime', fmtTimeHHMMSS(best.capturedAt));
 
         window.alert(`Captured START\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
       } catch (e) {
