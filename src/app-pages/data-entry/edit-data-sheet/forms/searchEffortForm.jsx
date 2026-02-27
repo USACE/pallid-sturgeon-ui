@@ -130,8 +130,9 @@ const SearchEffortForm = connect(
         dataEntryData.searchDate && handleSelect('searchDate', formatDate(dataEntryData.searchDate));
       } else {
         // Reset data if adding new Search Effort datasheet
-        doResetTelemetryDataEntries();
-        handleSelect('siteId', siteId);
+        // @TODO: Rendering multiples, need to debug this
+        // doResetTelemetryDataEntries();
+        handleSelect('siteId', Number(siteId));
         handleSelect('dsId', 1);
       }
     }, [isEditForm, dataEntryData]);
