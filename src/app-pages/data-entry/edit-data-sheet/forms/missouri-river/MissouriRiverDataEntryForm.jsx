@@ -253,10 +253,6 @@ const MissouriRiverDataEntryForm = connect(
 
     const handleChange = (e) => {
       const name = e?.target?.name;
-      const value = e?.target?.value;
-
-      console.warn('NAME/VALUE: ', name, value);
-
       trigger(name);
 
       if (name === 'distance') {
@@ -364,6 +360,64 @@ const MissouriRiverDataEntryForm = connect(
         }
       }
     }, [gearCode]);
+
+    // Populate Gear Code Dropdown Value from Existing API Data
+    useEffect(() => {
+      if (gearCodeOptions.length > 0) {
+        if (dataEntryData?.gear) {
+          setValue('gear', dataEntryData?.gear);
+        }
+      }
+    }, [dataEntryData, gearCodeOptions]);
+
+    // Populate Meso Dropdown Value from Existing API Data
+    useEffect(() => {
+      if (mesoOptions.length > 0) {
+        if (dataEntryData?.meso) {
+          setValue('meso', dataEntryData?.meso);
+        }
+      }
+    }, [dataEntryData, mesoOptions]);
+
+    // Populate Structure Flow Dropdown Value from Existing API Data
+    useEffect(() => {
+      if (structureFlowOptions.length > 0) {
+        if (dataEntryData?.structureFlow) {
+          setValue('structureFlow', dataEntryData?.structureFlow);
+          trigger('structureFlow');
+        }
+      }
+    }, [dataEntryData, structureFlowOptions]);
+
+    // Populate Structure Mod Dropdown Value from Existing API Data
+    useEffect(() => {
+      if (structureModOptions.length > 0) {
+        if (dataEntryData?.structureMod) {
+          setValue('structureMod', dataEntryData?.structureMod);
+          trigger('structureMod');
+        }
+      }
+    }, [dataEntryData, structureModOptions]);
+
+    // Populate Set Site 1 Dropdown Value from Existing API Data
+    useEffect(() => {
+      if (ss1Options.length > 0) {
+        if (dataEntryData?.setSite1) {
+          setValue('setSite1', dataEntryData?.setSite1);
+          trigger('setSite1');
+        }
+      }
+    }, [dataEntryData, ss1Options]);
+
+    // Populate Set Site 2 Dropdown Value from Existing API Data
+    useEffect(() => {
+      if (ss2Options.length > 0) {
+        if (dataEntryData?.setSite2) {
+          setValue('setSite2', dataEntryData?.setSite2);
+          trigger('setSite2');
+        }
+      }
+    }, [dataEntryData, ss2Options]);
 
     useEffect(() => {
       trigger('distance');
