@@ -34,7 +34,7 @@ const cleanAndTruncateLabels = (input, maxLength) => {
   return cleanedString + (truncated ? ' : ' : ': ');
 };
 
-const ErrorSummary = ({ errors, type = 'base', modalID, sectionNo = 0 }) => {
+const ErrorSummary = ({ errors, type = 'base', modalID, isValid }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const genericErrorArray = [];
@@ -58,7 +58,7 @@ const ErrorSummary = ({ errors, type = 'base', modalID, sectionNo = 0 }) => {
       case 'form':
         return 'form';
       default:
-        return `${sectionNo}`;
+        return 'form';
     }
   };
 
