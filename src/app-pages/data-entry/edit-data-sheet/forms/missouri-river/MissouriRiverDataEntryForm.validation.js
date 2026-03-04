@@ -33,6 +33,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .typeError(ValidationMessages.FieldRequired)
         .moreThan(0, 'Value cannot be zero'),
       subsamplen: yup.string().required(ValidationMessages.FieldRequired),
+      subsampleType: yup.string().required(ValidationMessages.FieldRequired),
       gearType: yup.string().required(ValidationMessages.FieldRequired),
       gear: yup.string().required(ValidationMessages.FieldRequired),
       recorder: yup.string().required(ValidationMessages.FieldRequired).max(3, 'Value must be at most 3 characters'),
@@ -441,6 +442,7 @@ export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData }) => ({
   subsample: dataEntryData?.subsample ?? 1,
   subsamplepass: dataEntryData?.subsamplepass ?? 1,
   subsamplen: dataEntryData?.subsamplen ?? 'R',
+  subsampleType: dataEntryData?.subsampleType ?? '',
   gearType: dataEntryData?.gearType ?? 'S',
   gear: dataEntryData?.gear ?? '',
   deploymentType: '',

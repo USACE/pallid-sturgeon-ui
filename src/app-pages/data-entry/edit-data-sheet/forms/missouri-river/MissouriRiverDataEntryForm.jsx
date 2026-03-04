@@ -72,6 +72,7 @@ const MissouriRiverDataEntryForm = connect(
       setSite3Options,
       structureFlows,
       structureMods,
+      subsampleTypes,
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
 
@@ -471,6 +472,15 @@ const MissouriRiverDataEntryForm = connect(
             <Grid tablet={{ col: 1 }}>
               <SelectInput name='subsamplen' label='Subsample R/N' onChange={handleChange} required>
                 {createDropdownOptions(bendSelections).map((item, index) => (
+                  <option key={index + 1} value={item.value}>
+                    {item.text}
+                  </option>
+                ))}
+              </SelectInput>
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <SelectInput name='subsampleType' label='Subsample Type' onChange={handleChange} required>
+                {createDropdownOptions(subsampleTypes).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
                   </option>
