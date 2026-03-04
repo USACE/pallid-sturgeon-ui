@@ -75,7 +75,6 @@ const MissouriRiverDataEntryForm = connect(
       subsampleTypes,
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
-
     const [gearCodeOptions, setGearCodeOptions] = useState(gearCodes);
     const [mesoOptions, setMesoOptions] = useState(mesos);
     const [structureFlowOptions, setStructureFlowOptions] = useState([]);
