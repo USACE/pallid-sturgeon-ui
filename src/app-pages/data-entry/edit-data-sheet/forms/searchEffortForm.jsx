@@ -131,7 +131,7 @@ const SearchEffortForm = connect(
         dataEntryData.searchDate && handleSelect('searchDate', formatDate(dataEntryData.searchDate));
       } else {
         // Reset data if adding new Search Effort datasheet
-        doResetTelemetryDataEntries();
+        // doResetTelemetryDataEntries();
         handleSelect('siteId', siteId);
         handleSelect('dsId', 1);
       }

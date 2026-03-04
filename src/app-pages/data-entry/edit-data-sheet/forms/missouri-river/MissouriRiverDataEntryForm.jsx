@@ -268,6 +268,7 @@ const MissouriRiverDataEntryForm = connect(
           depth1: parseFloat(values?.depth1),
           depth2: parseFloat(values?.depth2),
           depth3: parseFloat(values?.depth3),
+          distance: parseFloat(values?.distance),
           startLatitude: formatCoordFlt(values.startLatitude) ?? '',
           startLongitude: formatCoordFlt(values.startLongitude) ?? '',
           stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
@@ -727,7 +728,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLatitude'
                     label='Stop Latitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
                   />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>
@@ -735,7 +736,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLongitude'
                     label='Stop Longitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
                   />
                 </Grid>
               </Grid>
