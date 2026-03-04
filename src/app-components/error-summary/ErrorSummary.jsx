@@ -13,10 +13,7 @@ const cleanAndTruncateLabels = (input, maxLength) => {
     return '';
   }
 
-  let cleanedString = input
-    ?.replace(/\*/g, '')
-    ?.replace(/\s*\([^)]{2,}\)\s*/g, '') // Remove anything with more than one character in parentheses
-    ?.replace(/([^\w\s()/+'-])+/g, ''); // Remove punctuation but keep single characters in parentheses and slashes
+  let cleanedString = input?.replace(/\*/g, '');
 
   let truncated = false;
 
@@ -37,7 +34,7 @@ const cleanAndTruncateLabels = (input, maxLength) => {
   return cleanedString + (truncated ? ' : ' : ': ');
 };
 
-const ErrorSummary = ({ errors, type = 'base', modalID, sectionNo = 0 }) => {
+const ErrorSummary = ({ errors, type = 'base', modalID, isValid }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   const genericErrorArray = [];
@@ -61,7 +58,7 @@ const ErrorSummary = ({ errors, type = 'base', modalID, sectionNo = 0 }) => {
       case 'form':
         return 'form';
       default:
-        return `${sectionNo}`;
+        return 'form';
     }
   };
 

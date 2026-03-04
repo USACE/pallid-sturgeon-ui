@@ -91,6 +91,12 @@ export default {
             currentTab: payload,
           };
 
+        case 'RESET_FORM_DATA_ENTRY':
+          return {
+            ...state,
+            data: [],
+            totalCount: 0,
+          };
         case 'RESET_FISH_DATA_ENTRIES':
           return {
             ...state,
@@ -790,6 +796,12 @@ export default {
     },
 
   // RESET
+  doResetFormData:
+    () =>
+    ({ dispatch }) => {
+      dispatch({ type: 'RESET_FORM_DATA_ENTRY' });
+    },
+
   doResetFishDataEntries:
     () =>
     ({ dispatch }) => {

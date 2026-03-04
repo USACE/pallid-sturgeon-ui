@@ -24,16 +24,19 @@ const procCellStyle = (params) => ({
 });
 
 const MissouriDsTable = connect(
+  'doResetFormData',
   'doUpdateUrl',
   'doUpdateComplexStateField',
   'selectMoriverSitesDatasheetData',
   'selectRouteParams',
-  ({ doUpdateUrl, doUpdateComplexStateField, moriverSitesDatasheetData, routeParams }) => {
+  ({ doResetFormData, doUpdateUrl, doUpdateComplexStateField, moriverSitesDatasheetData, routeParams }) => {
     const siteId = routeParams?.siteId;
 
     const handleAddButtonClick = () => {
       doUpdateComplexStateField({ name: 'isEditForm', value: false });
       doUpdateUrl(`/sites-list/${siteId}/missouri-river`);
+      // Reset form data
+      doResetFormData();
     };
 
     return (
