@@ -202,8 +202,6 @@ const MissouriRiverDataEntryForm = connect(
       handleSubmit,
     } = methods;
 
-    console.warn('VALUES: ', getValues());
-
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
 
