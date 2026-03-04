@@ -33,6 +33,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .typeError(ValidationMessages.FieldRequired)
         .moreThan(0, 'Value cannot be zero'),
       subsamplen: yup.string().required(ValidationMessages.FieldRequired),
+      subsampleType: yup.string().required(ValidationMessages.FieldRequired),
       gearType: yup.string().required(ValidationMessages.FieldRequired),
       gear: yup.string().required(ValidationMessages.FieldRequired),
       recorder: yup.string().required(ValidationMessages.FieldRequired).max(3, 'Value must be at most 3 characters'),
@@ -61,16 +62,19 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
               message: "Mesohabitat cannot = 'FMCD' during High Water season",
             }),
         }),
-      micro: yup.string().when(['segment', 'project'], {
-        is: (segment, project) => Number(project) == 1 && microSegmentRequired.includes(segment),
-        then: (schema) =>
-          schema.when('u6', {
-            is: (val) => !val,
-            then: (schema) => schema.required(ValidationMessages.FieldRequired),
-            otherwise: (schema) => schema.nullable().notRequired(),
-          }),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
+      micro: yup
+        .string()
+        .max(6, 'Values cannot exceed 6 digits')
+        .when(['segment', 'project'], {
+          is: (segment, project) => Number(project) == 1 && microSegmentRequired.includes(segment),
+          then: (schema) =>
+            schema.when('u6', {
+              is: (val) => !val,
+              then: (schema) => schema.required(ValidationMessages.FieldRequired),
+              otherwise: (schema) => schema.nullable().notRequired(),
+            }),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
       microStructure: yup.string().nullable(),
       structureFlow: yup.string().when('microStructure', {
         is: (val) => val !== null && val !== '',
@@ -128,8 +132,8 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .required(ValidationMessages.FieldRequired)
         .test({
-          test: (value) => (Number(value) <= 36 && Number(value) >= -90) || Number(value) === 0,
-          message: 'Value must be between 36 and -90 degrees. (Enter 0 if unknown)',
+          test: (value) => (Number(value) >= 36 && Number(value) <= 50) || Number(value) === 0,
+          message: 'Value must be between 36 and 50 degrees. (Enter 0 if unknown)',
         })
         .nullable()
         .notRequired(),
@@ -143,7 +147,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         })
         .nullable()
         .notRequired(),
-      stopTime: yup.string().required(ValidationMessages.FieldRequired),
+      stopTime: yup.string().nullable().notRequired(),
       stopLatitude: yup
         .string()
         .when(['deploymentType', 'gear'], {
@@ -178,7 +182,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         then: (schema) =>
           schema.required(ValidationMessages.FieldRequired).test({
             test: (value, { parent: { distance, gear } }) => gear.startsWith('TL') && Number(value) >= Number(distance),
-            message: 'Distance cannot be less than U2 when the gear is trotline',
+            message: 'Distance cannot be greater than U2 when the gear is trotline',
           }),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
@@ -234,13 +238,19 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .max(999, 'Value cannot exceed 999'),
       netrivermile: yup
         .string()
-        .test({
-          test: (value) =>
-            Number(value) <= Number(riverMile?.upperRiverMile) && Number(value) >= Number(riverMile?.lowerRiverMile),
-          message: `Net River Mile must be between (or equal to) the ${riverMile?.lowerRiverMile} and ${riverMile?.upperRiverMile} for this bend.`,
-        })
         .nullable()
-        .notRequired(),
+        .notRequired()
+        .when('netrivermile', {
+          is: (val) => val !== null && val !== '',
+          then: (schema) =>
+            schema.test({
+              test: (value) =>
+                Number(value) <= Number(riverMile?.upperRiverMile) &&
+                Number(value) >= Number(riverMile?.lowerRiverMile),
+              message: `Net River Mile must be between (or equal to) the ${riverMile?.lowerRiverMile} and ${riverMile?.upperRiverMile} for this bend.`,
+            }),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
       structurenumber: yup.string().when(['project', 'season'], {
         is: (project, season) => Number(project) === 2 && season === 'HS',
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
@@ -252,9 +262,14 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .when('gear', {
           is: (val) => gearReqFields.depth1.includes(val),
           then: (schema) =>
-            schema.required(ValidationMessages.FieldRequired).test({
-              test: (value, { parent: { meso } }) => meso === 'BARS' && value <= 1.2,
-              message: 'Value cannot be greater than 1.2 when Meso = BAR',
+            schema.required(ValidationMessages.FieldRequired).when('meso', {
+              is: (val) => val !== null && val !== '' && val === 'BARS',
+              then: (schema) =>
+                schema.test({
+                  test: (value) => value <= 1.2,
+                  message: 'Value cannot be greater than 1.2 when Meso = BAR',
+                }),
+              otherwise: (schema) => schema.required(ValidationMessages.FieldRequired),
             }),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -271,9 +286,14 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .when('gear', {
           is: (val) => gearReqFields.depth2.includes(val),
           then: (schema) =>
-            schema.required(ValidationMessages.FieldRequired).test({
-              test: (value, { parent: { meso } }) => meso === 'BARS' && value <= 1.2,
-              message: 'Value cannot be greater than 1.2 when Meso = BAR',
+            schema.required(ValidationMessages.FieldRequired).when('meso', {
+              is: (val) => val !== null && val !== '' && val === 'BARS',
+              then: (schema) =>
+                schema.test({
+                  test: (value) => value <= 1.2,
+                  message: 'Value cannot be greater than 1.2 when Meso = BAR',
+                }),
+              otherwise: (schema) => schema.required(ValidationMessages.FieldRequired),
             }),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -290,9 +310,14 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .when('gear', {
           is: (val) => gearReqFields.depth3.includes(val),
           then: (schema) =>
-            schema.required(ValidationMessages.FieldRequired).test({
-              test: (value, { parent: { meso } }) => meso === 'BARS' && value <= 1.2,
-              message: 'Value cannot be greater than 1.2 when Meso = BAR',
+            schema.required(ValidationMessages.FieldRequired).when('meso', {
+              is: (val) => val !== null && val !== '' && val === 'BARS',
+              then: (schema) =>
+                schema.test({
+                  test: (value) => value <= 1.2,
+                  message: 'Value cannot be greater than 1.2 when Meso = BAR',
+                }),
+              otherwise: (schema) => schema.required(ValidationMessages.FieldRequired),
             }),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -321,7 +346,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when(['depth2', 'gear'], {
-          is: (depth2, gear) => gearReqFields.velocity081.includes(gear) && depth2 >= 1.2,
+          is: (depth2, gear) => gearReqFields.velocity081.includes(gear) || depth2 >= 1.2,
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -360,7 +385,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when(['depth2', 'gear'], {
-          is: (depth2, gear) => gearReqFields.velocity082.includes(gear) && depth2 >= 1.2,
+          is: (depth2, gear) => gearReqFields.velocity082.includes(gear) || depth2 >= 1.2,
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -384,29 +409,13 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
           test: (value) => value === undefined || Number.isInteger(value * 100),
           message: 'Must have at most 2 decimal places',
         }),
-      cobble: yup.string().nullable().notRequired(),
-      organic: yup.string().nullable().notRequired(),
-      silt: yup
-        .number()
-        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .nullable()
-        .notRequired()
-        .min(0, 'Value cannot be negative'),
-      sand: yup
-        .number()
-        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .nullable()
-        .notRequired()
-        .min(0, 'Value cannot be negative'),
-      gravel: yup
-        .number()
-        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .nullable()
-        .notRequired()
-        .min(0, 'Value cannot be negative'),
+      editInitials: yup.string().max(3, 'Value must be at most 3 characters').nullable().notRequired(),
       comments: yup.string().nullable(),
     },
-    [['width', 'width']]
+    [
+      ['width', 'width'],
+      ['netrivermile', 'netrivermile'],
+    ]
   );
 
 const getBaseDefaultValues = ({ baseData }) => ({
@@ -433,6 +442,7 @@ export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData }) => ({
   subsample: dataEntryData?.subsample ?? 1,
   subsamplepass: dataEntryData?.subsamplepass ?? 1,
   subsamplen: dataEntryData?.subsamplen ?? 'R',
+  subsampleType: dataEntryData?.subsampleType ?? '',
   gearType: dataEntryData?.gearType ?? 'S',
   gear: dataEntryData?.gear ?? '',
   deploymentType: '',
@@ -476,10 +486,19 @@ export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData }) => ({
   velocitybot2: dataEntryData?.velocitybot2 ?? '',
   velocity082: dataEntryData?.velocity082 ?? '',
   velocity02or062: dataEntryData?.velocity02or062 ?? '',
+  editInitials: dataEntryData?.editInitial ?? '',
+  comments: dataEntryData?.comments ?? '',
+  // Historic Data (Read Only)
   cobble: dataEntryData?.cobble ?? '',
   organic: dataEntryData?.organic ?? '',
   silt: dataEntryData?.silt ?? '',
   sand: dataEntryData?.sand ?? '',
   gravel: dataEntryData?.gravel ?? '',
-  comments: dataEntryData?.comments ?? '',
+  usgs: dataEntryData?.usgs ?? '',
+  riverstage: dataEntryData?.riverstage ?? '',
+  discharge: dataEntryData?.discharge ?? '',
+  habitatrn: dataEntryData?.habitatrn ?? '',
+  noTurbidity: dataEntryData?.noTurbidity ?? '',
+  noVelocity: dataEntryData?.noVelocity ?? '',
+  lastEditComment: dataEntryData?.lastEditComment ?? '',
 });
