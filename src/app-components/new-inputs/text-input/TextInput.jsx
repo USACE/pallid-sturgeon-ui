@@ -1,15 +1,17 @@
 import { useFormContext } from 'react-hook-form';
-
+import classNames from 'classnames';
+import { mdiAlert } from '@mdi/js';
 import { Label, TextInput as UswdsTextInput } from '@trussworks/react-uswds';
 
-import classNames from 'classnames';
+import Icon from '@src/app-components/icon/icon';
+import Tooltip from '@src/app-components/tooltip/Tooltip';
 
 import './textInput.scss';
 
 const TextInput = ({
   className = 'width-full',
   hint,
-  showOptionalText = true,
+  showOptionalText = false,
   label,
   type = 'text',
   maxLength = type === 'text' ? 256 : null,
@@ -21,6 +23,9 @@ const TextInput = ({
   required,
   uppercase,
   validations,
+  warning,
+  tooltip,
+  tooltipClickable,
   ...customProps
 }) => {
   const classes = classNames(className, { 'text-uppercase': uppercase });
@@ -56,6 +61,7 @@ const TextInput = ({
         ) : (
           showOptionalText && <span className='text-italic'> (optional)</span>
         )}
+        {tooltip && <Tooltip clickable={tooltipClickable} content={tooltip} header={label} name={name} />}
       </Label>
       {hint && (
         <div className='usa-hint' id={`${name}_hint`}>
@@ -76,6 +82,12 @@ const TextInput = ({
         {...rest}
         {...customProps}
       />
+      {warning && (
+        <div className='usa-hint warning-message' id={`${name}_hint`}>
+          <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+          {warning}
+        </div>
+      )}
     </>
   );
 };

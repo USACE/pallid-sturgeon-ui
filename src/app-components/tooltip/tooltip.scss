@@ -1,0 +1,51 @@
+@use '@styles/_variables';
+
+.info-tooltip-icon {
+  cursor: pointer;
+  display: inline-block;
+  margin: 0 0.1em;
+  vertical-align: text-bottom;
+
+  color: variables.$link-color;
+
+  &.info-tooltip-error {
+    color: variables.$color-error;
+  }
+}
+
+.tooltip-modal-contents {
+  padding: 1rem 1.5rem;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.tooltip-container {
+  .usa-tooltip__body {
+    opacity: 1;
+    display: block;
+
+    &.right {
+      &::after {
+        border-right: 6px solid #1b1b1b;
+      }
+    }
+
+    &.left {
+      &::after {
+        border-left: 6px solid #1b1b1b;
+      }
+    }
+
+    &.top {
+      &::after {
+        border-top: 6px solid #1b1b1b;
+      }
+    }
+
+    &.bottom {
+      &::after {
+        border-bottom: 6px solid #1b1b1b;
+      }
+    }
+  }
+}
