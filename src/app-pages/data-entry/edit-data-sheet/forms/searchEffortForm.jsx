@@ -321,12 +321,7 @@ const SearchEffortForm = connect(
                 },
                 {
                   title: `Telemetry (${dataEntryTelemetryTotalCount})`,
-                  content: (
-                    <>
-                      {/* <TelemetryDsTable /> */}
-                      <TelemetryDataEntry />
-                    </>
-                  ),
+                  content: <TelemetryDataEntry />,
                 },
               ]}
               onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}
