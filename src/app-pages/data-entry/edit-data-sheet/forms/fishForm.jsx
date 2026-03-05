@@ -6,23 +6,9 @@ import Card from '@components/card';
 import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 import Approval from '@pages/data-entry/datasheets/components/approval';
 
-import {
-  FilterSelectCustomLabel,
-  Input,
-  Row,
-  SelectCustomLabel,
-  TextArea,
-} from './_shared/helper';
-import {
-  baitOptions,
-  finCurlOptions,
-  raySpineOptions,
-  scaleOptions,
-} from './_shared/selectHelper';
-import {
-  createDropdownOptions,
-  createMesoOptions,
-} from '@pages/data-entry/helpers';
+import { FilterSelectCustomLabel, Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
+import { baitOptions, yesNoOptions, raySpineOptions, scaleOptions } from './_shared/selectHelper';
+import { createDropdownOptions, createMesoOptions } from '@pages/data-entry/helpers';
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -102,9 +88,7 @@ const FishForm = connect(
       dispatch({
         type: 'UPDATE_INPUT',
         field: e.target.name,
-        value: isNaN(parseFloat(e.target.value))
-          ? 0
-          : parseFloat(e.target.value),
+        value: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value),
       });
     };
 
@@ -117,8 +101,7 @@ const FishForm = connect(
     };
 
     const saveIsDisabled = !(
-      !!state['species'] &&
-      (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
+      !!state['species'] && (edit ? !!state['editInitials'] && !!state['lastEditComment'] : true)
     );
 
     useEffect(() => {
@@ -155,12 +138,7 @@ const FishForm = connect(
           <Card.Body>
             <Row>
               <div className='col-2'>
-                <Input
-                  name='panelHook'
-                  label='Panel/Hook'
-                  value={state['panelHook']}
-                  onChange={handleChange}
-                />
+                <Input name='panelHook' label='Panel/Hook' value={state['panelHook']} onChange={handleChange} />
               </div>
               <div className='col-2'>
                 <FilterSelectCustomLabel
@@ -215,12 +193,7 @@ const FishForm = connect(
             </Row>
             <Row>
               <div className='col-2'>
-                <Input
-                  name='ftnum'
-                  label='Floy Tag'
-                  value={state['ftnum']}
-                  onChange={handleChange}
-                />
+                <Input name='ftnum' label='Floy Tag' value={state['ftnum']} onChange={handleChange} />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
@@ -254,7 +227,7 @@ const FishForm = connect(
                   name='finCurl'
                   label='Fin Curl'
                   value={state['finCurl']}
-                  options={finCurlOptions}
+                  options={yesNoOptions}
                   onChange={(val) => handleSelect('finCurl', val)}
                 />
               </div>
@@ -280,23 +253,10 @@ const FishForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input
-                  name='kn'
-                  label='KN'
-                  value={state['kn']}
-                  onChange={handleChange}
-                  isDisabled
-                />
+                <Input name='kn' label='KN' value={state['kn']} onChange={handleChange} isDisabled />
               </div>
               <div className='col-2'>
-                <Input
-                  name='wr'
-                  label='WR'
-                  type='number'
-                  value={state['wr']}
-                  onChange={handleNumber}
-                  isDisabled
-                />
+                <Input name='wr' label='WR' type='number' value={state['wr']} onChange={handleNumber} isDisabled />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel
@@ -308,13 +268,7 @@ const FishForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input
-                  name='rsd'
-                  label='RSD'
-                  value={state['rsd']}
-                  onChange={handleChange}
-                  isDisabled
-                />
+                <Input name='rsd' label='RSD' value={state['rsd']} onChange={handleChange} isDisabled />
               </div>
               <div className='col-2'>
                 <SelectCustomLabel

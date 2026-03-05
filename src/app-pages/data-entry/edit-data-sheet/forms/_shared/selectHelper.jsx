@@ -479,36 +479,20 @@ export const positionConfidenceOptions = [
 ];
 
 // Fish Form Select Options
-export const finCurlOptions = [
-  { value: '', text: 'N/A' },
+export const yesNoOptions = [
+  { value: 'U', text: 'Unknown' },
   { value: 'Y', text: 'Yes' },
   { value: 'N', text: 'No' },
 ];
 
-export const raySpineOptions = [
-  { value: 'X' },
-];
+export const raySpineOptions = [{ value: 'X' }];
 
-export const scaleOptions = [
-  { value: 'X' },
-  { value: 'G' },
-];
+export const scaleOptions = [{ value: 'X' }, { value: 'G' }];
 
-export const baitOptions = [
-  { value: 'C' },
-  { value: 'F' },
-  { value: 'L' },
-  { value: 'W' },
-];
+export const baitOptions = [{ value: 'C' }, { value: 'F' }, { value: 'L' }, { value: 'W' }];
 
 // Procedure Form Select Options
-export const purposeOptions = [
-  { value: 'II' },
-  { value: 'RI' },
-  { value: 'EV' },
-  { value: 'SE' },
-  { value: 'RT' },
-];
+export const purposeOptions = [{ value: 'II' }, { value: 'RI' }, { value: 'EV' }, { value: 'SE' }, { value: 'RT' }];
 
 export const sexOptions = [
   { value: 'F', text: 'Female' },
@@ -532,27 +516,16 @@ export const evalLocationsOptions = [
   { value: 'GR', text: 'GR' },
 ];
 
-export const visualAssessmentOptions = [
-  { value: 'R' },
-  { value: 'N' },
-  { value: 'Z'},
-];
+export const visualAssessmentOptions = [{ value: 'R' }, { value: 'N' }, { value: 'Z' }];
 
 export const YNNumOptions = [
   { text: 'Y', value: 1 },
   { text: 'N', value: 0 },
 ];
 
-export const YNTextOptions = [
-  { text: 'Y' },
-  { text: 'N' },
-];
+export const YNTextOptions = [{ text: 'Y' }, { text: 'N' }];
 
-export const ScuteOptions = [
-  { value: 'N' },
-  { value: 'R' },
-  { value: 'L' },
-];
+export const ScuteOptions = [{ value: 'N' }, { value: 'R' }, { value: 'L' }];
 
 export const HVXOptions = [
   { value: 'H', text: 'Horizontal Position' },
@@ -561,16 +534,16 @@ export const HVXOptions = [
 ];
 
 export const ERELOptions = [
-  {value: 'G', text: 'Green'},
-  {value: 'O', text: 'Orange'},
-  {value: 'R', text: 'Red'},
-  {value: 'P', text: 'Pink'},
-  {value: 'Y', text: 'Yellow'},
-  {value: 'W', text: 'White'},
-  {value: 'V', text: 'Purple'},
-  {value: 'B', text: 'Brown'},
-  {value: 'K', text: 'Black'},
-  {value: 'U', text: 'Blue'},
-  {value: 'N', text: 'None'},
-  {value: 'x', text: 'Undetermined'},
+  { value: 'G', text: 'Green' },
+  { value: 'O', text: 'Orange' },
+  { value: 'R', text: 'Red' },
+  { value: 'P', text: 'Pink' },
+  { value: 'Y', text: 'Yellow' },
+  { value: 'W', text: 'White' },
+  { value: 'V', text: 'Purple' },
+  { value: 'B', text: 'Brown' },
+  { value: 'K', text: 'Black' },
+  { value: 'U', text: 'Blue' },
+  { value: 'N', text: 'None' },
+  { value: 'x', text: 'Undetermined' },
 ];
