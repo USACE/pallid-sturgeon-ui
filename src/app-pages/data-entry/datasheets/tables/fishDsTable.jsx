@@ -14,7 +14,7 @@ import TextEditor from '@common/gridCellEditors/textEditor';
 
 import {
   baitOptions,
-  finCurlOptions,
+  yesNoOptions,
   raySpineOptions,
   scaleOptions,
 } from '@pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
@@ -223,7 +223,7 @@ const FishDsTable = connect(
             <AgGridColumn
               field='finCurl'
               cellEditor='selectEditor'
-              cellEditorParams={{ options: finCurlOptions, isRequired: false }}
+              cellEditorParams={{ options: yesNoOptions, isRequired: false }}
             />
             <AgGridColumn
               field='otolith'
