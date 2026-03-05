@@ -18,6 +18,7 @@ import {
 } from './MissouriRiverDataEntryForm.validation';
 import { filterNullEmptyObjects, formatCoordFlt } from '@src/utils/helpers';
 import Checkbox from '@src/app-components/check-box/Checkbox';
+import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 
 import '../../../dataentry.scss';
 
@@ -43,6 +44,12 @@ const removeDuplicates = (arr) => {
   const uniqueSet = new Set(serializedArray);
   const uniqueArray = Array.from(uniqueSet).map(JSON.parse);
   return uniqueArray.sort((a, b) => a.code - b.code);
+};
+
+const GPS_OPTIONS = {
+  enableHighAccuracy: true,
+  timeout: 15000,
+  maximumAge: 0,
 };
 
 const MissouriRiverDataEntryForm = connect(
@@ -201,6 +208,50 @@ const MissouriRiverDataEntryForm = connect(
       setValue,
       handleSubmit,
     } = methods;
+
+    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
+
+    const fmtTimeHHMMSS = (iso) => {
+      try {
+        const d = new Date(iso);
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mm = String(d.getMinutes()).padStart(2, '0');
+        const ss = String(d.getSeconds()).padStart(2, '0');
+        return `${hh}:${mm}:${ss}`;
+      } catch {
+        return '';
+      }
+    };
+
+    const handleCaptureStart = async () => {
+      try {
+        const { best } = await captureBestOf(5, 700);
+
+        setValue('startLatitude', best.lat, { shouldValidate: true });
+        setValue('startLongitude', best.lng, { shouldValidate: true });
+        setValue('startTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+
+        window.alert(`Captured START\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+      } catch (e) {
+        console.error(e);
+        window.alert(`GPS capture failed: ${e?.message || e}`);
+      }
+    };
+
+    const handleCaptureStop = async () => {
+      try {
+        const { best } = await captureBestOf(5, 700);
+
+        setValue('stopLatitude', best.lat, { shouldValidate: true });
+        setValue('stopLongitude', best.lng, { shouldValidate: true });
+        setValue('stopTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+
+        window.alert(`Captured STOP\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+      } catch (e) {
+        console.error(e);
+        window.alert(`GPS capture failed: ${e?.message || e}`);
+      }
+    };
 
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
@@ -664,6 +715,11 @@ const MissouriRiverDataEntryForm = connect(
                     required
                   />
                 </Grid>
+                <Grid row gap='md' table={{ col: 3 }}>
+                  <Button onClick={handleCaptureStart} type='button'>
+                    Capture Start GPS
+                  </Button>
+                </Grid>
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }}>
@@ -738,6 +794,11 @@ const MissouriRiverDataEntryForm = connect(
                     onChange={handleChange}
                     required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
                   />
+                </Grid>
+                <Grid row gap='md' table={{ col: 3 }}>
+                  <Button onClick={handleCaptureStop} type='button'>
+                    Capture Stop GPS
+                  </Button>
                 </Grid>
               </Grid>
             </Grid>
