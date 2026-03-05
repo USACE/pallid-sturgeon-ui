@@ -10,6 +10,7 @@ import SuppDsTable from '@pages/data-entry/datasheets/tables/suppDsTable';
 import ProcedureDsTable from '@pages/data-entry/datasheets/tables/procedureDsTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import MissouriRiverDataEntryForm from '../../edit-data-sheet/forms/missouri-river/MissouriRiverDataEntryForm';
+import FishDataEntry from '../tables/fish/FishDataEntry';
 
 import '../../../data-summaries/data-summary.scss';
 
@@ -87,9 +88,8 @@ const MissouriRiverOverview = connect(
                 {
                   title: `Fish (${dataEntryFishTotalCount})`,
                   content: (
-                    <>
-                      <FishDsTable setIsAddRow={setIsAddSuppRow} setRowId={setSuppRowId} />
-                    </>
+                    <FishDataEntry />
+                    //   <FishDsTable setIsAddRow={setIsAddSuppRow} setRowId={setSuppRowId} />
                   ),
                 },
                 {
