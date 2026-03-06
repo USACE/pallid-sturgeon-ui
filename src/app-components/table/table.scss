@@ -1,0 +1,35 @@
+@use '@styles/_variables';
+
+.table-header-cell {
+  white-space: nowrap;
+
+  #help-icon svg {
+    margin-left: 0.5rem;
+  }
+}
+
+.table-sort-btn {
+  align-items: center;
+  border: none;
+  color: variables.$link-color;
+  padding: 0;
+
+  svg {
+    opacity: 0.5;
+    margin-left: 0.125rem;
+  }
+
+  &.asc,
+  &.desc {
+    font-weight: bold;
+    svg {
+      opacity: 1;
+    }
+  }
+}
+
+.no-table-records {
+  text-align: center;
+  padding: 2rem !important;
+  font-style: italic;
+}

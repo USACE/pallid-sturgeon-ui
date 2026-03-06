@@ -1,7 +1,13 @@
 // Colors
-$color-primary: #6fc3db;
+$color-primary: #4d96aa;
 $color-primary-light: #e3eef1;
 $color-primary-dark: #2c3e50;
+$color-primary-very-dark: #212529;
+
+$color-form-dark: #585a5c;
+$color-form-light: #d1d2d4;
+$color-form-xlight: #f9f9f9;
+$color-form-red: #de1e2e;
 
 $color-gray: #5e5e5e;
 $color-gray-light: #a7a7a7;
@@ -13,22 +19,48 @@ $color-black: #000000;
 $color-success: #68a072;
 $color-success-hover: #578b60;
 
+// Links
+$link-color: #005ea2;
+$link-logout: #565c65;
+
 // Error State
 $color-error: #e74c3c;
 $color-error-asterisk: #ef0000;
 $color-error-border: #d54309;
 $color-error-light: #f4e3db;
 
-// Links
-$link-color: #005ea2;
-$link-logout: #565c65;
-
 // Inputs
+$input-border: #ccc;
 $input-disabled: hsl(0, 0%, 95%);
 $input-error-border: #d54309;
+
+// Tables
+$color-tanstack-table-header: #f0f0f0;
+$color-tanstack-table-select: rgba(134, 176, 240, 0.25);
+$color-hover-stepper: rgba(0, 0, 0, 0.06); // transparent so that it does not overlap focus outline
+
+$color-sidebar-active: #c83800;
+
+// Buttons
+$color-button: #2c3e50;
+$color-button-hover: #343a40;
+$color-button-red: #d43929;
+$color-button-hover-dark: #585a5c;
+$color-button-disabled: #454545;
+$border-color: rgba(44, 62, 80, 0.5);
+$color-button-hover: #004a8d;
+
+$button-styles: (
+  width: auto,
+  font-size: 0.9rem,
+  padding: 10px 10px,
+  font-weight: normal,
+);
 
 // Sizes for media queries
 $small-screen-width: 576px;
 $medium-screen-width: 768px;
 $large-screen-width: 992px;
 $extra-large-screen-width: 1200px;
+
+$wide-screen-width: 1500px;

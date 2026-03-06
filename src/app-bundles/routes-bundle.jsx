@@ -19,8 +19,8 @@ import TagReplacement from '@pages/data-summaries/tagReplacement';
 import MultipleRecordApproval from '@pages/admin/multipleRecordApproval';
 import SiteDatasheet from '@pages/data-entry/datasheets/pages/site-datasheet';
 import Users from '@pages/admin/users/Users';
-import MissouriRiverForm from '@src/app-pages/data-entry/edit-data-sheet/forms/missouriRiverForm';
 // import SearchEffortForm from '@src/app-pages/data-entry/edit-data-sheet/forms/searchEffortForm';
+import MissouriRiverOverview from '@src/app-pages/data-entry/datasheets/pages/MissouriRiverOverview';
 import SearchEffortOverview from '@src/app-pages/data-entry/datasheets/pages/SearchEffortOverview';
 
 export default createRouteBundle({
@@ -41,9 +41,9 @@ export default createRouteBundle({
   '/search-reports': SearchReports,
   '/sites-list': SitesList,
   '/sites-list/:siteId': SiteDatasheet,
-  '/sites-list/:siteId/missouri-river': MissouriRiverForm,
+  '/sites-list/:siteId/missouri-river': MissouriRiverOverview,
   '/sites-list/:siteId/search-effort': SearchEffortOverview,
-  '/sites-list/:siteId/missouri-river/:mrId': MissouriRiverForm,
+  '/sites-list/:siteId/missouri-river/:mrId': MissouriRiverOverview,
   '/sites-list/:siteId/search-effort/:seId': SearchEffortOverview,
   '/tag-replacement': TagReplacement,
   '/user-access-requests': UserList,

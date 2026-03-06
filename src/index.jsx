@@ -6,17 +6,46 @@ import App from './App';
 import cache from './cache';
 import getStore from './app-bundles';
 
+import NavigateWarningModal from './common/modals/NavigateWarningModal';
+
 import '@trussworks/react-uswds/lib/uswds.css';
 import '@trussworks/react-uswds/lib/index.css';
 
+const enhancedNavHelper = (store) => {
+  const originalNavHelper = getNavHelper(store.doUpdateUrl);
+
+  return (event) => {
+    let target = event.target;
+    while (target && target.nodeName !== 'A') {
+      target = target.parentNode;
+    }
+
+    if (target && target.getAttribute('href')) {
+      const targetPath = target.getAttribute('href');
+      const currentPath = store.selectPathname();
+
+      if (
+        (currentPath.endsWith('/missouri-river') || currentPath.endsWith('/search-effort')) &&
+        (!targetPath.endsWith('/missouri-river') || !targetPath.endsWith('/search-effort'))
+      ) {
+        event.preventDefault(); // Prevent default navigation
+        store.doModalOpen(NavigateWarningModal, { url: targetPath });
+      } else {
+        originalNavHelper(event); // Proceed with normal navigation
+      }
+    }
+  };
+};
+
 cache.getAll().then((initialData) => {
   const store = getStore(initialData);
+  const navHelper = enhancedNavHelper(store);
 
-  if (process.env.NODE_ENV === 'development') window.store = store;
+  if (import.meta.env.VITE_ENVIRONMENT === 'local') window.store = store;
 
   ReactDOM.render(
     <Provider store={store}>
-      <div onClick={getNavHelper(store.doUpdateUrl)}>
+      <div onClick={navHelper}>
         <App />
       </div>
     </Provider>,

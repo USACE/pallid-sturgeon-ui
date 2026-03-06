@@ -2,13 +2,14 @@ import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { ToastContainer } from 'react-toastify';
 
-import Modal from '@components/modal';
 import Hero from '@components/hero';
 import Footer from '@components/footer';
 import PageContent from '@components/page-content';
 import LoadingModal from './common/modals/loading';
-import LandingModal from './common/modals/landing';
+import LandingModal from './common/modals/LandingModal';
 import NavBar from '@components/navigation';
+import Modal from './app-components/modal/primary-modal/PrimaryModal';
+import SecondaryModal from './app-components/modal/secondary-modal/SecondaryModal';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './css/bootstrap/css/bootstrap.water.min.css';
@@ -21,16 +22,18 @@ import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 export default connect(
   'doModalOpen',
   'doModalClose',
+  'doGetAllLookupData',
   'selectRoute',
   'selectAuth',
   'selectLoadingState',
   'selectLoadingMessage',
-  ({ doModalOpen, doModalClose, route: Route, auth, loadingState, loadingMessage }) => {
+  ({ doModalOpen, doModalClose, doGetAllLookupData, route: Route, auth, loadingState, loadingMessage }) => {
     useEffect(() => {
       if (!auth.token && !sessionStorage.getItem('isLoggedIn')) {
         doModalOpen(LandingModal);
       } else {
         doModalClose(LandingModal);
+        doGetAllLookupData();
       }
     }, [auth, doModalClose, doModalOpen, sessionStorage.getItem('isLoggedIn')]);
 
@@ -41,6 +44,7 @@ export default connect(
         <NavBar />
         <PageContent>{auth.token ? <Route /> : <Hero />}</PageContent>
         <Modal closeWithEscape />
+        <SecondaryModal closeWithEscape />
         <Footer />
       </>
     );
