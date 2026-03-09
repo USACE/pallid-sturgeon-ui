@@ -1,0 +1,51 @@
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { connect } from 'redux-bundler-react';
+import { debounce } from '../tableCellHelper';
+import { notRequiredSpeciesArr } from '@src/app-pages/data-entry/datasheets/tables/fish/FishDataEntry.validation';
+
+const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
+  const columnMeta = column.columnDef.meta;
+  const tableMeta = table.options.meta;
+  const initialValue = getValue();
+  const [value, setValue] = useState(initialValue);
+  const [species, setSpecies] = useState();
+  const rowSpecies = useMemo(() => row.getValue('species'), [row]);
+
+  const debouncedUpdateRef = useRef();
+
+  useEffect(() => {
+    debouncedUpdateRef.current = debounce((newValue) => {
+      if (tableMeta?.updateData) {
+        tableMeta?.updateData(
+          row.index,
+          column.id,
+          columnMeta?.type === 'number' ? Number(newValue) : (newValue ?? newValue)
+        );
+      }
+    }, 500);
+  }, [row.index, column.id, tableMeta?.updateData, columnMeta?.type, tableMeta]);
+
+  useEffect(() => {
+    rowSpecies && setSpecies(rowSpecies);
+  }, [rowSpecies]);
+
+  return (
+    <input
+      aria-label={'PanelHook'}
+      disabled={columnMeta?.readOnly}
+      id={cell.id}
+      maxLength={4000}
+      onChange={() => {}}
+      required={!notRequiredSpeciesArr.includes(species)}
+      style={{
+        width: '100%',
+        borderColor: 'hsl(0, 0%, 80%)',
+        cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
+      }}
+      type='text'
+      value={value ?? ''}
+    />
+  );
+});
+
+export default PanelHookTableCell;

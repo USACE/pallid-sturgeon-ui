@@ -12,6 +12,7 @@ import { FishDataEntrySchema, getFishRiverDefaultValues } from './FishDataEntry.
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
+import PanelHookTableCell from '@src/app-components/table/table-cell-components/fish/PanelHookTableCell';
 
 const createDropdownOptions = (data) => {
   if (!data) return [];
@@ -26,12 +27,28 @@ const createDropdownOptions = (data) => {
   });
 };
 
+const createComboboxOptions = (data) => {
+  if (!data) return [];
+
+  return data.map((item) => {
+    const { code, description } = item;
+
+    return {
+      value: code,
+      label: `${code} - ${description}`,
+    };
+  });
+};
+
+// @TODO: Need to pull gear code from Missouri River Data
+
 const FishDataEntry = connect(
   'selectDataEntryFishData',
   'selectBaseData',
   'selectLookupData',
   ({ dataEntryFishData, baseData, lookupData }) => {
     const { items } = dataEntryFishData;
+    const { projectId } = baseData;
 
     const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions } = lookupData;
 
@@ -43,15 +60,12 @@ const FishDataEntry = connect(
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
 
+    console.warn('data: ', data);
+    console.warn('baseData: ', baseData);
+
     const speciesOptions =
       fishCodes?.map((item) => ({
         code: item.alphaCode,
-        description: item.commonName,
-      })) ?? [];
-
-    const commonNameOptions =
-      fishCodes?.map((item) => ({
-        code: item.commonName,
         description: item.commonName,
       })) ?? [];
 
@@ -94,7 +108,7 @@ const FishDataEntry = connect(
         }),
         columnHelper.accessor('panelHook', {
           header: 'Panel/Hook',
-          cell: TableCell,
+          cell: PanelHookTableCell,
           size: 190,
         }),
         columnHelper.accessor('species', {
@@ -102,8 +116,8 @@ const FishDataEntry = connect(
           cell: TableCell,
           size: 200,
           meta: {
-            type: 'select',
-            options: createDropdownOptions(speciesOptions),
+            type: 'combobox',
+            options: createComboboxOptions(speciesOptions),
           },
         }),
         columnHelper.accessor('lengthType', {
@@ -132,7 +146,7 @@ const FishDataEntry = connect(
           header: 'Count',
           cell: TableCell,
           size: 200,
-          meta: { type: 'text', required: true },
+          meta: { type: 'number' },
         }),
         columnHelper.accessor('ftPrefix', {
           header: 'Floy Tag Prefix',
@@ -188,15 +202,6 @@ const FishDataEntry = connect(
           meta: {
             type: 'select',
             options: createDropdownOptions(fishStructures),
-          },
-        }),
-        columnHelper.accessor('commonName', {
-          header: 'Common Name',
-          cell: TableCell,
-          size: 200,
-          meta: {
-            type: 'select',
-            options: createDropdownOptions(commonNameOptions),
           },
         }),
         // NOTE: Not in requirements, but display historic data
