@@ -87,6 +87,14 @@ const SitesFormModal = connect(
 
     const segmentValue = segment?.value;
     const bendValue = bend?.value;
+    const brmId = useMemo(
+      () => bendRiverMileData?.filter((item) => item.bend === bendValue)?.[0]?.id,
+      [bendRiverMileData, bendValue]
+    );
+    const upperRiverMile = useMemo(
+      () => bendRiverMileData?.filter((item) => item.id === bendRiverMile)?.[0]?.upperRiverMile,
+      [bendRiverMileData, bendRiverMile]
+    );
 
     const filteredSegmentsOptions = () => {
       // Filter by office
@@ -120,10 +128,6 @@ const SitesFormModal = connect(
       }));
       return filteredOptions;
     };
-
-    const getBrmId = () => bendRiverMileData?.filter((item) => item.bend === bendValue)?.[0]?.id;
-
-    const getUpperRiverMile = (id) => bendRiverMileData?.filter((item) => item.id === id)?.[0]?.upperRiverMile;
 
     const getSegmentDescription = (segment) =>
       segments?.filter((item) => Number(item.code) === Number(segment))?.[0]?.description;
@@ -190,9 +194,7 @@ const SitesFormModal = connect(
 
     // Set Bend River Mile ID - dependent on Bend and Segment values
     useEffect(() => {
-      if (bendValue && segmentValue) {
-        setValue('bendRiverMile', getBrmId());
-      }
+      bendValue && segmentValue && setValue('bendRiverMile', brmId);
     }, [bendValue, segmentValue]);
 
     // Populate Segment & Bend Combobox Dropdown Values from Existing API Data
@@ -338,7 +340,7 @@ const SitesFormModal = connect(
                   </option>
                 ))}
               </SelectInput>
-              <p className='margin-top-2'>Bend River Mile: {getUpperRiverMile(bendRiverMile) ?? '--'}</p>
+              <p className='margin-top-2'>Bend River Mile: {upperRiverMile ?? '--'}</p>
               {edit && (
                 <Grid row gap='md'>
                   <Grid tablet={{ col: 9 }}>
