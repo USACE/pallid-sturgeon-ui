@@ -1,3 +1,28 @@
+@use '@styles/_variables';
+
 .filter-btn-container {
   position: relative;
+}
+
+.sites-info-section {
+  gap: 1rem;
+  flex-basis: 100%;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  padding: 0 0.5rem;
+
+  h3 {
+    border-bottom: 1px solid variables.$color-primary;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
+.sites-info-container {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.sites-info-item {
+  flex-basis: 100%;
 }
