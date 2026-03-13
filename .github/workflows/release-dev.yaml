@@ -14,7 +14,7 @@ jobs:
       bucket-name: pallid-sturgeon-dev
       role-name: github-actions-s3-pallid-sturgeon
       PUBLIC_URL: https://pallid-sturgeon.dev.cwbi.us
-      VITE_API_URL: https://pallid-sturgeon.dev.cwbi.us/api/
+      VITE_API_URL: https://pallid-sturgeon.dev.cwbi.us/api
       VITE_KEYCLOAK_URL: https://identity-test.cwbi.us/auth/
       VITE_REDIRECT_URL: https://pallid-sturgeon.dev.cwbi.us
       VITE_KEYCLOAK_REALM: cwbi
