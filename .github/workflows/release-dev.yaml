@@ -13,10 +13,10 @@ jobs:
       aws-account: 718787032875
       bucket-name: pallid-sturgeon-dev
       role-name: github-actions-s3-pallid-sturgeon
-      PUBLIC_URL: https://develop-pallid-sturgeon.rsgis.dev
-      VITE_API_URL: https://develop-pallid-sturgeon-api.rsgis.dev
+      PUBLIC_URL: https://pallid-sturgeon.dev.cwbi.us
+      VITE_API_URL: https://pallid-sturgeon.dev.cwbi.us/api
       VITE_KEYCLOAK_URL: https://identity-test.cwbi.us/auth/
-      VITE_REDIRECT_URL: https://develop-pallid-sturgeon.rsgis.dev
+      VITE_REDIRECT_URL: https://pallid-sturgeon.dev.cwbi.us
       VITE_KEYCLOAK_REALM: cwbi
       VITE_KEYCLOAK_CLIENT: pallid-sturgeon-dev
       VITE_IDP_HINT: login.gov
