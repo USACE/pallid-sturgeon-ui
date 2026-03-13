@@ -38,7 +38,7 @@ export default connect(
           doModalOpen(LandingModal);
         }
       }
-    }, [, isAuthenticated, userHasRole, doModalOpen]);
+    }, [isAuthenticated, userHasRole, doModalOpen]);
 
     return (
       <>
