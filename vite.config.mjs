@@ -39,6 +39,7 @@ export default ({ mode }) => {
     },
     server: {
       open: true,
+      host: true,
       port: 3000,
     },
     optimizeDeps: {
