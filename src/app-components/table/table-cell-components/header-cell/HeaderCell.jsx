@@ -1,5 +1,5 @@
 import { Button } from '@trussworks/react-uswds';
-import Icon from '@components/icon/Icon';
+import Icon from '@components/icon/icon';
 import { mdiCloseOctagon, mdiPlusBox } from '@mdi/js';
 import './headerCell.scss';
 
