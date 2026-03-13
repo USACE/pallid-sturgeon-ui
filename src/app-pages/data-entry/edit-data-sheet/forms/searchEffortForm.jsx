@@ -6,7 +6,6 @@ import Card from '@components/card';
 import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 import Approval from '@pages/data-entry/datasheets/components/approval';
 import TabContainer from '@components/tab/tabContainer';
-import TelemetryDsTable from '@pages/data-entry/datasheets/tables/telemetryDsTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
@@ -32,7 +31,6 @@ const SearchEffortForm = connect(
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'doUpdateCurrentTab',
-  'doResetTelemetryDataEntries',
   'selectDataEntryData',
   'selectDataEntryTelemetryTotalCount',
   'selectCurrentTab',
@@ -42,7 +40,6 @@ const SearchEffortForm = connect(
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     doUpdateCurrentTab,
-    doResetTelemetryDataEntries,
     dataEntryData,
     dataEntryTelemetryTotalCount,
     currentTab,
@@ -131,7 +128,6 @@ const SearchEffortForm = connect(
         dataEntryData.searchDate && handleSelect('searchDate', formatDate(dataEntryData.searchDate));
       } else {
         // Reset data if adding new Search Effort datasheet
-        // doResetTelemetryDataEntries();
         handleSelect('siteId', siteId);
         handleSelect('dsId', 1);
       }

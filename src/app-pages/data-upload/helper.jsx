@@ -97,6 +97,7 @@ export const formatAsNumber = (value, _header) => {
     'othertaginfo',
     'dststarttime',
     'geneticsvialnumber',
+    'capturedate',
   ];
   if (typeof value === 'string' && value.length === 0) {
     return null;

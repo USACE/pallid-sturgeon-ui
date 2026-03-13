@@ -20,22 +20,26 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 export default connect(
-  'doModalOpen',
-  'doModalClose',
   'doGetAllLookupData',
+  'doModalOpen',
   'selectRoute',
   'selectAuth',
   'selectLoadingState',
   'selectLoadingMessage',
-  ({ doModalOpen, doModalClose, doGetAllLookupData, route: Route, auth, loadingState, loadingMessage }) => {
+  ({ doGetAllLookupData, doModalOpen, route: Route, auth, loadingState, loadingMessage }) => {
+    const isAuthenticated = !!auth?.token;
+    const userHasRole = !!auth?.authData?.role;
+
     useEffect(() => {
-      if (!auth.token && !sessionStorage.getItem('isLoggedIn')) {
-        doModalOpen(LandingModal);
-      } else {
-        doModalClose(LandingModal);
+      if (isAuthenticated && userHasRole) {
         doGetAllLookupData();
+      } else {
+        const landingModalSeen = sessionStorage.getItem('landingModalSeen');
+        if (!landingModalSeen || landingModalSeen === 'false') {
+          doModalOpen(LandingModal);
+        }
       }
-    }, [auth, doModalClose, doModalOpen, sessionStorage.getItem('isLoggedIn')]);
+    }, [doGetAllLookupData, isAuthenticated, userHasRole, doModalOpen]);
 
     return (
       <>
