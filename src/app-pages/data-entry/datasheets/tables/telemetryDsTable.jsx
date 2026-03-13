@@ -210,6 +210,7 @@ const TelemetryDsTable = connect(
             <AgGridColumn field='silt' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='sand' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='gravel' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='suspectedSpawningActivity' cellEditor='numberEditor' width={150} sortable unSortIcon  />
             <AgGridColumn field='comments' width={200} sortable unSortIcon />
             <AgGridColumn field='editInitials' width={125} sortable unSortIcon />
             <AgGridColumn field='lastEditComment' width={200} sortable unSortIcon />
