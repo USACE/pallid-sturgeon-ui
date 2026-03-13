@@ -1,0 +1,84 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+        aws-region:
+          type: string
+          description: aws region for target repo
+          required: true
+        aws-account:
+          type: number
+          description: aws account id
+          required: true
+        bucket-name:
+          type: string
+          description: S3 Bucket Name
+          required: true
+        role-name:
+          type: string
+          description: ADFS role for application
+          required: true
+        PUBLIC_URL:
+          type: string
+          description: PUBLIC_URL react env variable
+          required: true
+        VITE_API_URL:
+          type: string
+          description: VITE_API_URL react env variable
+          required: true
+        VITE_KEYCLOAK_URL:
+          type: string
+          description: VITE_KEYCLOAK_URL react env variable
+          required: true
+        VITE_REDIRECT_URL:
+          type: string
+          description: VITE_REDIRECT_URL react env variable
+          required: true
+        VITE_KEYCLOAK_REALM:
+          type: string
+          description: VITE_KEYCLOAK_REALM react env variable
+          required: true
+        VITE_KEYCLOAK_CLIENT:
+          type: string
+          description: VITE_KEYCLOAK_CLIENT react env variable
+          required: true
+        VITE_IDP_HINT:
+          type: string
+          description: VITE_IDP_HINT react env variable
+          required: true
+
+jobs:
+
+  build:
+    env:
+      PUBLIC_URL: ${{inputs.PUBLIC_URL}}
+      VITE_API_URL: ${{inputs.VITE_API_URL}}
+      VITE_KEYCLOAK_URL: ${{inputs.VITE_KEYCLOAK_URL}}
+      VITE_REDIRECT_URL: ${{inputs.VITE_REDIRECT_URL}}
+      VITE_KEYCLOAK_REALM: ${{inputs.VITE_KEYCLOAK_REALM}}
+      VITE_KEYCLOAK_CLIENT: ${{inputs.VITE_KEYCLOAK_CLIENT}}
+      VITE_IDP_HINT: ${{inputs.VITE_IDP_HINT}}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [22.x]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm install
+      - run: npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{inputs.aws-region}}
+          role-to-assume: arn:aws-us-gov:iam::${{inputs.aws-account}}:role/${{inputs.role-name}}
+          output-credentials: true
+      - name: Sync files to S3
+        run: |
+          aws s3 rm s3://${{inputs.bucket-name}} --recursive && aws s3 cp ./build/ s3://${{inputs.bucket-name}} --recursive
