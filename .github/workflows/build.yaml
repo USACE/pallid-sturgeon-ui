@@ -60,6 +60,21 @@ jobs:
       VITE_KEYCLOAK_CLIENT: ${{inputs.VITE_KEYCLOAK_CLIENT}}
       VITE_IDP_HINT: ${{inputs.VITE_IDP_HINT}}
     runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      attestations: write
+      checks: write
+      contents: write
+      deployments: write
+      discussions: write
+      id-token: write
+      issues: write
+      models: read
+      packages: write
+      pages: write
+      pull-requests: write
+      security-events: write
+      statuses: write
     strategy:
       matrix:
         node-version: [22.x]
@@ -78,7 +93,6 @@ jobs:
         with:
           aws-region: ${{inputs.aws-region}}
           role-to-assume: arn:aws-us-gov:iam::${{inputs.aws-account}}:role/${{inputs.role-name}}
-          output-credentials: true
       - name: Sync files to S3
         run: |
           aws s3 rm s3://${{inputs.bucket-name}} --recursive && aws s3 cp ./build/ s3://${{inputs.bucket-name}} --recursive
