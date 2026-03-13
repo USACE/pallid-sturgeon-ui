@@ -22,19 +22,25 @@ const SitesListFilter = connect(
   'doDataEntryLoadData',
   'doDomainSeasonsFetch',
   'doDomainSegmentsFetch',
+  'doDomainFieldOfficesFetch',
   'doUpdateSiteParams',
   'selectDomains',
   'selectUserRole',
+  'selectUsersData',
   ({
     doDomainBendsFetch,
     doDataEntryLoadData,
     doDomainSeasonsFetch,
     doDomainSegmentsFetch,
+    doDomainFieldOfficesFetch,
     doUpdateSiteParams,
     domains,
     userRole,
+    usersData,
   }) => {
-    const { projects, seasons, bends, segments } = domains;
+    const { projects, seasons, bends, fieldOffices, segments } = domains;
+
+    const user = usersData.find((user) => userRole.id === user.id);
 
     // const bendComboOptions = useMemo(
     //   () =>
@@ -49,7 +55,8 @@ const SitesListFilter = connect(
 
     const defaultValues = {
       year: new Date().getFullYear(),
-      project: userRole?.projectCode,
+      project: Number(userRole?.projectCode) ?? '',
+      fieldoffice: '',
       seasonCode: '',
       bend: '',
       segmentCode: '',
@@ -67,24 +74,28 @@ const SitesListFilter = connect(
     const seasonCode = watch('seasonCode');
     const bend = watch('bend');
     const segmentCode = watch('segmentCode');
+    const project = watch('project');
+    const office = watch('fieldoffice');
 
     const clearFilters = () => {
       setValue('year', '');
       setValue('seasonCode', '');
       setValue('bend', '');
       setValue('segmentCode', '');
+      setValue('fieldoffice', '');
     };
 
     // Update data based on filters
     useEffect(() => {
       const searchParams = getValues();
       doUpdateSiteParams(searchParams);
-    }, [year, bend, seasonCode, segmentCode]);
+    }, [year, bend, seasonCode, segmentCode, office]);
 
     // Load data
     useEffect(() => {
       doDataEntryLoadData();
-      doDomainSegmentsFetch();
+      doDomainFieldOfficesFetch();
+      doDomainSegmentsFetch({ office, project });
       doDomainSeasonsFetch();
       doDomainBendsFetch();
     }, []);
@@ -111,7 +122,6 @@ const SitesListFilter = connect(
                 <SelectInput
                   name='project'
                   label='Project'
-                  defaultOption={userRole?.projectCode ?? ''}
                   readOnly={userRole?.projectCode === '2'}
                   showOptionalText={false}
                 >
@@ -121,6 +131,15 @@ const SitesListFilter = connect(
                     </option>
                   ))}
                 </SelectInput>
+                {user?.role === 'ADMINISTRATOR' && (
+                  <SelectInput name='fieldoffice' label='Field Office' showOptionalText={false}>
+                    {createDropdownOptions(fieldOffices).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                )}
               </Grid>
               <Grid tablet={{ col: 4 }}>
                 <SelectInput name='segmentCode' label='Segment' showOptionalText={false}>

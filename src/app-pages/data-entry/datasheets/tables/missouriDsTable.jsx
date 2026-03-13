@@ -11,24 +11,30 @@ import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+const fishCellStyle = (params) => ({
+  backgroundColor: params.data.bkgColor,
+});
+
+const suppCellStyle = (params) => ({
+  backgroundColor: params.data.suppBkgColor,
+});
+
+const procCellStyle = (params) => ({
+  backgroundColor: params.data.procBkgColor,
+});
 
 const MissouriDsTable = connect(
   'doUpdateUrl',
+  'doUpdateComplexStateField',
   'selectMoriverSitesDatasheetData',
-  ({ doUpdateUrl, moriverSitesDatasheetData }) => {
-    const fishCellStyle = (params) => ({
-      backgroundColor: params.data.bkgColor,
-    });
+  'selectRouteParams',
+  ({ doUpdateUrl, doUpdateComplexStateField, moriverSitesDatasheetData, routeParams }) => {
+    const siteId = routeParams?.siteId;
 
-    const suppCellStyle = (params) => ({
-      backgroundColor: params.data.suppBkgColor,
-    });
-
-    const procCellStyle = (params) => ({
-      backgroundColor: params.data.procBkgColor,
-    });
+    const handleAddButtonClick = () => {
+      doUpdateComplexStateField({ name: 'isEditForm', value: false });
+      doUpdateUrl(`/sites-list/${siteId}/missouri-river`);
+    };
 
     return (
       <>
@@ -42,7 +48,7 @@ const MissouriDsTable = connect(
               title='Add Missouri River Datasheet'
               icon={<Icon path={mdiPlus} />}
               className='btn-width'
-              handleClick={() => doUpdateUrl('/sites-list/datasheet/missouriRiver-create')}
+              handleClick={handleAddButtonClick}
             />
           </div>
           <div className='col-md-3 col-xs-12'>
@@ -75,7 +81,6 @@ const MissouriDsTable = connect(
               width={100}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
-                uri: '/sites-list/datasheet/missouriRiver-edit',
                 type: 'missouriRiver',
               }}
               sortable
@@ -88,7 +93,6 @@ const MissouriDsTable = connect(
               cellStyle={fishCellStyle}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
-                uri: '/sites-list/datasheet/missouriRiver-edit',
                 type: 'fish',
                 tab: 1,
               }}
@@ -102,7 +106,6 @@ const MissouriDsTable = connect(
               cellStyle={suppCellStyle}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
-                uri: '/sites-list/datasheet/missouriRiver-edit',
                 type: 'supplemental',
                 tab: 2,
               }}
@@ -116,7 +119,6 @@ const MissouriDsTable = connect(
               cellStyle={procCellStyle}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
-                uri: '/sites-list/datasheet/missouriRiver-edit',
                 type: 'procedure',
                 tab: 3,
               }}

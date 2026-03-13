@@ -1,4 +1,5 @@
 import { queryFromObject } from '@src/utils';
+import { ApiStatuses } from '@src/utils/enums';
 
 export default {
   name: 'domains',
@@ -103,11 +104,15 @@ export default {
         });
 
       apiGet(filter === true ? urlFilter : url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_PROJECTS',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_PROJECTS_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_PROJECTS',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_PROJECTS_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_PROJECTS_FETCH_ERROR', payload: _err });
+        }
       });
     },
 
@@ -122,38 +127,44 @@ export default {
         project: project,
       };
 
-      const url =
-        '/psapi/seasons?' +
-        new URLSearchParams(year === null ? params : { ...params, year: year });
+      const url = '/psapi/seasons?' + new URLSearchParams(year === null ? params : { ...params, year: year });
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_SEASONS',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_SEASONS_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_SEASONS',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_SEASONS_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_SEASONS_ERROR', payload: _err });
+        }
       });
     },
 
   doDomainSegmentsFetch:
-    () =>
+    ({ office, project }) =>
     ({ dispatch, apiGet, store }) => {
-      const fieldOffice = store.selectUserRole()?.officeCode;
-      const project = store.selectUserRole()?.projectCode;
+      const fieldOffice = office ?? store.selectUserRole()?.officeCode;
+      const projectVal = project ?? store.selectUserRole()?.projectCode;
 
       const url =
         '/psapi/segments?' +
         new URLSearchParams({
           office: fieldOffice,
-          project: project,
+          project: projectVal,
         });
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_SEGMENTS',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_SEGMENTS_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_SEGMENTS',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_SEGMENTS_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_SEGMENTS_ERROR', payload: _err });
+        }
       });
     },
 
@@ -165,11 +176,15 @@ export default {
       const url = `/psapi/sampleUnit${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_BENDS',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_BENDS_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_BENDS',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_BENDS_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_BENDS_ERROR', payload: _err });
+        }
       });
     },
 
@@ -181,11 +196,15 @@ export default {
       const url = '/psapi/bendRn';
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_BENDRN',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_BENDRN_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_BENDRN',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_BENDRN_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_BENDRN_ERROR', payload: _err });
+        }
       });
     },
 
@@ -197,11 +216,15 @@ export default {
       const url = `/psapi/fieldOffices${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_FIELD_OFFICES',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_FIELD_OFFICES_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_FIELD_OFFICES',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_FIELD_OFFICES_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_FIELD_OFFICES_ERROR', payload: _err });
+        }
       });
     },
 
@@ -213,11 +236,15 @@ export default {
       const url = '/psapi/sampleUnitTypes';
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_SAMPLE_UNIT_TYPES',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_SAMPLE_UNIT_TYPES_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_SAMPLE_UNIT_TYPES',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_SAMPLE_UNIT_TYPES_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_SAMPLE_UNIT_TYPES_ERROR', payload: _err });
+        }
       });
     },
 
@@ -229,11 +256,15 @@ export default {
       const url = `/psapi/meso${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_MESO',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_MESO_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_MESO',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_MESO_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_MESO_ERROR', payload: _err });
+        }
       });
     },
 
@@ -245,11 +276,15 @@ export default {
       const url = `/psapi/structureFlow${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_STRUCTURE_FLOW',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_FLOW_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_STRUCTURE_FLOW',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_FLOW_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_FLOW_ERROR', payload: _err });
+        }
       });
     },
 
@@ -261,11 +296,15 @@ export default {
       const url = `/psapi/structureMod${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_STRUCTURE_MOD',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_MOD_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_STRUCTURE_MOD',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_MOD_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_STRUCTURE_MOD_ERROR', payload: _err });
+        }
       });
     },
 
@@ -277,11 +316,15 @@ export default {
       const url = `/psapi/species${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_SPECIES',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_SPECIES_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_SPECIES',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_SPECIES_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_SPECIES_ERROR', payload: _err });
+        }
       });
     },
 
@@ -293,11 +336,15 @@ export default {
       const url = `/psapi/ftPrefix${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_FT_PREFIXES',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_FT_PREFIXES_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_FT_PREFIXES',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_FT_PREFIXES_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_FT_PREFIXES_ERROR', payload: _err });
+        }
       });
     },
 
@@ -309,11 +356,15 @@ export default {
       const url = `/psapi/mr${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_MR',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_MR_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_MR',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_MR_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_MR_ERROR', payload: _err });
+        }
       });
     },
 
@@ -325,11 +376,15 @@ export default {
       const url = `/psapi/otolith${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_OTOLITH',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_OTOLITH_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_OTOLITH',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_OTOLITH_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_OTOLITH_ERROR', payload: _err });
+        }
       });
     },
 
@@ -341,11 +396,15 @@ export default {
       const url = `/psapi/setsite1${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_SET_SITE_1',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_SET_SITE_1_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_SET_SITE_1',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_SET_SITE_1_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_SET_SITE_1_ERROR', payload: _err });
+        }
       });
     },
 
@@ -357,11 +416,15 @@ export default {
       const url = `/psapi/setsite2${queryFromObject(params)}`;
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_SET_SITE_2',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_SET_SITE_2_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_SET_SITE_2',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_SET_SITE_2_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_SET_SITE_2_ERROR', payload: _err });
+        }
       });
     },
 
@@ -373,11 +436,15 @@ export default {
       const url = '/psapi/years';
 
       apiGet(url, (_err, body) => {
-        dispatch({
-          type: 'DOMAIN_UPDATED_YEARS',
-          payload: body,
-        });
-        dispatch({ type: 'DOMAIN_FETCH_YEARS_FINISHED' });
+        if (!_err && body?.status === ApiStatuses.Success) {
+          dispatch({
+            type: 'DOMAIN_UPDATED_YEARS',
+            payload: body?.data,
+          });
+          dispatch({ type: 'DOMAIN_FETCH_YEARS_FINISHED' });
+        } else {
+          dispatch({ type: 'DOMAIN_FETCH_YEARS_ERROR', payload: _err });
+        }
       });
     },
 };

@@ -6,9 +6,10 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useForm, FormProvider } from 'react-hook-form';
 
-import { ModalContent, ModalFooter, ModalHeader } from '@components/modal';
 import SelectInput from '@components/new-inputs/select-input/SelectInput';
 import ErrorSummary from '@components/error-summary/ErrorSummary';
+import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
+import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
 
 import { createDropdownOptions, createFieldOfficeIdDropdownOptions } from '@pages/data-entry/helpers';
 
@@ -111,9 +112,8 @@ const AddUserFormModal = connect(
     }, [errors, setFocus]);
 
     return (
-      <ModalContent size='lg'>
+      <ModalContent title='Add Account to Existing User'>
         <FormProvider {...methods}>
-          <ModalHeader title='Add Account to Existing User' />
           {errors && <ErrorSummary errors={errors} modalID='addUsersFormModal' type='modal' />}
           <section className='modal-body margin-bottom-2' id='addUsersFormModal'>
             <div className='container-fluid margin-top-1'>

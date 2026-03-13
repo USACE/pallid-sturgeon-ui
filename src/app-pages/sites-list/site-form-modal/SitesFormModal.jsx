@@ -6,13 +6,14 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useForm, FormProvider } from 'react-hook-form';
 
-import { ModalContent, ModalFooter, ModalHeader } from '@components/modal';
 import TextInput from '@components/new-inputs/text-input/TextInput';
 import TextArea from '@components/new-inputs/text-area/TextArea';
 import SelectInput from '@components/new-inputs/select-input/SelectInput';
 import ComboBox from '@components/new-inputs/combo-box/ComboBox';
 import Card from '@components/card';
 import ErrorSummary from '@components/error-summary/ErrorSummary';
+import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
+import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
 
 import { createDropdownOptions } from '@pages/data-entry/helpers';
 import { dropdownYearsToNow } from '@src/utils';
@@ -58,16 +59,12 @@ const SitesFormModal = connect(
       uploadedBy: data?.uploadedBy ?? '',
     };
 
-    const bendComboOptions = useMemo(
-      () =>
-        bends
-          ? bends.map((item) => ({
-              value: item.sampleUnit,
-              label: item.description,
-            }))
-          : [],
-      []
-    );
+    const bendComboOptions = bends
+      ? bends.map((item) => ({
+          value: item.sampleUnit,
+          label: item.description,
+        }))
+      : [];
 
     const segmentComboOptions = useMemo(
       () =>
@@ -77,7 +74,7 @@ const SitesFormModal = connect(
               label: item.description,
             }))
           : [],
-      []
+      [segments]
     );
 
     const defaultValues = {
@@ -143,7 +140,7 @@ const SitesFormModal = connect(
               value: item.code,
               text: `${item.code} - ${item.description}`,
             })),
-      []
+      [project, sampleUnitTypes]
     );
 
     const handleChange = (e) => {
@@ -157,12 +154,12 @@ const SitesFormModal = connect(
         setValue('segmentId', null);
         setValue('season', null);
         setValue('sampleUnitType', null);
-        doDomainSegmentsFetch();
+        doDomainSegmentsFetch({ office: getValues('fieldoffice'), project: e?.target?.value });
       }
 
       if (name === 'fieldoffice') {
         setValue('segmentId', null);
-        doDomainSegmentsFetch();
+        doDomainSegmentsFetch({ office: e?.target?.value, project: getValues('projectId') });
       }
 
       if (name === 'segmentId') {
@@ -220,7 +217,9 @@ const SitesFormModal = connect(
     // Update Segment options if fieldoffice and projectId values change
     useEffect(() => {
       if (office && project) {
-        doDomainSegmentsFetch();
+        doDomainSegmentsFetch({ office, project });
+        setValue('segmentId', null);
+        setValue('bend', null);
       }
     }, [office, project]);
 
@@ -233,9 +232,8 @@ const SitesFormModal = connect(
     }, [edit, trigger]);
 
     return (
-      <ModalContent size='lg'>
+      <ModalContent title={edit ? 'Update Site' : 'Add Site'}>
         <FormProvider {...methods}>
-          <ModalHeader title={edit ? 'Update Site' : 'Add Site'} />
           {errors && <ErrorSummary errors={errors} modalID='siteFormModal' type='modal' />}
           <section className='modal-body' id='siteFormModal'>
             <div className='container-fluid margin-top-1'>
@@ -312,6 +310,7 @@ const SitesFormModal = connect(
                 onChange={handleChange}
                 tooltip={sitesFormTooltipContent.segment}
                 readOnly={!office || !project}
+                closeMenuOnSelect
                 required
               />
               <SelectInput
@@ -349,6 +348,7 @@ const SitesFormModal = connect(
                 tooltip={sitesFormTooltipContent.sampleUnit}
                 readOnly={!segment || !sampleUnitType}
                 required={bend !== 0}
+                closeMenuOnSelect
               />
               <SelectInput name='bendrn' label='Bend R/N' required>
                 {createDropdownOptions(bendRn).map((item, index) => (

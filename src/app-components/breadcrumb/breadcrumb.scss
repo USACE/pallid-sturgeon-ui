@@ -1,18 +1,24 @@
 @use '@styles/_variables' as *;
 
-.breadcrumb-container {
-  .breadcrumb-list {
-    display: flex;
-    padding-left: 18px;
-    font-style: italic;
+.breadcrumb-list {
+  padding-left: 10px;
+  font-style: italic;
+  padding-top: 10px;
+  margin-bottom: 0px;
+  padding-bottom: 0px;
+
+  svg {
+    vertical-align: middle;
+    bottom: 1px;
+  }
+}
+
+.breadcrumb-item {
+  &:visited {
+    color: $link-color;
   }
 
-  .breadcrumb-item + .breadcrumb-item::before {
-    content: '>';
-    color: $color-gray;
-  }
-
-  .breadcrumb-item.active {
+  &.active {
     color: $color-gray;
     font-style: normal;
   }

@@ -26,6 +26,7 @@ import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import { tabToNextCell } from './helpers';
 
 const ProcedureDsTable = connect(
   'doModalOpen',
@@ -100,6 +101,8 @@ const ProcedureDsTable = connect(
           <AgGridReact
             getRowNodeId={(params) => String(params.sid)}
             ref={gridRef}
+            tabToNextCell={tabToNextCell}
+            tabToPreviousCell={tabToNextCell}
             suppressClickEdit
             rowHeight={35}
             rowData={items}
@@ -336,6 +339,7 @@ const ProcedureDsTable = connect(
             <AgGridColumn field='expectedSpawnYear' cellEditor='numberEditor' width={175} sortable unSortIcon />
             <AgGridColumn field='ultrasoundGonadLength' cellEditor='numberEditor' width={175} sortable unSortIcon />
             <AgGridColumn field='gonadCondition' cellEditor='textEditor' width={150} sortable unSortIcon />
+            <AgGridColumn field='serialNum' cellEditor='textEditor' width={150} sortable unSortIcon />
             <AgGridColumn
               field='lastEditComment'
               cellEditor='textEditor'

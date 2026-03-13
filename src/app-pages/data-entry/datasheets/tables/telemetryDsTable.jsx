@@ -19,6 +19,7 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
+import { tabToNextCell } from './helpers';
 
 // tableId = 4604 For testing
 
@@ -107,6 +108,8 @@ const TelemetryDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}
+            tabToNextCell={tabToNextCell}
+            tabToPreviousCell={tabToNextCell}
             suppressClickEdit
             defaultColDef={{
               width: 100,
@@ -207,6 +210,7 @@ const TelemetryDsTable = connect(
             <AgGridColumn field='silt' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='sand' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='gravel' cellEditor='floatEditor' sortable unSortIcon />
+            <AgGridColumn field='suspectedSpawningActivity' cellEditor='numberEditor' width={150} sortable unSortIcon  />
             <AgGridColumn field='comments' width={200} sortable unSortIcon />
             <AgGridColumn field='editInitials' width={125} sortable unSortIcon />
             <AgGridColumn field='lastEditComment' width={200} sortable unSortIcon />

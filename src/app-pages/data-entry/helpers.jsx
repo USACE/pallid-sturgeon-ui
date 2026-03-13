@@ -6,7 +6,7 @@ export const projectMap = {
 export const createDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.map((d) => {
+  return data?.map((d) => {
     const { code, description } = d;
     return {
       value: code,
@@ -19,7 +19,7 @@ export const createBendsDropdownOptions = (data) => {
   if (!data) return [];
 
   return data
-    .map((d) => {
+    ?.map((d) => {
       const { description, sampleUnit } = d;
 
       if (!description) return null;
@@ -35,7 +35,7 @@ export const createBendsDropdownOptions = (data) => {
 export const createRolesDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.data.map((opt) => ({
+  return data?.data?.data?.map((opt) => ({
     text: opt.description,
     value: opt.id,
   }));
@@ -44,7 +44,7 @@ export const createRolesDropdownOptions = (data) => {
 export const createFieldOfficeIdDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.map((d) => {
+  return data?.map((d) => {
     const { id, description } = d;
 
     return {

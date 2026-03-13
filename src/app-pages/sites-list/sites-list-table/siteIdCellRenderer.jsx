@@ -26,7 +26,7 @@ const SiteIdCellRenderer = connect(
     value,
   }) => {
     const handleCallback = () => {
-      doUpdateUrl('/sites-list/datasheet');
+      doUpdateUrl(`/sites-list/${data?.siteId}`);
     };
 
     const handleClick = () => {
@@ -35,7 +35,7 @@ const SiteIdCellRenderer = connect(
         doDomainBendRnFetch();
         doFetchUsers();
         doDomainSeasonsFetch();
-        doDomainSegmentsFetch();
+        doDomainSegmentsFetch({ office: data?.fieldoffice, project: data?.projectId });
         doModalOpen(SitesFormModal, { edit: true, data: data });
       } else {
         doSitesFetch({ siteId: data?.siteId }, handleCallback());

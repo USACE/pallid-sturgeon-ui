@@ -2,6 +2,7 @@ import { queryFromObject } from '@src/utils';
 
 import { toast } from 'react-toastify';
 import { tSuccess, tError } from '@common/toast/toastHelper';
+import { ApiStatuses } from '@src/utils/enums';
 
 export default {
   name: 'sites',
@@ -53,13 +54,6 @@ export default {
       store.doSitesFetch();
     },
 
-  doNewSiteLoadData:
-    () =>
-    ({ dispatch, store }) => {
-      dispatch({ type: 'LOADING_NEW_SITE_INIT_DATA' });
-      store.doDomainBendRnFetch();
-    },
-
   doSitesFetch:
     (siteId) =>
     ({ dispatch, store, apiGet }) => {
@@ -67,29 +61,42 @@ export default {
       const pageSize = store.selectSitesPageSize();
       const pageNumber = store.selectSitesPageNumber();
 
-      const queryAllSites = queryFromObject({
-        ...filterParams,
-        size: pageSize,
-        page: pageNumber,
-      });
+      let actualSiteId = null;
+      if (siteId) {
+        if (typeof siteId === 'object') {
+          actualSiteId = Number(siteId.siteId);
+        } else {
+          actualSiteId = Number(siteId);
+        }
+      }
 
-      const queryById = queryFromObject({
-        ...filterParams,
-        ...siteId,
-        size: pageSize,
-        page: pageNumber,
-      });
+      let url = '';
 
-      const url = `/psapi/siteDataEntry${siteId ? queryById : queryAllSites}`;
+      if (actualSiteId) {
+        const queryById = queryFromObject({
+          ...filterParams,
+          siteId: actualSiteId,
+        });
+        url = `/psapi/siteDataEntry${queryById}`;
+      } else {
+        const queryAllSites = queryFromObject({
+          ...filterParams,
+          size: pageSize,
+          page: pageNumber,
+        });
+        url = `/psapi/siteDataEntry${queryAllSites}`;
+      }
 
       store.doSetLoadingState(true);
       store.doSetLoadingMessage('Fetching Sites...');
 
       apiGet(url, (err, body) => {
         store.doSetLoadingState(false);
-        if (!err) {
-          dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body });
-          siteId && dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.items?.[0] });
+        if (!err && body?.status === ApiStatuses.Success) {
+          dispatch({ type: 'SITES_UPDATED_ITEMS', payload: body?.data });
+          if (actualSiteId) {
+            siteId && dispatch({ type: 'UPDATE_BASE_DATA', payload: body?.data?.items?.[0] });
+          }
         } else {
           dispatch({ type: 'SITES_FETCH_ERROR', payload: err });
         }

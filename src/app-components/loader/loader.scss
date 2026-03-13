@@ -1,0 +1,158 @@
+@use '@styles/_variables';
+
+@mixin modal-variant-styles($size, $thickness) {
+  width: $size;
+  height: $size;
+
+  div {
+    width: $size;
+    height: $size;
+    border: $thickness solid currentColor;
+  }
+}
+
+@mixin modal-container-styles {
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.app-loader-container {
+  background-color: rgba(variables.$color-black, 0.6);
+  bottom: 0;
+  color: variables.$color-white;
+  left: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 10000;
+
+  @include modal-container-styles;
+}
+
+.app-loader {
+  $size: 5rem;
+  $thickness: 0.55rem;
+
+  &.loading-spinner {
+    color: variables.$color-white;
+  }
+
+  @include modal-variant-styles($size, $thickness);
+}
+
+.page-loader-container {
+  margin-top: 24px;
+
+  @include modal-container-styles;
+}
+
+.page-loader {
+  $size: 4rem;
+  $thickness: 0.5rem;
+
+  @include modal-variant-styles($size, $thickness);
+}
+
+.modal-loader-container {
+  min-height: 16rem;
+
+  @include modal-container-styles;
+}
+
+.modal-loader {
+  $size: 3.5rem;
+  $thickness: 0.45rem;
+
+  @include modal-variant-styles($size, $thickness);
+}
+
+.section-loader-container {
+  width: 100%;
+  margin-top: 1.5rem;
+
+  @include modal-container-styles;
+}
+
+.section-loader {
+  $size: 2rem;
+  $thickness: 0.35rem;
+
+  @include modal-variant-styles($size, $thickness);
+}
+
+.button-loader {
+  $size: 1rem;
+  $thickness: 0.125rem;
+
+  @include modal-variant-styles($size, $thickness);
+}
+
+.loading-button {
+  position: relative;
+
+  &.is-loading {
+    pointer-events: none;
+    color: transparent;
+  }
+
+  .button-loader {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -0.5rem; // for some reason transformX/Y was not working here
+    margin-left: -0.5rem;
+  }
+}
+
+.loading-spinner {
+  color: variables.$color-primary-dark;
+  display: inline-block;
+  position: relative;
+
+  div {
+    box-sizing: border-box;
+    display: block;
+    position: absolute;
+    border-radius: 50%;
+    animation: spin-animation 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    border-color: currentColor transparent transparent transparent;
+
+    &:nth-child(1) {
+      animation-delay: -0.45s;
+    }
+    &:nth-child(2) {
+      animation-delay: -0.3s;
+    }
+    &:nth-child(3) {
+      animation-delay: -0.15s;
+    }
+  }
+}
+
+@keyframes spin-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.line-loader {
+  $darkColor: rgba(variables.$color-form-light, 0.5);
+  $lightColor: rgba(variables.$color-form-light, 0);
+
+  background: linear-gradient(120deg, $darkColor 33%, $lightColor 50%, $darkColor 66%) #f2f2f2;
+  background-size: 300% 100%;
+  animation: lineKeyframes 2s infinite linear;
+  border-radius: 0.25rem;
+}
+
+@keyframes lineKeyframes {
+  0% {
+    background-position: right;
+  }
+}

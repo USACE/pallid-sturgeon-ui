@@ -3,15 +3,23 @@ import { connect } from 'redux-bundler-react';
 
 import SitesListFilter from './SitesListFilters';
 import SitesListTable from './sites-list-table/SitesListTable';
-
+import Breadcrumb from '@src/app-components/breadcrumb';
 import Pagination from '@components/pagination';
 import Card from '@src/app-components/card';
 
 import './sitesList.scss';
 
+const breadcrumbLinks = [
+  {
+    text: 'Sites List',
+    current: true,
+  },
+];
+
 const SitesList = connect(
   'doDomainBendsFetch',
   'doDataEntryLoadData',
+  'doDomainFieldOfficesFetch',
   'doDomainSeasonsFetch',
   'doDomainSegmentsFetch',
   'doSetSitesPagination',
@@ -19,21 +27,26 @@ const SitesList = connect(
   ({
     doDomainBendsFetch,
     doDataEntryLoadData,
+    doDomainFieldOfficesFetch,
     doDomainSeasonsFetch,
     doDomainSegmentsFetch,
     doSetSitesPagination,
     sitesTotalResults,
+    office,
+    project,
   }) => {
     // Load data
     useEffect(() => {
       doDataEntryLoadData();
-      doDomainSegmentsFetch();
+      doDomainFieldOfficesFetch();
+      doDomainSegmentsFetch({ office, project });
       doDomainSeasonsFetch();
       doDomainBendsFetch();
     }, []);
 
     return (
       <div className='container-fluid'>
+        <Breadcrumb paths={breadcrumbLinks} />
         <SitesListFilter />
         <Card>
           <Card.Header text='Sites List' />

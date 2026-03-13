@@ -16,11 +16,19 @@ import ProcedureTable from './tables/procedureTable';
 import SupplementalTable from './tables/supplementalTable';
 import TelemetryTable from './tables/telemetryTable';
 import SearchTable from './tables/searchTable';
+import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { createDropdownOptions } from './datasheetHelpers';
 import { SelectCustomLabel } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import '../data-summary.scss';
+
+const breadcrumbLinks = [
+  {
+    text: 'Datasheet',
+    current: true,
+  },
+];
 
 export default connect(
   'doDatasheetLoadData',
@@ -44,7 +52,7 @@ export default connect(
     userRole,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const [yearFilter, setYearFilter] = useState(new Date().getFullYear());
+    const [yearFilter, setYearFilter] = useState(new Date().getFullYear() - 1);
     const [monthFilter, setMonthFilter] = useState('');
     const [projectFilter, setProjectFilter] = useState(userRole ? userRole.projectCode : '');
     const [approvalFilter, setApprovalFilter] = useState('');
@@ -113,6 +121,7 @@ export default connect(
 
     return (
       <div className='container-fluid'>
+        <Breadcrumb paths={breadcrumbLinks} />
         <Card className='mb-3'>
           <Card.Header text='Datasheet Filters' />
           <Card.Body>
@@ -126,7 +135,7 @@ export default connect(
                   onChange={(val) => setYearFilter(val)}
                   value={yearFilter}
                   options={domainsYears && domainsYears.map((item) => ({ value: item.year }))}
-                  defaultValue={new Date().getFullYear()}
+                  defaultValue={new Date().getFullYear() - 1}
                 />
               </div>
               <div className='col-md-6 col-xs-12'>
@@ -282,27 +291,27 @@ export default connect(
             <TabContainer
               tabs={[
                 {
-                  title: `Missouri River (${datasheet.missouriRiver.totalCount})`,
+                  title: `Missouri River (${datasheet?.missouriRiver?.totalCount || 0})`,
                   content: <MissouriRiverTable />,
                 },
                 {
-                  title: `Fish (${datasheet.fish.totalCount})`,
+                  title: `Fish (${datasheet?.fish?.totalCount || 0})`,
                   content: <FishTable />,
                 },
                 {
-                  title: `Supplemental (${datasheet.supplemental.totalCount})`,
+                  title: `Supplemental (${datasheet?.supplemental?.totalCount || 0})`,
                   content: <SupplementalTable />,
                 },
                 {
-                  title: `Procedure (${datasheet.procedure.totalCount})`,
+                  title: `Procedure (${datasheet?.procedure?.totalCount || 0})`,
                   content: <ProcedureTable />,
                 },
                 {
-                  title: `Search Effort (${datasheet.searchEffort.totalCount})`,
+                  title: `Search Effort (${datasheet?.searchEffort?.totalCount || 0})`,
                   content: <SearchTable />,
                 },
                 {
-                  title: `Telemetry (${datasheet.telemetry.totalCount})`,
+                  title: `Telemetry (${datasheet?.telemetry?.totalCount || 0})`,
                   content: <TelemetryTable />,
                 },
               ]}

@@ -96,13 +96,12 @@ export const formatAsNumber = (value, _header) => {
     'ultrasoundreprostatus',
     'othertaginfo',
     'dststarttime',
+    'geneticsvialnumber',
+    'capturedate',
   ];
   if (typeof value === 'string' && value.length === 0) {
     return null;
-  } else if (
-    isNumeric(value) &&
-    keepAString.indexOf(_header.toLowerCase()) === -1
-  ) {
+  } else if (isNumeric(value) && keepAString.indexOf(_header.toLowerCase()) === -1) {
     return Number(value);
   }
 

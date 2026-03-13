@@ -24,6 +24,7 @@ import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
+import { tabToNextCell } from './helpers';
 
 const FishDsTable = connect(
   'doUpdateFishDataEntry',
@@ -133,11 +134,12 @@ const FishDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
           <AgGridReact
             ref={gridRef}
+            tabToNextCell={tabToNextCell}
+            tabToPreviousCell={tabToNextCell}
             suppressClickEdit
             defaultColDef={{
               width: 100,
               editable: true,
-              lockPinned: true,
             }}
             editType='fullRow'
             onRowValueChanged={({ data }) =>

@@ -7,6 +7,7 @@ import Icon from '@components/icon/icon';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
 
 const TelemetryTable = connect(
   'doFetchAllDatasheet',
@@ -36,11 +37,17 @@ const TelemetryTable = connect(
             <AgGridColumn field='project' sortable unSortIcon />
             <AgGridColumn field='segment' sortable unSortIcon />
             <AgGridColumn field='season' sortable unSortIcon />
-            <AgGridColumn field='bend' sortable unSortIcon />
+            <AgGridColumn headerName='Site Bend' field='bend' sortable unSortIcon />
+            <AgGridColumn headerName='Bend R/M' field='t_bend' sortable unSortIcon />
             <AgGridColumn headerName='Telemetry ID' field='tId' sortable unSortIcon />
             <AgGridColumn headerName='Search Effort ID' field='seId' sortable unSortIcon />
             <AgGridColumn headerName='Site ID' field='siteId' sortable unSortIcon />
-            <AgGridColumn field='searchDate' sortable unSortIcon />
+            <AgGridColumn
+              field='searchDate'
+              valueGetter={(params) => dateFormatter(params.data.searchDate)}
+              sortable
+              unSortIcon
+            />
             <AgGridColumn field='searchDay' sortable unSortIcon />
             <AgGridColumn headerName='Radio Tag Number' field='radioTagNum' sortable unSortIcon />
             <AgGridColumn headerName='Frequency' field='frequencyIdCode' sortable unSortIcon />
