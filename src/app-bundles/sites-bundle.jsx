@@ -4,6 +4,8 @@ import { toast } from 'react-toastify';
 import { tSuccess, tError } from '@common/toast/toastHelper';
 import { ApiStatuses } from '@src/utils/enums';
 
+const rootUrl = '/psapi/Sites/';
+
 export default {
   name: 'sites',
   getReducer: () => {
@@ -51,10 +53,10 @@ export default {
     () =>
     ({ dispatch, store }) => {
       dispatch({ type: 'LOADING_SITES_INIT_DATA' });
-      store.doSitesFetch();
+      store.doFetchSites();
     },
 
-  doSitesFetch:
+  doFetchSites:
     (siteId) =>
     ({ dispatch, store, apiGet }) => {
       const filterParams = store.selectSitesParams();
@@ -77,14 +79,14 @@ export default {
           ...filterParams,
           siteId: actualSiteId,
         });
-        url = `/psapi/siteDataEntry${queryById}`;
+        url = `${rootUrl}getSites${queryById}`;
       } else {
         const queryAllSites = queryFromObject({
           ...filterParams,
           size: pageSize,
           page: pageNumber,
         });
-        url = `/psapi/siteDataEntry${queryAllSites}`;
+        url = `${rootUrl}getSites${queryAllSites}`;
       }
 
       store.doSetLoadingState(true);
@@ -103,22 +105,21 @@ export default {
       });
     },
 
-  doPostNewSite:
+  doAddSite:
     (params, payload) =>
     ({ dispatch, store, apiPost }) => {
-      dispatch({ type: 'SITES_POST_START' });
-      const toastId = toast.loading('Saving new site...');
+      const toastId = toast.loading('Adding site...');
 
-      const url = `/psapi/siteDataEntry${queryFromObject(params)}`;
+      const url = `${rootUrl}addSite${queryFromObject(params)}`;
 
-      apiPost(url, payload, (err, _body) => {
-        if (!err) {
+      apiPost(url, payload, (err, body) => {
+        if (!err && body?.status === ApiStatuses.Success) {
           dispatch({ type: 'SITES_POST_FINISHED' });
-          tSuccess(toastId, 'New site created!');
-          store.doSitesFetch();
+          tSuccess(toastId, 'Successfully added site!');
+          store.doFetchSites();
         } else {
           dispatch({ type: 'SITES_POST_ERROR', payload: err });
-          tError(toastId, 'Failed to create site. Please try again.');
+          tError(toastId, 'Failed to add site. Please try again.');
         }
       });
     },
@@ -126,16 +127,15 @@ export default {
   doUpdateSite:
     (siteData) =>
     ({ dispatch, apiPut, store }) => {
-      dispatch({ type: 'SITES_UPDATE_START' });
       const toastId = toast.loading('Saving site data...');
 
-      const url = '/psapi/siteDataEntry';
+      const url = `${rootUrl}updateSite`;
 
-      apiPut(url, siteData, (err, _body) => {
-        if (!err) {
+      apiPut(url, siteData, (err, body) => {
+        if (!err && body?.status === ApiStatuses.Success) {
           dispatch({ type: 'SITES_UPDATE_FINISHED' });
           tSuccess(toastId, 'Changes successfully saved!');
-          store.doSitesFetch();
+          store.doFetchSites();
         } else {
           dispatch({ type: 'SITES_UPDATE_ERROR', payload: err });
           tError(toastId, 'Failed to save changes. Please try again.');
@@ -150,7 +150,7 @@ export default {
         type: 'SET_SITES_PAGINATION',
         payload: { pageSize, pageNumber },
       });
-      store.doSitesFetch();
+      store.doFetchSites();
     },
 
   doUpdateSiteParams:
@@ -165,7 +165,7 @@ export default {
         payload: { ...searchParams, ...paramObj },
       });
       store.doDomainSeasonsFetch(searchParams?.year);
-      store.doSitesFetch();
+      store.doFetchSites();
       store.doFetchExportsSites({ ...searchParams, ...paramObj });
     },
 };

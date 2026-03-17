@@ -9,7 +9,7 @@ const SiteIdCellRenderer = connect(
   'doDomainSegmentsFetch',
   'doFetchUsers',
   'doDomainSeasonsFetch',
-  'doSitesFetch',
+  'doFetchSites',
   'doUpdateUrl',
   'doModalOpen',
   ({
@@ -18,7 +18,7 @@ const SiteIdCellRenderer = connect(
     doDomainSegmentsFetch,
     doFetchUsers,
     doDomainSeasonsFetch,
-    doSitesFetch,
+    doFetchSites,
     doUpdateUrl,
     doModalOpen,
     edit,
@@ -38,7 +38,7 @@ const SiteIdCellRenderer = connect(
         doDomainSegmentsFetch({ office: data?.fieldoffice, project: data?.projectId });
         doModalOpen(SitesFormModal, { edit: true, data: data });
       } else {
-        doSitesFetch({ siteId: data?.siteId }, handleCallback());
+        doFetchSites({ siteId: data?.siteId }, handleCallback());
       }
     };
 
