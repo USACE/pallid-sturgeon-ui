@@ -43,9 +43,11 @@ const SitesFormModal = connect(
     const {
       bendRiverMile: bendRiverMileData,
       bendSelections: bends,
+      chutes,
       fieldOffices,
       fieldOfficeSegments,
       projects,
+      reach: reachData,
       sampleUnitTypes,
       seasons,
       segments,
@@ -53,6 +55,14 @@ const SitesFormModal = connect(
     } = lookupData;
     const [bendOptions, setBendOptions] = useState([]);
     const [segmentOptions, setSegmentOptions] = useState([]);
+
+    const bendDataMapping = {
+      B: bendRiverMileData,
+      S: bendRiverMileData,
+      C: chutes,
+      A: reachData,
+      R: reachData,
+    };
 
     const user = usersData?.find((user) => userRole.id === user.id);
     const yearsOptions = useMemo(() => years?.map((item) => ({ value: item.year })), [years]);
@@ -84,19 +94,37 @@ const SitesFormModal = connect(
     const segment = watch('segmentId');
     const bend = watch('bend');
     const bendRiverMile = watch('bendRiverMile');
+    const sampleUnitType = watch('sampleUnitType');
 
     const segmentValue = segment?.value;
     const bendValue = bend?.value;
-    const brmId = useMemo(
-      () => bendRiverMileData?.filter((item) => item.bend === bendValue)?.[0]?.id,
-      [bendRiverMileData, bendValue]
-    );
-    const upperRiverMile = useMemo(
-      () => bendRiverMileData?.filter((item) => item.id === bendRiverMile)?.[0]?.upperRiverMile,
-      [bendRiverMileData, bendRiverMile]
-    );
 
-    const filteredSegmentsOptions = () => {
+    const buildBendOptions = (type) => {
+      if (!type) return;
+
+      const options = bendDataMapping[type]?.filter((item) => Number(item.segment) === Number(segmentValue));
+      const filteredOptions = options?.map((item) => ({
+        value: type === 'B' || type === 'S' ? item.bend : item.code,
+        label:
+          type === 'B' || type === 'S'
+            ? item.bendDescription
+              ? `${item.bend} - ${item.bendDescription}`
+              : item.bend
+            : item.description,
+      }));
+      return filteredOptions;
+    };
+
+    const buildDescription = (type, value) => {
+      if (type === 'segment') {
+        return segments?.filter((item) => Number(item.code) === Number(value))?.[0]?.description;
+      }
+      if (type === 'bend') {
+        bendRiverMileData?.filter((item) => Number(item.bend) === Number(value))?.[0]?.bendDescription;
+      }
+    };
+
+    const buildSegmentsOptions = () => {
       // Filter by office
       const fieldOfficeFilteredOptions = fieldOfficeSegments?.filter((item) => item.fieldOfficeCode === office);
 
@@ -120,20 +148,17 @@ const SitesFormModal = connect(
       return formattedOptions;
     };
 
-    const filteredBendOptions = () => {
-      const options = bendRiverMileData?.filter((item) => Number(item.segment) === Number(segmentValue));
-      const filteredOptions = options?.map((item) => ({
-        value: item.bend,
-        label: item.bendDescription ? `${item.bend} - ${item.bendDescription}` : item.bend,
-      }));
-      return filteredOptions;
+    const getBendRiverMileId = (type) => {
+      if (!type) return;
+      return bendDataMapping[type]?.filter(
+        (item) => (type === 'B' || type === 'S' ? item.bend : item.code) === bendValue
+      )?.[0]?.id;
     };
 
-    const getSegmentDescription = (segment) =>
-      segments?.filter((item) => Number(item.code) === Number(segment))?.[0]?.description;
-
-    const getBendDescription = (bend) =>
-      bendRiverMileData?.filter((item) => Number(item.bend) === Number(bend))?.[0]?.bendDescription;
+    const getUpperRiverMile = (type) => {
+      if (!type) return;
+      return bendDataMapping[type]?.filter((item) => item.id === bendRiverMile)?.[0]?.upperRiverMile;
+    };
 
     const handleChange = (e) => {
       // If you want to access the event properties in an asynchronous way,
@@ -184,31 +209,31 @@ const SitesFormModal = connect(
 
     // Update Bend options if Segment values change
     useEffect(() => {
-      segmentValue && setBendOptions(filteredBendOptions());
-    }, [segmentValue]);
+      segmentValue && sampleUnitType && setBendOptions(buildBendOptions(sampleUnitType));
+    }, [segmentValue, sampleUnitType]);
 
     // Update Segment options if Field Office and/or Project values change
     useEffect(() => {
-      office && project && setSegmentOptions(filteredSegmentsOptions());
+      office && project && setSegmentOptions(buildSegmentsOptions());
     }, [office, project]);
 
-    // Set Bend River Mile ID - dependent on Bend and Segment values
+    // Set Bend River Mile ID - dependent on Bend, Sample Unit Type, and Segment values
     useEffect(() => {
-      bendValue && segmentValue && setValue('bendRiverMile', brmId);
-    }, [bendValue, segmentValue]);
+      bendValue && segmentValue && sampleUnitType && setValue('bendRiverMile', getBendRiverMileId(sampleUnitType));
+    }, [bendValue, segmentValue, sampleUnitType]);
 
     // Populate Segment & Bend Combobox Dropdown Values from Existing API Data
     useEffect(() => {
       if (data?.segmentId) {
         setValue('segmentId', {
           value: data?.segmentId,
-          label: getSegmentDescription(data?.segmentId),
+          label: buildDescription('segment', data?.segmentId),
         });
       }
       if (data?.bend) {
         setValue('bend', {
           value: data?.bend,
-          label: getBendDescription(data?.bend),
+          label: buildDescription('bend', data?.bend),
         });
       }
     }, [data?.segmentId, data?.bend]);
@@ -318,7 +343,7 @@ const SitesFormModal = connect(
                   </option>
                 ))}
               </SelectInput>
-              <SelectInput name='sampleUnitType' label='Sample Unit Type' readOnly>
+              <SelectInput name='sampleUnitType' label='Sample Unit Type' required>
                 {createDropdownOptions(sampleUnitTypes).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
@@ -340,7 +365,7 @@ const SitesFormModal = connect(
                   </option>
                 ))}
               </SelectInput>
-              <p className='margin-top-2'>Bend River Mile: {upperRiverMile ?? '--'}</p>
+              <p className='margin-top-2'>Bend River Mile: {getUpperRiverMile(sampleUnitType) ?? '--'}</p>
               {edit && (
                 <Grid row gap='md'>
                   <Grid tablet={{ col: 9 }}>
