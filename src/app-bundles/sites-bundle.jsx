@@ -115,11 +115,11 @@ export default {
       apiPost(url, payload, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
           dispatch({ type: 'SITES_POST_FINISHED' });
-          tSuccess(toastId, 'Successfully added site!');
+          tSuccess(toastId, body?.message);
           store.doFetchSites();
         } else {
           dispatch({ type: 'SITES_POST_ERROR', payload: err });
-          tError(toastId, 'Failed to add site. Please try again.');
+          tError(toastId, body?.message);
         }
       });
     },

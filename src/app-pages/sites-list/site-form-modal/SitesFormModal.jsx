@@ -198,6 +198,7 @@ const SitesFormModal = connect(
           projectId: Number(values.projectId),
           year: Number(values.year),
           siteId: Number(values.siteId),
+          bendRiverMile: String(values?.bendRiverMile),
         };
         // Filter out any null/empty values for final payload
         const payload = filterNullEmptyObjects(dataObj);
@@ -276,11 +277,6 @@ const SitesFormModal = connect(
                             <span className='text-bold'>Field Office:</span> {fieldOfficeTypes[office]}
                           </p>
                         </Grid>
-                        <Grid tablet={{ col: 6 }}>
-                          <p className='margin-bottom-0'>
-                            <span className='text-bold'>Project:</span> {projectTypes[project]}
-                          </p>
-                        </Grid>
                       </Grid>
                     )}
                   </Card.Body>
@@ -315,17 +311,17 @@ const SitesFormModal = connect(
                         ))}
                       </SelectInput>
                     </Grid>
-                    <Grid tablet={{ col: 4 }}>
-                      <SelectInput name='projectId' label='Project' onChange={handleChange} required>
-                        {createDropdownOptions(projectsOptions).map((item, index) => (
-                          <option key={index + 1} value={item.value}>
-                            {item.text}
-                          </option>
-                        ))}
-                      </SelectInput>
-                    </Grid>
                   </>
                 )}
+                <Grid tablet={{ col: 4 }}>
+                  <SelectInput name='projectId' label='Project' onChange={handleChange} required>
+                    {createDropdownOptions(projectsOptions).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Grid>
               </Grid>
               <ComboBox
                 label='Segment'
