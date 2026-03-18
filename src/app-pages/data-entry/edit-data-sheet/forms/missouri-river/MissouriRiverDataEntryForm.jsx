@@ -75,6 +75,7 @@ const MissouriRiverDataEntryForm = connect(
       subsampleTypes,
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
+
     const [gearCodeOptions, setGearCodeOptions] = useState(gearCodes);
     const [mesoOptions, setMesoOptions] = useState(mesos);
     const [structureFlowOptions, setStructureFlowOptions] = useState([]);
@@ -202,6 +203,8 @@ const MissouriRiverDataEntryForm = connect(
       handleSubmit,
     } = methods;
 
+    console.warn('VALUES: ', getValues());
+
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
 
@@ -268,7 +271,6 @@ const MissouriRiverDataEntryForm = connect(
           depth1: parseFloat(values?.depth1),
           depth2: parseFloat(values?.depth2),
           depth3: parseFloat(values?.depth3),
-          distance: parseFloat(values?.distance),
           startLatitude: formatCoordFlt(values.startLatitude) ?? '',
           startLongitude: formatCoordFlt(values.startLongitude) ?? '',
           stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
@@ -353,44 +355,12 @@ const MissouriRiverDataEntryForm = connect(
         setValue('deploymentType', gearCodes.filter((gear) => gear.code === gearCode)?.[0]?.deploymentType);
         if (gearCode === 'TLC1') {
           setValue('distance', 20, { shouldValidate: true });
-        } else if (gearCode === 'TLC2') {
+        }
+        if (gearCode === 'TLC2') {
           setValue('distance', 40, { shouldValidate: true });
         }
       }
     }, [gearCode]);
-
-    // Reset values when fields are readOnly
-    useEffect(() => {
-      if (gearType === 'S') {
-        if (!gearReqFields.distance.includes(gearCode)) {
-          setValue('distance', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.depth1.includes(gearCode)) {
-          setValue('depth1', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.depth2.includes(gearCode)) {
-          setValue('depth2', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.depth3.includes(gearCode)) {
-          setValue('depth3', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocitybot1.includes(gearCode)) {
-          setValue('velocitybot1', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocity081.includes(gearCode) && (depth2 !== null || depth2 !== '' || depth2 < 1.2)) {
-          setValue('velocity081', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocitybot2.includes(gearCode)) {
-          setValue('velocitybot2', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocity082.includes(gearCode) && (depth2 !== null || depth2 !== '' || depth2 < 1.2)) {
-          setValue('velocity082', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocity02or062.includes(gearCode)) {
-          setValue('velocity02or062', '', { shouldValidate: true });
-        }
-      }
-    }, [depth2, gearType, gearCode]);
 
     // Populate Gear Code Dropdown Value from Existing API Data
     useEffect(() => {
@@ -760,7 +730,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLatitude'
                     label='Stop Latitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
                   />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>
@@ -768,7 +738,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLongitude'
                     label='Stop Longitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
                   />
                 </Grid>
               </Grid>
