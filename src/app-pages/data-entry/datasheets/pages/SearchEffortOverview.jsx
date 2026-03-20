@@ -2,7 +2,8 @@ import { connect } from 'redux-bundler-react';
 import Card from '@src/app-components/card';
 import DataHeader from '../components/dataHeader';
 import TabContainer from '@src/app-components/tab';
-import TelemetryDsTable from '../tables/telemetryDsTable';
+// import TelemetryDsTable from '../tables/telemetryDsTable';
+import TelemetryDataEntry from '../tables/telemetry/TelemetryDataEntry';
 import Breadcrumb from '@src/app-components/breadcrumb';
 
 import SearchEffortDataEntryForm from '../../edit-data-sheet/forms/search-effort/SearchEffortDataEntryForm';
@@ -57,7 +58,7 @@ const SearchEffortOverview = connect(
                 },
                 {
                   title: `Telemetry (${dataEntryTelemetryTotalCount})`,
-                  content: <TelemetryDsTable />,
+                  content: <TelemetryDataEntry />,
                 },
               ]}
               onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}
