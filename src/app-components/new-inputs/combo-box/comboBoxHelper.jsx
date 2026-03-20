@@ -1,5 +1,6 @@
 // To make multi select look like other elements
 export const baseStyle = {
+  container: (provided) => ({ ...provided, zIndex: '9999' }),
   control: (base, state) => ({
     ...base,
     border: '1px solid #6fc3db',
@@ -12,6 +13,7 @@ export const baseStyle = {
 };
 
 export const customSelectStyles = {
+  container: (provided) => ({ ...provided, zIndex: '9999' }),
   control: (base, state) => ({
     ...base,
     border: '1px solid #e74c3c',
@@ -30,6 +32,7 @@ export const customSelectStyles = {
 };
 
 export const customSelectStylesNonRequired = {
+  container: (provided) => ({ ...provided, zIndex: '9999' }),
   control: (base) => ({
     ...base,
   }),

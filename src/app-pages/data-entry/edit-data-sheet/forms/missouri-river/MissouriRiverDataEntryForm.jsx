@@ -404,12 +404,44 @@ const MissouriRiverDataEntryForm = connect(
         setValue('deploymentType', gearCodes.filter((gear) => gear.code === gearCode)?.[0]?.deploymentType);
         if (gearCode === 'TLC1') {
           setValue('distance', 20, { shouldValidate: true });
-        }
-        if (gearCode === 'TLC2') {
+        } else if (gearCode === 'TLC2') {
           setValue('distance', 40, { shouldValidate: true });
         }
       }
     }, [gearCode]);
+
+    // Reset values when fields are readOnly
+    useEffect(() => {
+      if (gearType === 'S') {
+        if (!gearReqFields.distance.includes(gearCode)) {
+          setValue('distance', '', { shouldValidate: true });
+        }
+        if (!gearReqFields.depth1.includes(gearCode)) {
+          setValue('depth1', '', { shouldValidate: true });
+        }
+        if (!gearReqFields.depth2.includes(gearCode)) {
+          setValue('depth2', '', { shouldValidate: true });
+        }
+        if (!gearReqFields.depth3.includes(gearCode)) {
+          setValue('depth3', '', { shouldValidate: true });
+        }
+        if (!gearReqFields.velocitybot1.includes(gearCode)) {
+          setValue('velocitybot1', '', { shouldValidate: true });
+        }
+        if (!gearReqFields.velocity081.includes(gearCode) && (depth2 !== null || depth2 !== '' || depth2 < 1.2)) {
+          setValue('velocity081', '', { shouldValidate: true });
+        }
+        if (!gearReqFields.velocitybot2.includes(gearCode)) {
+          setValue('velocitybot2', '', { shouldValidate: true });
+        }
+        if (!gearReqFields.velocity082.includes(gearCode) && (depth2 !== null || depth2 !== '' || depth2 < 1.2)) {
+          setValue('velocity082', '', { shouldValidate: true });
+        }
+        if (!gearReqFields.velocity02or062.includes(gearCode)) {
+          setValue('velocity02or062', '', { shouldValidate: true });
+        }
+      }
+    }, [depth2, gearType, gearCode]);
 
     // Populate Gear Code Dropdown Value from Existing API Data
     useEffect(() => {
