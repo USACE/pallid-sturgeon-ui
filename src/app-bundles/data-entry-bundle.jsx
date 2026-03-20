@@ -558,10 +558,17 @@ export default {
       const url = '/psapi/searchDataEntry';
 
       apiPost(url, formData, (err, _body) => {
-        if (!err && body?.status === ApiStatuses.Success) {
+        if (!err && _body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_FINISHED' });
-          store.doUpdateUrl('/sites-list/datasheet');
+          dispatch({
+            type: 'DATA_ENTRY_FETCH_START',
+            payload: { ...store.selectDataEntryLastParams(), seId: _body.data },
+          });
+          store.doFetchSearchDataEntry();
+          // store.doUpdateLastParams({ seId: _body?.data });
+          store.doUpdateCurrentTab(1);
+          // store.doUpdateUrl('/sites-list/datasheet');
         } else {
           dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
