@@ -206,7 +206,7 @@ export default {
           const mrId = body?.data?.items?.[0]?.mrId;
           const mrFid = body?.data?.items?.[0]?.mrFid;
           const siteId = body?.data?.items?.[0]?.siteId;
-          store.doSitesFetch({ siteId: siteId });
+          store.doFetchSites({ siteId: siteId });
 
           dispatch({
             type: 'DATA_ENTRY_UPDATED_DATA',
@@ -253,7 +253,7 @@ export default {
           const mrId = body?.data?.items?.[0]?.mrId;
           const mrFid = body?.data?.items?.[0]?.mrFid;
           const siteId = body?.data?.items?.[0]?.siteId;
-          store.doSitesFetch({ siteId: siteId });
+          store.doFetchSites({ siteId: siteId });
 
           dispatch({
             type: 'DATA_ENTRY_UPDATE_FISH_DATA',
@@ -301,7 +301,7 @@ export default {
           const mrId = body?.data?.items?.[0]?.mrId;
           const mrFid = body?.data?.items?.[0]?.mrFid;
           const siteId = body?.data?.items?.[0]?.siteId;
-          store.doSitesFetch({ siteId: siteId });
+          store.doFetchSites({ siteId: siteId });
 
           dispatch({
             type: 'DATA_ENTRY_UPDATE_SUPPLEMENTAL_DATA',
@@ -349,7 +349,7 @@ export default {
           const mrId = body?.data?.items?.[0]?.mrId;
           const mrFid = body?.data?.items?.[0]?.mrFid;
           const siteId = body?.data?.items?.[0]?.siteId;
-          store.doSitesFetch({ sitedId: siteId });
+          store.doFetchSites({ sitedId: siteId });
 
           dispatch({
             type: 'DATA_ENTRY_UPDATE_PROCEDURE_DATA',
@@ -393,7 +393,7 @@ export default {
         if (!err && body?.status === ApiStatuses.Success) {
           const seId = body?.data?.items?.[0]?.seId;
           const siteId = body?.data?.items?.[0]?.siteId;
-          store.doSitesFetch({ siteId: siteId });
+          store.doFetchSites({ siteId: siteId });
 
           dispatch({
             type: 'DATA_ENTRY_UPDATED_DATA',
@@ -438,7 +438,7 @@ export default {
         if (!err && body?.status === ApiStatuses.Success) {
           const seId = body?.data?.items?.[0]?.seId;
           const siteId = body?.data?.items?.[0]?.siteId;
-          store.doSitesFetch({ siteId: siteId });
+          store.doFetchSites({ siteId: siteId });
 
           dispatch({
             type: 'DATA_ENTRY_UPDATE_TELEMETRY_DATA',

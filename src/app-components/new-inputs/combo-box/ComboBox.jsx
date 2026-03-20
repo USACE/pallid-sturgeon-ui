@@ -61,6 +61,7 @@ const ComboBox = ({
               isDisabled={readOnly}
               isLoading={isLoading}
               isMulti={multi}
+              menuPosition='fixed'
               menuPlacement={menuPlacement}
               name={name}
               onBlur={(e) => {

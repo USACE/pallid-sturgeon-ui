@@ -99,7 +99,7 @@ export default connect(
                 className='w-25 d-inline-block mb-1 mr-4'
                 onChange={(value) => setVersion(value)}
                 defaultOption={{ value: '4.2.1' }}
-                options={[{ value: '4.2.1' }, { value: '4.1.3' }]}
+                options={[{ value: '4.2.2' }, { value: '4.2.1' }, { value: '4.1.3' }]}
               />
               <label>
                 <small>Recorder:</small>
