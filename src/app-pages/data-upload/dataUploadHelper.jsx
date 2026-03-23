@@ -1,4 +1,4 @@
-import { isNumeric, isValidText, sanitizeText } from '@src/utils';
+import { isNumeric } from '@src/utils';
 import { toast } from 'react-toastify';
 
 export const getIsRequired = (key, files) => {
@@ -101,10 +101,7 @@ export const formatAsNumber = (value, _header) => {
     'capturedate',
   ];
   if (typeof value === 'string' && value.length === 0) {
-    if (value?.length === 0) return null;
-    if (!isValidText(value)) {
-      return sanitizeText(value);
-    }
+    return null;
   } else if (isNumeric(value) && keepAString.indexOf(_header.toLowerCase()) === -1) {
     return Number(value);
   }
