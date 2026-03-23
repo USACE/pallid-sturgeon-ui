@@ -1,4 +1,5 @@
-import { isNumeric } from '@src/utils';
+import { isNumeric, isValidText, sanitizeText } from '@src/utils';
+import { toast } from 'react-toastify';
 
 export const getIsRequired = (key, files) => {
   switch (key) {
@@ -100,11 +101,32 @@ export const formatAsNumber = (value, _header) => {
     'capturedate',
   ];
   if (typeof value === 'string' && value.length === 0) {
-    return null;
+    if (value?.length === 0) return null;
+    if (!isValidText(value)) {
+      return sanitizeText(value);
+    }
   } else if (isNumeric(value) && keepAString.indexOf(_header.toLowerCase()) === -1) {
     return Number(value);
   }
 
   return value;
 };
-//Adding some filler text so it forces the process to update
+
+// Validation function
+const isInvalidCell = (value) => {
+  if (typeof value !== 'string' && Number(value)) return false;
+
+  const normalized = value?.trim();
+  const startsWithFormula = /^=[+-]/.test(normalized); // =- or =+
+  const hasExcelError = /#NAME\?/i.test(normalized); // #NAME? (case-insensitive)
+
+  return startsWithFormula || hasExcelError;
+};
+
+// Validate each cell
+export const validateCell = (value, col) => {
+  if (isInvalidCell(value)) {
+    toast.error('Found invalid data, please review files again.');
+    throw new Error(`Invalid cell at column "${col}": "${value}"`);
+  }
+};
