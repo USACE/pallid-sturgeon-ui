@@ -3,43 +3,126 @@ import * as yup from 'yup';
 
 export const notRequiredSpeciesArr = ['NFSH', 'NDNF', 'CAN', 'CNFH'];
 
-export const FishDataEntrySchema = yup.object().shape({
-  panelHook: yup.string().when('species', {
-    is: (val) => !notRequiredSpeciesArr.includes(val),
-    then: (schema) => schema.required(ValidationMessages.FieldRequired),
-    otherwise: (schema) => schema.nullable().notRequired(),
-  }),
-  species: yup.string().nullable().notRequired(),
-  lengthType: yup.string().required(ValidationMessages.FieldRequired),
-  length: yup.number().when(['species', 'countF'], {
-    is: (species, count) => ['PDSG', 'SNSG', 'SNPD'].includes(species) && count > 1,
-    then: (schema) => schema.required(ValidationMessages.FieldRequired),
-    otherwise: (schema) => schema.nullable().notRequired(),
-  }),
-  weight: yup.number().nullable().notRequired(),
-  countF: yup.number().nullable().notRequired(),
-  ftPrefix: yup.string().required(ValidationMessages.FieldRequired),
-  floyTag: yup.string().when('ftPrefix', {
-    is: (val) => !val && val !== null && val !== '',
-    then: (schema) => schema.required(ValidationMessages.FieldRequired),
-    otherwise: (schema) => schema.nullable().notRequired(),
-  }),
-  mR: yup.string().when('floyTag', {
-    is: (val) => !val && val !== null && val !== '',
-    then: (schema) => schema.required(ValidationMessages.FieldRequired),
-    otherwise: (schema) => schema.nullable().notRequired(),
-  }),
-  geneticsVialNumber: yup.string().when('species', {
-    is: (val) => val === 'USG',
-    then: (schema) => schema.string().required(ValidationMessages.FieldRequired),
-    otherwise: (schema) => schema.nullable().notRequired(),
-  }),
-  tagnumber: yup.string().nullable().notRequired(),
-  finCurl: yup.string().required(ValidationMessages.FieldRequired),
-  otolith: yup.string().nullable().notRequired(),
-});
+export const FishDataEntrySchema = ({ gear, data, recaptureData }) =>
+  yup.object().shape({
+    panelHook: yup
+      .string()
+      .when('species', {
+        is: (species) => gear?.startsWith('TL') || gear?.startsWith('LDN') || !notRequiredSpeciesArr.includes(species),
+        then: (schema) => schema.required(ValidationMessages.FieldRequired),
+        otherwise: (schema) => schema.nullable().notRequired(),
+      })
+      .test({
+        test: (value) => value && (['M', 'B'].includes(value) || Number(value)),
+        message: 'Value must be a number or M or B',
+      }),
+    species: yup
+      .string()
+      .test({
+        test: (species) => {
+          if (species && species === 'NFSH' && data?.length > 0) {
+            data?.filter((row) => row.species === 'NFSH').length > 1;
+          }
+          return true;
+        },
+        message: 'Cannot have more than one record for the species NFSH',
+      })
+      .test({
+        test: (species) => {
+          if (species && species === 'CNFH' && data?.length > 1) {
+            return data?.filter((row) => row.species === 'CNFH').length > 1;
+          }
+          return true;
+        },
+        message: 'Cannot have more than one record for the species CNFH',
+      })
+      .test({
+        test: (species) => {
+          if (species && species === 'CAN' && data?.length > 1) {
+            return data?.filter((row) => row.species === 'CAN').length > 1;
+          }
+          return true;
+        },
+        message: 'Cannot have more than one record for the species CAN',
+      })
+      .test({
+        test: (species) => {
+          if (species && species === 'NDNF' && data?.length > 1) {
+            return data?.filter((row) => row.species === 'NDNF').length <= 1;
+          }
+          return true;
+        },
+        message: 'Cannot have more than one record for the species NDNF',
+      })
+      .test({
+        test: (species, { parent: { panelHook } }) => {
+          if (species === 'NFSH' && panelHook === 'M' && data?.length > 1) {
+            return data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'M')?.length <= 1;
+          }
+          return true;
+        },
+        message: 'Cannot have more than one record for species = NFSH where Panel/Hook = M',
+      })
+      .test({
+        test: (species, { parent: { panelHook } }) => {
+          if (species === 'NFSH' && panelHook === 'B' && data?.length > 1) {
+            return data?.filter((row) => row.species === species && row.panelHook === 'B')?.length <= 1;
+          }
+          return true;
+        },
+        message: 'Cannot have more than one record for species = NFSH where Panel/Hook = B',
+      })
+      .test({
+        test: (species, { parent: { tagnumber } }) => {
+          if (species && tagnumber && data?.length > 1) {
+            const correctSpecies = recaptureData?.filter((item) => item.pitTag === tagnumber)?.[0]?.species;
+            return species === correctSpecies;
+          }
+          return true;
+        },
+        message: 'Cannot have more than one record for species = NFSH where Panel/Hook = B',
+      }),
+    lengthType: yup.string().required(ValidationMessages.FieldRequired),
+    length: yup.number().when(['species', 'countF'], {
+      is: (species, count) => ['PDSG', 'SNSG', 'SNPD'].includes(species) && count > 1,
+      then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    weight: yup.number().nullable().notRequired(),
+    countF: yup.number().when('species', {
+      is: (species) => !['NDNF', 'CAN', 'CNFH'].includes(species),
+      then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    // @TODO: Revist FloyTag business logic
+    ftPrefix: yup.string().required(ValidationMessages.FieldRequired),
+    floyTag: yup.string().when('ftPrefix', {
+      is: (ftPrefix) => ftPrefix && ftPrefix !== null && ftPrefix !== '',
+      then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    mR: yup.string().when('floyTag', {
+      is: (floyTag) => floyTag !== null && floyTag !== '' && floyTag !== undefined,
+      then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    // @TODO: Might need to add some safe guards here for masking prefix and number values
+    geneticsVialNumber: yup.string().when('species', {
+      is: (species) => species === 'USG',
+      then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    tagnumber: yup.string().nullable().notRequired(), // Need to check for duplicates for each MR_FID
+    finCurl: yup.string().when(['length', 'segment', 'species'], {
+      is: (length, segment, species) =>
+        species === 'PDSG' && ((length < 425 && segment < 7) || (length < 250 && segment >= 7)),
+      then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    otolith: yup.string().nullable().notRequired(),
+  });
 
-const getBaseDefaultValues = ({ baseData }) => ({
+export const getBaseDefaultValues = ({ baseData }) => ({
   year: baseData?.year ?? '',
   fieldOffice: baseData?.fieldOffice ?? '',
   project: baseData?.projectId ?? '',

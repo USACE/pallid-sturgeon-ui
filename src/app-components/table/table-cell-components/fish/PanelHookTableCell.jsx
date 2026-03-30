@@ -1,7 +1,9 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { notRequiredSpeciesArr } from '@src/app-pages/data-entry/datasheets/tables/fish/FishDataEntry.validation';
+import Icon from '@src/app-components/icon/icon';
+import { mdiAlert } from '@mdi/js';
 
 const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
@@ -13,38 +15,67 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   const debouncedUpdateRef = useRef();
 
+  const isRequired = columnMeta?.gear?.startsWith('TL') || columnMeta?.gear?.startsWith('LDN');
+
+  const updateValue = useCallback((newValue) => {
+    debouncedUpdateRef.current(newValue);
+  }, []);
+
+  const handleBlur = (e) => {
+    // Clear field if value is 0 or is a negative number
+    if (String(e?.target?.value)[0] === '-') {
+      setValue(null);
+      updateValue(null);
+    }
+  };
+
+  const handleChange = (e) => {
+    const val = e?.target?.value ?? '';
+    setValue(val === '' ? null : val);
+    updateValue(val === '' ? null : val);
+  };
+
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
       if (tableMeta?.updateData) {
-        tableMeta?.updateData(
-          row.index,
-          column.id,
-          columnMeta?.type === 'number' ? Number(newValue) : (newValue ?? newValue)
-        );
+        tableMeta?.updateData(row.index, column.id, newValue);
       }
     }, 500);
-  }, [row.index, column.id, tableMeta?.updateData, columnMeta?.type, tableMeta]);
+  }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
 
   useEffect(() => {
     rowSpecies && setSpecies(rowSpecies);
   }, [rowSpecies]);
 
   return (
-    <input
-      aria-label={'PanelHook'}
-      disabled={columnMeta?.readOnly}
+    <div
       id={cell.id}
-      maxLength={4000}
-      onChange={() => {}}
-      required={!notRequiredSpeciesArr.includes(species)}
       style={{
         width: '100%',
-        borderColor: 'hsl(0, 0%, 80%)',
-        cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
-      type='text'
-      value={value ?? ''}
-    />
+    >
+      <input
+        aria-label='PanelHook'
+        disabled={columnMeta?.readOnly}
+        id={cell.id}
+        maxLength={4000}
+        onBlur={handleBlur}
+        onChange={handleChange}
+        required={columnMeta?.required || isRequired || !notRequiredSpeciesArr.includes(species)}
+        style={{
+          width: '100%',
+          borderColor: 'hsl(0, 0%, 80%)',
+          cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
+        }}
+        type='text'
+        value={value ?? ''}
+      />
+    </div>
   );
 });
 

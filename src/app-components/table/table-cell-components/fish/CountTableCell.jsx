@@ -3,31 +3,19 @@ import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { decimalNumberRegex } from '@src/utils/regex';
 
-const speciesArr = ['PDSG', 'SNSG', 'SNPD'];
+const speciesArr = ['NDNF', 'CAN', 'CNFH'];
 
-const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
+const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
   const [species, setSpecies] = useState();
-  const [count, setCount] = useState();
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
-  const rowCount = useMemo(() => row.getValue('countF'), [row]);
 
   const debouncedUpdateRef = useRef();
 
-  const isRequired = speciesArr.includes(species) && count === 1;
-
-  console.warn('isRequired: ', isRequired);
-
-  useEffect(() => {
-    debouncedUpdateRef.current = debounce((newValue) => {
-      if (tableMeta?.updateData) {
-        tableMeta?.updateData(row.index, column.id, Number(newValue));
-      }
-    }, 500);
-  }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
+  const isRequired = !speciesArr.includes(species);
 
   const updateValue = useCallback((newValue) => {
     debouncedUpdateRef.current(newValue);
@@ -50,21 +38,34 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   };
 
   useEffect(() => {
+    debouncedUpdateRef.current = debounce((newValue) => {
+      if (tableMeta?.updateData) {
+        tableMeta?.updateData(row.index, column.id, newValue);
+      }
+    }, 500);
+  }, [row.index, column.id, tableMeta?.updateData, columnMeta?.type, tableMeta]);
+
+  useEffect(() => {
     rowSpecies && setSpecies(rowSpecies);
   }, [rowSpecies]);
 
   useEffect(() => {
-    rowCount && setCount(rowCount);
-  }, [rowCount]);
+    if (species === 'NFSH') {
+      setValue(0);
+      updateValue(0);
+    } else if (speciesArr.includes(species)) {
+      setValue(null);
+      updateValue(null);
+    }
+  }, [species]);
 
   return (
     <input
-      aria-label='Length'
-      disabled={columnMeta?.readOnly || !isRequired}
+      aria-label='Floy Tag'
+      disabled={columnMeta?.readOnly}
       id={cell.id}
-      maxLength={4000}
-      onBlur={handleBlur}
       onChange={handleChange}
+      onBlur={handleBlur}
       required={isRequired}
       style={{
         width: '100%',
@@ -77,4 +78,4 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   );
 });
 
-export default LengthTableCell;
+export default CountTableCell;

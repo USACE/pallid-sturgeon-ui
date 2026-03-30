@@ -25,8 +25,6 @@ const calculateCondition = (length, segment, species, weight) => {
 const ConditionTableCell = connect('selectBaseData', ({ baseData, getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
-  const initialValue = getValue();
-  const [value, setValue] = useState(initialValue);
   const [species, setSpecies] = useState();
   const [weight, setWeight] = useState();
   const [length, setLength] = useState();
@@ -41,11 +39,7 @@ const ConditionTableCell = connect('selectBaseData', ({ baseData, getValue, row,
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
       if (tableMeta?.updateData) {
-        tableMeta?.updateData(
-          row.index,
-          column.id,
-          columnMeta?.type === 'number' ? Number(newValue) : (newValue ?? newValue)
-        );
+        tableMeta?.updateData(row.index, column.id, newValue);
       }
     }, 500);
   }, [row.index, column.id, tableMeta?.updateData, columnMeta?.type, tableMeta]);
@@ -56,7 +50,7 @@ const ConditionTableCell = connect('selectBaseData', ({ baseData, getValue, row,
     rowWeight && setWeight(rowWeight);
     rowLength && setLength(rowLength);
   }, [rowSpecies, rowWeight, rowLength]);
-  f;
+
   return <span>{calculateCondition(length, segmentId, species, weight)}</span>;
 });
 

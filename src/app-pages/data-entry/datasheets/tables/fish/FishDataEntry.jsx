@@ -7,12 +7,19 @@ import _isEqual from 'lodash/isEqual';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
-import { FishDataEntrySchema, getFishRiverDefaultValues } from './FishDataEntry.validation';
+import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 import PanelHookTableCell from '@src/app-components/table/table-cell-components/fish/PanelHookTableCell';
+import LengthTableCell from '@src/app-components/table/table-cell-components/fish/LengthTableCell';
+import FinCurlTableCell from '@src/app-components/table/table-cell-components/fish/FinCurlTableCell';
+import ConditionTableCell from '@src/app-components/table/table-cell-components/fish/ConditionTableCell';
+import GeneticVialNumTableCell from '@src/app-components/table/table-cell-components/fish/GeneticVialNumTableCell';
+import FloyTagMrTableCell from '@src/app-components/table/table-cell-components/fish/FloyTagMrTableCell';
+import FloyTagTableCell from '@src/app-components/table/table-cell-components/fish/FloyTagTableCell';
+import CountTableCell from '@src/app-components/table/table-cell-components/fish/CountTableCell';
 
 const createDropdownOptions = (data) => {
   if (!data) return [];
@@ -43,14 +50,16 @@ const createComboboxOptions = (data) => {
 // @TODO: Need to pull gear code from Missouri River Data
 
 const FishDataEntry = connect(
+  'selectDataEntryData',
   'selectDataEntryFishData',
   'selectBaseData',
   'selectLookupData',
-  ({ dataEntryFishData, baseData, lookupData }) => {
+  ({ dataEntryData, dataEntryFishData, baseData, lookupData }) => {
     const { items } = dataEntryFishData;
     const { projectId } = baseData;
+    const { gear } = dataEntryData;
 
-    const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions } = lookupData;
+    const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions, recaptureData } = lookupData;
 
     const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
@@ -70,7 +79,7 @@ const FishDataEntry = connect(
       })) ?? [];
 
     const methods = useForm({
-      resolver: yupResolver(FishDataEntrySchema),
+      resolver: yupResolver(FishDataEntrySchema({ gear, data, recaptureData })),
       mode: 'onBlur',
       defaultValues: getFishRiverDefaultValues({ baseData: baseData, dataEntryData: dataEntryFishData }),
     });
@@ -91,11 +100,6 @@ const FishDataEntry = connect(
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 150,
         }),
-        columnHelper.accessor('mrFid', {
-          header: 'MR Field ID',
-          cell: ({ cell }) => <span>{cell.getValue()}</span>,
-          size: 150,
-        }),
         columnHelper.accessor('ffid', {
           header: 'Field ID',
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
@@ -110,6 +114,9 @@ const FishDataEntry = connect(
           header: 'Panel/Hook',
           cell: PanelHookTableCell,
           size: 190,
+          meta: {
+            gear: gear,
+          },
         }),
         columnHelper.accessor('species', {
           header: 'Species',
@@ -132,7 +139,7 @@ const FishDataEntry = connect(
         }),
         columnHelper.accessor('length', {
           header: 'Length(mm)',
-          cell: TableCell,
+          cell: LengthTableCell,
           size: 200,
           meta: { type: 'number' },
         }),
@@ -144,27 +151,22 @@ const FishDataEntry = connect(
         }),
         columnHelper.accessor('countF', {
           header: 'Count',
-          cell: TableCell,
+          cell: CountTableCell,
           size: 200,
-          meta: { type: 'number' },
         }),
         columnHelper.accessor('ftPrefix', {
           header: 'Floy Tag Prefix',
           cell: TableCell,
           size: 200,
-          meta: {
-            type: 'select',
-            options: createDropdownOptions(floyTagPrefixes),
-          },
         }),
         columnHelper.accessor('floyTag', {
           header: 'Floy Tag',
-          cell: TableCell,
+          cell: FloyTagTableCell,
           size: 200,
         }),
         columnHelper.accessor('mR', {
           header: 'Floy Tag M/R',
-          cell: TableCell,
+          cell: FloyTagMrTableCell,
           size: 200,
           meta: {
             type: 'select',
@@ -173,12 +175,12 @@ const FishDataEntry = connect(
         }),
         columnHelper.accessor('geneticsVialNumber', {
           header: 'Genetics Vial #',
-          cell: TableCell,
-          size: 200,
+          cell: GeneticVialNumTableCell,
+          size: 250,
         }),
         columnHelper.accessor('condition', {
           header: 'Condition',
-          cell: ({ cell }) => <span>{cell.getValue()}</span>,
+          cell: ConditionTableCell,
           size: 200,
         }),
         columnHelper.accessor('tagnumber', {
@@ -188,7 +190,7 @@ const FishDataEntry = connect(
         }),
         columnHelper.accessor('finCurl', {
           header: 'Fin Curl',
-          cell: TableCell,
+          cell: FinCurlTableCell,
           size: 200,
           meta: {
             type: 'select',
@@ -233,6 +235,16 @@ const FishDataEntry = connect(
       ],
       [columnHelper]
     );
+
+    const handleAddRow = () => {
+      // Add default values here
+      const base = getBaseDefaultValues({ baseData });
+      const newRowData = {
+        ...base,
+        countF: 1,
+      };
+      setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
+    };
 
     const handleAddMultipleRows = (rows) => {
       // Handle any data mapping or formatting here
@@ -281,19 +293,19 @@ const FishDataEntry = connect(
     return (
       <FormProvider {...methods}>
         <DataEntryTable
-          addRow={() => setData((prev) => (prev ? [...prev, {}] : [{}]))}
+          addRow={handleAddRow}
           columns={tableColumns}
           data={data}
           initialTableState={{}}
           key={tableKey}
-          placeholderClick={() => setData((prev) => (prev ? [...prev, {}] : [{}]))}
+          placeholderClick={handleAddRow}
           placeholderText='No Fish Data found.'
           removeMultipleRows={handleRemoveMultipleRows}
           addMultipleRows={handleAddMultipleRows}
           rowErrorCallback={setTableErrors}
           tableVersion='FishTable'
           updateSourceData={handleUpdateData}
-          validationSchema={FishDataEntrySchema}
+          validationSchema={FishDataEntrySchema({ gear, data, recaptureData })}
         />
       </FormProvider>
     );
