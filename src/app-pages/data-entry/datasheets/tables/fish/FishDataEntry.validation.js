@@ -3,7 +3,7 @@ import * as yup from 'yup';
 
 export const notRequiredSpeciesArr = ['NFSH', 'NDNF', 'CAN', 'CNFH'];
 
-export const FishDataEntrySchema = ({ gear, data, recaptureData }) =>
+export const FishDataEntrySchema = ({ gear, data }) =>
   yup.object().shape({
     panelHook: yup
       .string()
@@ -67,16 +67,6 @@ export const FishDataEntrySchema = ({ gear, data, recaptureData }) =>
         test: (species, { parent: { panelHook } }) => {
           if (species === 'NFSH' && panelHook === 'B' && data?.length > 1) {
             return data?.filter((row) => row.species === species && row.panelHook === 'B')?.length <= 1;
-          }
-          return true;
-        },
-        message: 'Cannot have more than one record for species = NFSH where Panel/Hook = B',
-      })
-      .test({
-        test: (species, { parent: { tagnumber } }) => {
-          if (species && tagnumber && data?.length > 1) {
-            const correctSpecies = recaptureData?.filter((item) => item.pitTag === tagnumber)?.[0]?.species;
-            return species === correctSpecies;
           }
           return true;
         },

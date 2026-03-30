@@ -59,7 +59,7 @@ const FishDataEntry = connect(
     const { projectId } = baseData;
     const { gear } = dataEntryData;
 
-    const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions, recaptureData } = lookupData;
+    const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions } = lookupData;
 
     const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
@@ -79,7 +79,7 @@ const FishDataEntry = connect(
       })) ?? [];
 
     const methods = useForm({
-      resolver: yupResolver(FishDataEntrySchema({ gear, data, recaptureData })),
+      resolver: yupResolver(FishDataEntrySchema({ gear, data })),
       mode: 'onBlur',
       defaultValues: getFishRiverDefaultValues({ baseData: baseData, dataEntryData: dataEntryFishData }),
     });
@@ -305,7 +305,7 @@ const FishDataEntry = connect(
           rowErrorCallback={setTableErrors}
           tableVersion='FishTable'
           updateSourceData={handleUpdateData}
-          validationSchema={FishDataEntrySchema({ gear, data, recaptureData })}
+          validationSchema={FishDataEntrySchema({ gear, data })}
         />
       </FormProvider>
     );
