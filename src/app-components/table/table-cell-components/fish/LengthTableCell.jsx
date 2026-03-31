@@ -3,8 +3,6 @@ import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { decimalNumberRegex } from '@src/utils/regex';
 
-const speciesArr = ['PDSG', 'SNSG', 'SNPD'];
-
 const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
@@ -12,14 +10,13 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const [value, setValue] = useState(initialValue);
   const [species, setSpecies] = useState();
   const [count, setCount] = useState();
+
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
   const rowCount = useMemo(() => row.getValue('countF'), [row]);
 
   const debouncedUpdateRef = useRef();
 
-  const isRequired = speciesArr.includes(species) && count === 1;
-
-  console.warn('isRequired: ', isRequired);
+  const isRequired = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
@@ -49,13 +46,20 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
     }
   };
 
+  // Get latest species and countF values
   useEffect(() => {
     rowSpecies && setSpecies(rowSpecies);
-  }, [rowSpecies]);
-
-  useEffect(() => {
     rowCount && setCount(rowCount);
-  }, [rowCount]);
+  }, [rowSpecies, rowCount]);
+
+  // Reset cell value if the field is disabled
+  useEffect(() => {
+    const isDisabled = !isRequired;
+    if (isDisabled) {
+      setValue(null);
+      updateValue(null);
+    }
+  }, [isRequired]);
 
   return (
     <input

@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { decimalNumberRegex } from '@src/utils/regex';
 import Select from 'react-select';
+import { hasValueChanged } from './tableCellHelper';
 
 const debounce = (func, wait) => {
   let timeout;
@@ -24,12 +25,6 @@ const formatSelectValue = (value, options) => {
 const getSelectOptionValue = (option) => {
   if (!option) return null;
   return option.value;
-};
-
-const hasValueChanged = (prevValue, newValue) => {
-  if (prevValue === null && newValue === null) return false;
-  if (prevValue === undefined && newValue === undefined) return false;
-  return prevValue !== newValue;
 };
 
 export const TableCell = ({ getValue, row, column, table, cell, cellError }) => {

@@ -16,9 +16,12 @@ const GeneticVialNumTableCell = connect('selectBaseData', ({ baseData, getValue,
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
   const [species, setSpecies] = useState();
+
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
+
   const { projectId } = baseData;
   const project = Number(projectId);
+
   const debouncedUpdateRef = useRef();
 
   const prefix = setPrefixValue(species, project, value);

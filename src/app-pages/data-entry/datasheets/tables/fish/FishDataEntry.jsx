@@ -7,19 +7,21 @@ import _isEqual from 'lodash/isEqual';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
-import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
-
-import '@pages/data-summaries/data-summary.scss';
-import '@pages/data-entry/dataentry.scss';
-import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 import PanelHookTableCell from '@src/app-components/table/table-cell-components/fish/PanelHookTableCell';
 import LengthTableCell from '@src/app-components/table/table-cell-components/fish/LengthTableCell';
 import FinCurlTableCell from '@src/app-components/table/table-cell-components/fish/FinCurlTableCell';
 import ConditionTableCell from '@src/app-components/table/table-cell-components/fish/ConditionTableCell';
 import GeneticVialNumTableCell from '@src/app-components/table/table-cell-components/fish/GeneticVialNumTableCell';
-import FloyTagMrTableCell from '@src/app-components/table/table-cell-components/fish/FloyTagMrTableCell';
-import FloyTagTableCell from '@src/app-components/table/table-cell-components/fish/FloyTagTableCell';
+import FloyTagMrTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell.mr';
+import FloyTagTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell';
 import CountTableCell from '@src/app-components/table/table-cell-components/fish/CountTableCell';
+import FloyTagPrefixTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell.prefix';
+
+import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
+import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
+
+import '@pages/data-summaries/data-summary.scss';
+import '@pages/data-entry/dataentry.scss';
 
 const createDropdownOptions = (data) => {
   if (!data) return [];
@@ -47,8 +49,6 @@ const createComboboxOptions = (data) => {
   });
 };
 
-// @TODO: Need to pull gear code from Missouri River Data
-
 const FishDataEntry = connect(
   'selectDataEntryData',
   'selectDataEntryFishData',
@@ -56,7 +56,6 @@ const FishDataEntry = connect(
   'selectLookupData',
   ({ dataEntryData, dataEntryFishData, baseData, lookupData }) => {
     const { items } = dataEntryFishData;
-    const { projectId } = baseData;
     const { gear } = dataEntryData;
 
     const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions } = lookupData;
@@ -68,9 +67,6 @@ const FishDataEntry = connect(
     const [tableIsDirty, setTableIsDirty] = useState(false);
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
-
-    console.warn('data: ', data);
-    console.warn('baseData: ', baseData);
 
     const speciesOptions =
       fishCodes?.map((item) => ({
@@ -156,8 +152,11 @@ const FishDataEntry = connect(
         }),
         columnHelper.accessor('ftPrefix', {
           header: 'Floy Tag Prefix',
-          cell: TableCell,
+          cell: FloyTagPrefixTableCell,
           size: 200,
+          meta: {
+            options: createDropdownOptions(floyTagPrefixes),
+          },
         }),
         columnHelper.accessor('floyTag', {
           header: 'Floy Tag',
@@ -169,7 +168,6 @@ const FishDataEntry = connect(
           cell: FloyTagMrTableCell,
           size: 200,
           meta: {
-            type: 'select',
             options: createDropdownOptions(markRecaptureOptions),
           },
         }),

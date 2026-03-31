@@ -16,6 +16,7 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
   const debouncedUpdateRef = useRef();
 
   const isRequired = !speciesArr.includes(species);
+  const isDisabled = species === 'NFSH' || speciesArr.includes(species);
 
   const updateValue = useCallback((newValue) => {
     debouncedUpdateRef.current(newValue);
@@ -62,7 +63,7 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
   return (
     <input
       aria-label='Floy Tag'
-      disabled={columnMeta?.readOnly}
+      disabled={columnMeta?.readOnly || isDisabled}
       id={cell.id}
       onChange={handleChange}
       onBlur={handleBlur}
