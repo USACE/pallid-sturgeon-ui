@@ -12,7 +12,7 @@ import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEff
 import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { createDropdownOptions, fmtTimeHHMMSS, generateFieldId } from '../dataEntryFormHelper';
+import { createDropdownOptions, fmtTimeHHMMSS, generateFieldId } from '../../../dataEntryHelper';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
