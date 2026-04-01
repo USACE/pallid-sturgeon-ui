@@ -15,7 +15,6 @@ const FloyTagMrTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   const rowFloyTag = useMemo(() => row.getValue('floyTag'), [row]);
 
-  // const isRequired = rowFloyTag !== null && rowFloyTag !== '' && rowFloyTag !== undefined;
   const isRequired = !!rowFloyTag;
 
   const updateValue = useCallback((newValue) => {
