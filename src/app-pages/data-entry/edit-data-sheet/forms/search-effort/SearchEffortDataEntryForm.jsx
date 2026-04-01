@@ -6,15 +6,13 @@ import { FormProvider, useForm } from 'react-hook-form';
 import TextInput from '@src/app-components/new-inputs/text-input/TextInput';
 import SelectInput from '@src/app-components/new-inputs/select-input/SelectInput';
 import { Button, Grid } from '@trussworks/react-uswds';
-
-import { searchTypeOptions } from '../_shared/selectHelper';
 import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 
 import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEffortDataEntryForm.validation';
 import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { fmtTimeHHMMSS, generateFieldId } from '../dataEntryFormHelper';
+import { createDropdownOptions, fmtTimeHHMMSS, generateFieldId } from '../dataEntryFormHelper';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -34,6 +32,7 @@ const SearchEffortDataEntryForm = connect(
   'selectDataEntryTelemetryTotalCount',
   'selectRouteParams',
   'selectIsEditForm',
+  'selectLookupData',
   ({
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
@@ -42,9 +41,11 @@ const SearchEffortDataEntryForm = connect(
     dataEntryTelemetryTotalCount,
     routeParams,
     isEditForm,
+    lookupData,
   }) => {
-    const siteId = routeParams?.siteId;
     const prevIsEditFormRef = useRef(isEditForm);
+    const siteId = routeParams?.siteId;
+    const { searchTypes } = lookupData;
 
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
@@ -284,13 +285,11 @@ const SearchEffortDataEntryForm = connect(
 
             <Grid tablet={{ col: 2 }}>
               <SelectInput name='searchTypeCode' label='Search Type' required>
-                {(typeof searchTypeOptions === 'function' ? searchTypeOptions(searchTypeCode) : searchTypeOptions).map(
-                  (opt, idx) => (
-                    <option key={idx + 1} value={opt.value}>
-                      {opt.text}
-                    </option>
-                  )
-                )}
+                {createDropdownOptions(searchTypes).map((item, index) => (
+                  <option key={index + 1} value={item.value}>
+                    {item.text}
+                  </option>
+                ))}
               </SelectInput>
               {searchTypeCode === 'RS' && (
                 <Grid tablet={{ col: 12 }}>

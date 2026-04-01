@@ -1,3 +1,16 @@
+export const createDropdownOptions = (data) => {
+  if (!data) return [];
+
+  return data.map((item) => {
+    const { code, description } = item;
+
+    return {
+      value: code,
+      text: description,
+    };
+  });
+};
+
 export const fmtTimeHHMMSS = (val) => {
   const date = val ? new Date(val) : new Date();
 
