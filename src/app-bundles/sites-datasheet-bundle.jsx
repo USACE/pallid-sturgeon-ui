@@ -64,7 +64,10 @@ const sitesDatasheetBundle = {
   selectSearchEffortSitesDatasheetData: (state) =>
     state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 2),
   selectMoriverSitesDatasheetTotalResults: (state) => state.sitesDatasheet.missouriRiver.totalCount,
-  selectSearchEffortSitesDatasheetTotalResults: (state) => state.sitesDatasheet.searchEffort.totalCount,
+  selectSearchEffortSitesDatasheetTotalResults: (state) =>
+    state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 2).length,
+  selectSearchEffortSitesDraftDatasheetTotalResults: (state) =>
+    state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 1).length,
 
   doSitesDatasheetLoadData:
     () =>
