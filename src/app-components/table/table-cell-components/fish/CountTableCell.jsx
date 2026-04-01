@@ -1,0 +1,82 @@
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { connect } from 'redux-bundler-react';
+import { debounce } from '../tableCellHelper';
+import { decimalNumberRegex } from '@src/utils/regex';
+
+const speciesArr = ['NDNF', 'CAN', 'CNFH'];
+
+const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
+  const columnMeta = column.columnDef.meta;
+  const tableMeta = table.options.meta;
+  const initialValue = getValue();
+  const [value, setValue] = useState(initialValue);
+  const [species, setSpecies] = useState();
+  const rowSpecies = useMemo(() => row.getValue('species'), [row]);
+
+  const debouncedUpdateRef = useRef();
+
+  const isRequired = !speciesArr.includes(species);
+  const isDisabled = species === 'NFSH' || speciesArr.includes(species);
+
+  const updateValue = useCallback((newValue) => {
+    debouncedUpdateRef.current(newValue);
+  }, []);
+
+  const handleBlur = (e) => {
+    // Clear field if value is 0 or is a negative number
+    if (String(e?.target?.value)[0] === '-') {
+      setValue(null);
+      updateValue(null);
+    }
+  };
+
+  const handleChange = (e) => {
+    const val = e?.target?.value ?? '';
+    if (decimalNumberRegex.test(val) || val === '') {
+      setValue(val === '' ? null : val);
+      updateValue(val === '' ? null : val);
+    }
+  };
+
+  useEffect(() => {
+    debouncedUpdateRef.current = debounce((newValue) => {
+      if (tableMeta?.updateData) {
+        tableMeta?.updateData(row.index, column.id, newValue);
+      }
+    }, 500);
+  }, [row.index, column.id, tableMeta?.updateData, columnMeta?.type, tableMeta]);
+
+  useEffect(() => {
+    rowSpecies && setSpecies(rowSpecies);
+  }, [rowSpecies]);
+
+  useEffect(() => {
+    if (species === 'NFSH') {
+      setValue(0);
+      updateValue(0);
+    } else if (speciesArr.includes(species)) {
+      setValue(null);
+      updateValue(null);
+    }
+  }, [species]);
+
+  return (
+    <input
+      aria-label='Floy Tag'
+      disabled={columnMeta?.readOnly || isDisabled}
+      id={cell.id}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      required={isRequired}
+      style={{
+        width: '100%',
+        borderColor: 'hsl(0, 0%, 80%)',
+        cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
+      }}
+      type='number'
+      value={value ?? ''}
+    />
+  );
+});
+
+export default CountTableCell;
