@@ -41,7 +41,7 @@ const TelemetryDataEntry = connect(
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
 
-    const defaultValues = { seId: dataEntryLastParams.seId };
+    const defaultValues = { seId: dataEntryLastParams?.seId };
 
     const methods = useForm({
       resolver: yupResolver(telemetryDataEntrySchema),

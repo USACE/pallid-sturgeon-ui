@@ -50,7 +50,7 @@ const TelemetryDsTable = connect(
 
     const lastRow = dataEntryTelemetryData.items[dataEntryTelemetryData.totalCount - 1];
     const initialState = {
-      seId: dataEntryLastParams.seId,
+      seId: dataEntryLastParams?.seId ?? null,
     };
 
     const addRow = useCallback(() => {
@@ -121,10 +121,10 @@ const TelemetryDsTable = connect(
               !data.tId
                 ? doSaveTelemetryDataEntry(
                     { ...initialState, ...data },
-                    { seId: dataEntryLastParams.seId, id: userRole.id }
+                    { seId: dataEntryLastParams?.seId, id: userRole.id }
                   )
                 : doUpdateTelemetryDataEntry(data, {
-                    seId: dataEntryLastParams.seId,
+                    seId: dataEntryLastParams?.seId,
                     id: userRole.id,
                   })
             }

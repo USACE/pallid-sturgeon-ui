@@ -223,14 +223,9 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when('gear', {
           is: (val) => gearReqFields.distance.includes(val),
-          then: (schema) => schema.required(ValidationMessages.FieldRequired),
-          otherwise: (schema) => schema.nullable().notRequired(),
-        })
-        .when(['gear', 'u2'], {
-          is: (gear, u2) => u2 !== null && u2 !== '' && gear.startsWith('TL'),
           then: (schema) =>
-            schema.test({
-              test: (value, { parent: { u2 } }) => Number(value) < Number(u2),
+            schema.required(ValidationMessages.FieldRequired).test({
+              test: (value, { parent: { gear, u2 } }) => gear.startsWith('TL') && Number(value) < Number(u2),
               message: 'Value cannot be greater than U2 when the gear is trotline.',
             }),
           otherwise: (schema) => schema.nullable().notRequired(),
