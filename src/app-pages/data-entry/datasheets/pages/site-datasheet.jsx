@@ -7,6 +7,7 @@ import DataHeader from '../components/dataHeader';
 
 import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
+import SearchDraftDsTable from '../../edit-data-sheet/forms/search-effort/searchDraftDsTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 
 const SiteDatasheet = connect(
@@ -75,6 +76,10 @@ const SiteDatasheet = connect(
                 {
                   title: `Search Effort (${searchEffortSitesDatasheetTotalResults})`,
                   content: <SearchDsTable />,
+                },
+                {
+                  title: `Drafts`,
+                  content: <SearchDraftDsTable />,
                 },
               ]}
               onTabChange={(_str, ind) => setCurrentTab(ind)}

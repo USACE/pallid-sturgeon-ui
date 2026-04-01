@@ -1,0 +1,354 @@
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { connect } from 'redux-bundler-react';
+
+import { yupResolver } from '@hookform/resolvers/yup';
+import { FormProvider, useForm } from 'react-hook-form';
+import TextInput from '@src/app-components/new-inputs/text-input/TextInput';
+import SelectInput from '@src/app-components/new-inputs/select-input/SelectInput';
+import { Button, Alert, Grid } from '@trussworks/react-uswds';
+
+import { searchTypeOptions } from '../_shared/selectHelper';
+import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
+
+import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEffortDataEntryForm.validation';
+import classNames from 'classnames';
+import { filterNullEmptyObjects } from '@src/utils/helpers';
+
+const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
+
+const isEmpty = (obj) => Object.keys(obj).length === 0;
+
+const SearchEffortDataEntryForm = connect(
+  'doSaveSearchDataEntry',
+  'doUpdateSearchDataEntry',
+  'doUpdateCurrentTab',
+  'doResetTelemetryDataEntries',
+  'selectDataEntryData',
+  'selectDataEntryTelemetryTotalCount',
+  'selectRouteParams',
+  'selectIsEditForm',
+  ({
+    doSaveSearchDataEntry,
+    doUpdateSearchDataEntry,
+    doUpdateCurrentTab,
+    doResetTelemetryDataEntries,
+    dataEntryData,
+    dataEntryTelemetryTotalCount,
+    routeParams,
+    isEditForm,
+  }) => {
+    const siteId = routeParams?.siteId;
+    const defaultValues = useMemo(
+      () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
+      [dataEntryData?.siteId, dataEntryTelemetryTotalCount]
+    );
+    const schema = getSearchEffortSchema();
+    const [isDraftSave, setIsDraftSave] = useState(false);
+
+    const methods = useForm({
+      defaultValues: {
+        ...getSearchEffortDefaultValues({ dataEntryData }),
+        telemetryCount: Number(dataEntryTelemetryTotalCount || 0),
+      },
+      resolver: yupResolver(schema),
+      mode: 'onSubmit',
+      reValidateMode: 'onChange',
+      stateOptions: [],
+    });
+
+    const {
+      formState: { errors, isValid, touchedFields, submitCount, isDirty },
+      setFocus,
+      watch,
+      getValues,
+      setValue,
+      trigger,
+      reset,
+      handleSubmit,
+      clearErrors,
+    } = methods;
+
+    const isTouched = Object.keys(touchedFields).length > 0;
+    const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
+
+    const searchTypeCode = watch('searchTypeCode');
+    const telemetryCount = watch(Number(watch('telemetryCount') || 0));
+    const hasTelemetry = telemetryCount > 0;
+
+    const generateSeFid = (queueLength = 0) => {
+      const now = new Date();
+
+      const date =
+        now.getFullYear().toString() +
+        String(now.getMonth() + 1).padStart(2, '0') +
+        String(now.getDate()).padStart(2, '0');
+
+      const time =
+        String(now.getHours()).padStart(2, '0') +
+        String(now.getMinutes()).padStart(2, '0') +
+        String(now.getSeconds()).padStart(2, '0') +
+        String(now.getMilliseconds()).padStart(3, '0');
+
+      const sequence = String(queueLength + 1).padStart(3, '0');
+
+      return `${date}-${time}-${sequence}`;
+    };
+
+    const getTelemetryWarning = () => {
+      if (Number(dataEntryTelemetryTotalCount || 0) === 0) {
+        return 'Telemetry fish must have a value';
+      }
+      return;
+    };
+
+    useEffect(() => {
+      const count = Number(dataEntryTelemetryTotalCount || 0);
+
+      setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
+      if (count > 0) {
+        clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
+
+        setTimeout(() => {
+          trigger(['stopTime', 'stopLatitude', 'stopLongitude']);
+        }, 0);
+      }
+    }, [dataEntryTelemetryTotalCount, setValue, trigger, clearErrors]);
+
+    useEffect(() => {
+      reset(defaultValues);
+    }, [reset, defaultValues]);
+
+    const prevIsEditFormRef = useRef(isEditForm);
+
+    useEffect(() => {
+      const prevIsEditForm = prevIsEditFormRef.current;
+
+      if (!isEditForm && prevIsEditForm !== false) {
+        doResetTelemetryDataEntries();
+      }
+
+      prevIsEditFormRef.current = isEditForm;
+    }, [isEditForm, doResetTelemetryDataEntries]);
+
+    useEffect(() => {
+      if (!isEditForm) {
+        const queueLength = 0; // replace with outbox length later
+
+        const seFid = generateSeFid(queueLength);
+        setValue('seFid', seFid);
+      } else if (isEditForm && dataEntryData) {
+        setValue('seId', dataEntryData.seId);
+        setValue('seFid', dataEntryData.seFid);
+      }
+    }, [isEditForm, dataEntryData, setValue]);
+
+    useEffect(() => {
+      if (Object.keys(errors).length > 0) {
+        setFocus(Object.keys(errors)[0]);
+      }
+    }, [errors, setFocus]);
+
+    useEffect(() => {
+      const handleBeforeUnload = (e) => {
+        if (isDirty) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }, [isDirty]);
+
+    // const confirmLeave = () => {
+    //   if (isDirty) {
+    //     const confirm = window.confirm('You have unsaved changes. Data will not be saved. Continue?');
+    //     return confirm;
+    //   }
+    //   return true;
+    // };
+
+    const getCastedValues = () => {
+      const values = getValues();
+
+      return {
+        ...values,
+        startLatitude: values.startLatitude !== '' ? Number(values.startLatitude) : values.startLatitude,
+        startLongitude: values.startLongitude !== '' ? Number(values.startLongitude) : values.startLongitude,
+        stopLatitude: values.stopLatitude !== '' ? Number(values.stopLatitude) : values.stopLatitude,
+        stopLongitude: values.stopLongitude !== '' ? Number(values.stopLongitude) : values.stopLongitude,
+        temp: values.temp !== '' ? Number(values.temp) : values.temp,
+        conductivity: values.conductivity !== '' ? Number(values.conductivity) : values.conductivity,
+
+        siteId: values.siteId !== undefined && values.siteId !== '' ? Number(values.siteId) : Number(siteId),
+        dsId: values.dsId ?? 1,
+      };
+    };
+
+    const doSaveDraft = async () => {
+      const valid = await trigger();
+      if (!valid) return;
+
+      const payload = filterNullEmptyObjects({
+        ...getCastedValues(),
+        status: 1,
+      });
+
+      if (isEditForm) {
+        doUpdateSearchDataEntry(payload, () => {
+          // doUpdateCurrentTab(1);
+        });
+      } else {
+        doSaveSearchDataEntry(payload, (val) => {
+          if (val) setValue('seId', val);
+          // doUpdateCurrentTab(1);
+        });
+      }
+    };
+
+    const doFinalSave = async () => {
+      setValue('status', 2);
+      const valid = await trigger();
+      if (!valid) return;
+
+      const payload = filterNullEmptyObjects({
+        ...getCastedValues(),
+        status: 2,
+      });
+
+      if (isEditForm) {
+        doUpdateSearchDataEntry(payload);
+      } else {
+        doSaveSearchDataEntry(payload);
+      }
+    };
+
+    // const showStopWarning = Number(dataEntryTelemetryTotalCount || 0) > 0;
+
+    return (
+      <FormProvider {...methods}>
+        {isShowErrorSummary && <ErrorSummary errors={errors} type='form' isValid={isValid} />}
+        <>
+          <Grid row gap='md' className='padding-bottom-3'>
+            <Grid tablet={{ col: 3 }}>
+              <TextInput name='seId' label='SE ID' readOnly />
+            </Grid>
+            <Grid tablet={{ col: 3 }}>
+              <TextInput name='seFid' label='SE Field ID (Date-Time-SE#)' readOnly />
+            </Grid>
+            {!hasTelemetry && (
+              <Grid tablet={{ col: 2 }}>
+                <Button className={saveBtnClasses} onClick={handleSubmit(doSaveDraft)} type='button'>
+                  Save as Draft
+                </Button>
+              </Grid>
+            )}
+            {hasTelemetry && (
+              <Grid tablet={{ col: 2 }}>
+                <Button className={saveBtnClasses} onClick={doFinalSave} type='button'>
+                  Submit
+                </Button>
+              </Grid>
+            )}
+          </Grid>
+          <Grid row gap='md' className='padding-bottom-3'>
+            <Grid tablet={{ col: 2 }}>
+              <TextInput name='searchDate' label='Search Date' type='date' required />
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <TextInput name='recorder' label='Recorder Initials' required />
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <SelectInput name='searchTypeCode' label='Search Type' required>
+                {(typeof searchTypeOptions === 'function' ? searchTypeOptions(searchTypeCode) : searchTypeOptions).map(
+                  (opt, idx) => (
+                    <option key={idx + 1} value={opt.value}>
+                      {opt.text}
+                    </option>
+                  )
+                )}
+              </SelectInput>
+              {searchTypeCode === 'RS' && (
+                <Grid tablet={{ col: 12 }}>
+                  <TextInput name='day' label='Day' type='date' required />
+                </Grid>
+              )}
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <TextInput name='temp' label='Temp (C)' type='number' />
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <TextInput name='conductivity' label='Conductivity' type='number' />
+            </Grid>
+          </Grid>
+
+          <Grid row gap='md' className='padding-bottom-3'>
+            <Grid tablet={{ col: 2 }}>
+              <TextInput name='startTime' label='Start Time (hh:mm:ss)' required />
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <TextInput name='startLatitude' type='number' label='Start Latitude' required />
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <TextInput name='startLongitude' type='number' label='Start Longitude' required />
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <TextInput
+                name='stopTime'
+                label='Stop Time (hh:mm:ss)'
+                required={hasTelemetry}
+                disabled={!hasTelemetry}
+                warning={!hasTelemetry ? getTelemetryWarning() : ''}
+              />
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <TextInput
+                name='stopLatitude'
+                type='number'
+                label='Stop Latitude'
+                required={hasTelemetry}
+                disabled={!hasTelemetry}
+                warning={!hasTelemetry ? getTelemetryWarning() : ''}
+              />
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <TextInput
+                name='stopLongitude'
+                type='number'
+                label='Stop Longitude'
+                required={hasTelemetry}
+                disabled={!hasTelemetry}
+                warning={!hasTelemetry ? getTelemetryWarning() : ''}
+              />
+            </Grid>
+          </Grid>
+          {/* Warning */}
+
+          {/* <Grid tablet={{ col: 2 }}>
+            <Grid row gap='md'>
+              <Grid tablet={{ col: 12 }}>
+                <Button className={saveBtnClasses} onClick={() => doSave()} type='button'>
+                  {isEditForm ? 'Apply Changes' : 'Save as Draft'}
+                </Button>
+              </Grid>
+            </Grid>
+          </Grid> */}
+        </>
+      </FormProvider>
+    );
+  }
+);
+
+export default SearchEffortDataEntryForm;
