@@ -34,6 +34,7 @@ const SearchEffortDataEntryForm = connect(
   'selectDataEntryTelemetryTotalCount',
   'selectRouteParams',
   'selectIsEditForm',
+  'selectLookupData',
   ({
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
@@ -43,7 +44,11 @@ const SearchEffortDataEntryForm = connect(
     dataEntryTelemetryTotalCount,
     routeParams,
     isEditForm,
+    lookupData,
   }) => {
+    const { searchTypeCodes } = lookupData;
+    console.log('Search type:', searchTypeCodes);
+    console.log('How is it catching?:', searchTypeCodes[2].code);
     const siteId = routeParams?.siteId;
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
@@ -51,6 +56,7 @@ const SearchEffortDataEntryForm = connect(
     );
     const schema = getSearchEffortSchema();
     const [isDraftSave, setIsDraftSave] = useState(false);
+    const [selectedSearchType, setSelectedSearchType] = useState('');
 
     const methods = useForm({
       defaultValues: {
@@ -317,16 +323,19 @@ const SearchEffortDataEntryForm = connect(
             </Grid>
 
             <Grid tablet={{ col: 2 }}>
-              <SelectInput name='searchTypeCode' label='Search Type' required>
-                {(typeof searchTypeOptions === 'function' ? searchTypeOptions(searchTypeCode) : searchTypeOptions).map(
-                  (opt, idx) => (
-                    <option key={idx + 1} value={opt.value}>
-                      {opt.text}
-                    </option>
-                  )
-                )}
+              <SelectInput
+                name='searchTypeCode'
+                label='Search Type'
+                onChange={(e) => setSelectedSearchType(e.target.value)}
+                required
+              >
+                {searchTypeCodes.map((opt, idx) => (
+                  <option key={idx + 1} value={opt.code}>
+                    {opt.code}
+                  </option>
+                ))}
               </SelectInput>
-              {searchTypeCode === 'RS' && (
+              {selectedSearchType === 'RS' && (
                 <Grid tablet={{ col: 12 }}>
                   <TextInput name='day' label='Day' type='date' required />
                 </Grid>
