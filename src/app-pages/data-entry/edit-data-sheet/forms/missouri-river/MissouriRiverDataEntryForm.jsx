@@ -18,6 +18,7 @@ import {
 } from './MissouriRiverDataEntryForm.validation';
 import { filterNullEmptyObjects, formatCoordFlt } from '@src/utils/helpers';
 import Checkbox from '@src/app-components/check-box/Checkbox';
+import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 
 import '../../../dataentry.scss';
 
@@ -39,10 +40,19 @@ const createDropdownOptions = (data) => {
 const isEmpty = (obj) => Object.keys(obj).length === 0;
 
 const removeDuplicates = (arr) => {
-  const serializedArray = arr.map(JSON.stringify);
-  const uniqueSet = new Set(serializedArray);
-  const uniqueArray = Array.from(uniqueSet).map(JSON.parse);
-  return uniqueArray.sort((a, b) => a.code - b.code);
+  const serializedArray = arr?.map(JSON.stringify) ?? [];
+  if (serializedArray?.length > 0) {
+    const uniqueSet = new Set(serializedArray);
+    const uniqueArray = Array.from(uniqueSet)?.map(JSON.parse);
+    return uniqueArray?.sort((a, b) => a.code - b.code) ?? [];
+  }
+  return [];
+};
+
+const GPS_OPTIONS = {
+  enableHighAccuracy: true,
+  timeout: 15000,
+  maximumAge: 0,
 };
 
 const MissouriRiverDataEntryForm = connect(
@@ -75,6 +85,7 @@ const MissouriRiverDataEntryForm = connect(
       subsampleTypes,
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
+
     const [gearCodeOptions, setGearCodeOptions] = useState(gearCodes);
     const [mesoOptions, setMesoOptions] = useState(mesos);
     const [structureFlowOptions, setStructureFlowOptions] = useState([]);
@@ -202,6 +213,52 @@ const MissouriRiverDataEntryForm = connect(
       handleSubmit,
     } = methods;
 
+    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
+
+    const fmtTimeHHMMSS = (val) => {
+      const d = val ? new Date(val) : new Date();
+
+      if (Number.isNaN(d.getTime())) {
+        console.error('Invalid date:', val);
+        return '';
+      }
+
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+    };
+
+    const handleCaptureStart = async () => {
+      try {
+        const { best } = await captureBestOf(5, 700);
+
+        setValue('startLatitude', best.lat, { shouldValidate: true });
+        setValue('startLongitude', best.lng, { shouldValidate: true });
+        setValue('startTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+
+        window.alert(`Captured START\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+      } catch (e) {
+        console.error(e);
+        window.alert(`GPS capture failed: ${e?.message || e}`);
+      }
+    };
+
+    const handleCaptureStop = async () => {
+      try {
+        const { best } = await captureBestOf(5, 700);
+
+        setValue('stopLatitude', best.lat, { shouldValidate: true });
+        setValue('stopLongitude', best.lng, { shouldValidate: true });
+        setValue('stopTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+
+        window.alert(`Captured STOP\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+      } catch (e) {
+        console.error(e);
+        window.alert(`GPS capture failed: ${e?.message || e}`);
+      }
+    };
+
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
 
@@ -268,7 +325,6 @@ const MissouriRiverDataEntryForm = connect(
           depth1: parseFloat(values?.depth1),
           depth2: parseFloat(values?.depth2),
           depth3: parseFloat(values?.depth3),
-          distance: parseFloat(values?.distance),
           startLatitude: formatCoordFlt(values.startLatitude) ?? '',
           startLongitude: formatCoordFlt(values.startLongitude) ?? '',
           stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
@@ -353,44 +409,12 @@ const MissouriRiverDataEntryForm = connect(
         setValue('deploymentType', gearCodes.filter((gear) => gear.code === gearCode)?.[0]?.deploymentType);
         if (gearCode === 'TLC1') {
           setValue('distance', 20, { shouldValidate: true });
-        } else if (gearCode === 'TLC2') {
+        }
+        if (gearCode === 'TLC2') {
           setValue('distance', 40, { shouldValidate: true });
         }
       }
     }, [gearCode]);
-
-    // Reset values when fields are readOnly
-    useEffect(() => {
-      if (gearType === 'S') {
-        if (!gearReqFields.distance.includes(gearCode)) {
-          setValue('distance', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.depth1.includes(gearCode)) {
-          setValue('depth1', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.depth2.includes(gearCode)) {
-          setValue('depth2', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.depth3.includes(gearCode)) {
-          setValue('depth3', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocitybot1.includes(gearCode)) {
-          setValue('velocitybot1', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocity081.includes(gearCode) && (depth2 !== null || depth2 !== '' || depth2 < 1.2)) {
-          setValue('velocity081', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocitybot2.includes(gearCode)) {
-          setValue('velocitybot2', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocity082.includes(gearCode) && (depth2 !== null || depth2 !== '' || depth2 < 1.2)) {
-          setValue('velocity082', '', { shouldValidate: true });
-        }
-        if (!gearReqFields.velocity02or062.includes(gearCode)) {
-          setValue('velocity02or062', '', { shouldValidate: true });
-        }
-      }
-    }, [depth2, gearType, gearCode]);
 
     // Populate Gear Code Dropdown Value from Existing API Data
     useEffect(() => {
@@ -696,6 +720,11 @@ const MissouriRiverDataEntryForm = connect(
                     required
                   />
                 </Grid>
+                <Grid row gap='md' table={{ col: 3 }}>
+                  <Button onClick={handleCaptureStart} type='button'>
+                    Capture Start GPS
+                  </Button>
+                </Grid>
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }}>
@@ -760,7 +789,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLatitude'
                     label='Stop Latitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
                   />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>
@@ -768,8 +797,13 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLongitude'
                     label='Stop Longitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
                   />
+                </Grid>
+                <Grid row gap='md' table={{ col: 3 }}>
+                  <Button onClick={handleCaptureStop} type='button'>
+                    Capture Stop GPS
+                  </Button>
                 </Grid>
               </Grid>
             </Grid>

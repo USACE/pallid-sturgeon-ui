@@ -249,10 +249,7 @@ const DataEntryTable = ({
             </thead>
             <tbody style={{ width: table.getTotalSize() }}>
               {table.getRowModel()?.rows?.length === 0 && (
-                <EmptyTableRow
-                  onAddClick={placeholderClick}
-                  placeholderText={placeholderText}
-                />
+                <EmptyTableRow onAddClick={placeholderClick} placeholderText={placeholderText} />
               )}
               {table.getRowModel()?.rows?.map((row) => (
                 <tr

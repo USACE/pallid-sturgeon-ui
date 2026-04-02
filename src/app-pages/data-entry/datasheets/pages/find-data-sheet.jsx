@@ -56,6 +56,7 @@ const FindDataSheet = connect(
         fieldId,
         geneticsVial,
         id: userRole.id,
+        status: 2,
       };
 
       switch (dataSheetType) {
