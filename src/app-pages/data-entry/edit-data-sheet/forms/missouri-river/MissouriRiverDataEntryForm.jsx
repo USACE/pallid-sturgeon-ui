@@ -40,10 +40,13 @@ const createDropdownOptions = (data) => {
 const isEmpty = (obj) => Object.keys(obj).length === 0;
 
 const removeDuplicates = (arr) => {
-  const serializedArray = arr.map(JSON.stringify);
-  const uniqueSet = new Set(serializedArray);
-  const uniqueArray = Array.from(uniqueSet).map(JSON.parse);
-  return uniqueArray.sort((a, b) => a.code - b.code);
+  const serializedArray = arr?.map(JSON.stringify) ?? [];
+  if (serializedArray?.length > 0) {
+    const uniqueSet = new Set(serializedArray);
+    const uniqueArray = Array.from(uniqueSet)?.map(JSON.parse);
+    return uniqueArray?.sort((a, b) => a.code - b.code) ?? [];
+  }
+  return [];
 };
 
 const GPS_OPTIONS = {
