@@ -8,6 +8,7 @@ import DataHeader from '../components/dataHeader';
 import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
 import SearchDraftDsTable from '../../edit-data-sheet/forms/search-effort/searchDraftDsTable';
+import SearchDraftDsTable from '../../edit-data-sheet/forms/search-effort/searchDraftDsTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 
 const SiteDatasheet = connect(
