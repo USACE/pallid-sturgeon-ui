@@ -69,7 +69,9 @@ const TelemetryDataEntry = connect(
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
 
-    const defaultValues = { seId: dataEntryLastParams.seId };
+    const defaultValues = { seId: dataEntryLastParams?.seId };
+    console.log('Data Entry Last params:', dataEntryLastParams);
+    console.log('Is it getting seId?:', dataEntryLastParams?.seId);
 
     useEffect(() => {
       if (items) {
@@ -95,6 +97,8 @@ const TelemetryDataEntry = connect(
       trigger,
       reset,
     } = methods;
+
+    console.warn('Check errors:', errors);
 
     const tableColumns = useMemo(
       () => [
@@ -163,7 +167,7 @@ const TelemetryDataEntry = connect(
               className={saveBtnClasses}
               onClick={() => {
                 const computedValues = {
-                  captureDate: 'captureDate',
+                  captureTime: 'captureTime',
                   captureLatitude: 'captureLatitude',
                   captureLongitude: 'captureLongitude',
                 };
@@ -176,7 +180,7 @@ const TelemetryDataEntry = connect(
           ),
           size: 200,
         }),
-        columnHelper.accessor('captureDate', {
+        columnHelper.accessor('captureTime', {
           header: 'Capture Time',
           cell: TableCell,
           size: 200,
@@ -317,7 +321,8 @@ const TelemetryDataEntry = connect(
       const base = getBaseDefaultValues({ baseData });
       const newRowData = {
         ...base,
-        countF: 1,
+        ...defaultValues,
+        // countF: 1,
       };
       setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
     };
@@ -377,7 +382,8 @@ const TelemetryDataEntry = connect(
     const handleSubmitAll = async () => {
       try {
         for (let i = 0; i < data.length; i++) {
-          await telemetryDataEntrySchema.validate(data, { abortEarly: false });
+          console.log('Indexed Data:', data[i]);
+          await telemetryDataEntrySchema.validate(data[i], { abortEarly: false });
         }
 
         await doSaveTelemetryDataEntry(data);
