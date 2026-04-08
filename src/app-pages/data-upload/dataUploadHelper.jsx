@@ -99,6 +99,7 @@ export const formatAsNumber = (value, _header) => {
     'dststarttime',
     'geneticsvialnumber',
     'capturedate',
+    'serialnum',
   ];
   if (typeof value === 'string' && value.length === 0) {
     return null;
@@ -111,7 +112,8 @@ export const formatAsNumber = (value, _header) => {
 
 // Validation function
 const isInvalidCell = (value) => {
-  if (typeof value !== 'string' && Number(value)) return false;
+  if ((typeof value !== 'string' && Number(value)) || (value === null && value === undefined) || value === 0)
+    return false;
 
   const normalized = value?.trim();
   const startsWithFormula = /^=[+-]/.test(normalized); // =- or =+
