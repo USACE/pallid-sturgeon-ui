@@ -9,7 +9,7 @@ import Select from '@components/select';
 import Breadcrumb from '@src/app-components/breadcrumb';
 
 import { keyAsText } from '@src/utils';
-import { getIsRequired, reduceCsvState, formatAsNumber, formatJsonKey, validateCell } from './dataUploadHelper';
+import { getIsRequired, reduceCsvState, formatAsNumber, formatJsonKey } from './dataUploadHelper';
 
 import './dataupload.scss';
 
@@ -56,18 +56,7 @@ export default connect(
 
       if (file) {
         Papa.parse(file, {
-          complete: (result) => {
-            try {
-              result?.data?.forEach((row) => {
-                Object.entries(row).forEach(([col, cell]) => {
-                  validateCell(cell, col);
-                });
-              });
-              dispatch({ type: 'update', key, data: result.data });
-            } catch (err) {
-              console.error('Validation error:', err.message);
-            }
-          },
+          complete: (result) => dispatch({ type: 'update', key, data: result.data }),
           transformHeader: formatJsonKey,
           transform: formatAsNumber,
           skipEmptyLines: true,
