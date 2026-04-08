@@ -277,6 +277,7 @@ const SearchEffortDataEntryForm = connect(
               <TextInput
                 name='recorder'
                 label='Recorder Initials'
+                maxLength={3}
                 style={{ textTransform: 'uppercase' }}
                 onChange={handleChange}
                 required

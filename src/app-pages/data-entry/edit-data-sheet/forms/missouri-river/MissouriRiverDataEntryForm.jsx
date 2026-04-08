@@ -19,35 +19,16 @@ import {
 import { filterNullEmptyObjects, formatCoordFlt } from '@src/utils/helpers';
 import Checkbox from '@src/app-components/check-box/Checkbox';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
+import {
+  createDropdownOptions,
+  fmtTimeHHMMSS,
+  isEmpty,
+  removeDuplicates,
+} from '@src/app-pages/data-entry/dataEntryHelper';
 
 import '../../../dataentry.scss';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
-
-const createDropdownOptions = (data) => {
-  if (!data) return [];
-
-  return data.map((item) => {
-    const { code, description } = item;
-
-    return {
-      value: code,
-      text: description,
-    };
-  });
-};
-
-const isEmpty = (obj) => Object.keys(obj).length === 0;
-
-const removeDuplicates = (arr) => {
-  const serializedArray = arr?.map(JSON.stringify) ?? [];
-  if (serializedArray?.length > 0) {
-    const uniqueSet = new Set(serializedArray);
-    const uniqueArray = Array.from(uniqueSet)?.map(JSON.parse);
-    return uniqueArray?.sort((a, b) => a.code - b.code) ?? [];
-  }
-  return [];
-};
 
 const GPS_OPTIONS = {
   enableHighAccuracy: true,
@@ -63,6 +44,7 @@ const MissouriRiverDataEntryForm = connect(
   'selectDataEntryData',
   'selectLookupData',
   ({ doUpdateBaseData, doAddMoRiverDataEntry, doUpdateMoRiverDataEntry, baseData, dataEntryData, lookupData }) => {
+    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
     const {
       bendRiverMile,
       bendSelections,
@@ -93,7 +75,7 @@ const MissouriRiverDataEntryForm = connect(
     const [ss1Options, setSs1Options] = useState([]);
     const [ss2Options, setSs2Options] = useState([]);
 
-    const newForm = dataEntryData?.mrId ? true : false;
+    const newForm = !!dataEntryData.mrId;
 
     const ss3Options = removeDuplicates(
       setSite3Options?.map((item) => ({
@@ -213,23 +195,8 @@ const MissouriRiverDataEntryForm = connect(
       handleSubmit,
     } = methods;
 
-    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
-
-    const fmtTimeHHMMSS = (val) => {
-      const d = val ? new Date(val) : new Date();
-
-      if (Number.isNaN(d.getTime())) {
-        console.error('Invalid date:', val);
-        return '';
-      }
-
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      const ss = String(d.getSeconds()).padStart(2, '0');
-      return `${hh}:${mm}:${ss}`;
-    };
-
-    const handleCaptureStart = async () => {
+    // Capture Start and Stop Lat, Long, Time
+    const handleCapture = async (type) => {
       try {
         const { best } = await captureBestOf(5, 700);
 
@@ -237,22 +204,9 @@ const MissouriRiverDataEntryForm = connect(
         setValue('startLongitude', best.lng, { shouldValidate: true });
         setValue('startTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
 
-        window.alert(`Captured START\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
-      } catch (e) {
-        console.error(e);
-        window.alert(`GPS capture failed: ${e?.message || e}`);
-      }
-    };
-
-    const handleCaptureStop = async () => {
-      try {
-        const { best } = await captureBestOf(5, 700);
-
-        setValue('stopLatitude', best.lat, { shouldValidate: true });
-        setValue('stopLongitude', best.lng, { shouldValidate: true });
-        setValue('stopTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
-
-        window.alert(`Captured STOP\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+        window.alert(
+          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+        );
       } catch (e) {
         console.error(e);
         window.alert(`GPS capture failed: ${e?.message || e}`);
@@ -264,7 +218,6 @@ const MissouriRiverDataEntryForm = connect(
 
     const deploymentType = watch('deploymentType');
     const macro = watch('macro');
-    const meso = watch('meso');
     const gearCode = watch('gear');
     const gearType = watch('gearType');
     const subsamplepass = watch('subsamplepass');
@@ -282,7 +235,6 @@ const MissouriRiverDataEntryForm = connect(
     const depth3 = watch('depth3');
     const velocitybot1 = watch('velocitybot1');
     const velocity081 = watch('velocity081');
-    const u2 = watch('u2');
     const u7 = watch('u7');
 
     const isStartTimeDisabled =
@@ -308,11 +260,13 @@ const MissouriRiverDataEntryForm = connect(
 
     const handleChange = (e) => {
       const name = e?.target?.name;
-      trigger(name);
+      const val = e?.target?.value;
 
-      if (name === 'distance') {
-        trigger('u2');
+      if (name === 'recorder') {
+        setValue('recorder', val?.toUpperCase());
       }
+
+      trigger(name);
     };
 
     const handleSave = () => {
@@ -325,6 +279,7 @@ const MissouriRiverDataEntryForm = connect(
           depth1: parseFloat(values?.depth1),
           depth2: parseFloat(values?.depth2),
           depth3: parseFloat(values?.depth3),
+          distance: parseFloat(values?.distance),
           startLatitude: formatCoordFlt(values.startLatitude) ?? '',
           startLongitude: formatCoordFlt(values.startLongitude) ?? '',
           stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
@@ -339,7 +294,7 @@ const MissouriRiverDataEntryForm = connect(
         };
         // Filter out any null/empty values for final payload
         const payload = filterNullEmptyObjects(dataObj);
-        dataEntryData?.mrId ? doUpdateMoRiverDataEntry(payload) : doAddMoRiverDataEntry(payload);
+        newForm ? doUpdateMoRiverDataEntry(payload) : doAddMoRiverDataEntry(payload);
       } else {
         trigger();
       }
@@ -408,10 +363,10 @@ const MissouriRiverDataEntryForm = connect(
       if (gearCode) {
         setValue('deploymentType', gearCodes.filter((gear) => gear.code === gearCode)?.[0]?.deploymentType);
         if (gearCode === 'TLC1') {
-          setValue('distance', 20, { shouldValidate: true });
+          setValue('u2', 20, { shouldValidate: true });
         }
         if (gearCode === 'TLC2') {
-          setValue('distance', 40, { shouldValidate: true });
+          setValue('u2', 40, { shouldValidate: true });
         }
       }
     }, [gearCode]);
@@ -473,16 +428,6 @@ const MissouriRiverDataEntryForm = connect(
         }
       }
     }, [dataEntryData, ss2Options]);
-
-    useEffect(() => {
-      trigger('distance');
-    }, [u2]);
-
-    useEffect(() => {
-      trigger('depth1');
-      trigger('depth2');
-      trigger('depth3');
-    }, [meso]);
 
     // netrivermile in baseData
     useEffect(() => {
@@ -560,7 +505,14 @@ const MissouriRiverDataEntryForm = connect(
               </SelectInput>
             </Grid>
             <Grid tablet={{ col: 1 }}>
-              <TextInput name='recorder' label='Recorder' maxLength={3} onChange={handleChange} required />
+              <TextInput
+                name='recorder'
+                label='Recorder'
+                maxLength={3}
+                onChange={handleChange}
+                style={{ textTransform: 'uppercase' }}
+                required
+              />
             </Grid>
           </Grid>
 
@@ -721,7 +673,7 @@ const MissouriRiverDataEntryForm = connect(
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>
-                  <Button onClick={handleCaptureStart} type='button'>
+                  <Button onClick={() => handleCapture('start')} type='button'>
                     Capture Start GPS
                   </Button>
                 </Grid>
@@ -801,7 +753,7 @@ const MissouriRiverDataEntryForm = connect(
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>
-                  <Button onClick={handleCaptureStop} type='button'>
+                  <Button onClick={() => handleCapture('stop')} type='button'>
                     Capture Stop GPS
                   </Button>
                 </Grid>
@@ -887,6 +839,102 @@ const MissouriRiverDataEntryForm = connect(
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
+            <Grid tablet={{ col: 4 }} className='border-right'>
+              <Grid row gap='md'>
+                <Grid tablet={{ col: 4 }}>
+                  <TextInput
+                    name='velocitybot1'
+                    label='1-Velocity (bot)'
+                    onChange={handleChange}
+                    required={gearReqFields.velocitybot1.includes(gearCode)}
+                    readOnly={gearType === 'S' && !gearReqFields.velocitybot1.includes(gearCode)}
+                    type='number'
+                  />
+                </Grid>
+                <Grid tablet={{ col: 4 }}>
+                  <TextInput
+                    name='velocity081'
+                    label='1-Velocity (0.8 or 0.5)'
+                    onChange={handleChange}
+                    required={gearReqFields.velocity081.includes(gearCode) || depth2 >= 1.2}
+                    readOnly={
+                      gearType === 'S' &&
+                      !gearReqFields.velocity081.includes(gearCode) &&
+                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
+                    }
+                    type='number'
+                  />
+                </Grid>
+                <Grid tablet={{ col: 4 }}>
+                  <TextInput
+                    name='velocity02or061'
+                    label='1-Velocity (0.2 or 0.6)'
+                    type='number'
+                    onChange={handleChange}
+                    readOnly={gearType === 'S'}
+                  />
+                </Grid>
+              </Grid>
+              <Grid row gap='md'>
+                <Grid tablet={{ col: 4 }}>
+                  <TextInput
+                    name='velocitybot2'
+                    label='2-Velocity (bot)'
+                    onChange={handleChange}
+                    required={gearReqFields.velocitybot2.includes(gearCode)}
+                    readOnly={gearType === 'S' && !gearReqFields.velocitybot2.includes(gearCode)}
+                    type='number'
+                  />
+                </Grid>
+                <Grid tablet={{ col: 4 }}>
+                  <TextInput
+                    name='velocity082'
+                    label='2-Velocity (0.8 or 0.5)'
+                    onChange={handleChange}
+                    required={gearReqFields.velocity082.includes(gearCode) || depth2 >= 1.2}
+                    readOnly={
+                      gearType === 'S' &&
+                      !gearReqFields.velocity082.includes(gearCode) &&
+                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
+                    }
+                    type='number'
+                  />
+                </Grid>
+                <Grid tablet={{ col: 4 }}>
+                  <TextInput
+                    name='velocity02or062'
+                    label='2-Velocity (0.2 or 0.6)'
+                    onChange={handleChange}
+                    required={gearReqFields.velocity02or062.includes(gearCode)}
+                    readOnly={gearType === 'S' && !gearReqFields.velocity02or062.includes(gearCode)}
+                    type='number'
+                  />
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid tablet={{ col: 4 }}>
+              <Grid row gap='md'>
+                <Grid tablet={{ col: 5 }}>
+                  <TextInput name='cobble' label='Cobble' readOnly />
+                </Grid>
+                <Grid tablet={{ col: 5 }}>
+                  <TextInput name='silt' label='Silt' readOnly />
+                </Grid>
+              </Grid>
+              <Grid row gap='md'>
+                <Grid tablet={{ col: 5 }}>
+                  <TextInput name='organic' label='Organic' readOnly />
+                </Grid>
+                <Grid tablet={{ col: 5 }}>
+                  <TextInput name='sand' label='Sand' readOnly />
+                </Grid>
+              </Grid>
+              <Grid row gap='md'>
+                <Grid tablet={{ col: 5 }}>
+                  <TextInput name='gravel' label='Gravel' readOnly />
+                </Grid>
+              </Grid>
+            </Grid>
             <Grid tablet={{ col: 2 }}>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 6 }}>
@@ -902,101 +950,6 @@ const MissouriRiverDataEntryForm = connect(
               <Grid row gap='md'>
                 <Grid tablet={{ col: 12 }}>
                   <Checkbox disabled id='no-velocity' label='No Velocity' name='noVelocity' tile value='Y' />
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid tablet={{ col: 4 }} className='border-right'>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }} offset={1}>
-                  <TextInput name='cobble' label='Cobble' readOnly />
-                </Grid>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='silt' label='Silt' readOnly />
-                </Grid>
-              </Grid>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }} offset={1}>
-                  <TextInput name='organic' label='Organic' readOnly />
-                </Grid>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='sand' label='Sand' readOnly />
-                </Grid>
-              </Grid>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }} offset={6}>
-                  <TextInput name='gravel' label='Gravel' readOnly />
-                </Grid>
-              </Grid>
-            </Grid>
-            <Grid tablet={{ col: 6 }}>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput
-                    name='velocitybot1'
-                    label='1-Velocity (bot)'
-                    onChange={handleChange}
-                    required={gearReqFields.velocitybot1.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.velocitybot1.includes(gearCode)}
-                    type='number'
-                  />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput
-                    name='velocity081'
-                    label='1-Velocity (0.8 or 0.5)'
-                    onChange={handleChange}
-                    required={gearReqFields.velocity081.includes(gearCode) || depth2 >= 1.2}
-                    readOnly={
-                      gearType === 'S' &&
-                      !gearReqFields.velocity081.includes(gearCode) &&
-                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
-                    }
-                    type='number'
-                  />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput
-                    name='velocity02or061'
-                    label='1-Velocity (0.2 or 0.6)'
-                    type='number'
-                    onChange={handleChange}
-                  />
-                </Grid>
-              </Grid>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput
-                    name='velocitybot2'
-                    label='2-Velocity (bot)'
-                    onChange={handleChange}
-                    required={gearReqFields.velocitybot2.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.velocitybot2.includes(gearCode)}
-                    type='number'
-                  />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput
-                    name='velocity082'
-                    label='2-Velocity (0.8 or 0.5)'
-                    onChange={handleChange}
-                    required={gearReqFields.velocity082.includes(gearCode) || depth2 >= 1.2}
-                    readOnly={
-                      gearType === 'S' &&
-                      !gearReqFields.velocity082.includes(gearCode) &&
-                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
-                    }
-                    type='number'
-                  />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput
-                    name='velocity02or062'
-                    label='2-Velocity (0.2 or 0.6)'
-                    onChange={handleChange}
-                    required={gearReqFields.velocity02or062.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.velocity02or062.includes(gearCode)}
-                    type='number'
-                  />
                 </Grid>
               </Grid>
             </Grid>

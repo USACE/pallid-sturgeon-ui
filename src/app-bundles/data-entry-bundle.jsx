@@ -482,7 +482,7 @@ export default {
         if (!err && body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
-          store.doUpdateUrl('/sites-list/datasheet');
+          store.doUpdateUrl(`/sites-list/${formData?.siteId}`);
         } else {
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -566,9 +566,8 @@ export default {
             payload: { ...store.selectDataEntryLastParams(), seId: _body.data },
           });
           store.doFetchSearchDataEntry();
-          // store.doUpdateLastParams({ seId: _body?.data });
           store.doUpdateCurrentTab(1);
-          // store.doUpdateUrl('/sites-list/datasheet');
+          store.doUpdateUrl(`/sites-list/${formData?.siteId}`);
         } else {
           dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
