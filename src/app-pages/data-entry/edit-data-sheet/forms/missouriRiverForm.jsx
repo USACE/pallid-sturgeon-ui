@@ -214,7 +214,6 @@ const MissouriRiverForm = connect(
         setIsNoVelocity(dataEntryData?.noVelocity === 'Y' ? true : false);
       } else {
         // Reset data if adding new Missouri River datasheet
-        doResetMoRiverDataEntryData();
         handleSelect('siteId', siteId);
       }
     }, [isEditForm, dataEntryData]);

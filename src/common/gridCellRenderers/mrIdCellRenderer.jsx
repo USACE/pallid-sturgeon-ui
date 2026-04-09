@@ -4,9 +4,18 @@ import Button from '@components/button';
 
 const MrIdCellRenderer = connect(
   'doFetchMoRiverDataEntry',
+  'doResetMoRiverDataEntryData',
   'doUpdateCurrentTab',
   'doUpdateComplexStateField',
-  ({ doFetchMoRiverDataEntry, doUpdateCurrentTab, doUpdateComplexStateField, data, type, tab = 0 }) => {
+  ({
+    doFetchMoRiverDataEntry,
+    doResetMoRiverDataEntryData,
+    doUpdateCurrentTab,
+    doUpdateComplexStateField,
+    data,
+    type,
+    tab = 0,
+  }) => {
     const mrId = type === 'home' ? data.mrID : data.mrId;
     const typeText = {
       missouriRiver: data.mrId,
@@ -19,6 +28,7 @@ const MrIdCellRenderer = connect(
     const handleClick = () => {
       doUpdateCurrentTab(tab);
       doUpdateComplexStateField({ name: 'isEditForm', value: true });
+      doResetMoRiverDataEntryData();
       doFetchMoRiverDataEntry({ tableId: mrId }, false, true, true);
     };
 
