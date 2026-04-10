@@ -2,6 +2,7 @@ import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { decimalNumberRegex } from '@src/utils/regex';
 import Select from 'react-select';
 import { hasValueChanged } from './tableCellHelper';
+import { hasValueChanged } from './tableCellHelper';
 
 const debounce = (func, wait) => {
   let timeout;
@@ -61,7 +62,10 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
     if (hasValueChanged(valueBeforeBlur, blurValue)) {
       // @TODO: handle any data formatting
       // Clear field if value is 0 or is a negative number
-      if (String(blurValue) === '0' && column.id !== 'longitude' && column.id !== 'latitude') {
+      if (
+        String(blurValue) === '0' ||
+        (String(blurValue)[0] === '-' && column.id !== 'longitude' && column.id !== 'latitude')
+      ) {
         setValue('');
         updateValue('');
       }

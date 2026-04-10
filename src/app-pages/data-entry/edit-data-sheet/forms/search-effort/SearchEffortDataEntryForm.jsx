@@ -1,49 +1,57 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
 import TextInput from '@src/app-components/new-inputs/text-input/TextInput';
 import SelectInput from '@src/app-components/new-inputs/select-input/SelectInput';
-import { Button, Alert, Grid } from '@trussworks/react-uswds';
-
-import { searchTypeOptions } from '../_shared/selectHelper';
+import { Button, Grid } from '@trussworks/react-uswds';
 import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 
 import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEffortDataEntryForm.validation';
 import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
+import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
+import { createDropdownOptions, fmtTimeHHMMSS, generateFieldId } from '../../../dataEntryHelper';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
 const isEmpty = (obj) => Object.keys(obj).length === 0;
 
+const GPS_OPTIONS = {
+  enableHighAccuracy: true,
+  timeout: 15000,
+  maximumAge: 0,
+};
+
 const SearchEffortDataEntryForm = connect(
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
-  'doUpdateCurrentTab',
   'doResetTelemetryDataEntries',
   'selectDataEntryData',
   'selectDataEntryTelemetryTotalCount',
   'selectRouteParams',
   'selectIsEditForm',
+  'selectLookupData',
   ({
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
-    doUpdateCurrentTab,
     doResetTelemetryDataEntries,
     dataEntryData,
     dataEntryTelemetryTotalCount,
     routeParams,
     isEditForm,
+    lookupData,
   }) => {
+    const prevIsEditFormRef = useRef(isEditForm);
     const siteId = routeParams?.siteId;
+    const { searchTypes } = lookupData;
+
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
       [dataEntryData?.siteId, dataEntryTelemetryTotalCount]
     );
     const schema = getSearchEffortSchema();
-    const [isDraftSave, setIsDraftSave] = useState(false);
 
     const methods = useForm({
       defaultValues: {
@@ -68,31 +76,15 @@ const SearchEffortDataEntryForm = connect(
       clearErrors,
     } = methods;
 
-    const isTouched = Object.keys(touchedFields).length > 0;
-    const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
+    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
+
+    console.warn('values: ', getValues());
 
     const searchTypeCode = watch('searchTypeCode');
     const telemetryCount = watch(Number(watch('telemetryCount') || 0));
     const hasTelemetry = telemetryCount > 0;
 
-    const generateSeFid = (queueLength = 0) => {
-      const now = new Date();
-
-      const date =
-        now.getFullYear().toString() +
-        String(now.getMonth() + 1).padStart(2, '0') +
-        String(now.getDate()).padStart(2, '0');
-
-      const time =
-        String(now.getHours()).padStart(2, '0') +
-        String(now.getMinutes()).padStart(2, '0') +
-        String(now.getSeconds()).padStart(2, '0') +
-        String(now.getMilliseconds()).padStart(3, '0');
-
-      const sequence = String(queueLength + 1).padStart(3, '0');
-
-      return `${date}-${time}-${sequence}`;
-    };
+    const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
     const getTelemetryWarning = () => {
       if (Number(dataEntryTelemetryTotalCount || 0) === 0) {
@@ -101,81 +93,38 @@ const SearchEffortDataEntryForm = connect(
       return;
     };
 
-    useEffect(() => {
-      const count = Number(dataEntryTelemetryTotalCount || 0);
+    // Capture Start and Stop Lat, Long, Time
+    const handleCapture = async (type) => {
+      try {
+        const { best } = await captureBestOf(5, 700);
 
-      setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
-      if (count > 0) {
-        clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
+        setValue('startLatitude', best.lat, { shouldValidate: true });
+        setValue('startLongitude', best.lng, { shouldValidate: true });
+        setValue('startTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
 
-        setTimeout(() => {
-          trigger(['stopTime', 'stopLatitude', 'stopLongitude']);
-        }, 0);
+        window.alert(
+          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+        );
+      } catch (e) {
+        console.error(e);
+        window.alert(`GPS capture failed: ${e?.message || e}`);
       }
-    }, [dataEntryTelemetryTotalCount, setValue, trigger, clearErrors]);
+    };
 
-    useEffect(() => {
-      reset(defaultValues);
-    }, [reset, defaultValues]);
-
-    const prevIsEditFormRef = useRef(isEditForm);
-
-    useEffect(() => {
-      const prevIsEditForm = prevIsEditFormRef.current;
-
-      if (!isEditForm && prevIsEditForm !== false) {
-        doResetTelemetryDataEntries();
+    const handleChange = (e) => {
+      const name = e?.target?.name;
+      const val = e?.target?.value;
+      if (name === 'recorder') {
+        setValue('recorder', val?.toUpperCase());
       }
-
-      prevIsEditFormRef.current = isEditForm;
-    }, [isEditForm, doResetTelemetryDataEntries]);
-
-    useEffect(() => {
-      if (!isEditForm) {
-        const queueLength = 0; // replace with outbox length later
-
-        const seFid = generateSeFid(queueLength);
-        setValue('seFid', seFid);
-      } else if (isEditForm && dataEntryData) {
-        setValue('seId', dataEntryData.seId);
-        setValue('seFid', dataEntryData.seFid);
-      }
-    }, [isEditForm, dataEntryData, setValue]);
-
-    useEffect(() => {
-      if (Object.keys(errors).length > 0) {
-        setFocus(Object.keys(errors)[0]);
-      }
-    }, [errors, setFocus]);
-
-    useEffect(() => {
-      const handleBeforeUnload = (e) => {
-        if (isDirty) {
-          e.preventDefault();
-          e.returnValue = '';
-        }
-      };
-
-      window.addEventListener('beforeunload', handleBeforeUnload);
-
-      return () => {
-        window.removeEventListener('beforeunload', handleBeforeUnload);
-      };
-    }, [isDirty]);
-
-    // const confirmLeave = () => {
-    //   if (isDirty) {
-    //     const confirm = window.confirm('You have unsaved changes. Data will not be saved. Continue?');
-    //     return confirm;
-    //   }
-    //   return true;
-    // };
+    };
 
     const getCastedValues = () => {
       const values = getValues();
 
       return {
         ...values,
+        searchDay: values.searchDay !== '' ? Number(values.searchDay) : values.searchDay,
         startLatitude: values.startLatitude !== '' ? Number(values.startLatitude) : values.startLatitude,
         startLongitude: values.startLongitude !== '' ? Number(values.startLongitude) : values.startLongitude,
         stopLatitude: values.stopLatitude !== '' ? Number(values.stopLatitude) : values.stopLatitude,
@@ -198,18 +147,15 @@ const SearchEffortDataEntryForm = connect(
       });
 
       if (isEditForm) {
-        doUpdateSearchDataEntry(payload, () => {
-          // doUpdateCurrentTab(1);
-        });
+        doUpdateSearchDataEntry(payload, () => {});
       } else {
         doSaveSearchDataEntry(payload, (val) => {
           if (val) setValue('seId', val);
-          // doUpdateCurrentTab(1);
         });
       }
     };
 
-    const doFinalSave = async () => {
+    const doSubmit = async () => {
       setValue('status', 2);
       const valid = await trigger();
       if (!valid) return;
@@ -225,6 +171,74 @@ const SearchEffortDataEntryForm = connect(
         doSaveSearchDataEntry(payload);
       }
     };
+
+    useEffect(() => {
+      const count = Number(dataEntryTelemetryTotalCount || 0);
+
+      setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
+      if (count > 0) {
+        clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
+
+        setTimeout(() => {
+          trigger(['stopTime', 'stopLatitude', 'stopLongitude']);
+        }, 0);
+      }
+    }, [dataEntryTelemetryTotalCount, setValue, trigger, clearErrors]);
+
+    useEffect(() => {
+      reset(defaultValues);
+    }, [reset, defaultValues]);
+
+    // Reset form
+    useEffect(() => {
+      const prevIsEditForm = prevIsEditFormRef.current;
+
+      if (!isEditForm && prevIsEditForm !== false) {
+        doResetTelemetryDataEntries();
+      }
+
+      prevIsEditFormRef.current = isEditForm;
+    }, [isEditForm, doResetTelemetryDataEntries]);
+
+    // Set IDs
+    useEffect(() => {
+      if (!isEditForm) {
+        const queueLength = 0; // replace with outbox length later
+
+        const seFid = generateFieldId(queueLength);
+        setValue('seFid', seFid);
+      } else if (isEditForm && dataEntryData) {
+        setValue('seId', dataEntryData.seId);
+        setValue('seFid', dataEntryData.seFid);
+      }
+    }, [isEditForm, dataEntryData, setValue]);
+
+    useEffect(() => {
+      if (Object.keys(errors).length > 0) {
+        setFocus(Object.keys(errors)[0]);
+      }
+    }, [errors, setFocus]);
+
+    useEffect(() => {
+      const handleBeforeUnload = (e) => {
+        if (isDirty) {
+          e.preventDefault();
+          e.returnValue = '';
+        }
+      };
+      window.addEventListener('beforeunload', handleBeforeUnload);
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      };
+    }, [isDirty]);
+
+    // const confirmLeave = () => {
+    //   if (isDirty) {
+    //     const confirm = window.confirm('You have unsaved changes. Data will not be saved. Continue?');
+    //     return confirm;
+    //   }
+    //   return true;
+    // };
 
     // const showStopWarning = Number(dataEntryTelemetryTotalCount || 0) > 0;
 
@@ -248,7 +262,7 @@ const SearchEffortDataEntryForm = connect(
             )}
             {hasTelemetry && (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={doFinalSave} type='button'>
+                <Button className={saveBtnClasses} onClick={doSubmit} type='button'>
                   Submit
                 </Button>
               </Grid>
@@ -260,22 +274,26 @@ const SearchEffortDataEntryForm = connect(
             </Grid>
 
             <Grid tablet={{ col: 2 }}>
-              <TextInput name='recorder' label='Recorder Initials' required />
+              <TextInput
+                name='recorder'
+                label='Recorder Initials'
+                style={{ textTransform: 'uppercase' }}
+                onChange={handleChange}
+                required
+              />
             </Grid>
 
             <Grid tablet={{ col: 2 }}>
               <SelectInput name='searchTypeCode' label='Search Type' required>
-                {(typeof searchTypeOptions === 'function' ? searchTypeOptions(searchTypeCode) : searchTypeOptions).map(
-                  (opt, idx) => (
-                    <option key={idx + 1} value={opt.value}>
-                      {opt.text}
-                    </option>
-                  )
-                )}
+                {createDropdownOptions(searchTypes).map((item, index) => (
+                  <option key={index + 1} value={item.value}>
+                    {item.text}
+                  </option>
+                ))}
               </SelectInput>
               {searchTypeCode === 'RS' && (
                 <Grid tablet={{ col: 12 }}>
-                  <TextInput name='day' label='Day' type='date' required />
+                  <TextInput name='searchDay' label='Search Day' type='number' required />
                 </Grid>
               )}
             </Grid>
@@ -332,6 +350,16 @@ const SearchEffortDataEntryForm = connect(
                 disabled={!hasTelemetry}
                 warning={!hasTelemetry ? getTelemetryWarning() : ''}
               />
+            </Grid>
+            <Grid row gap='sm' table={{ col: 3 }}>
+              <Button onClick={() => handleCapture('start')} type='button'>
+                Capture Start GPS
+              </Button>
+            </Grid>
+            <Grid row gap='md' table={{ col: 3 }}>
+              <Button onClick={() => handleCapture('stop')} type='button'>
+                Capture Stop GPS
+              </Button>
             </Grid>
           </Grid>
           {/* Warning */}

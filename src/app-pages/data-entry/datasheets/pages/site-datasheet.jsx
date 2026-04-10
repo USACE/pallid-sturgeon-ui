@@ -8,6 +8,7 @@ import DataHeader from '../components/dataHeader';
 import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
 import SearchDraftDsTable from '../../edit-data-sheet/forms/search-effort/searchDraftDsTable';
+import SearchDraftDsTable from '../../edit-data-sheet/forms/search-effort/searchDraftDsTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 
 const SiteDatasheet = connect(
@@ -16,16 +17,20 @@ const SiteDatasheet = connect(
   'selectBaseData',
   'selectMoriverSitesDatasheetTotalResults',
   'selectSearchEffortSitesDatasheetTotalResults',
+  'selectSearchEffortSitesDraftDatasheetTotalResults',
   'selectRouteParams',
   ({
     doSitesDatasheetLoadData,
     doUpdateSitesDatasheetParams,
     moriverSitesDatasheetTotalResults,
     searchEffortSitesDatasheetTotalResults,
+    searchEffortSitesDraftDatasheetTotalResults,
     routeParams,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
     const siteId = routeParams?.siteId ?? null;
+
+    console.log('The numbers where?:', searchEffortSitesDatasheetTotalResults);
 
     const breadcrumbLinks = [
       {
@@ -78,7 +83,7 @@ const SiteDatasheet = connect(
                   content: <SearchDsTable />,
                 },
                 {
-                  title: `Drafts`,
+                  title: `Drafts (${searchEffortSitesDraftDatasheetTotalResults})`,
                   content: <SearchDraftDsTable />,
                 },
               ]}

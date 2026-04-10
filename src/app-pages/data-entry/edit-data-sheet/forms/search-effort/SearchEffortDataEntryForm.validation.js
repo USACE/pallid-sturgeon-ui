@@ -12,7 +12,7 @@ export const getSearchEffortSchema = () =>
     searchDate: yup.string().required(ValidationMessages.FieldRequired),
     recorder: yup.string().required(ValidationMessages.FieldRequired).max(3, 'Value must be at most 3 characters'),
     searchTypeCode: yup.string().required(ValidationMessages.FieldRequired),
-    day: yup.string().when('searchTypeCode', {
+    searchDay: yup.string().when('searchTypeCode', {
       is: (v) => v === 'RS',
       then: (schema) => schema.required(ValidationMessages.FieldRequired),
       otherwise: (schema) => schema.nullable(),
@@ -88,17 +88,13 @@ export const getSearchEffortDefaultValues = ({ dataEntryData, telemetryCount = 0
   searchDate: dataEntryData?.searchDate ? formatDate(dataEntryData.searchDate) : new Date().toISOString().split('T')[0],
   recorder: dataEntryData?.recorder ?? '',
   searchTypeCode: dataEntryData?.searchTypeCode ?? '',
-
-  day: dataEntryData?.day ? formatDate(dataEntryData.day) : '',
-
+  searchDay: dataEntryData?.searchDay ? formatDate(dataEntryData.searchDay) : '',
   startTime: dataEntryData?.startTime ?? '',
   startLatitude: dataEntryData?.startLatitude ?? '',
   startLongitude: dataEntryData?.startLongitude ?? '',
-
   stopTime: dataEntryData?.stopTime ?? '',
   stopLatitude: dataEntryData?.stopLatitude ?? '',
   stopLongitude: dataEntryData?.stopLongitude ?? '',
-
   temp: dataEntryData?.temp ?? '',
   conductivity: dataEntryData?.conductivity ?? '',
 });
