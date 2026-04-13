@@ -71,9 +71,7 @@ const sitesDatasheetBundle = {
 
   doSitesDatasheetLoadData:
     () =>
-    ({ dispatch, store }) => {
-      dispatch({ type: 'LOADING_SITES_DATASHEETS_INIT_DATA' });
-      // Load data
+    ({ store }) => {
       store.doFetchMoRiverSitesDatasheets();
       store.doFetchSearchEffortSitesDatasheets();
     },
@@ -81,8 +79,6 @@ const sitesDatasheetBundle = {
   doFetchMoRiverSitesDatasheets:
     () =>
     ({ dispatch, store, apiGet }) => {
-      dispatch({ type: 'MORIVER_SITES_DATASHEETS_FETCH_START' });
-
       const { ...params } = store.selectSitesDatasheetParams();
       const size = store.selectSitesDatasheetPageSize();
       const number = store.selectSitesDatasheetPageNumber();

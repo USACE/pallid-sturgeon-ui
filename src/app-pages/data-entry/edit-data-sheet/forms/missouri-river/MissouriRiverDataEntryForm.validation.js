@@ -132,8 +132,8 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .required(ValidationMessages.FieldRequired)
         .test({
-          test: (value) => (Number(value) >= 36 && Number(value) <= 50) || Number(value) === 0,
-          message: 'Value must be between 36 and 50 degrees. (Enter 0 if unknown)',
+          test: (value) => (Number(value) >= 36 && Number(value) <= 49) || Number(value) === 0,
+          message: 'Value must be between 36 and 49 degrees. (Enter 0 if unknown)',
         })
         .nullable()
         .notRequired(),
@@ -142,8 +142,8 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .required(ValidationMessages.FieldRequired)
         .test({
-          test: (value) => (Number(value) >= -115 && Number(value) <= -90) || Number(value) === 0,
-          message: 'Value must be between -115 and -90 degrees.  Enter 0 if unknown',
+          test: (value) => (Number(value) >= -111 && Number(value) <= -89) || Number(value) === 0,
+          message: 'Value must be between -111 and -89 degrees.  Enter 0 if unknown',
         })
         .nullable()
         .notRequired(),
@@ -156,8 +156,8 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
           otherwise: (schema) => schema.nullable().notRequired(),
         })
         .test({
-          test: (value) => (Number(value) >= 36 && Number(value) <= 50) || Number(value) === 0,
-          message: 'Value must be between 36 and 50 degrees. (Enter 0 if unknown)',
+          test: (value) => (Number(value) >= 36 && Number(value) <= 49) || Number(value) === 0,
+          message: 'Value must be between 36 and 49 degrees. (Enter 0 if unknown)',
         })
         .nullable()
         .notRequired(),
@@ -169,8 +169,8 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
           otherwise: (schema) => schema.nullable().notRequired(),
         })
         .test({
-          test: (value) => (Number(value) >= -115 && Number(value) <= -90) || Number(value) === 0,
-          message: 'Value must be between -115 and -90 degrees.  Enter 0 if unknown',
+          test: (value) => (Number(value) >= -111 && Number(value) <= -89) || Number(value) === 0,
+          message: 'Value must be between -111 and -89 degrees.  Enter 0 if unknown',
         }),
       u1: yup.string().when('project', {
         is: (val) => Number(val) === 3,
@@ -180,9 +180,13 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
       u2: yup.string().when(['gear', 'project'], {
         is: (gear, project) => project === 1 && gear.startsWith('TL'),
         then: (schema) =>
-          schema.required(ValidationMessages.FieldRequired).test({
-            test: (value, { parent: { distance, gear } }) => gear.startsWith('TL') && Number(value) >= Number(distance),
-            message: 'Distance cannot be greater than U2 when the gear is trotline',
+          schema.required(ValidationMessages.FieldRequired).when('distance', {
+            is: (val) => ![null, undefined, ''].includes(val),
+            then: (schema) =>
+              schema.test({
+                test: (u2, { parent: { distance, gear } }) => gear.startsWith('TL') && Number(u2) >= Number(distance),
+                message: 'Value cannot be less than Distance when the gear is trotline',
+              }),
           }),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
@@ -224,9 +228,13 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .when('gear', {
           is: (val) => gearReqFields.distance.includes(val),
           then: (schema) =>
-            schema.required(ValidationMessages.FieldRequired).test({
-              test: (value, { parent: { gear, u2 } }) => gear.startsWith('TL') && Number(value) < Number(u2),
-              message: 'Value cannot be greater than U2 when the gear is trotline.',
+            schema.required(ValidationMessages.FieldRequired).when('u2', {
+              is: (val) => ![null, undefined, ''].includes(val),
+              then: (schema) =>
+                schema.test({
+                  test: (distance, { parent: { gear, u2 } }) => gear.startsWith('TL') && Number(distance) <= Number(u2),
+                  message: 'Value cannot be greater than U2 when the gear is trotline.',
+                }),
             }),
           otherwise: (schema) => schema.nullable().notRequired(),
         })

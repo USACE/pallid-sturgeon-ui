@@ -41,3 +41,15 @@ export const generateFieldId = (queueLength = 0) => {
 
   return `${date}-${time}-${sequence}`;
 };
+
+export const isEmpty = (obj) => Object.keys(obj).length === 0;
+
+export const removeDuplicates = (arr) => {
+  const serializedArray = arr?.map(JSON.stringify) ?? [];
+  if (serializedArray?.length > 0) {
+    const uniqueSet = new Set(serializedArray);
+    const uniqueArray = Array.from(uniqueSet)?.map(JSON.parse);
+    return uniqueArray?.sort((a, b) => a.code - b.code) ?? [];
+  }
+  return [];
+};
