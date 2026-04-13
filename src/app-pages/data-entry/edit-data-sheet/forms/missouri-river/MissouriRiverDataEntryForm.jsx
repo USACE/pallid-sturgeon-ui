@@ -75,7 +75,7 @@ const MissouriRiverDataEntryForm = connect(
     const [ss1Options, setSs1Options] = useState([]);
     const [ss2Options, setSs2Options] = useState([]);
 
-    const newForm = !!dataEntryData.mrId;
+    const newForm = !dataEntryData.mrId;
 
     const ss3Options = removeDuplicates(
       setSite3Options?.map((item) => ({
@@ -182,7 +182,8 @@ const MissouriRiverDataEntryForm = connect(
     const methods = useForm({
       defaultValues: getMissouriRiverDefaultValues({ baseData, dataEntryData }),
       resolver: yupResolver(getMissouriRiverSchema({ riverMile: getUpperLowerRiverMile(bend, segmentId) })),
-      mode: 'all',
+      mode: 'onSubmit',
+      reValidateMode: 'onChange',
       stateOptions: [],
     });
     const {
@@ -285,6 +286,7 @@ const MissouriRiverDataEntryForm = connect(
           stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
           stopLongitude: formatCoordFlt(values.stopLongitude) ?? '',
           temp: parseFloat(values?.temp),
+          u2: String(values?.u2),
           velocitybot1: parseFloat(values?.velocitybot1),
           velocity081: parseFloat(values?.velocity081),
           velocity02or061: parseFloat(values?.velocity02or061),
@@ -362,11 +364,13 @@ const MissouriRiverDataEntryForm = connect(
     useEffect(() => {
       if (gearCode) {
         setValue('deploymentType', gearCodes.filter((gear) => gear.code === gearCode)?.[0]?.deploymentType);
-        if (gearCode === 'TLC1') {
-          setValue('u2', 20, { shouldValidate: true });
-        }
-        if (gearCode === 'TLC2') {
-          setValue('u2', 40, { shouldValidate: true });
+        if (newForm) {
+          if (gearCode === 'TLC1') {
+            setValue('u2', 20);
+          }
+          if (gearCode === 'TLC2') {
+            setValue('u2', 40);
+          }
         }
       }
     }, [gearCode]);
