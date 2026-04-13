@@ -79,8 +79,6 @@ const sitesDatasheetBundle = {
   doFetchMoRiverSitesDatasheets:
     () =>
     ({ dispatch, store, apiGet }) => {
-      console.warn('test: ', store.selectSitesDatasheetParams());
-
       const { ...params } = store.selectSitesDatasheetParams();
       const size = store.selectSitesDatasheetPageSize();
       const number = store.selectSitesDatasheetPageNumber();

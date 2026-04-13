@@ -78,8 +78,6 @@ const SearchEffortDataEntryForm = connect(
 
     const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
 
-    console.warn('values: ', getValues());
-
     const searchTypeCode = watch('searchTypeCode');
     const telemetryCount = watch(Number(watch('telemetryCount') || 0));
     const hasTelemetry = telemetryCount > 0;
