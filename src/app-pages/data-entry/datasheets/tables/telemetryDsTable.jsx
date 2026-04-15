@@ -13,13 +13,13 @@ import TextEditor from '@common/gridCellEditors/textEditor';
 import FloatEditor from '@common/gridCellEditors/floatEditor';
 
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { frequencyIdOptions } from '@pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 import { tabToNextCell } from './helpers';
+import { createDropdownOptions } from '../../helpers';
 
 // tableId = 4604 For testing
 
@@ -31,6 +31,7 @@ const TelemetryDsTable = connect(
   'selectDataEntryLastParams',
   'selectUserRole',
   'selectBaseData',
+  'selectLookupData',
   ({
     doModalOpen,
     doSaveTelemetryDataEntry,
@@ -39,9 +40,14 @@ const TelemetryDsTable = connect(
     dataEntryLastParams,
     userRole,
     baseData,
+    lookupData,
   }) => {
     const { items } = dataEntryTelemetryData;
+    const { frequencyIds } = lookupData;
+
     const gridRef = useRef();
+
+    const getFrequencyIdString = (id) => frequencyIds?.filter((item) => item.code === id)?.[0]?.description;
 
     const rowData = items?.map((item) => ({
       ...item,
@@ -168,10 +174,11 @@ const TelemetryDsTable = connect(
               headerName='Frequency Id'
               cellEditor='selectEditor'
               cellEditorParams={{
-                options: frequencyIdOptions,
+                options: createDropdownOptions(frequencyIds),
                 type: 'number',
                 isRequired: true,
               }}
+              valueGetter={(params) => getFrequencyIdString(params.data.frequencyIdCode)}
               width={125}
               sortable
               unSortIcon
@@ -210,7 +217,7 @@ const TelemetryDsTable = connect(
             <AgGridColumn field='silt' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='sand' cellEditor='floatEditor' sortable unSortIcon />
             <AgGridColumn field='gravel' cellEditor='floatEditor' sortable unSortIcon />
-            <AgGridColumn field='suspectedSpawningActivity' cellEditor='numberEditor' width={150} sortable unSortIcon  />
+            <AgGridColumn field='suspectedSpawningActivity' cellEditor='numberEditor' width={150} sortable unSortIcon />
             <AgGridColumn field='comments' width={200} sortable unSortIcon />
             <AgGridColumn field='editInitials' width={125} sortable unSortIcon />
             <AgGridColumn field='lastEditComment' width={200} sortable unSortIcon />

@@ -20,25 +20,26 @@ import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 
 export default connect(
+  'doGetAllLookupData',
   'doModalOpen',
   'selectRoute',
   'selectAuth',
   'selectLoadingState',
   'selectLoadingMessage',
-  ({ doModalOpen, route: Route, auth, loadingState, loadingMessage }) => {
+  ({ doGetAllLookupData, doModalOpen, route: Route, auth, loadingState, loadingMessage }) => {
     const isAuthenticated = !!auth?.token;
     const userHasRole = !!auth?.authData?.role;
 
     useEffect(() => {
       if (isAuthenticated && userHasRole) {
-        // doGetAllLookupData();
+        doGetAllLookupData();
       } else {
         const landingModalSeen = sessionStorage.getItem('landingModalSeen');
         if (!landingModalSeen || landingModalSeen === 'false') {
           doModalOpen(LandingModal);
         }
       }
-    }, [isAuthenticated, userHasRole, doModalOpen]);
+    }, [doGetAllLookupData, isAuthenticated, userHasRole, doModalOpen]);
 
     return (
       <>
