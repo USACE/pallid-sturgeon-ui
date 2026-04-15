@@ -7,14 +7,7 @@ const lookupBundle = {
 
   getReducer: () => {
     const initialState = {
-      bendSelections: [],
-      gearCodes: [],
-      filteredGearCodes: [],
-      gearTypes: [],
-      macros: [],
-      mesos: [],
-      macroMesos: [],
-      u7: [],
+      frequencyIds: [],
     };
 
     return (state = initialState, { type, payload }) => {
