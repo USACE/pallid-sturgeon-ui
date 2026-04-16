@@ -4,12 +4,7 @@ import { connect } from 'redux-bundler-react';
 import Button from '@components/button';
 import Card from '@components/card';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
-import {
-  frequencyIdOptions,
-  macroOptions,
-  mesoOptions,
-  positionConfidenceOptions,
-} from './_shared/selectHelper';
+import { macroOptions, mesoOptions, positionConfidenceOptions } from './_shared/selectHelper';
 import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 import Approval from '@pages/data-entry/datasheets/components/approval';
 
@@ -75,9 +70,7 @@ const TelemetryForm = connect(
       dispatch({
         type: 'UPDATE_INPUT',
         field: e.target.name,
-        value: isNaN(parseFloat(e.target.value))
-          ? 0
-          : parseFloat(e.target.value),
+        value: isNaN(parseFloat(e.target.value)) ? 0 : parseFloat(e.target.value),
       });
     };
 
@@ -126,13 +119,7 @@ const TelemetryForm = connect(
           <Card.Body>
             <Row>
               <div className='col-2'>
-                <Input
-                  name='bend'
-                  label='Bend'
-                  type='number'
-                  value={state['bend'] || ''}
-                  onChange={handleNumber}
-                />
+                <Input name='bend' label='Bend' type='number' value={state['bend'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
                 <Input
@@ -149,7 +136,6 @@ const TelemetryForm = connect(
                   name='frequencyIdCode'
                   label='Frequency ID'
                   value={Number(state['frequencyIdCode'])}
-                  options={frequencyIdOptions}
                   onChange={(val) => handleSelect('frequencyIdCode', val)}
                   isRequired
                 />
@@ -250,22 +236,10 @@ const TelemetryForm = connect(
                 />
               </div>
               <div className='col-2'>
-                <Input
-                  name='silt'
-                  label='Silt'
-                  type='number'
-                  value={state['silt'] || ''}
-                  onChange={handleNumber}
-                />
+                <Input name='silt' label='Silt' type='number' value={state['silt'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
-                <Input
-                  name='sand'
-                  label='Sand'
-                  type='number'
-                  value={state['sand'] || ''}
-                  onChange={handleNumber}
-                />
+                <Input name='sand' label='Sand' type='number' value={state['sand'] || ''} onChange={handleNumber} />
               </div>
               <div className='col-2'>
                 <Input
@@ -277,12 +251,7 @@ const TelemetryForm = connect(
                 />
               </div>
               <div className='col-4'>
-                <TextArea
-                  name='comments'
-                  label='Comments'
-                  value={state['comments']}
-                  onChange={handleChange}
-                />
+                <TextArea name='comments' label='Comments' value={state['comments']} onChange={handleChange} />
               </div>
             </Row>
             <Row>
