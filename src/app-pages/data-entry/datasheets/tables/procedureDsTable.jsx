@@ -226,7 +226,7 @@ const ProcedureDsTable = connect(
               field='oldFrequencyId'
               cellEditor='selectEditor'
               cellEditorParams={{ options: createDropdownOptions(frequencyIds), type: 'number' }}
-              valueGetter={(params) => getFrequencyIdString(params.data.oldFrequencyId)}
+              valueFormatter={(params) => getFrequencyIdString(params.data.oldFrequencyId)}
               width={150}
               sortable
               unSortIcon
@@ -278,7 +278,7 @@ const ProcedureDsTable = connect(
               headerName='New Frequency Id'
               cellEditor='selectEditor'
               cellEditorParams={{ options: createDropdownOptions(frequencyIds), type: 'number' }}
-              valueGetter={(params) => getFrequencyIdString(params.data.newFreqId)}
+              valueFormatter={(params) => getFrequencyIdString(params.data.newFreqId)}
               width={150}
               sortable
               unSortIcon
