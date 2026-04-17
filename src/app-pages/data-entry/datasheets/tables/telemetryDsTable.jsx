@@ -178,7 +178,7 @@ const TelemetryDsTable = connect(
                 type: 'number',
                 isRequired: true,
               }}
-              valueGetter={(params) => getFrequencyIdString(params.data.frequencyIdCode)}
+              valueFormatter={(params) => getFrequencyIdString(params.data.frequencyIdCode)}
               width={125}
               sortable
               unSortIcon
