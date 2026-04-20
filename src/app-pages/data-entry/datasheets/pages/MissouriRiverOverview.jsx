@@ -5,9 +5,6 @@ import Card from '@components/card';
 import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 import Approval from '@pages/data-entry/datasheets/components/approval';
 import TabContainer from '@components/tab';
-import FishDsTable from '@pages/data-entry/datasheets/tables/fishDsTable';
-import SuppDsTable from '@pages/data-entry/datasheets/tables/suppDsTable';
-import ProcedureDsTable from '@pages/data-entry/datasheets/tables/procedureDsTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import MissouriRiverDataEntryForm from '../../edit-data-sheet/forms/missouri-river/MissouriRiverDataEntryForm';
 import FishDataEntry from '../tables/fish/FishDataEntry';
@@ -87,31 +84,8 @@ const MissouriRiverOverview = connect(
                 },
                 {
                   title: `Fish (${dataEntryFishTotalCount})`,
-                  content: (
-                    <FishDataEntry />
-                    //   <FishDsTable setIsAddRow={setIsAddSuppRow} setRowId={setSuppRowId} />
-                  ),
-                },
-                {
-                  title: `Supplemental (${dataEntrySupplementalTotalCount})`,
-                  content: (
-                    <>
-                      <SuppDsTable
-                        isAddRow={isAddSuppRow}
-                        rowId={suppRowId}
-                        setIsAddRow={setIsAddProcRow}
-                        setRowId={setProcRowId}
-                      />
-                    </>
-                  ),
-                },
-                {
-                  title: `Procedure (${dataEntryProcedureTotalCount})`,
-                  content: (
-                    <>
-                      <ProcedureDsTable isAddRow={isAddProcRow} rowId={procRowId} />
-                    </>
-                  ),
+                  content: <FishDataEntry />,
+                  isDisabled: !!!dataEntryData?.mrId, // Disable tab when no Missouri River data exists yet
                 },
               ]}
               onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}
