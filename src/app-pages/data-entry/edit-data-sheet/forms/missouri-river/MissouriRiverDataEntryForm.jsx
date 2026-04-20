@@ -222,6 +222,7 @@ const MissouriRiverDataEntryForm = connect(
     const gearCode = watch('gear');
     const gearType = watch('gearType');
     const subsamplepass = watch('subsamplepass');
+    const micro = watch('micro');
     const microStructure = watch('microStructure');
     const netrivermile = watch('netrivermile');
     const structureFlow = watch('structureFlow');
@@ -238,6 +239,8 @@ const MissouriRiverDataEntryForm = connect(
     const velocity081 = watch('velocity081');
     const u7 = watch('u7');
 
+    const normalize = (val) => (val ? String(val) : '');
+
     const isStartTimeDisabled =
       gearCode.startsWith('LDN') &&
       (velocitybot1 === null || velocitybot1 === '' || velocity081 === null || velocity081 === '');
@@ -249,6 +252,13 @@ const MissouriRiverDataEntryForm = connect(
         return 'Temp >= 12.8 for a gill net gear code';
       } else {
         return;
+      }
+    };
+
+    const getDigitsWarning = (val, options) => {
+      if (val === null || val === '' || val === undefined) return;
+      if (options?.filter((item) => String(item.value) === String(val))?.length === 0) {
+        return 'Entered digit does not exist for this field, please enter a new digit or select from dropdown';
       }
     };
 
@@ -319,17 +329,46 @@ const MissouriRiverDataEntryForm = connect(
       handleMesoOptions(mesos, gearType, gearCode, macro, season);
     }, [mesos, gearType, gearCode, macro, season]);
 
-    // Populate Micro using the following six fields; Micro Structure, Structure flow, structure mod, set site 1, set site 2, set site 3
+    // Sync Micro code -> Digits (Micro Structure, Structure Flow, Structure Mod, Set Site 1, Set Site 2, Set Site 3)
     useEffect(() => {
-      if (microStructure || structureFlow || structureMod || setSite1 || setSite2 || setSite3) {
-        const str =
-          String(microStructure || 0) +
-          String(structureFlow || 0) +
-          String(structureMod || 0) +
-          String(setSite1 || 0) +
-          String(setSite2 || 0) +
-          String(setSite3 || 0);
-        setValue('micro', str, { shouldValidate: true });
+      if (!micro) return;
+      const split = micro.slice(0, 6).split('');
+      const currentDigits = [
+        normalize(microStructure),
+        normalize(structureFlow),
+        normalize(structureMod),
+        normalize(setSite1),
+        normalize(setSite2),
+        normalize(setSite3),
+      ];
+      if (split.join('') !== currentDigits.join('')) {
+        setValue('microStructure', split[0] || '', { shouldValidate: true });
+        setValue('structureFlow', split[1] || '', { shouldValidate: true });
+        setValue('structureMod', split[2] || '', { shouldValidate: true });
+        setValue('setSite1', split[3] || '', { shouldValidate: true });
+        setValue('setSite2', split[4] || '', { shouldValidate: true });
+        setValue('setSite3', split[5] || '', { shouldValidate: true });
+      }
+    }, [micro]);
+
+    // Sync Digits (Micro Structure, Structure Flow, Structure Mod, Set Site 1, Set Site 2, Set Site 3) -> Micro code
+    useEffect(() => {
+      const digits = [
+        normalize(microStructure),
+        normalize(structureFlow),
+        normalize(structureMod),
+        normalize(setSite1),
+        normalize(setSite2),
+        normalize(setSite3),
+      ];
+      const allFilled = digits.every((d) => d !== '');
+      if (!allFilled) return;
+      const joined = digits.join('');
+      if (joined !== micro) {
+        setValue('micro', joined, {
+          shouldValidate: true,
+          shouldDirty: false,
+        });
       }
     }, [microStructure, structureFlow, structureMod, setSite1, setSite2, setSite3]);
 
@@ -577,7 +616,12 @@ const MissouriRiverDataEntryForm = connect(
                   />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='microStructure' label='Micro Structure' onChange={handleChange}>
+                  <SelectInput
+                    name='microStructure'
+                    label='Micro Structure'
+                    onChange={handleChange}
+                    warning={getDigitsWarning(microStructure, createDropdownOptions(microStructures))}
+                  >
                     {createDropdownOptions(microStructures).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -591,6 +635,7 @@ const MissouriRiverDataEntryForm = connect(
                     label='Structure Flow'
                     onChange={handleChange}
                     required={microStructure}
+                    warning={getDigitsWarning(structureFlow, createDropdownOptions(structureFlowOptions))}
                   >
                     {createDropdownOptions(structureFlowOptions).map((item, index) => (
                       <option key={index + 1} value={item.value}>
@@ -605,6 +650,7 @@ const MissouriRiverDataEntryForm = connect(
                     label='Structure Mod'
                     onChange={handleChange}
                     required={structureFlow}
+                    warning={getDigitsWarning(structureMod, createDropdownOptions(structureModOptions))}
                   >
                     {createDropdownOptions(structureModOptions).map((item, index) => (
                       <option key={index + 1} value={item.value}>
@@ -616,7 +662,13 @@ const MissouriRiverDataEntryForm = connect(
               </Grid>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 3 }} offset={3}>
-                  <SelectInput name='setSite1' label='Set Site 1' onChange={handleChange} required={structureMod}>
+                  <SelectInput
+                    name='setSite1'
+                    label='Set Site 1'
+                    onChange={handleChange}
+                    required={structureMod}
+                    warning={getDigitsWarning(setSite1, createDropdownOptions(ss1Options))}
+                  >
                     {createDropdownOptions(ss1Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -625,7 +677,13 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='setSite2' label='Set Site 2' onChange={handleChange} required={setSite1}>
+                  <SelectInput
+                    name='setSite2'
+                    label='Set Site 2'
+                    onChange={handleChange}
+                    required={setSite1}
+                    warning={getDigitsWarning(setSite2, createDropdownOptions(ss2Options))}
+                  >
                     {createDropdownOptions(ss2Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -634,7 +692,13 @@ const MissouriRiverDataEntryForm = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='setSite3' label='Set Site 3' onChange={handleChange} required={setSite2}>
+                  <SelectInput
+                    name='setSite3'
+                    label='Set Site 3'
+                    onChange={handleChange}
+                    required={setSite2}
+                    warning={getDigitsWarning(setSite3, createDropdownOptions(ss3Options))}
+                  >
                     {createDropdownOptions(ss3Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
