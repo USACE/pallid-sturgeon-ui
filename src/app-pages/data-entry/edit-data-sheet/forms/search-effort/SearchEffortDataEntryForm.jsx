@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -12,7 +12,7 @@ import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEff
 import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { createDropdownOptions, fmtTimeHHMMSS, generateFieldId } from '../../../dataEntryHelper';
+import { generateFieldId } from '../../../dataEntryHelper';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -22,6 +22,19 @@ const GPS_OPTIONS = {
   enableHighAccuracy: true,
   timeout: 15000,
   maximumAge: 0,
+};
+
+const createDropdownOptions = (data) => {
+  if (!data) return [];
+
+  return data.map((item) => {
+    const { code, description } = item;
+
+    return {
+      value: code,
+      text: description,
+    };
+  });
 };
 
 const SearchEffortDataEntryForm = connect(
@@ -44,11 +57,13 @@ const SearchEffortDataEntryForm = connect(
     lookupData,
   }) => {
     const prevIsEditFormRef = useRef(isEditForm);
-    const { searchTypeCodes } = lookupData;
-    console.log('Search type:', searchTypeCodes);
-    console.log('How is it catching?:', searchTypeCodes[2].code);
     const siteId = routeParams?.siteId;
-    // const { searchTypes } = lookupData;
+    const { searchTypeCodes } = lookupData;
+
+    console.log('here is searchtypes', searchTypeCodes);
+    console.log('search type spec:', searchTypeCodes[2].code);
+    console.log('look at this:', searchTypeCodes.find((s) => s.code === 'RS')?.code);
+    console.log('what is here', searchTypeCodes.code);
 
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
@@ -79,7 +94,13 @@ const SearchEffortDataEntryForm = connect(
       clearErrors,
     } = methods;
 
-    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
+    const { permission, captureBestOf, lastError } = useGpsCapture(GPS_OPTIONS);
+
+    console.warn('VALUES: ', getValues());
+
+    const findOptionByValue = (opt, val) => {
+      return opt.find((opt) => String(opt.val) === String(val) || null);
+    };
 
     const fmtTimeHHMMSS = (val) => {
       const d = val ? new Date(val) : new Date();
@@ -125,14 +146,13 @@ const SearchEffortDataEntryForm = connect(
       }
     };
 
-    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
-
     console.warn('values: ', getValues());
 
     const searchTypeCode = watch('searchTypeCode');
-    const telemetryCount = watch(Number(watch('telemetryCount') || 0));
-    const hasTelemetry = telemetryCount > 0;
+    const telemetryCount = Number(watch('telemetryCount') || 0);
+    const hasTelemetry = telemetryCount >= 1;
 
+    console.log('watch it!:', searchTypeCode);
     const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
     const getTelemetryWarning = () => {
@@ -171,7 +191,7 @@ const SearchEffortDataEntryForm = connect(
     const getCastedValues = () => {
       const values = getValues();
 
-      return {
+      const casted = {
         ...values,
         searchDay: values.searchDay !== '' ? Number(values.searchDay) : values.searchDay,
         startLatitude: values.startLatitude !== '' ? Number(values.startLatitude) : values.startLatitude,
@@ -184,6 +204,11 @@ const SearchEffortDataEntryForm = connect(
         siteId: values.siteId !== undefined && values.siteId !== '' ? Number(values.siteId) : Number(siteId),
         dsId: values.dsId ?? 1,
       };
+
+      delete casted.checkby;
+      delete casted.uploadedBy;
+
+      return casted;
     };
 
     const doSaveDraft = async () => {
@@ -214,6 +239,9 @@ const SearchEffortDataEntryForm = connect(
         status: 2,
       });
 
+      console.log('SUBMIT isEditForm:', isEditForm);
+      console.log('SUBMIT payload:', payload);
+
       if (isEditForm) {
         doUpdateSearchDataEntry(payload);
       } else {
@@ -225,13 +253,14 @@ const SearchEffortDataEntryForm = connect(
       const count = Number(dataEntryTelemetryTotalCount || 0);
 
       setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
-      if (count > 0) {
-        clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
+      // if (count > 0) {
+      //   clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
 
-        setTimeout(() => {
-          trigger(['stopTime', 'stopLatitude', 'stopLongitude']);
-        }, 0);
-      }
+      //   setTimeout(() => {
+      //     trigger(['stopTime', 'stopLatitude', 'stopLongitude']);
+      //   }, 0);
+      // }
+      clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
     }, [dataEntryTelemetryTotalCount, setValue, trigger, clearErrors]);
 
     useEffect(() => {
@@ -275,6 +304,7 @@ const SearchEffortDataEntryForm = connect(
           e.returnValue = '';
         }
       };
+
       window.addEventListener('beforeunload', handleBeforeUnload);
       return () => {
         window.removeEventListener('beforeunload', handleBeforeUnload);
@@ -291,6 +321,11 @@ const SearchEffortDataEntryForm = connect(
 
     // const showStopWarning = Number(dataEntryTelemetryTotalCount || 0) > 0;
 
+    console.log('STORE telemtry type:', typeof telemetryCount);
+    console.log('FORM telemetry count:', telemetryCount);
+    console.log('hasTelemetry calc:', telemetryCount >= 1);
+    console.log('hasTelemetry:', hasTelemetry);
+
     return (
       <FormProvider {...methods}>
         {isShowErrorSummary && <ErrorSummary errors={errors} type='form' isValid={isValid} />}
@@ -302,14 +337,13 @@ const SearchEffortDataEntryForm = connect(
             <Grid tablet={{ col: 3 }}>
               <TextInput name='seFid' label='SE Field ID (Date-Time-SE#)' readOnly />
             </Grid>
-            {!hasTelemetry && (
+            {!hasTelemetry ? (
               <Grid tablet={{ col: 2 }}>
                 <Button className={saveBtnClasses} onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
                 </Button>
               </Grid>
-            )}
-            {hasTelemetry && (
+            ) : (
               <Grid tablet={{ col: 2 }}>
                 <Button className={saveBtnClasses} onClick={doSubmit} type='button'>
                   Submit
@@ -333,21 +367,16 @@ const SearchEffortDataEntryForm = connect(
             </Grid>
 
             <Grid tablet={{ col: 2 }}>
-              <SelectInput
-                name='searchTypeCode'
-                label='Search Type'
-                onChange={(e) => setSelectedSearchType(e.target.value)}
-                required
-              >
+              <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
                 {searchTypeCodes.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
                     {opt.code}
                   </option>
                 ))}
               </SelectInput>
-              {selectedSearchType === 'RS' && (
+              {searchTypeCode === 'RS' && (
                 <Grid tablet={{ col: 12 }}>
-                  <TextInput name='searchDay' label='Search Day' type='number' required />
+                  <TextInput name='searchDay' label='Search Day' type='date' required />
                 </Grid>
               )}
             </Grid>

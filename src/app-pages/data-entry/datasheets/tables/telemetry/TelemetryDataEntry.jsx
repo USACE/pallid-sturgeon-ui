@@ -396,7 +396,7 @@ const TelemetryDataEntry = connect(
           meta: { type: 'text' },
         }),
         columnHelper.accessor('uploadedBy', {
-          header: 'Check By',
+          header: 'Uploaded By',
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 190,
         }),
