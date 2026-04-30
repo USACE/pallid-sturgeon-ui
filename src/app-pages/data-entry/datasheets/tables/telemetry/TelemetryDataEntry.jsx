@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import { createColumnHelper } from '@tanstack/react-table';
 import _isEqual from 'lodash/isEqual';
+import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
@@ -20,6 +21,9 @@ import {
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 import { update } from 'lodash';
+import { components } from 'react-select';
+import { getLineAndCharacterOfPosition } from 'typescript';
+import { getLabelTextById } from '@src/utils/helpers';
 // import { createDropdownOptions } from '@src/app-pages/data-entry/helpers';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
@@ -68,18 +72,103 @@ const TelemetryDataEntry = connect(
     const [tableIsDirty, setTableIsDirty] = useState(false);
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
+    const { captureOnce } = useGpsCapture();
 
     const defaultValues = { seId: dataEntryLastParams?.seId };
+    console.log('Data Entry Last params:', dataEntryLastParams);
+    console.log('Is it getting seId?:', dataEntryLastParams?.seId);
+    const seFid = dataEntryData?.seFid;
+    console.log('Where is my seFid:', seFid);
+
+    // const idOptions = createDropdownOptions(id);
+
+    const findOptionByValue = (options, value) => {
+      return options.find((opt) => String(opt.value) === String(value)) || null;
+    };
+
+    const getNextSequence = (data, seFid) => {
+      const existing = data.filter((row) => row.seFid === seFid);
+      return existing.length + 1;
+    };
 
     useEffect(() => {
       if (items) {
-        const mapped = items.map((item) => ({
-          ...item,
-          bendRiverMile: baseData?.bendRiverMile,
-        }));
+        console.log('Fetched items:', items);
+        items.forEach((item, index) => {
+          console.log(
+            'row',
+            index,
+            'captureTime:',
+            item.captureTime,
+            'spawnBehavior:',
+            item.spawnBehavior,
+            'frequencyId:',
+            item.frequencyIdCode
+          );
+        });
+
+        const idOptions = createDropdownOptions(frequencyId);
+        console.log('Options:', frequencyId);
+
+        const mapped = items.map((item) => {
+          console.log('-----Mapping item----');
+          console.log('raw item:', item.frequencyIdCode);
+          console.log('available options:', frequencyId);
+
+          const match = idOptions?.find((opt) => String(opt.value) === String(item.frequencyIdCode));
+          console.log('matched option:', match);
+          console.log('API value:', item.frequencyIdCode);
+          console.log(
+            'Option values:',
+            idOptions.map((o) => o.value)
+          );
+
+          return {
+            ...item,
+            bendRiverMile: baseData?.bendRiverMile,
+            captureTime: item.captureDate ?? '',
+            spawnBehavior: item.suspectedSpawningActivity ?? '',
+            frequencyIdCode: item.frequencyIdCode != null ? match || null : null,
+          };
+        });
         setData(mapped);
       }
-    }, [items, baseData]);
+    }, [items, baseData, frequencyId]);
+
+    const fmtTimeHHMMSS = (val) => {
+      const d = val ? new Date(val) : new Date();
+
+      if (Number.isNaN(d.getTime())) {
+        console.error('Invalid date:', val);
+        return '';
+      }
+
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
+    };
+
+    const handleCaptureRow = async (rowIndex) => {
+      try {
+        console.log('GPS capturing for row', rowIndex);
+
+        const fix = await captureOnce();
+        const time = fmtTimeHHMMSS();
+
+        console.log('GPS result:', { fix, time });
+
+        const computedValues = {
+          captureTime: time,
+          captureLatitude: fix.lat,
+          captureLongitude: fix.lng,
+        };
+
+        handleUpdateData(rowIndex, null, computedValues);
+      } catch (err) {
+        console.error('GPS error', err);
+      }
+    };
 
     const methods = useForm({
       resolver: yupResolver(telemetryDataEntrySchema),
@@ -95,6 +184,8 @@ const TelemetryDataEntry = connect(
       trigger,
       reset,
     } = methods;
+
+    console.warn('Check errors:', errors);
 
     const tableColumns = useMemo(
       () => [
@@ -117,10 +208,22 @@ const TelemetryDataEntry = connect(
                 if (row.index === 0) return;
 
                 const prevRow = data[row.index - 1];
+                console.log('Previous row:', prevRow);
 
                 handleUpdateData(row.index, null, {
-                  radioTagNum: prevRow.radioTagNum,
-                  frequencyId: prevRow.frequencyId,
+                  radioTagNum: prevRow.radioTagNum ?? '',
+                  frequencyIdCode:
+                    prevRow.frequencyIdCode && typeof prevRow.frequencyIdCode === 'object'
+                      ? prevRow.frequencyIdCode
+                      : prevRow.frequencyIdCode != null
+                        ? {
+                            value: prevRow.frequencyIdCode,
+                            text:
+                              createDropdownOptions(frequencyId).find(
+                                (opt) => String(opt.value) === String(prevRow.frequencyIdCode)
+                              )?.text || '',
+                          }
+                        : null,
                 });
               }}
               type='button'
@@ -132,7 +235,7 @@ const TelemetryDataEntry = connect(
         columnHelper.accessor('bend', {
           header: 'Bend',
           cell: TableCell,
-          size: 200,
+          size: 100,
           meta: { readOnly: true },
         }),
         columnHelper.accessor('bendRiverMile', {
@@ -159,24 +262,13 @@ const TelemetryDataEntry = connect(
         columnHelper.accessor('captureButton', {
           header: 'Capture Button',
           cell: ({ row }) => (
-            <Button
-              className={saveBtnClasses}
-              onClick={() => {
-                const computedValues = {
-                  captureDate: 'captureDate',
-                  captureLatitude: 'captureLatitude',
-                  captureLongitude: 'captureLongitude',
-                };
-                handleUpdateData(row.index, computedValues);
-              }}
-              type='button'
-            >
+            <Button className={saveBtnClasses} onClick={() => handleCaptureRow(row.index)} type='button'>
               Capture Button
             </Button>
           ),
           size: 200,
         }),
-        columnHelper.accessor('captureDate', {
+        columnHelper.accessor('captureTime', {
           header: 'Capture Time',
           cell: TableCell,
           size: 200,
@@ -304,7 +396,7 @@ const TelemetryDataEntry = connect(
           meta: { type: 'text' },
         }),
         columnHelper.accessor('uploadedBy', {
-          header: 'Check By',
+          header: 'Uploaded By',
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 190,
         }),
@@ -315,10 +407,17 @@ const TelemetryDataEntry = connect(
     const handleAddRow = () => {
       // Add default values here
       const base = getBaseDefaultValues({ baseData });
+      const sequence = getNextSequence(data, seFid);
+
       const newRowData = {
         ...base,
-        countF: 1,
+        tFid: `${seFid}-${sequence}`,
+        seFid,
+        ...defaultValues,
+        _status: 'new',
+        // countF: 1,
       };
+      console.log('New tFid:', newRowData.tFid);
       setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
     };
 
@@ -361,6 +460,10 @@ const TelemetryDataEntry = connect(
             };
           }
 
+          if (newData[rowIndex]._status !== 'new') {
+            newData[rowIndex]._status = 'edited';
+          }
+
           // if (newData && newData[rowIndex]) {
           //   // Update properties
           //   newData[rowIndex] = {
@@ -374,16 +477,58 @@ const TelemetryDataEntry = connect(
       []
     );
 
+    const formatRow = (row) => {
+      return {
+        ...row,
+        frequencyIdCode:
+          row.frequencyIdCode !== null
+            ? Number(typeof row.frequencyIdCode === 'object' ? row.frequencyIdCode.value : row.frequencyIdCode)
+            : null,
+        captureLatitude:
+          row.captureLatitude !== null && row.captureLatitude !== '' ? Number(row.captureLatitude) : null,
+        captureLongitude:
+          row.captureLongitude !== null && row.captureLongitude !== '' ? Number(row.captureLongitude) : null,
+        positionConfidence:
+          row.positionConfidence !== null && row.positionConfidence !== '' ? Number(row.positionConfidence) : null,
+        captureDate: row.captureTime,
+        suspectedSpawningActivity:
+          row.spawnBehavior !== null && row.spawnBehavior !== '' ? Number(row.spawnBehavior) : null,
+      };
+    };
+
     const handleSubmitAll = async () => {
       try {
-        for (let i = 0; i < data.length; i++) {
-          await telemetryDataEntrySchema.validate(data, { abortEarly: false });
+        const rowsToProcess = data.filter((row) => row._status === 'new' || row._status === 'edited');
+
+        console.log('Rows to process:', rowsToProcess);
+
+        for (let i = 0; i < rowsToProcess.length; i++) {
+          const row = rowsToProcess[i];
+
+          const isNew = !row.tId;
+
+          const formattedRow = formatRow(row);
+
+          console.log('Row:', row);
+          console.log('isNew:', isNew, 'tId:', row.tId);
+
+          console.log('Submitting row:', formattedRow.frequencyIdCode, typeof formattedRow.frequencyIdCode);
+
+          await telemetryDataEntrySchema.validate(formattedRow, { abortEarly: false });
+
+          if (isNew) {
+            console.log('Creating row:', formattedRow);
+            await doSaveTelemetryDataEntry(formattedRow);
+          } else if (row.tId && row._status === 'edited') {
+            console.log('Updating row:', formattedRow);
+            await doUpdateTelemetryDataEntry(formattedRow);
+          }
         }
 
-        await doSaveTelemetryDataEntry(data);
-        console.log('Submitted:', data);
+        // const res = await doSaveTelemetryDataEntry(formattedRow);
+        console.log('All rows submitted');
       } catch (err) {
-        console.error('Validation failed:', err);
+        console.error('Submit failed:', err);
       }
     };
 
@@ -413,7 +558,14 @@ const TelemetryDataEntry = connect(
             updateSourceData={handleUpdateData}
             validationSchema={telemetryDataEntrySchema}
           />
-          <Button className={saveBtnClasses} onClick={handleSubmitAll} type='button'>
+          <Button
+            className={saveBtnClasses}
+            onClick={() => {
+              console.log('Clicked Submit');
+              handleSubmitAll();
+            }}
+            type='button'
+          >
             Submit
           </Button>
         </>

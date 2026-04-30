@@ -135,9 +135,21 @@ const DataEntryTable = ({
       editedRows,
       setEditedRows,
       updateData: (rowIndex, columnId, value) => {
-        updateSourceData(rowIndex, columnId, value);
         const updatedRowData = { ...data[rowIndex], [columnId]: value };
-        debouncedValidation([{ rowIndex, updatedRowData }]);
+        const formattedRow = Object.keys(updatedRowData).reduce((acc, key) => {
+          const val = updatedRowData[key];
+
+          if (val && typeof val === 'object' && 'value' in val) {
+            acc[key] = Number(val.value);
+          } else {
+            acc[key] = val;
+          }
+          return acc;
+        }, {});
+        console.log('DEBOUNCE VALIDATING', formattedRow);
+        updateSourceData(rowIndex, columnId, value);
+
+        debouncedValidation([{ rowIndex, updatedRowData: formattedRow }]);
       },
       addRow: () => {
         addRow();
