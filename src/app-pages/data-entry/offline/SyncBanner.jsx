@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-// import { useOnlineStatus } from '/offline-listener';
+import { useState } from 'react';
+import { useOnlineStatus } from './online-listener';
 import { syncNow } from './sync';
 import { db } from './db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
 export default function SyncBanner() {
-  // const online = useOnlineStatus();
+  const online = useOnlineStatus();
   const pending = useLiveQuery(() => db.outbox.count(), [], 0);
 
   const [syncing, setSyncing] = useState(false);

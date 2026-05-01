@@ -60,6 +60,8 @@ const FishForm = connect(
     const [state, dispatch] = useReducer(reducer, initialState);
     const siteId = edit ? state['siteId'] : sitesData[0].siteId;
 
+    const isGVNAllowed = state['species'] === 'USG';
+
     const handleChange = (e) => {
       dispatch({
         type: 'UPDATE_INPUT',
@@ -98,6 +100,7 @@ const FishForm = connect(
       } else {
         doSaveFishDataEntry(state, { mrId: state['mrId'] });
       }
+      console.log('What was saved?:', state);
     };
 
     const saveIsDisabled = !(
@@ -111,6 +114,7 @@ const FishForm = connect(
           payload: dataEntryFishData.items[0],
         });
       }
+      console.log('What is this?:', dataEntryFishData);
     }, [edit, dataEntryFishData]);
 
     useEffect(() => {
@@ -211,6 +215,7 @@ const FishForm = connect(
                   value={state['geneticsVialNumber']}
                   placeholder='ex: STURG-13334'
                   onChange={handleChange}
+                  isDisabled={state['species'] !== 'USG'}
                 />
               </div>
               <div className='col-2'>
