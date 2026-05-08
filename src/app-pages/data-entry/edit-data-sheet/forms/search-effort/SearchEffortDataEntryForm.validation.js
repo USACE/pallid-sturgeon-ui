@@ -8,7 +8,7 @@ export const getSearchEffortSchema = () =>
   yup.object().shape({
     seId: yup.mixed().nullable(),
     seFid: yup.string().nullable(),
-    telemetryCount: yup.string().nullable(),
+    telemetryCount: yup.number().nullable(),
     searchDate: yup.string().required(ValidationMessages.FieldRequired),
     recorder: yup.string().required(ValidationMessages.FieldRequired).max(3, 'Value must be at most 3 characters'),
     searchTypeCode: yup.string().required(ValidationMessages.FieldRequired),
@@ -37,7 +37,11 @@ export const getSearchEffortSchema = () =>
     stopTime: yup.string().when('telemetryCount', {
       is: (val) => Number(val) > 0,
       then: (schema) => schema.required(ValidationMessages.FieldRequired),
-      otherwise: (schema) => schema.notRequired(),
+      otherwise: (schema) =>
+        schema
+          .transform((value, originalValue) => (originalValue === '' ? null : value))
+          .nullable()
+          .notRequired(),
     }),
     stopLatitude: yup
       .string()
@@ -56,7 +60,11 @@ export const getSearchEffortSchema = () =>
               test: (val) => (Number(val) >= 36 && Number(val) <= 50) || Number(val) === 0,
               message: 'Value must be between 36 and 50 degrees. (Enter 0 if unknown)',
             }),
-        otherwise: (schema) => schema.nullable().notRequired(),
+        otherwise: (schema) =>
+          schema
+            .transform((value, originalValue) => (originalValue === '' ? null : value))
+            .nullable()
+            .notRequired(),
       }),
     stopLongitude: yup
       .string()
@@ -75,7 +83,11 @@ export const getSearchEffortSchema = () =>
               test: (val) => (Number(val) >= -115 && Number(val) <= -88) || Number(val) === 0,
               message: 'Value must be between -115 and -88 degrees. (Enter 0 if unknown)',
             }),
-        otherwise: (schema) => schema.nullable().notRequired(),
+        otherwise: (schema) =>
+          schema
+            .transform((value, originalValue) => (originalValue === '' ? null : value))
+            .nullable()
+            .notRequired(),
       }),
     temp: yup.string().nullable(),
     conductivity: yup.string().nullable(),
@@ -97,4 +109,5 @@ export const getSearchEffortDefaultValues = ({ dataEntryData, telemetryCount = 0
   stopLongitude: dataEntryData?.stopLongitude ?? '',
   temp: dataEntryData?.temp ?? '',
   conductivity: dataEntryData?.conductivity ?? '',
+  checkby: dataEntryData?.checkby ?? '',
 });

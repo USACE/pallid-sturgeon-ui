@@ -2,6 +2,7 @@ import { toast } from 'react-toastify';
 import { tSuccess, tError, tWarning } from '@common/toast/toastHelper';
 import { queryFromObject } from '@src/utils';
 import { ApiStatuses } from '@src/utils/enums';
+import { reject } from 'lodash';
 
 const rootUrl = '/psapi/DataEntry/';
 
@@ -577,22 +578,30 @@ export default {
 
   doSaveTelemetryDataEntry:
     (formData, params) =>
-    ({ dispatch, store, apiPost }) => {
-      const toastId = toast.loading('Saving datasheet...');
+    ({ dispatch, store, apiPost }) =>
+      new Promise((resolve, reject) => {
+        const toastId = toast.loading('Saving datasheet...');
 
-      const url = '/psapi/telemetryDataEntry';
+        const url = '/psapi/telemetryDataEntry';
 
-      apiPost(url, formData, (err, _body) => {
-        if (!err) {
-          tSuccess(toastId, 'Datasheet successfully updated!');
-          dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
-          store.doFetchTelemetryDataEntry(params);
-        } else {
-          dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
-          tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
-        }
-      });
-    },
+        apiPost(url, formData, (err, _body) => {
+          console.log('apiPost err:', err);
+          console.log('apiPost body:', _body);
+
+          const apiError = err || _body?.status === 'error';
+
+          if (!apiError) {
+            tSuccess(toastId, 'Datasheet successfully updated!');
+            dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
+            store.doFetchTelemetryDataEntry(params);
+            resolve(_body);
+          } else {
+            dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err || _body });
+            tError(toastId, _body?.message || 'Error saving datasheet. Check your field entries and please try again.');
+            reject(err || _body);
+          }
+        });
+      }),
 
   // DATA ENTRY UPDATES
 
@@ -701,13 +710,15 @@ export default {
       const url = '/psapi/telemetryDataEntry';
 
       apiPut(url, formData, (err, _body) => {
-        if (!err) {
+        const apiError = err || _body?.status === 'error';
+
+        if (!apiError) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
           store.doFetchTelemetryDataEntry(params);
         } else {
           dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
-          tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
+          tError(toastId, _body?.message || 'Error saving datasheet. Check your field entries and please try again.');
         }
       });
     },
