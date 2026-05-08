@@ -1,4 +1,4 @@
-import { db, OutboxItem } from './db';
+import { db, type OutboxItem } from './db';
 import { pushOutboxItem } from './api';
 
 export type SyncResult = {
@@ -12,6 +12,16 @@ export type SyncResult = {
 export function isOnline(): boolean {
   return typeof navigator !== 'undefined' ? navigator.onLine : false;
 }
+
+const tablePriority: Record<OutboxItem['tableName'], number> = {
+  ds_sites: 1,
+  ds_search: 2,
+  ds_telemetry_fish: 3,
+  ds_moriver: 4,
+  ds_fish: 5,
+  ds_supplemental: 6,
+  ds_procedure: 7,
+};
 
 function getTable(tableName: string) {
   switch (tableName) {
@@ -34,6 +44,18 @@ function getTable(tableName: string) {
   }
 }
 
+function sortOutboxItems(items: OutboxItem[]) {
+  return items.sort((a, b) => {
+    const topPriority = tablePriority[a.tableName] ?? 99;
+    const nextPriority = tablePriority[b.tableName] ?? 99;
+
+    if (topPriority !== nextPriority) {
+      return topPriority - nextPriority;
+    }
+    return a.ts - b.ts;
+  });
+}
+
 export async function syncNow(): Promise<SyncResult> {
   if (!isOnline()) {
     return { tried: 0, ok: 0, errors: 0, conflicts: 0, draftSkip: 0 };
@@ -51,21 +73,30 @@ export async function syncNow(): Promise<SyncResult> {
 
   for (const item of items) {
     try {
+      if (!item.tableName) {
+        console.warn('Skipping outbox item with missing tableName', item);
+        continue;
+      }
       const table: any = getTable(item.tableName);
       const localRow: any = await table.get(item.clientId);
 
-      if (localRow && localRow._status === 'draft') {
-        draftSkip++;
-        continue;
-      }
+      // if (localRow && localRow._status === 'draft') {
+      //   draftSkip++;
+      //   continue;
+      // }
 
       const res: any = await pushOutboxItem(item);
 
       if (res.status === 'ok') {
         ok++;
 
+        if (item._id == null) {
+          console.warn('Cannot delete outbox item without _id', item);
+          continue;
+        }
+
         await db.transaction('rw', db.outbox, table, async () => {
-          await db.outbox.delete(item._id);
+          await db.outbox.delete(item._id!);
 
           const currentRow = await table.get(item.clientId);
           if (!currentRow) return;
@@ -88,6 +119,9 @@ export async function syncNow(): Promise<SyncResult> {
             _status: 'conflict',
           });
         }
+      } else {
+        errors++;
+        console.warn('Sync failed. Keeping item in outbox:', res, item);
       }
     } catch (err) {
       console.error('Sync error:', item, err);

@@ -364,7 +364,7 @@ export interface ProcedureEntry extends DataEntry {
 export interface OutboxItem {
   _id?: number;
 
-  tableName?:
+  tableName:
     | 'ds_sites'
     | 'ds_moriver'
     | 'ds_search'
@@ -399,20 +399,23 @@ export class PSOfflineDB extends Dexie {
   outbox!: Table<OutboxItem, number>;
   meta!: Table<MetaKV, string>;
 
+  lookups!: Table<LookupItem, number>;
+
   constructor() {
     super('ps_offline_db');
 
-    this.version(1).stores({
+    this.version(5).stores({
       sites: 'clientId, serverId, site_id, _status',
       moriver: 'clientId, serverId, updatedAt, setdate, _status',
-      search: 'clientId, serverId, se_id, site_id, _status',
+      search: 'clientId, serverId, se_id, seFid, site_id, _status',
       fish: 'clientId, serverId, f_id, _status',
-      telemetry: 'clientId, serverId, t_id, se_id, _status',
+      telemetry: 'clientId, serverId, t_id, se_id, tFid, seFid, _status',
       supplemental: 'clientId, serverId, s_id, _status',
       procedure: 'clientId, serverId, id, _status',
 
-      outbox: '++_id, entity, op, ts, clientId, serverId',
+      outbox: '++_id, tableName, op, ts, clientId, serverId',
       meta: 'key',
+      lookups: '++id, lookupName, code',
     });
   }
 }
@@ -429,15 +432,19 @@ export function createEntry<T>(init?: Partial<T>): T & DataEntry {
   } as T & DataEntry;
 }
 
-export async function submitEntry(entityName: OutboxItem['entity'], table: Table<any, string>, entry: DataEntry) {
+export async function submitEntry(
+  tableName: OutboxItem['tableName'],
+  table: Table<any, string>,
+  entry: DataEntry & { clientId: string }
+) {
   entry._status = 'queued';
-  entry.version += 1;
+  entry.version = (entry.version ?? 0) + 1;
   entry.updatedAt = new Date().toISOString();
 
   await table.put(entry);
 
   await db.outbox.add({
-    entity: entityName,
+    tableName,
     op: entry.serverId ? 'update' : 'create',
     clientId: entry.clientId,
     serverId: entry.serverId,
@@ -445,4 +452,13 @@ export async function submitEntry(entityName: OutboxItem['entity'], table: Table
     clientVersion: entry.version,
     ts: Date.now(),
   });
+}
+
+export interface LookupItem {
+  id?: number;
+  lookupName: string;
+  code: string | number;
+  label: string;
+  raw?: any;
+  updatedAt: string;
 }

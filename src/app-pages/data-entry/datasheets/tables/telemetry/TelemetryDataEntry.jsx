@@ -11,7 +11,6 @@ import { TableCell } from '@src/app-components/table/table-cell-components/Table
 import { Button, Alert, Grid } from '@trussworks/react-uswds';
 import classNames from 'classnames';
 
-import { frequencyIdOptions } from '../../../edit-data-sheet/forms/_shared/selectHelper';
 import {
   telemetryDataEntrySchema,
   getBaseDefaultValues,
@@ -24,6 +23,9 @@ import { update } from 'lodash';
 import { components } from 'react-select';
 import { getLineAndCharacterOfPosition } from 'typescript';
 import { getLabelTextById } from '@src/utils/helpers';
+import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
+import { db } from '@src/app-pages/data-entry/offline/db';
 // import { createDropdownOptions } from '@src/app-pages/data-entry/helpers';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
@@ -51,6 +53,7 @@ const TelemetryDataEntry = connect(
   'selectBaseData',
   'selectDataEntryData',
   'selectLookupData',
+  'doUpdateCurrentTab',
   ({
     doModalOpen,
     doSaveTelemetryDataEntry,
@@ -61,6 +64,7 @@ const TelemetryDataEntry = connect(
     baseData,
     dataEntryData,
     lookupData,
+    doUpdateCurrentTab,
   }) => {
     const { frequencyId, spawnBehavior, macros, mesos, positionConfidence } = lookupData;
     const { items } = dataEntryTelemetryData;
@@ -73,14 +77,31 @@ const TelemetryDataEntry = connect(
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
     const { captureOnce } = useGpsCapture();
+    const savedDraft = sessionStorage.getItem('currentSearchEffortDraft');
+    const searchEffortDraft = savedDraft ? JSON.parse(savedDraft) : null;
+    const seFid = dataEntryData?.seFid ?? baseData?.seFid ?? searchEffortDraft?.seFid;
+
+    // const [offlineFrequencyIds, setOfflineFrequencyIds] = useState([]);
+    // const [offlineSpawnBehavior, setOfflineSpawnBehavior] = useState([]);
+    // const [offlineMacros, setOfflineMacros] = useState([]);
+    // const [offlineMesos, setOfflineMesos] = useState([]);
+    // const [offlinePositionConfidence, setOfflinePositionConfidence] = useState([]);
+    const [offlineLookups, setOfflineLookups] = useState({
+      frequencyId: [],
+      spawnBehavior: [],
+      macros: [],
+      mesos: [],
+      positionConfidence: [],
+    });
 
     const defaultValues = { seId: dataEntryLastParams?.seId };
     console.log('Data Entry Last params:', dataEntryLastParams);
     console.log('Is it getting seId?:', dataEntryLastParams?.seId);
-    const seFid = dataEntryData?.seFid;
+    // const seFid = dataEntryData?.seFid;
     console.log('Where is my seFid:', seFid);
 
     // const idOptions = createDropdownOptions(id);
+    const mapOnlineLookup = (items = []) => items.map((opt) => ({ value: opt.code, text: opt.code }));
 
     const findOptionByValue = (options, value) => {
       return options.find((opt) => String(opt.value) === String(value)) || null;
@@ -90,6 +111,36 @@ const TelemetryDataEntry = connect(
       const existing = data.filter((row) => row.seFid === seFid);
       return existing.length + 1;
     };
+
+    const frequencyIdOptions = frequencyId?.length > 0 ? frequencyId : offlineLookups.frequencyId;
+    const spawnBehaviorOptions = spawnBehavior?.length > 0 ? spawnBehavior : offlineLookups.spawnBehavior;
+    const macroOptions = macros?.length > 0 ? macros : offlineLookups.macros;
+    const mesoOptions = mesos?.length > 0 ? mesos : offlineLookups.mesos;
+    const positionConfidenceOptions =
+      positionConfidence?.length > 0 ? positionConfidence : offlineLookups.positionConfidence;
+
+    useEffect(() => {
+      async function loadOfflineLookups() {
+        const [offlineFrequencyId, offlineSpawnBehavior, offlineMacros, offlineMesos, offlinePositionConfidence] =
+          await Promise.all([
+            getLookupOptions('frequencyId'),
+            getLookupOptions('spawnBehavior'),
+            getLookupOptions('macros'),
+            getLookupOptions('mesos'),
+            getLookupOptions('positionConfidence'),
+          ]);
+
+        setOfflineLookups({
+          frequencyId: offlineFrequencyId,
+          spawnBehavior: offlineSpawnBehavior,
+          macros: offlineMacros,
+          mesos: offlineMesos,
+          positionConfidence: offlinePositionConfidence,
+        });
+      }
+
+      loadOfflineLookups();
+    }, []);
 
     useEffect(() => {
       if (items) {
@@ -256,7 +307,7 @@ const TelemetryDataEntry = connect(
           meta: {
             type: 'select',
             required: true,
-            options: createDropdownOptions(frequencyId),
+            options: createDropdownOptions(frequencyIdOptions),
           },
         }),
         columnHelper.accessor('captureButton', {
@@ -294,7 +345,7 @@ const TelemetryDataEntry = connect(
           meta: {
             type: 'select',
             required: true,
-            options: createDropdownOptions(positionConfidence),
+            options: createDropdownOptions(positionConfidenceOptions),
           },
         }),
         columnHelper.accessor('spawnBehavior', {
@@ -304,7 +355,7 @@ const TelemetryDataEntry = connect(
           meta: {
             type: 'select',
             required: true,
-            options: createDropdownOptions(spawnBehavior),
+            options: createDropdownOptions(spawnBehaviorOptions),
           },
         }),
         columnHelper.accessor('mesoId', {
@@ -315,7 +366,7 @@ const TelemetryDataEntry = connect(
           meta: {
             type: 'select',
             required: true,
-            options: createDropdownOptions(mesos),
+            options: createDropdownOptions(mesoOptions),
           },
         }),
         columnHelper.accessor('macroId', {
@@ -326,7 +377,7 @@ const TelemetryDataEntry = connect(
           meta: {
             type: 'select',
             required: true,
-            options: createDropdownOptions(macros),
+            options: createDropdownOptions(macroOptions),
           },
         }),
         columnHelper.accessor('depth', {
@@ -404,18 +455,33 @@ const TelemetryDataEntry = connect(
       [columnHelper]
     );
 
-    const handleAddRow = () => {
+    const handleAddRow = async () => {
       // Add default values here
+
+      if (!seFid) {
+        console.error('Cannot add telemetry row because seFid is missing:', {
+          seFid,
+          baseData,
+          dataEntryData,
+        });
+        return;
+      }
       const base = getBaseDefaultValues({ baseData });
-      const sequence = getNextSequence(data, seFid);
+
+      const localRows = await db.telemetry.where('seFid').equals(seFid).toArray();
+
+      const dbRows = data?.filter((row) => row.seFid === seFid) ?? [];
+      const sequence = localRows.length + dbRows.length + 1;
+      const sequenceText = String(sequence).padStart(3, '0');
 
       const newRowData = {
         ...base,
-        tFid: `${seFid}-${sequence}`,
+        tFid: `${seFid}-${sequenceText}`,
         seFid,
         ...defaultValues,
+        clientId: crypto.randomUUID(),
         _status: 'new',
-        // countF: 1,
+        version: 0,
       };
       console.log('New tFid:', newRowData.tFid);
       setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
@@ -506,27 +572,59 @@ const TelemetryDataEntry = connect(
           const row = rowsToProcess[i];
 
           const isNew = !row.tId;
-
           const formattedRow = formatRow(row);
 
-          console.log('Row:', row);
-          console.log('isNew:', isNew, 'tId:', row.tId);
+          const clientId = row.clientId ?? crypto.randomUUID();
 
-          console.log('Submitting row:', formattedRow.frequencyIdCode, typeof formattedRow.frequencyIdCode);
+          const payload = {
+            ...formattedRow,
+            clientId,
+            seFid: row.seFid,
+            tFid: row.tFid,
+            _status: 'queued',
+            version: row.version ?? 0,
+          };
 
-          await telemetryDataEntrySchema.validate(formattedRow, { abortEarly: false });
+          await telemetryDataEntrySchema.validate(payload, { abortEarly: false });
 
-          if (isNew) {
-            console.log('Creating row:', formattedRow);
-            await doSaveTelemetryDataEntry(formattedRow);
-          } else if (row.tId && row._status === 'edited') {
-            console.log('Updating row:', formattedRow);
-            await doUpdateTelemetryDataEntry(formattedRow);
+          try {
+            if (isOnline()) {
+              if (isNew) {
+                console.log('Creating row online:', payload);
+                await doSaveTelemetryDataEntry(payload);
+              } else if (row.tId && row._status === 'edited') {
+                console.log('Updating row online:', payload);
+                await doUpdateTelemetryDataEntry(payload);
+              }
+            } else {
+              if (isNew) {
+                console.log('Creating row offline:', payload);
+                await createData('telemetry', payload);
+              } else {
+                console.log('Updating row offline:', payload);
+                await updateData('telemetry', clientId, payload);
+              }
+            }
+          } catch (error) {
+            console.error('Telemetry API failed, queuing offline:', error);
+
+            if (isNew) {
+              await createData('telemetry', payload);
+            } else {
+              await updateData('telemetry', clientId, payload);
+            }
           }
         }
+        console.log('All telemetry rows submitted');
 
-        // const res = await doSaveTelemetryDataEntry(formattedRow);
-        console.log('All rows submitted');
+        setData((prev) =>
+          prev.map((row) =>
+            row._status === 'new' || row._status === 'edited'
+              ? { ...row, _status: 'queued', clientId: row.clientId ?? crypto.randomUUID() }
+              : row
+          )
+        );
+        doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
       }

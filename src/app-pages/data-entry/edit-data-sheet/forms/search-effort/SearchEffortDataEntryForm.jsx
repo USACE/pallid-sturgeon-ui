@@ -13,6 +13,10 @@ import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { generateFieldId } from '../../../dataEntryHelper';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
+import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+import { db } from '@src/app-pages/data-entry/offline/db';
+import { create } from 'lodash';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -46,6 +50,7 @@ const SearchEffortDataEntryForm = connect(
   'selectRouteParams',
   'selectIsEditForm',
   'selectLookupData',
+  'doUpdateCurrentTab',
   ({
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
@@ -55,15 +60,12 @@ const SearchEffortDataEntryForm = connect(
     routeParams,
     isEditForm,
     lookupData,
+    doUpdateCurrentTab,
   }) => {
     const prevIsEditFormRef = useRef(isEditForm);
     const siteId = routeParams?.siteId;
     const { searchTypeCodes } = lookupData;
-
-    console.log('here is searchtypes', searchTypeCodes);
-    console.log('search type spec:', searchTypeCodes[2].code);
-    console.log('look at this:', searchTypeCodes.find((s) => s.code === 'RS')?.code);
-    console.log('what is here', searchTypeCodes.code);
+    const [offlineSearchTypeCodes, setOfflineSearchTypeCodes] = useState([]);
 
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
@@ -152,7 +154,6 @@ const SearchEffortDataEntryForm = connect(
     const telemetryCount = Number(watch('telemetryCount') || 0);
     const hasTelemetry = telemetryCount >= 1;
 
-    console.log('watch it!:', searchTypeCode);
     const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
     const getTelemetryWarning = () => {
@@ -215,17 +216,58 @@ const SearchEffortDataEntryForm = connect(
       const valid = await trigger();
       if (!valid) return;
 
+      const values = getCastedValues();
+
+      const clientId = values.clientId ?? crypto.randomUUID();
+
       const payload = filterNullEmptyObjects({
-        ...getCastedValues(),
+        ...values,
+        clientId,
         status: 1,
+        _status: 'queued',
+        version: values.version ?? 0,
       });
 
-      if (isEditForm) {
-        doUpdateSearchDataEntry(payload, () => {});
-      } else {
-        doSaveSearchDataEntry(payload, (val) => {
-          if (val) setValue('seId', val);
-        });
+      if (!payload.seFid) {
+        console.error('Missing seFid. Cannot save draft offline.');
+        return;
+      }
+
+      try {
+        if (isOnline()) {
+          if (isEditForm) {
+            doUpdateSearchDataEntry(payload, () => {});
+          } else {
+            doSaveSearchDataEntry(payload, (val) => {
+              if (val) setValue('seId', val);
+            });
+          }
+        } else {
+          if (isEditForm) {
+            await updateData('search', clientId, payload);
+          } else {
+            await createData('search', payload);
+          }
+        }
+        sessionStorage.setItem('currentSearchEffortDraft', JSON.stringify(payload));
+        console.log('Saved Search Effort draft to sessionStorage');
+        setValue('clientId', clientId);
+        setValue('seFid', payload.seFid);
+        setValue('status', 1);
+
+        doUpdateCurrentTab(1);
+      } catch (error) {
+        console.error('Save draft failed:', error);
+
+        if (isEditForm) {
+          await updateData('search', clientId, payload);
+        } else {
+          await createData('search', payload);
+        }
+
+        setValue('clientId', clientId);
+        setValue('status', 1);
+        doUpdateCurrentTab(1);
       }
     };
 
@@ -234,20 +276,79 @@ const SearchEffortDataEntryForm = connect(
       const valid = await trigger();
       if (!valid) return;
 
+      const values = getCastedValues();
+
+      const clientId = values.clientId ?? crypto.randomUUID();
+
       const payload = filterNullEmptyObjects({
-        ...getCastedValues(),
+        ...values,
+        clientId,
         status: 2,
+        _status: 'queued',
+        version: values.version ?? 0,
       });
 
-      console.log('SUBMIT isEditForm:', isEditForm);
-      console.log('SUBMIT payload:', payload);
+      try {
+        if (isOnline()) {
+          if (isEditForm) {
+            doUpdateSearchDataEntry(payload);
+          } else {
+            doSaveSearchDataEntry(payload);
+          }
+        } else {
+          if (isEditForm || values.clientId) {
+            await updateData('search', clientId, payload);
+          } else {
+            await createData('search', payload);
+          }
+        }
 
-      if (isEditForm) {
-        doUpdateSearchDataEntry(payload);
-      } else {
-        doSaveSearchDataEntry(payload);
+        setValue('clientId', clientId);
+        setValue('status', 2);
+      } catch (error) {
+        console.error('Search submit failed, queueing offline:', error);
+
+        if (isEditForm || values.clientId) {
+          await updateData('search', clientId, payload);
+        } else {
+          await createData('search', payload);
+        }
+        setValue('clientId', clientId);
+        setValue('status', 2);
       }
     };
+
+    useEffect(() => {
+      if (isEditForm) return;
+
+      const savedDraft = sessionStorage.getItem('currentSearchEffortDraft');
+
+      if (!savedDraft) return;
+
+      try {
+        const draft = JSON.parse(savedDraft);
+
+        if (!draft?.seFid) return;
+
+        Object.entries(draft).forEach(([key, value]) => {
+          setValue(key, value);
+        });
+        console.log('Reloaded offline Search Effort draft:', draft);
+      } catch (error) {
+        console.error('Failed to reload offline Search Effort draft:', error);
+      }
+    }, [isEditForm, setValue]);
+
+    useEffect(() => {
+      async function loadCachedLookups() {
+        const options = await getLookupOptions('searchTypeCodes');
+        console.log('Offline search type options:', options);
+        setOfflineSearchTypeCodes(options);
+      }
+      loadCachedLookups();
+    }, []);
+
+    const searchTypeOptions = searchTypeCodes?.length > 0 ? searchTypeCodes : offlineSearchTypeCodes;
 
     useEffect(() => {
       const count = Number(dataEntryTelemetryTotalCount || 0);
@@ -280,15 +381,27 @@ const SearchEffortDataEntryForm = connect(
 
     // Set IDs
     useEffect(() => {
-      if (!isEditForm) {
-        const queueLength = 0; // replace with outbox length later
+      async function setSearchEffortFid() {
+        if (!isEditForm) {
+          const savedDraft = sessionStorage.getItem('currentSearchEffortDraft');
+          const draft = savedDraft ? JSON.parse(savedDraft) : null;
 
-        const seFid = generateFieldId(queueLength);
-        setValue('seFid', seFid);
-      } else if (isEditForm && dataEntryData) {
-        setValue('seId', dataEntryData.seId);
-        setValue('seFid', dataEntryData.seFid);
+          if (draft?.seFid) {
+            setValue('clientId', draft.clientId);
+            setValue('seFid', draft.seFid);
+            return;
+          }
+
+          const queueLength = await db.outbox.where('tableName').equals('ds_search').count();
+
+          const seFid = generateFieldId(queueLength);
+          setValue('seFid', seFid);
+        } else if (isEditForm && dataEntryData) {
+          setValue('seId', dataEntryData.seId);
+          setValue('seFid', dataEntryData.seFid);
+        }
       }
+      setSearchEffortFid();
     }, [isEditForm, dataEntryData, setValue]);
 
     useEffect(() => {
@@ -368,7 +481,7 @@ const SearchEffortDataEntryForm = connect(
 
             <Grid tablet={{ col: 2 }}>
               <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
-                {searchTypeCodes.map((opt, idx) => (
+                {searchTypeOptions.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
                     {opt.code}
                   </option>

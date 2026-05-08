@@ -143,7 +143,12 @@ async function upsertLocal(table: any, entry: Partial<DataEntry> & { clientId: s
   await table.put(merged);
 }
 
-async function queueOp(entityKey: EntityKey, op: OutboxItem['op'], entry: DataEntry, payload?: Partial<DataEntry>) {
+async function queueOp(
+  entityKey: EntityKey,
+  op: OutboxItem['op'],
+  entry: DataEntry & { clientId: string },
+  payload?: Partial<DataEntry>
+) {
   const config = API_CONFIG[entityKey];
   await db.outbox.add({
     tableName: config.tableName,
