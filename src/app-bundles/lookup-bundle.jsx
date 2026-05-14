@@ -10,6 +10,7 @@ const lookupBundle = {
       bendSelections: [],
       gearCodes: [],
       filteredGearCodes: [],
+      frequencyIds: [],
       gearTypes: [],
       macros: [],
       mesos: [],

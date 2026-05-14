@@ -28,6 +28,7 @@ const MrIdCellRenderer = connect(
     const handleClick = () => {
       doUpdateCurrentTab(tab);
       doUpdateComplexStateField({ name: 'isEditForm', value: true });
+      doResetMoRiverDataEntryData();
       doFetchMoRiverDataEntry({ tableId: mrId }, false, true, true);
       // Reset form data
       doResetFormData();
