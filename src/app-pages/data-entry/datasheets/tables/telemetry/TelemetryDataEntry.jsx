@@ -11,7 +11,6 @@ import { TableCell } from '@src/app-components/table/table-cell-components/Table
 import { Button, Alert, Grid } from '@trussworks/react-uswds';
 import classNames from 'classnames';
 
-import { frequencyIdOptions } from '../../../edit-data-sheet/forms/_shared/selectHelper';
 import {
   telemetryDataEntrySchema,
   getBaseDefaultValues,
