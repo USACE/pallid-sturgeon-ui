@@ -460,18 +460,6 @@ export const searchTypeOptions = [
   { value: 'TA', text: 'TA' },
 ];
 
-// Telemetry Form Select Options
-export const frequencyIdOptions = [
-  { value: 1, text: 'A69-1602' },
-  { value: 2, text: 'R_149.760_3' },
-  { value: 3, text: 'R_149.620_3' },
-  { value: 4, text: 'A_180.0' },
-  { value: 5, text: 'A_76.8_1.1.4' },
-  { value: 6, text: 'A_200_1.14.1' },
-  { value: 7, text: 'A_69.0' },
-  { value: 8, text: 'A69-1601' },
-];
-
 export const positionConfidenceOptions = [
   { value: 1, text: '1' },
   { value: 2, text: '2' },

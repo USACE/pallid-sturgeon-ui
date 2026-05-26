@@ -19,6 +19,8 @@ import FloyTagPrefixTableCell from '@src/app-components/table/table-cell-compone
 
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
+import FishLinkTableCell from '@src/app-components/table/table-cell-components/fish/FishLinkTableCell';
+import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
@@ -101,10 +103,18 @@ const FishDataEntry = connect(
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 150,
         }),
-        columnHelper.accessor('supplink', {
-          header: 'Supp Link',
-          cell: ({ cell }) => <span>Button</span>,
-          size: 200,
+        columnHelper.display({
+          header: 'Supp/Proc Link',
+          id: 'supplink',
+          cell: ({ row }) => (
+            <FishLinkTableCell row={row} rowData={rowData} modalComponent={SupplementalProcedureModal} />
+          ),
+          size: 60,
+          enableSorting: false,
+          meta: {
+            centerText: true,
+            optional: true, // These values are set to prevent error styling from rendering when inappropriate.
+          },
         }),
         columnHelper.accessor('panelHook', {
           header: 'Panel/Hook',

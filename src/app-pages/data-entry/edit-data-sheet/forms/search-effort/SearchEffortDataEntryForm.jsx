@@ -13,10 +13,6 @@ import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { generateFieldId } from '../../../dataEntryHelper';
-import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
-import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
-import { db } from '@src/app-pages/data-entry/offline/db';
-import { create } from 'lodash';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -65,7 +61,11 @@ const SearchEffortDataEntryForm = connect(
     const prevIsEditFormRef = useRef(isEditForm);
     const siteId = routeParams?.siteId;
     const { searchTypeCodes } = lookupData;
-    const [offlineSearchTypeCodes, setOfflineSearchTypeCodes] = useState([]);
+
+    console.log('here is searchtypes', searchTypeCodes);
+    console.log('search type spec:', searchTypeCodes[2].code);
+    console.log('look at this:', searchTypeCodes.find((s) => s.code === 'RS')?.code);
+    console.log('what is here', searchTypeCodes.code);
 
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
@@ -148,12 +148,11 @@ const SearchEffortDataEntryForm = connect(
       }
     };
 
-    console.warn('values: ', getValues());
-
     const searchTypeCode = watch('searchTypeCode');
     const telemetryCount = Number(watch('telemetryCount') || 0);
     const hasTelemetry = telemetryCount >= 1;
 
+    console.log('watch it!:', searchTypeCode);
     const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
     const getTelemetryWarning = () => {
@@ -288,67 +287,15 @@ const SearchEffortDataEntryForm = connect(
         version: values.version ?? 0,
       });
 
-      try {
-        if (isOnline()) {
-          if (isEditForm) {
-            doUpdateSearchDataEntry(payload);
-          } else {
-            doSaveSearchDataEntry(payload);
-          }
-        } else {
-          if (isEditForm || values.clientId) {
-            await updateData('search', clientId, payload);
-          } else {
-            await createData('search', payload);
-          }
-        }
+      console.log('SUBMIT isEditForm:', isEditForm);
+      console.log('SUBMIT payload:', payload);
 
-        setValue('clientId', clientId);
-        setValue('status', 2);
-      } catch (error) {
-        console.error('Search submit failed, queueing offline:', error);
-
-        if (isEditForm || values.clientId) {
-          await updateData('search', clientId, payload);
-        } else {
-          await createData('search', payload);
-        }
-        setValue('clientId', clientId);
-        setValue('status', 2);
+      if (isEditForm) {
+        doUpdateSearchDataEntry(payload);
+      } else {
+        doSaveSearchDataEntry(payload);
       }
     };
-
-    useEffect(() => {
-      if (isEditForm) return;
-
-      const savedDraft = sessionStorage.getItem('currentSearchEffortDraft');
-
-      if (!savedDraft) return;
-
-      try {
-        const draft = JSON.parse(savedDraft);
-
-        if (!draft?.seFid) return;
-
-        Object.entries(draft).forEach(([key, value]) => {
-          setValue(key, value);
-        });
-        console.log('Reloaded offline Search Effort draft:', draft);
-      } catch (error) {
-        console.error('Failed to reload offline Search Effort draft:', error);
-      }
-    }, [isEditForm, setValue]);
-
-    useEffect(() => {
-      async function loadCachedLookups() {
-        const options = await getLookupOptions('searchTypeCodes');
-        console.log('Offline search type options:', options);
-        setOfflineSearchTypeCodes(options);
-      }
-      loadCachedLookups();
-    }, []);
-
-    const searchTypeOptions = searchTypeCodes?.length > 0 ? searchTypeCodes : offlineSearchTypeCodes;
 
     useEffect(() => {
       const count = Number(dataEntryTelemetryTotalCount || 0);
@@ -473,6 +420,7 @@ const SearchEffortDataEntryForm = connect(
               <TextInput
                 name='recorder'
                 label='Recorder Initials'
+                maxLength={3}
                 style={{ textTransform: 'uppercase' }}
                 onChange={handleChange}
                 required
@@ -481,7 +429,7 @@ const SearchEffortDataEntryForm = connect(
 
             <Grid tablet={{ col: 2 }}>
               <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
-                {searchTypeOptions.map((opt, idx) => (
+                {searchTypeCodes.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
                     {opt.code}
                   </option>

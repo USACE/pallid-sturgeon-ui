@@ -15,7 +15,6 @@ import DateEditor from '@common/gridCellEditors/dateEditor';
 
 import {
   evalLocationsOptions,
-  frequencyIdOptions,
   purposeOptions,
   sexOptions,
   spawnEvaluationOptions,
@@ -23,10 +22,11 @@ import {
   YNNumOptions,
 } from '@pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
+import { tabToNextCell } from './helpers';
+import { createDropdownOptions } from '../../helpers';
 
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
-import { tabToNextCell } from './helpers';
 
 const ProcedureDsTable = connect(
   'doModalOpen',
@@ -35,6 +35,7 @@ const ProcedureDsTable = connect(
   'selectDataEntryProcedure',
   'selectDataEntryLastParams',
   'selectUserRole',
+  'selectLookupData',
   ({
     doModalOpen,
     doSaveProcedureDataEntry,
@@ -44,9 +45,13 @@ const ProcedureDsTable = connect(
     userRole,
     isAddRow,
     rowId,
+    lookupData,
   }) => {
     const gridRef = useRef();
     const { items } = dataEntryProcedure;
+    const { frequencyIds } = lookupData;
+
+    const getFrequencyIdString = (id) => frequencyIds?.filter((item) => item.code === id)?.[0]?.description;
 
     const setDates = useCallback((id) => {
       const rowNode = gridRef.current.api.getRowNode(String(id));
@@ -220,7 +225,8 @@ const ProcedureDsTable = connect(
             <AgGridColumn
               field='oldFrequencyId'
               cellEditor='selectEditor'
-              cellEditorParams={{ options: frequencyIdOptions, type: 'number' }}
+              cellEditorParams={{ options: createDropdownOptions(frequencyIds), type: 'number' }}
+              valueFormatter={(params) => getFrequencyIdString(params.data.oldFrequencyId)}
               width={150}
               sortable
               unSortIcon
@@ -271,7 +277,8 @@ const ProcedureDsTable = connect(
               field='newFreqId'
               headerName='New Frequency Id'
               cellEditor='selectEditor'
-              cellEditorParams={{ options: frequencyIdOptions, type: 'number' }}
+              cellEditorParams={{ options: createDropdownOptions(frequencyIds), type: 'number' }}
+              valueFormatter={(params) => getFrequencyIdString(params.data.newFreqId)}
               width={150}
               sortable
               unSortIcon
