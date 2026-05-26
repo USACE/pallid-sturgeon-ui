@@ -5,7 +5,6 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { createColumnHelper } from '@tanstack/react-table';
 import _isEqual from 'lodash/isEqual';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
