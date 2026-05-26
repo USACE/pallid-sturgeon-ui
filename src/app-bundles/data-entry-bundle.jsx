@@ -703,7 +703,7 @@ export default {
     },
 
   doUpdateTelemetryDataEntry:
-    (formData, params) =>
+    (formData) =>
     ({ dispatch, store, apiPut }) => {
       const toastId = toast.loading('Saving datasheet...');
 
@@ -715,7 +715,7 @@ export default {
         if (!apiError) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
-          store.doFetchTelemetryDataEntry(params);
+          store.doFetchTelemetryDataEntry({ seId: formData?.seId, id: store.selectUserRole()?.id });
         } else {
           dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, _body?.message || 'Error saving datasheet. Check your field entries and please try again.');
