@@ -1,9 +1,11 @@
-import React, { useRef, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import { createColumnHelper } from '@tanstack/react-table';
 import _isEqual from 'lodash/isEqual';
+import { Button } from '@trussworks/react-uswds';
+import classNames from 'classnames';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
@@ -16,47 +18,31 @@ import FloyTagMrTableCell from '@src/app-components/table/table-cell-components/
 import FloyTagTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell';
 import CountTableCell from '@src/app-components/table/table-cell-components/fish/CountTableCell';
 import FloyTagPrefixTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell.prefix';
+import FishLinkTableCell from '@src/app-components/table/table-cell-components/fish/FishLinkTableCell';
+import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
 
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
-import FishLinkTableCell from '@src/app-components/table/table-cell-components/fish/FishLinkTableCell';
-import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
+import { CreateComboboxOptions, createDropdownOptions } from '@src/app-pages/data-entry/dataEntryHelper';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 
-const createDropdownOptions = (data) => {
-  if (!data) return [];
+const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
-  return data.map((item) => {
-    const { code, description } = item;
-
-    return {
-      value: code,
-      text: description,
-    };
-  });
-};
-
-const createComboboxOptions = (data) => {
-  if (!data) return [];
-
-  return data.map((item) => {
-    const { code, description } = item;
-
-    return {
-      value: code,
-      label: `${code} - ${description}`,
-    };
-  });
+const getNextSequence = (data, mrFid) => {
+  const existing = data.filter((item) => item.mrFid === mrFid);
+  return existing.length + 1;
 };
 
 const FishDataEntry = connect(
+  'doSaveFishDataEntry',
+  'doUpdateFishDataEntry',
   'selectDataEntryData',
   'selectDataEntryFishData',
   'selectBaseData',
   'selectLookupData',
-  ({ dataEntryData, dataEntryFishData, baseData, lookupData }) => {
+  ({ doSaveFishDataEntry, doUpdateFishDataEntry, dataEntryData, dataEntryFishData, baseData, lookupData }) => {
     const { items } = dataEntryFishData;
     const { gear } = dataEntryData;
 
@@ -66,9 +52,9 @@ const FishDataEntry = connect(
     const [tableKey, setTableKey] = useState(0);
     const [tableErrors, setTableErrors] = useState();
     const [data, setData] = useState(rowData);
-    const [tableIsDirty, setTableIsDirty] = useState(false);
-    const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
+
+    const mrFid = dataEntryData?.mrFid;
 
     const speciesOptions =
       fishCodes?.map((item) => ({
@@ -81,15 +67,6 @@ const FishDataEntry = connect(
       mode: 'onBlur',
       defaultValues: getFishRiverDefaultValues({ baseData: baseData, dataEntryData: dataEntryFishData }),
     });
-    const {
-      formState: { errors, dirtyFields },
-      setValue,
-      watch,
-      setError,
-      clearErrors,
-      trigger,
-      reset,
-    } = methods;
 
     const tableColumns = useMemo(
       () => [
@@ -130,7 +107,7 @@ const FishDataEntry = connect(
           size: 200,
           meta: {
             type: 'combobox',
-            options: createComboboxOptions(speciesOptions),
+            options: CreateComboboxOptions(speciesOptions),
           },
         }),
         columnHelper.accessor('lengthType', {
@@ -247,11 +224,32 @@ const FishDataEntry = connect(
     const handleAddRow = () => {
       // Add default values here
       const base = getBaseDefaultValues({ baseData });
+      const sequence = getNextSequence(data, mrFid);
+
+      // Format new row data
       const newRowData = {
         ...base,
-        countF: 1,
+        ffid: `${mrFid}-${sequence}`,
+        mrFid,
+        _status: 'new',
       };
+
       setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
+    };
+
+    const handleCopyLastRowBtn = () => {
+      const sequence = getNextSequence(data, mrFid);
+      // Grab last object from data array
+      const lastRowData = data.slice(-1)[0];
+      // Format new row data
+      const newRowData = {
+        ...lastRowData,
+        fid: null, // Reset fid if copying a save data object
+        ffid: `${mrFid}-${sequence}`,
+        _status: 'new',
+        mrFid: mrFid,
+      };
+      setData((prev) => (prev ? [...prev, newRowData] : []));
     };
 
     const handleAddMultipleRows = (rows) => {
@@ -290,16 +288,30 @@ const FishDataEntry = connect(
       [setData]
     );
 
-    useEffect(() => {
-      const tableDataChanged = !_isEqual(data, prevTableDataRef.current);
-      tableDataChanged && setTableIsDirty(true);
-    }, [data]);
+    const handleSubmitAll = async () => {
+      try {
+        const rowsToProcess = data.filter((item) => item._status === 'new' || item._status === 'edited');
+        for (let i = 0; i < rowsToProcess.length; i++) {
+          const data = rowsToProcess[i];
+          const isNew = !data.fId;
+          await FishDataEntrySchema.validate(data, { abortEarly: false });
 
-    //Reset the dirty states of the fields after a save.
-    // useResetDirtyFields(isTouched, requestAPIData, reset, trigger);
+          if (isNew) {
+            await doSaveFishDataEntry(data);
+          } else if (data.tId && data._status === 'edited') {
+            await doUpdateFishDataEntry(data);
+          }
+        }
+      } catch (err) {
+        console.error('Submit failed:', err);
+      }
+    };
 
     return (
       <FormProvider {...methods}>
+        <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
+          Copy Last Row
+        </Button>
         <DataEntryTable
           addRow={handleAddRow}
           columns={tableColumns}
@@ -315,6 +327,9 @@ const FishDataEntry = connect(
           updateSourceData={handleUpdateData}
           validationSchema={FishDataEntrySchema({ gear, data })}
         />
+        <Button className={saveBtnClasses} onClick={() => handleSubmitAll()} type='button'>
+          Submit
+        </Button>
       </FormProvider>
     );
   }
