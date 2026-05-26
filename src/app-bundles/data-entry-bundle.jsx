@@ -460,7 +460,7 @@ export default {
               store.doUpdateUrl(`/sites-list/${siteId}/search-effort/${seId}`);
               store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
               store.doFetchSearchDataEntry({ tableId: seId }, false, false, true);
-              store.doSearchEffortDatasheetLoadData(seId);
+              store.doSearchEffortDatasheetLoadData({ seId: seId });
             }
           }
         } else {
@@ -577,7 +577,7 @@ export default {
     },
 
   doSaveTelemetryDataEntry:
-    (formData, params) =>
+    (formData) =>
     ({ dispatch, store, apiPost }) =>
       new Promise((resolve, reject) => {
         const toastId = toast.loading('Saving datasheet...');
@@ -593,7 +593,7 @@ export default {
           if (!apiError) {
             tSuccess(toastId, 'Datasheet successfully updated!');
             dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_FINISHED' });
-            store.doFetchTelemetryDataEntry(params);
+            store.doFetchTelemetryDataEntry({ seId: formData?.seId, id: store.selectUserRole()?.id });
             resolve(_body);
           } else {
             dispatch({ type: 'TELEMETRY_DATA_ENTRY_UPDATE_ERROR', payload: err || _body });
