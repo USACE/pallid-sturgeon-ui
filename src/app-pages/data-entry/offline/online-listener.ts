@@ -3,14 +3,14 @@ import { syncNow, scheduleAutoSync } from './sync';
 
 let onlineState = typeof navigator !== 'undefined' ? navigator.onLine : true;
 
-const subscribers = new Set<(online: boolean) => void>();
+const onlineStatusListener = new Set<(online: boolean) => void>();
 
-const notifySubscribers = () => {
-  subscribers.forEach((callback) => {
+const notifyOnlineStatusListeners = () => {
+  onlineStatusListener.forEach((callback) => {
     try {
       callback(onlineState);
     } catch {
-      // ignore subscriber errors
+      // ignore statusListener errors
     }
   });
 };
@@ -19,7 +19,7 @@ const setOnlineState = (value: boolean) => {
   if (onlineState === value) return;
 
   onlineState = value;
-  notifySubscribers();
+  notifyOnlineStatusListeners();
 };
 
 export function getOnlineStatus(): boolean {
@@ -27,7 +27,7 @@ export function getOnlineStatus(): boolean {
 }
 
 export function onOnlineChange(callback: (online: boolean) => void): () => void {
-  subscribers.add(callback);
+  onlineStatusListener.add(callback);
 
   try {
     callback(onlineState);
@@ -36,7 +36,7 @@ export function onOnlineChange(callback: (online: boolean) => void): () => void 
   }
 
   return () => {
-    subscribers.delete(callback);
+    onlineStatusListener.delete(callback);
   };
 }
 
@@ -44,9 +44,9 @@ const autoSync = scheduleAutoSync(15000);
 
 const handleOnline = async () => {
   setOnlineState(true);
-  async;
+
   try {
-    await syncNow();
+    console.warn('Auto-sync skipped: auth token required. Use manual Sync button.');
   } catch (err) {
     console.error('Auto-sync failed after coming online:', err);
   }
@@ -81,7 +81,7 @@ export function initOnlineListener(): () => void {
   window.addEventListener('visibilitychange', handleVisibilityChange);
 
   autoSync.start();
-  notifySubscribers();
+  notifyOnlineStatusListeners();
 
   return () => {
     window.removeEventListener('online', handleOnline);

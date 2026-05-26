@@ -3,6 +3,7 @@ const urlencodeFormData = (fd) => new URLSearchParams([...fd]);
 class Keycloak {
   constructor(config) {
     this.accessToken = null;
+    this.refreshToken = null;
     this.identityToken = null;
     this.config = config;
     this.redirectCallback = config.onRedirect;
@@ -30,13 +31,9 @@ class Keycloak {
   authenticate() {
     const url = `${this.config.keycloakUrl}/realms/${
       this.config.realm
-    }/protocol/openid-connect/auth?response_type=code${
-      this.idpHint ? `&kc_idp_hint=${this.idpHint}` : ''
-    }&client_id=${
+    }/protocol/openid-connect/auth?response_type=code${this.idpHint ? `&kc_idp_hint=${this.idpHint}` : ''}&client_id=${
       this.config.client
-    }&scope=openid&redirect_uri=${
-      this.config.redirectUrl
-    }&nocache=${new Date().getTime()}`;
+    }&scope=openid%20offline_access&redirect_uri=${this.config.redirectUrl}&nocache=${new Date().getTime()}`;
     window.location.href = url;
   }
 
@@ -48,7 +45,7 @@ class Keycloak {
       this.redirectCallback(this.session_state);
     }
     if (this.code && this.session_state) {
-      this.codeFlowAuth(this.authcallback);
+      this.codeFlowAuth();
       window.history.pushState(null, null, document.location.pathname);
     }
   }
@@ -60,25 +57,26 @@ class Keycloak {
     let self = this;
     let resp = null;
     xhr.onload = function () {
+      console.log('Keycloak token response status:', xhr.status);
       switch (xhr.status) {
-        case (400):
+        case 400:
           self.accessToken = null;
           self.refreshToken = null;
           resp = JSON.parse(xhr.responseText);
           self.errCallback(resp);
           break;
-        case (xhr.status !== 200):
+        case xhr.status !== 200:
           resp = JSON.parse(xhr.responseText);
           self.errCallback(resp);
           break;
         default:
           const keycloakResp = JSON.parse(xhr.responseText);
           self.accessToken = keycloakResp.access_token;
+          self.refreshToken = keycloakResp.refresh_token;
           self.identityToken = keycloakResp.identity_token;
           const remainingTime = keycloakResp.refresh_expires_in;
           if (remainingTime <= self.sessionEndWarning) {
-            if (self.sessionEndingCallback)
-              self.sessionEndingCallback(remainingTime);
+            if (self.sessionEndingCallback) self.sessionEndingCallback(remainingTime);
           }
           setTimeout(function () {
             self.refresh(keycloakResp.refresh_token);
@@ -90,7 +88,7 @@ class Keycloak {
       if (xhr.responseText) {
         self.errCallback(JSON.parse(xhr.responseText));
       } else {
-        self.errCallback({ 'error': 'Unable to fetch the token due to a Network Error' });
+        self.errCallback({ error: 'Unable to fetch the token due to a Network Error' });
       }
     };
     xhr.send(urlencodeFormData(formData));
@@ -119,6 +117,10 @@ class Keycloak {
     return this.accessToken;
   }
 
+  getRefreshToken() {
+    return this.refreshToken;
+  }
+
   getIdentityToken() {
     return this.identityToken;
   }
@@ -127,11 +129,16 @@ class Keycloak {
 const tokenToObject = function (token) {
   let base64Url = token.split('.')[1];
   let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  let jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
-    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
+  let jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join('')
+  );
 
   return JSON.parse(jsonPayload);
 };
 
-export { Keycloak as default, tokenToObject }; 
+export { Keycloak as default, tokenToObject };

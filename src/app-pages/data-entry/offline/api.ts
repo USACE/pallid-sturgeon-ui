@@ -104,36 +104,25 @@ const getConfigByTableName = (tableName: OutboxTable) => {
   return Object.values(API_CONFIG).find((config) => config.tableName === tableName);
 };
 
-async function getAuthHeaders(): Promise<HeadersInit> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
+function getAuthHeaders(token?: string): HeadersInit {
+  const headers = new Headers();
+  headers.set('Content-Type', 'application/json');
 
-  const getToken = (window as any).getAuthTokenAsync;
-
-  if (typeof getToken === 'function') {
-    try {
-      const token = await getToken();
-
-      if (token) {
-        headers.Authorization = `Bearer ${token}`;
-      }
-    } catch (e) {
-      console.warn('Token fetch failed', e);
-    }
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
   }
   return headers;
 }
 
 export const isOnline = () => navigator.onLine;
 
-function toServerDto(entry: Partial<DataEntry>): Record<string, any> {
+function formatPayloadForApi(entry: Partial<DataEntry>): Record<string, any> {
   const { clientId, serverId, version, updatedAt, _status, ...serverPayload } = entry;
 
   return serverPayload;
 }
 
-async function upsertLocal(table: any, entry: Partial<DataEntry> & { clientId: string }) {
+async function saveLocalData(table: any, entry: Partial<DataEntry> & { clientId: string }) {
   const current = await table.get(entry.clientId);
 
   const merged = {
@@ -143,7 +132,7 @@ async function upsertLocal(table: any, entry: Partial<DataEntry> & { clientId: s
   await table.put(merged);
 }
 
-async function queueOp(
+async function addToSyncQueue(
   entityKey: EntityKey,
   op: OutboxItem['op'],
   entry: DataEntry & { clientId: string },
@@ -176,7 +165,7 @@ export async function createData(entityKey: EntityKey, entry: DataEntry) {
 
   await config.table.put(local);
 
-  await queueOp(entityKey, 'create', local, local);
+  await addToSyncQueue(entityKey, 'create', local, local);
 
   return { queued: true, clientId };
 }
@@ -191,8 +180,8 @@ export async function updateData(entityKey: EntityKey, clientId: string, changes
 
   const updated = { ...current, ...changes, _status: 'queued' };
 
-  await upsertLocal(config.table, updated);
-  await queueOp(entityKey, 'update', updated, updated);
+  await saveLocalData(config.table, updated);
+  await addToSyncQueue(entityKey, 'update', updated, updated);
 
   return {
     queued: true,
@@ -213,7 +202,10 @@ export async function deleteData(entityKey: EntityKey, clientId: string) {
   return { queued: true, clientId };
 }
 
-export async function pushOutboxItem(item: OutboxItem): Promise<
+export async function pushOutboxItem(
+  item: OutboxItem,
+  token?: string
+): Promise<
   | {
       status: 'ok';
       serverId?: number;
@@ -250,7 +242,8 @@ export async function pushOutboxItem(item: OutboxItem): Promise<
     };
   }
 
-  const method = item.op === 'create' ? 'POST' : item.op === 'update' ? 'PUT' : item.op === 'delete' ? 'DELETE' : null;
+  const method =
+    item.op === 'create' ? 'POST' : item.op === 'update' ? 'PUT' : item.op === 'delete' ? 'DELETE' : undefined;
 
   if (!method) {
     return {
@@ -259,34 +252,55 @@ export async function pushOutboxItem(item: OutboxItem): Promise<
     };
   }
 
-  const payload = item.payload ? toServerDto(item.payload) : {};
+  const payload = item.payload ? formatPayloadForApi(item.payload) : {};
 
-  if (item.serverId != null) {
+  if (item.tableName === 'ds_telemetry_fish' && item.op === 'create') {
+    delete payload.t_id;
+    delete payload.tId;
+  }
+
+  if (item.serverId != null && item.op !== 'create') {
     payload[config.idField] = item.serverId;
   }
 
   payload.clientVersion = item.clientVersion ?? 0;
 
   try {
-    const res = await fetch(`${API_BASE}${endpoint}`, {
+    const requestOptions: RequestInit = {
       method,
-      headers: await getAuthHeaders(),
-      body: method === 'DELETE' ? undefined : JSON.stringify(payload),
-    });
+      headers: getAuthHeaders(token),
+    };
+
+    if (method !== 'DELETE') {
+      requestOptions.body = JSON.stringify(payload);
+    }
+
+    const res = await fetch(`${API_BASE}${endpoint}`, requestOptions);
 
     if (!res.ok) {
+      const errorText = await res.text().catch(() => '');
+
       return {
         status: 'error',
         http: res.status,
-        message: `HTTP ${res.status}`,
+        message: errorText || `HTTP ${res.status}`,
       };
     }
 
     const json = await res.json().catch(() => ({}));
 
+    const returnedServerId =
+      json?.[config.idField] ??
+      json?.data?.[config.idField] ??
+      json?.data?.seId ??
+      json?.data?.se_id ??
+      json?.data?.tId ??
+      json?.data?.t_id ??
+      (typeof json?.data === 'number' ? json.data : undefined);
+
     return {
       status: 'ok',
-      serverId: json?.[config.idField],
+      serverId: returnedServerId,
       serverVersion: json?.version,
       lastUpdated: json?.last_updated ?? json?.lastUpdated,
       json,

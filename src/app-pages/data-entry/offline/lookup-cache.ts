@@ -1,53 +1,6 @@
-import { head } from 'lodash';
 import { db, type LookupItem } from './db';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? '';
-
-// type LookupConfig = {
-//   lookupName: string;
-//   responseKey: string;
-//   codeField: string;
-//   labelField: string;
-// };
-
-// export const LOOKUP_CONFIG: LookupConfig[] = [
-//   {
-//     lookupName: 'searchTypeCodes',
-//     responseKey: 'searchTypes',
-//     codeField: 'code',
-//     labelField: 'description',
-//   },
-//   {
-//     lookupName: 'frequencyId',
-//     responseKey: 'frequencyId',
-//     codeField: 'code',
-//     labelField: 'description',
-//   },
-//   {
-//     lookupName: 'spawnBehavior',
-//     responseKey: 'spawnBehavior',
-//     codeField: 'code',
-//     labelField: 'description',
-//   },
-//   {
-//     lookupName: 'macros',
-//     responseKey: 'macros',
-//     codeField: 'code',
-//     labelField: 'description',
-//   },
-//   {
-//     lookupName: 'mesos',
-//     responseKey: 'mesos',
-//     codeField: 'code',
-//     labelField: 'description',
-//   },
-//   {
-//     lookupName: 'positionConfidence',
-//     responseKey: 'positionConfidence',
-//     codeField: 'code',
-//     labelField: 'description',
-//   },
-// ];
 
 function getAuthHeaders(token?: string): HeadersInit {
   const headers: Record<string, string> = {
@@ -70,13 +23,6 @@ export async function downloadLookupsForOffline(token?: string) {
     throw new Error(`Failed to download lookup data: ${res.status}`);
   }
   const json = await res.json();
-
-  console.log('Dexie DB name:', db.name);
-  console.log(
-    'Dexie tables:',
-    db.tables.map((table) => table.name)
-  );
-  console.log('Lookup API response:', json);
 
   const lookupData = json?.data ?? json;
 
@@ -104,8 +50,6 @@ export async function downloadLookupsForOffline(token?: string) {
       });
     }
   }
-
-  console.log('Rows to save:', rowsToSave.length);
 
   await db.lookups.clear();
 

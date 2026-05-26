@@ -13,53 +13,117 @@ export function isOnline(): boolean {
   return typeof navigator !== 'undefined' ? navigator.onLine : false;
 }
 
-const tablePriority: Record<OutboxItem['tableName'], number> = {
-  ds_sites: 1,
-  ds_search: 2,
-  ds_telemetry_fish: 3,
-  ds_moriver: 4,
-  ds_fish: 5,
-  ds_supplemental: 6,
-  ds_procedure: 7,
-};
+// const tablePriority: Record<OutboxItem['tableName'], number> = {
+//   ds_sites: 1,
+//   ds_search: 2,
+//   ds_telemetry_fish: 3,
+//   ds_moriver: 4,
+//   ds_fish: 5,
+//   ds_supplemental: 6,
+//   ds_procedure: 7,
+// };
 
 function getTable(tableName: string) {
   switch (tableName) {
-    case 'sites':
+    case 'ds_sites':
       return db.sites;
-    case 'moriver':
+    case 'ds_moriver':
       return db.moriver;
-    case 'search':
+    case 'ds_search':
       return db.search;
-    case 'fish':
+    case 'ds_fish':
       return db.fish;
-    case 'telemetry':
+    case 'ds_telemetry_fish':
       return db.telemetry;
-    case 'supplemental':
+    case 'ds_supplemental':
       return db.supplemental;
-    case 'procedure':
+    case 'ds_procedure':
       return db.procedure;
     default:
       throw new Error(`Unknown table: ${tableName}`);
   }
 }
 
-function sortOutboxItems(items: OutboxItem[]) {
-  return items.sort((a, b) => {
-    const topPriority = tablePriority[a.tableName] ?? 99;
-    const nextPriority = tablePriority[b.tableName] ?? 99;
+async function patchSearchChildrenAfterCreate(searchItem: OutboxItem, searchResult: any) {
+  if (searchItem.tableName !== 'ds_search') return;
+  if (searchItem.op !== 'create') return;
 
-    if (topPriority !== nextPriority) {
-      return topPriority - nextPriority;
+  const serverSeId =
+    searchResult.serverId ?? searchResult.json?.data ?? searchResult.json?.seId ?? searchResult.json?.se_id;
+
+  if (!serverSeId) {
+    console.warn('Search create synced but no se_id returned:', searchResult);
+    return;
+  }
+
+  const searchPayload = searchItem.payload ?? {};
+  const seFid = searchPayload.seFid ?? searchPayload.se_fid;
+
+  if (!seFid) {
+    console.warn('Search create synced but no seFid found:', searchItem);
+    return;
+  }
+
+  const pendingItems = await db.outbox.toArray();
+
+  console.log('Pending outbox items before patch:', pendingItems);
+
+  for (const pending of pendingItems) {
+    if (pending._id == null) continue;
+
+    const payload = pending.payload ?? {};
+    const payloadSeFid = payload.seFid ?? payload.se_fid;
+
+    const isSearchUpdate =
+      pending.tableName === 'ds_search' &&
+      pending.op === 'update' &&
+      (pending.clientId === searchItem.clientId || payloadSeFid === seFid);
+
+    const isRelatedTelemetry = pending.tableName === 'ds_telemetry_fish' && payloadSeFid === seFid;
+
+    if (!isSearchUpdate && !isRelatedTelemetry) continue;
+
+    const updates: Partial<OutboxItem> = {
+      payload: {
+        ...payload,
+        se_id: serverSeId,
+        seId: serverSeId,
+      },
+    };
+
+    if (isSearchUpdate) {
+      updates.serverId = undefined;
+
+      updates.payload = {
+        ...updates.payload,
+        t_id: undefined,
+        tId: undefined,
+      };
     }
-    return a.ts - b.ts;
-  });
+
+    await db.outbox.update(pending._id, updates);
+
+    const telemetryRows = await db.telemetry.where('seFid').equals(seFid).toArray();
+
+    for (const row of telemetryRows) {
+      await db.telemetry.put({
+        ...row,
+        se_id: serverSeId,
+      });
+    }
+  }
 }
 
-export async function syncNow(): Promise<SyncResult> {
+export async function syncNow(token?: string): Promise<SyncResult> {
   if (!isOnline()) {
     return { tried: 0, ok: 0, errors: 0, conflicts: 0, draftSkip: 0 };
   }
+
+  if (!token) {
+    console.warn('Sync skipped: missing auth token. Use manual Sync button after login.');
+    return { tried: 0, ok: 0, errors: 1, conflicts: 0, draftSkip: 0 };
+  }
+
   const items = await db.outbox.orderBy('ts').toArray();
 
   if (!items.length) {
@@ -75,31 +139,37 @@ export async function syncNow(): Promise<SyncResult> {
     try {
       if (!item.tableName) {
         console.warn('Skipping outbox item with missing tableName', item);
+        errors++;
         continue;
       }
+
+      if (item._id == null) {
+        console.warn('Skipping outbox item without _id:', item);
+        errors++;
+        continue;
+      }
+
+      console.log('Syncing outbox item:', item);
+
       const table: any = getTable(item.tableName);
       const localRow: any = await table.get(item.clientId);
 
-      // if (localRow && localRow._status === 'draft') {
-      //   draftSkip++;
-      //   continue;
-      // }
+      const res: any = await pushOutboxItem(item, token);
 
-      const res: any = await pushOutboxItem(item);
+      console.log('Sync result:', res);
 
       if (res.status === 'ok') {
         ok++;
 
-        if (item._id == null) {
-          console.warn('Cannot delete outbox item without _id', item);
-          continue;
-        }
-
         await db.transaction('rw', db.outbox, table, async () => {
+          console.log('Deleting synced outbox item:', item._id);
           await db.outbox.delete(item._id!);
 
           const currentRow = await table.get(item.clientId);
-          if (!currentRow) return;
+          if (!currentRow) {
+            console.warn('No local row found after successful sync:', item.clientId);
+            return;
+          }
 
           await table.put({
             ...currentRow,
@@ -110,6 +180,8 @@ export async function syncNow(): Promise<SyncResult> {
             ...(res.json ?? {}),
           });
         });
+
+        await patchSearchChildrenAfterCreate(item, res);
       } else if (res.status === 'conflict') {
         conflicts++;
 
@@ -121,7 +193,10 @@ export async function syncNow(): Promise<SyncResult> {
         }
       } else {
         errors++;
-        console.warn('Sync failed. Keeping item in outbox:', res, item);
+        console.warn('Sync failed. Keeping item in outbox:', {
+          item,
+          result: res,
+        });
       }
     } catch (err) {
       console.error('Sync error:', item, err);
@@ -150,7 +225,7 @@ export function scheduleAutoSync(intervalMs = 15000) {
 
     timer = window.setInterval(() => {
       if (isOnline()) {
-        void syncNow();
+        console.warn('Scheduled auto-sync skipped: auth token required. Use manual Sync button.');
       }
     }, intervalMs);
   };

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useOnlineStatus } from './online-listener';
-import { syncNow } from './sync';
+import { connect } from 'redux-bundler-react';
+import { getPendingCount, syncNow } from './sync';
 import { db } from './db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
-export default function SyncBanner() {
+const SyncBanner = connect('selectAuth', ({ auth }) => {
   const online = useOnlineStatus();
   const pending = useLiveQuery(() => db.outbox.count(), [], 0);
 
@@ -16,11 +17,17 @@ export default function SyncBanner() {
       setSyncing(true);
       setMessage('');
 
-      await syncNow();
+      const result = await syncNow(auth?.token);
+      const remaining = await getPendingCount();
 
-      setMessage('Synced successfully');
+      if (remaining === 0 && result.errors === 0 && result.conflicts === 0) {
+        setMessage('Synced successfully');
+      } else {
+        setMessage(`Sync incomplete. ${remaining} item(s) still pending.`);
+      }
     } catch (err) {
       console.error('Sync failed:', err);
+      setMessage('Sync failed. Check console.');
     } finally {
       setSyncing(false);
     }
@@ -65,4 +72,6 @@ export default function SyncBanner() {
       {message && <span style={{ fontSize: 12, color: '#555' }}>{message}</span>}
     </div>
   );
-}
+});
+
+export default SyncBanner;
