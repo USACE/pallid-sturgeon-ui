@@ -19,11 +19,9 @@ import {
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
-import { update } from 'lodash';
-import { components } from 'react-select';
-import { getLineAndCharacterOfPosition } from 'typescript';
-import { getLabelTextById } from '@src/utils/helpers';
-// import { createDropdownOptions } from '@src/app-pages/data-entry/helpers';
+import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
+import { db } from '@src/app-pages/data-entry/offline/db';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -50,6 +48,8 @@ const TelemetryDataEntry = connect(
   'selectBaseData',
   'selectDataEntryData',
   'selectLookupData',
+  'doUpdateCurrentTab',
+  'selectRouteParams',
   ({
     doModalOpen,
     doSaveTelemetryDataEntry,
@@ -60,6 +60,8 @@ const TelemetryDataEntry = connect(
     baseData,
     dataEntryData,
     lookupData,
+    doUpdateCurrentTab,
+    routeParams,
   }) => {
     const { frequencyId, spawnBehavior, macros, mesos, positionConfidence } = lookupData;
     const { items } = dataEntryTelemetryData;
@@ -72,23 +74,51 @@ const TelemetryDataEntry = connect(
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
     const { captureOnce } = useGpsCapture();
+    const siteId = routeParams?.siteId;
+    const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
+    const savedDraft = sessionStorage.getItem(searchDraftKey);
+    const searchEffortDraft = savedDraft ? JSON.parse(savedDraft) : null;
+    const seFid = dataEntryData?.seFid || baseData?.seFid || searchEffortDraft?.seFid;
+
+    const [offlineLookups, setOfflineLookups] = useState({
+      frequencyId: [],
+      spawnBehavior: [],
+      macros: [],
+      mesos: [],
+      positionConfidence: [],
+    });
 
     const defaultValues = { seId: dataEntryLastParams?.seId };
-    console.log('Data Entry Last params:', dataEntryLastParams);
-    console.log('Is it getting seId?:', dataEntryLastParams?.seId);
-    const seFid = dataEntryData?.seFid;
-    console.log('Where is my seFid:', seFid);
 
-    // const idOptions = createDropdownOptions(id);
+    const frequencyIdOptions = frequencyId?.length > 0 ? frequencyId : offlineLookups.frequencyId;
+    const spawnBehaviorOptions = spawnBehavior?.length > 0 ? spawnBehavior : offlineLookups.spawnBehavior;
+    const macroOptions = macros?.length > 0 ? macros : offlineLookups.macros;
+    const mesoOptions = mesos?.length > 0 ? mesos : offlineLookups.mesos;
+    const positionConfidenceOptions =
+      positionConfidence?.length > 0 ? positionConfidence : offlineLookups.positionConfidence;
 
-    const findOptionByValue = (options, value) => {
-      return options.find((opt) => String(opt.value) === String(value)) || null;
-    };
+    useEffect(() => {
+      async function loadOfflineLookups() {
+        const [offlineFrequencyId, offlineSpawnBehavior, offlineMacros, offlineMesos, offlinePositionConfidence] =
+          await Promise.all([
+            getLookupOptions('frequencyId'),
+            getLookupOptions('spawnBehavior'),
+            getLookupOptions('macros'),
+            getLookupOptions('mesos'),
+            getLookupOptions('positionConfidence'),
+          ]);
 
-    const getNextSequence = (data, seFid) => {
-      const existing = data.filter((row) => row.seFid === seFid);
-      return existing.length + 1;
-    };
+        setOfflineLookups({
+          frequencyId: offlineFrequencyId,
+          spawnBehavior: offlineSpawnBehavior,
+          macros: offlineMacros,
+          mesos: offlineMesos,
+          positionConfidence: offlinePositionConfidence,
+        });
+      }
+
+      loadOfflineLookups();
+    }, []);
 
     useEffect(() => {
       if (items) {
@@ -107,20 +137,9 @@ const TelemetryDataEntry = connect(
         });
 
         const idOptions = createDropdownOptions(frequencyId);
-        console.log('Options:', frequencyId);
 
         const mapped = items.map((item) => {
-          console.log('-----Mapping item----');
-          console.log('raw item:', item.frequencyIdCode);
-          console.log('available options:', frequencyId);
-
           const match = idOptions?.find((opt) => String(opt.value) === String(item.frequencyIdCode));
-          console.log('matched option:', match);
-          console.log('API value:', item.frequencyIdCode);
-          console.log(
-            'Option values:',
-            idOptions.map((o) => o.value)
-          );
 
           return {
             ...item,
@@ -403,20 +422,33 @@ const TelemetryDataEntry = connect(
       [columnHelper]
     );
 
-    const handleAddRow = () => {
+    const handleAddRow = async () => {
       // Add default values here
       const base = getBaseDefaultValues({ baseData });
-      const sequence = getNextSequence(data, seFid);
+
+      const localRows = await db.telemetry.where('seFid').equals(seFid).toArray();
+
+      const dbRows = data?.filter((row) => row.seFid === seFid) ?? [];
+      const sequence = localRows.length + dbRows.length + 1;
+      const sequenceText = String(sequence).padStart(3, '0');
+
+      const parentSeId =
+        dataEntryData?.seId ??
+        dataEntryData?.se_id ??
+        dataEntryLastParams?.seId ??
+        dataEntryLastParams?.se_id ??
+        searchEffortDraft?.seId ??
+        searchEffortDraft?.se_id;
 
       const newRowData = {
         ...base,
-        tFid: `${seFid}-${sequence}`,
+        se_id: parentSeId,
+        tFid: `${seFid}-${sequenceText}`,
         seFid,
         ...defaultValues,
         _status: 'new',
         // countF: 1,
       };
-      console.log('New tFid:', newRowData.tFid);
       setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
     };
 
@@ -439,42 +471,31 @@ const TelemetryDataEntry = connect(
       [setData, setTableKey]
     );
 
-    const handleUpdateData = useCallback(
-      (rowIndex, columnId, value) => {
-        setData((oldData) => {
-          if (!oldData) return [];
+    const handleUpdateData = useCallback((rowIndex, columnId, value) => {
+      setData((oldData) => {
+        if (!oldData) return [];
 
-          const newData = [...oldData];
-          if (!newData[rowIndex]) return oldData;
+        const newData = [...oldData];
+        if (!newData[rowIndex]) return oldData;
 
-          if (typeof value === 'object' && columnId === null) {
-            newData[rowIndex] = {
-              ...newData[rowIndex],
-              ...value,
-            };
-          } else {
-            newData[rowIndex] = {
-              ...newData[rowIndex],
-              [columnId]: value,
-            };
-          }
+        if (typeof value === 'object' && columnId === null) {
+          newData[rowIndex] = {
+            ...newData[rowIndex],
+            ...value,
+          };
+        } else {
+          newData[rowIndex] = {
+            ...newData[rowIndex],
+            [columnId]: value,
+          };
+        }
 
-          if (newData[rowIndex]._status !== 'new') {
-            newData[rowIndex]._status = 'edited';
-          }
-
-          // if (newData && newData[rowIndex]) {
-          //   // Update properties
-          //   newData[rowIndex] = {
-          //     ...newData[rowIndex],
-          //     [columnId]: updatedValue,
-          //   };
-          return newData;
-        });
-      },
-      // [setData]
-      []
-    );
+        if (newData[rowIndex]._status !== 'new') {
+          newData[rowIndex]._status = 'edited';
+        }
+        return newData;
+      });
+    }, []);
 
     const formatRow = (row) => {
       return {
@@ -499,8 +520,6 @@ const TelemetryDataEntry = connect(
       try {
         const rowsToProcess = data.filter((row) => row._status === 'new' || row._status === 'edited');
 
-        console.log('Rows to process:', rowsToProcess);
-
         for (let i = 0; i < rowsToProcess.length; i++) {
           const row = rowsToProcess[i];
 
@@ -508,24 +527,74 @@ const TelemetryDataEntry = connect(
 
           const formattedRow = formatRow(row);
 
-          console.log('Row:', row);
-          console.log('isNew:', isNew, 'tId:', row.tId);
+          const clientId = row.clientId ?? crypto.randomUUID();
 
-          console.log('Submitting row:', formattedRow.frequencyIdCode, typeof formattedRow.frequencyIdCode);
+          const parentSeId =
+            row.se_id ??
+            row.seId ??
+            dataEntryData?.seId ??
+            dataEntryData?.se_id ??
+            dataEntryLastParams?.seId ??
+            dataEntryLastParams?.se_id ??
+            searchEffortDraft?.seId ??
+            searchEffortDraft?.se_id ??
+            baseData?.seId ??
+            baseData?.se_id;
 
-          await telemetryDataEntrySchema.validate(formattedRow, { abortEarly: false });
+          const payload = {
+            ...formattedRow,
+            clientId,
+            se_id: parentSeId,
+            seFid: row.seFid,
+            tFid: row.tFid,
+            _status: 'queued',
+            version: row.version ?? 0,
+          };
 
-          if (isNew) {
-            console.log('Creating row:', formattedRow);
-            await doSaveTelemetryDataEntry(formattedRow);
-          } else if (row.tId && row._status === 'edited') {
-            console.log('Updating row:', formattedRow);
-            await doUpdateTelemetryDataEntry(formattedRow);
+          await telemetryDataEntrySchema.validate(payload, { abortEarly: false });
+
+          try {
+            if (isOnline()) {
+              if (isNew) {
+                console.log('Creating row online:', payload);
+                await doSaveTelemetryDataEntry(payload);
+              } else if (row.tId && row._status === 'edited') {
+                console.log('Updating row online:', payload);
+                await doUpdateTelemetryDataEntry(payload);
+              }
+            } else {
+              if (isNew) {
+                console.log('Creating row offline:', payload);
+                await createData('telemetry', payload);
+              } else {
+                console.log('Updating row offline:', payload);
+                await updateData('telemetry', clientId, payload);
+              }
+            }
+          } catch (error) {
+            console.error('Telemetry API failed, queuing offline:', error);
+
+            if (isNew) {
+              await createData('telemetry', payload);
+            } else {
+              await updateData('telemetry', clientId, payload);
+            }
           }
         }
 
-        // const res = await doSaveTelemetryDataEntry(formattedRow);
-        console.log('All rows submitted');
+        setData((prev) =>
+          prev.map((row) =>
+            row._status === 'new' || row._status === 'edited'
+              ? { ...row, _status: 'queued', clientId: row.clientId ?? crypto.randomUUID() }
+              : row
+          )
+        );
+        const draftKey = `currentSearchEffortDraft:${siteId}`;
+        const savedDraft = sessionStorage.getItem(draftKey);
+        const draft = savedDraft ? JSON.parse(savedDraft) : {};
+
+        sessionStorage.setItem(draftKey, JSON.stringify({ ...draft, telemetryCount: 1 }));
+        doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
       }
@@ -535,9 +604,6 @@ const TelemetryDataEntry = connect(
       const tableDataChanged = !_isEqual(data, prevTableDataRef.current);
       tableDataChanged && setTableIsDirty(true);
     }, [data]);
-
-    //Reset the dirty states of the fields after a save.
-    // useResetDirtyFields(isTouched, requestAPIData, reset, trigger);
 
     return (
       <FormProvider {...methods}>
@@ -560,7 +626,6 @@ const TelemetryDataEntry = connect(
           <Button
             className={saveBtnClasses}
             onClick={() => {
-              console.log('Clicked Submit');
               handleSubmitAll();
             }}
             type='button'

@@ -12,6 +12,7 @@ const FloyTagTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   const debouncedUpdateRef = useRef();
 
+  // const isRequired = floyTagPrefix !== null && floyTagPrefix !== '' && floyTagPrefix !== undefined;
   const isRequired = !!rowFloyTagPrefix;
 
   const updateValue = useCallback((newValue) => {
