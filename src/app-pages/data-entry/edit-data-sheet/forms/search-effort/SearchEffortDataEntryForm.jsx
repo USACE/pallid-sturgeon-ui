@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { use, useEffect, useMemo, useRef, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -13,6 +13,9 @@ import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { generateFieldId } from '../../../dataEntryHelper';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
+import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+import { db } from '@src/app-pages/data-entry/offline/db';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -24,19 +27,6 @@ const GPS_OPTIONS = {
   maximumAge: 0,
 };
 
-const createDropdownOptions = (data) => {
-  if (!data) return [];
-
-  return data.map((item) => {
-    const { code, description } = item;
-
-    return {
-      value: code,
-      text: description,
-    };
-  });
-};
-
 const SearchEffortDataEntryForm = connect(
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
@@ -46,6 +36,7 @@ const SearchEffortDataEntryForm = connect(
   'selectRouteParams',
   'selectIsEditForm',
   'selectLookupData',
+  'doUpdateCurrentTab',
   ({
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
@@ -55,15 +46,14 @@ const SearchEffortDataEntryForm = connect(
     routeParams,
     isEditForm,
     lookupData,
+    doUpdateCurrentTab,
   }) => {
     const prevIsEditFormRef = useRef(isEditForm);
     const siteId = routeParams?.siteId;
     const { searchTypeCodes } = lookupData;
-
-    console.log('here is searchtypes', searchTypeCodes);
-    console.log('search type spec:', searchTypeCodes[2].code);
-    console.log('look at this:', searchTypeCodes.find((s) => s.code === 'RS')?.code);
-    console.log('what is here', searchTypeCodes.code);
+    const [offlineSearchTypeCodes, setOfflineSearchTypeCodes] = useState([]);
+    const [submitMessage, setSubmitMessage] = useState(null);
+    const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
 
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
@@ -83,7 +73,7 @@ const SearchEffortDataEntryForm = connect(
     });
 
     const {
-      formState: { errors, isValid, touchedFields, submitCount, isDirty },
+      formState: { errors, isValid, submitCount, isDirty },
       setFocus,
       watch,
       getValues,
@@ -94,13 +84,9 @@ const SearchEffortDataEntryForm = connect(
       clearErrors,
     } = methods;
 
-    const { permission, captureBestOf, lastError } = useGpsCapture(GPS_OPTIONS);
+    const { captureBestOf } = useGpsCapture(GPS_OPTIONS);
 
     console.warn('VALUES: ', getValues());
-
-    const findOptionByValue = (opt, val) => {
-      return opt.find((opt) => String(opt.val) === String(val) || null);
-    };
 
     const fmtTimeHHMMSS = (val) => {
       const d = val ? new Date(val) : new Date();
@@ -160,24 +146,6 @@ const SearchEffortDataEntryForm = connect(
       return;
     };
 
-    // Capture Start and Stop Lat, Long, Time
-    const handleCapture = async (type) => {
-      try {
-        const { best } = await captureBestOf(5, 700);
-
-        setValue('startLatitude', best.lat, { shouldValidate: true });
-        setValue('startLongitude', best.lng, { shouldValidate: true });
-        setValue('startTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
-
-        window.alert(
-          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
-        );
-      } catch (e) {
-        console.error(e);
-        window.alert(`GPS capture failed: ${e?.message || e}`);
-      }
-    };
-
     const handleChange = (e) => {
       const name = e?.target?.name;
       const val = e?.target?.value;
@@ -213,17 +181,59 @@ const SearchEffortDataEntryForm = connect(
       const valid = await trigger();
       if (!valid) return;
 
+      const values = getCastedValues();
+
+      const clientId = values.clientId ?? crypto.randomUUID();
+
       const payload = filterNullEmptyObjects({
-        ...getCastedValues(),
+        ...values,
+        clientId,
+        siteId: values.siteId || Number(siteId),
         status: 1,
+        _status: 'queued',
+        version: values.version ?? 0,
       });
 
-      if (isEditForm) {
-        doUpdateSearchDataEntry(payload, () => {});
-      } else {
-        doSaveSearchDataEntry(payload, (val) => {
-          if (val) setValue('seId', val);
-        });
+      if (!payload.seFid) {
+        console.error('Missing seFid. Cannot save draft offline.');
+        return;
+      }
+
+      try {
+        if (isOnline()) {
+          if (isEditForm) {
+            doUpdateSearchDataEntry(payload, () => {});
+          } else {
+            doSaveSearchDataEntry(payload, (val) => {
+              if (val) setValue('seId', val);
+            });
+          }
+        } else {
+          if (isEditForm) {
+            await updateData('search', clientId, payload);
+          } else {
+            await createData('search', payload);
+          }
+        }
+        sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
+
+        setValue('clientId', clientId);
+        setValue('seFid', payload.seFid);
+        setValue('status', 1);
+
+        doUpdateCurrentTab(1);
+      } catch (error) {
+        console.error('Save draft failed:', error);
+
+        if (isEditForm) {
+          await updateData('search', clientId, payload);
+        } else {
+          await createData('search', payload);
+        }
+
+        setValue('clientId', clientId);
+        setValue('status', 1);
+        doUpdateCurrentTab(1);
       }
     };
 
@@ -232,38 +242,138 @@ const SearchEffortDataEntryForm = connect(
       const valid = await trigger();
       if (!valid) return;
 
+      const values = getCastedValues();
+      const draft = getOfflineSearchEffortDraft();
+
+      const clientId = values.clientId ?? draft?.clientId ?? crypto.randomUUID();
+
       const payload = filterNullEmptyObjects({
-        ...getCastedValues(),
+        ...draft,
+        ...values,
+        clientId,
         status: 2,
+        _status: 'queued',
+        version: values.version ?? draft?.version ?? 0,
       });
 
-      console.log('SUBMIT isEditForm:', isEditForm);
-      console.log('SUBMIT payload:', payload);
+      try {
+        if (isOnline()) {
+          if (isEditForm || payload.seId || payload.se_id) {
+            doUpdateSearchDataEntry(payload);
+          } else {
+            doSaveSearchDataEntry(payload);
+          }
+        } else {
+          await createData('search', payload);
+        }
 
-      if (isEditForm) {
-        doUpdateSearchDataEntry(payload);
-      } else {
-        doSaveSearchDataEntry(payload);
+        setValue('clientId', clientId);
+        setValue('status', 2);
+
+        sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
+
+        setSubmitMessage({
+          type: 'success',
+          text: isOnline()
+            ? 'Search Effort form submitted successfully.'
+            : 'Search Effort form saved offline successfully. It will sync when you are back online.',
+        });
+      } catch (error) {
+        console.error('Search submit failed, queueing offline:', error);
+
+        await updateData('search', clientId, payload);
+
+        setValue('clientId', clientId);
+        setValue('status', 2);
+        sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
+
+        setSubmitMessage({
+          type: 'success',
+          text: 'Search Effort form saved offline successfully. It will sync when you are back online.',
+        });
       }
     };
+
+    const getOfflineSearchEffortDraft = () => {
+      const savedDraft = sessionStorage.getItem(searchDraftKey);
+
+      if (!savedDraft) return null;
+
+      try {
+        const draft = JSON.parse(savedDraft);
+        if (!draft?.seFid) return null;
+
+        if (String(draft.siteId) !== String(siteId)) {
+          return null;
+        }
+        return draft;
+      } catch (err) {
+        console.error('Failed to parse offline Search Effort draft:', err);
+        return null;
+      }
+    };
+
+    const reloadOfflineSearchEffortDraft = () => {
+      if (isEditForm) return false;
+
+      const draft = getOfflineSearchEffortDraft();
+
+      if (!draft) return false;
+
+      reset(
+        {
+          ...getSearchEffortDefaultValues({ dataEntryData }),
+          ...draft,
+          telemetryCount: Number(draft.telemetryCount || dataEntryTelemetryTotalCount || 0),
+        },
+        {
+          keepDirty: false,
+          keepTouched: false,
+        }
+      );
+      return true;
+    };
+
+    useEffect(() => {
+      reloadOfflineSearchEffortDraft();
+    }, [isEditForm, dataEntryTelemetryTotalCount]);
+
+    useEffect(() => {
+      async function loadCachedLookups() {
+        const options = await getLookupOptions('searchTypeCodes');
+        setOfflineSearchTypeCodes(options);
+      }
+      loadCachedLookups();
+    }, []);
+
+    const searchTypeOptions = searchTypeCodes?.length > 0 ? searchTypeCodes : offlineSearchTypeCodes;
 
     useEffect(() => {
       const count = Number(dataEntryTelemetryTotalCount || 0);
 
       setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
-      // if (count > 0) {
-      //   clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
-
-      //   setTimeout(() => {
-      //     trigger(['stopTime', 'stopLatitude', 'stopLongitude']);
-      //   }, 0);
-      // }
       clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
     }, [dataEntryTelemetryTotalCount, setValue, trigger, clearErrors]);
 
     useEffect(() => {
+      const draft = getOfflineSearchEffortDraft();
+
+      if (!isEditForm && draft) {
+        reset(
+          {
+            ...defaultValues,
+            ...draft,
+            telemetryCount: Number(draft.telemetryCount || dataEntryTelemetryTotalCount || 0),
+          },
+          {
+            keepDirty: false,
+            keepTouched: false,
+          }
+        );
+        return;
+      }
       reset(defaultValues);
-    }, [reset, defaultValues]);
+    }, [reset, defaultValues, isEditForm, dataEntryTelemetryTotalCount]);
 
     // Reset form
     useEffect(() => {
@@ -278,15 +388,26 @@ const SearchEffortDataEntryForm = connect(
 
     // Set IDs
     useEffect(() => {
-      if (!isEditForm) {
-        const queueLength = 0; // replace with outbox length later
+      async function setSearchEffortFid() {
+        if (!isEditForm) {
+          const savedDraft = sessionStorage.getItem(searchDraftKey);
+          const draft = savedDraft ? JSON.parse(savedDraft) : null;
 
-        const seFid = generateFieldId(queueLength);
-        setValue('seFid', seFid);
-      } else if (isEditForm && dataEntryData) {
-        setValue('seId', dataEntryData.seId);
-        setValue('seFid', dataEntryData.seFid);
+          if (draft?.seFid) {
+            reloadOfflineSearchEffortDraft();
+            return;
+          }
+
+          const queueLength = await db.outbox.where('tableName').equals('ds_search').count();
+
+          const seFid = generateFieldId(queueLength);
+          setValue('seFid', seFid);
+        } else if (isEditForm && dataEntryData) {
+          setValue('seId', dataEntryData.seId);
+          setValue('seFid', dataEntryData.seFid);
+        }
       }
+      setSearchEffortFid();
     }, [isEditForm, dataEntryData, setValue]);
 
     useEffect(() => {
@@ -309,24 +430,16 @@ const SearchEffortDataEntryForm = connect(
       };
     }, [isDirty]);
 
-    // const confirmLeave = () => {
-    //   if (isDirty) {
-    //     const confirm = window.confirm('You have unsaved changes. Data will not be saved. Continue?');
-    //     return confirm;
-    //   }
-    //   return true;
-    // };
-
-    // const showStopWarning = Number(dataEntryTelemetryTotalCount || 0) > 0;
-
-    console.log('STORE telemtry type:', typeof telemetryCount);
-    console.log('FORM telemetry count:', telemetryCount);
-    console.log('hasTelemetry calc:', telemetryCount >= 1);
-    console.log('hasTelemetry:', hasTelemetry);
-
     return (
       <FormProvider {...methods}>
         {isShowErrorSummary && <ErrorSummary errors={errors} type='form' isValid={isValid} />}
+        {submitMessage && (
+          <div className={`usa-alert usa-alert--${submitMessage.type}`} role='status'>
+            <div className='usa-alert__body'>
+              <p className='usa-alert__text'>{submitMessage.text}</p>
+            </div>
+          </div>
+        )}
         <>
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 3 }}>
@@ -444,17 +557,6 @@ const SearchEffortDataEntryForm = connect(
               </Button>
             </Grid>
           </Grid>
-          {/* Warning */}
-
-          {/* <Grid tablet={{ col: 2 }}>
-            <Grid row gap='md'>
-              <Grid tablet={{ col: 12 }}>
-                <Button className={saveBtnClasses} onClick={() => doSave()} type='button'>
-                  {isEditForm ? 'Apply Changes' : 'Save as Draft'}
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid> */}
         </>
       </FormProvider>
     );

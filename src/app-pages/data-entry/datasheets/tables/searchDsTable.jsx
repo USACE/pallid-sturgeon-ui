@@ -22,6 +22,9 @@ const SearchDsTable = connect(
     const siteId = routeParams?.siteId;
 
     const handleAddButtonClick = () => {
+      const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
+      sessionStorage.removeItem(searchDraftKey);
+
       doUpdateComplexStateField({ name: 'isEditForm', value: false });
       doUpdateUrl(`/sites-list/${siteId}/search-effort`);
     };

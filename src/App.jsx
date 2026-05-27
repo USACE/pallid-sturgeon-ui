@@ -10,6 +10,8 @@ import LandingModal from './common/modals/LandingModal';
 import NavBar from '@components/navigation';
 import Modal from './app-components/modal/primary-modal/PrimaryModal';
 import SecondaryModal from './app-components/modal/secondary-modal/SecondaryModal';
+import { initOnlineListener } from './app-pages/data-entry/offline/online-listener';
+import SyncBanner from './app-pages/data-entry/offline/SyncBanner';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './css/bootstrap/css/bootstrap.water.min.css';
@@ -31,6 +33,8 @@ export default connect(
     const userHasRole = !!auth?.authData?.role;
 
     useEffect(() => {
+      const cleanupOnlineListener = initOnlineListener();
+
       if (isAuthenticated && userHasRole) {
         doGetAllLookupData();
       } else {
@@ -39,6 +43,8 @@ export default connect(
           doModalOpen(LandingModal);
         }
       }
+
+      return cleanupOnlineListener;
     }, [doGetAllLookupData, isAuthenticated, userHasRole, doModalOpen]);
 
     return (
@@ -46,6 +52,7 @@ export default connect(
         {loadingState && <LoadingModal text={loadingMessage} />}
         <ToastContainer autoClose={3500} hideProgressBar={false} />
         <NavBar />
+        {auth.token && <SyncBanner />}
         <PageContent>{auth.token ? <Route /> : <Hero />}</PageContent>
         <Modal closeWithEscape />
         <SecondaryModal closeWithEscape />
