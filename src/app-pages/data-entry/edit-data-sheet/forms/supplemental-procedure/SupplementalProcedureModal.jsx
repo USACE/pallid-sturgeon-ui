@@ -4,20 +4,8 @@ import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.fo
 import Card from '@components/card';
 import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 
-import {
-  Alert,
-  Button,
-  Grid,
-  Table,
-  Checkbox,
-  Label,
-  Textarea,
-  GridContainer,
-  Fieldset,
-  // TextInput,
-} from '@trussworks/react-uswds';
+import { Button, Grid, Checkbox, Label, GridContainer, Fieldset } from '@trussworks/react-uswds';
 
-// import SupplementalDataEntryForm from './SupplementalDataEntryForm';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import TextInput from '@components/new-inputs/text-input/TextInput';
@@ -27,9 +15,10 @@ import PallidIdOverview from './pallidIdOverview';
 import classNames from 'classnames';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { getSuppDefaultValues, supplementalValidationSchema } from './SupplementalProcedureModal.validation';
-import { createDropdownOptions, isEmpty } from '@pages/data-entry/dataEntryHelper';
+import { createDropdownOptions, isEmpty, fmtTimeHHMMSS } from '@pages/data-entry/dataEntryHelper';
 import ErrorSummary from '@components/error-summary/ErrorSummary';
-import ModalHeader from '@src/app-components/modal/primary-modal/PrimaryModal.header';
+import Icon from '@components/icon/icon';
+import { mdiMinus, mdiPlus } from '@mdi/js';
 
 const SupplementalProcedureModal = connect(
   'selectDataEntryData',
@@ -52,17 +41,34 @@ const SupplementalProcedureModal = connect(
       elastomerHvxOptions,
       pallidLocationStatusOptions,
       hatcheryOriginOptions,
+      purposeOptions,
+      evalLocationOptions,
+      sexOptions,
+      reproductiveStatusOptions,
+      frequencyId,
+      spawnBehavior,
       yesNoOptions,
     } = lookupData;
 
+    const procedureDataExists = false; //TODO set based on existing procedure data.
+    const [showProcedureSection, setShowProcedureSection] = useState(procedureDataExists);
+
     const methods = useForm({
       defaultValues: {
-        ...getSuppDefaultValues({ dataEntryData }),
+        ...getSuppDefaultValues({ dataEntryData, showProcedureSection: showProcedureSection }),
       },
-      resolver: yupResolver(supplementalValidationSchema({ projectId: projectId, species: species })),
+      resolver: yupResolver(
+        supplementalValidationSchema({
+          projectId: projectId,
+          species: species,
+          // showProcedureSection: showProcedureSection,
+        })
+      ),
+      // context: { showProcedureSection: showProcedureSection },
       mode: 'onSubmit',
       reValidateMode: 'onChange',
       stateOptions: [],
+      // shouldUnregister: true,
     });
 
     const {
@@ -77,8 +83,23 @@ const SupplementalProcedureModal = connect(
       clearErrors,
     } = methods;
 
+    //console.log('getValues', getValues());
+    //console.log('errors', errors);
+    // const toggleProcedureSection = () => setShowProcedureSection(!showProcedureSection);
+    const toggleProcedureSection = () => {
+      setShowProcedureSection(!showProcedureSection);
+      setValue('showProcedureSection', !showProcedureSection, { shouldValidate: true });
+      clearErrors();
+    };
+
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
+
+    const geneticVialPrefixDefault = projectId === 1 ? 'STURG' : 'BLAHH';
+
+    const fmtGeneticsVial = (val) => {
+      setValue('geneticsVial', geneticVialPrefixDefault.length ? geneticVialPrefixDefault : val?.toUpperCase());
+    };
 
     const handleChange = (e) => {
       const name = e?.target?.name;
@@ -86,9 +107,25 @@ const SupplementalProcedureModal = connect(
 
       if (name === 'tagNumber') {
         setValue(name, val?.toUpperCase());
+      } else if (name === 'geneticVial' && geneticVialPrefixDefault.length) {
+        fmtGeneticsVial(geneticVialPrefixDefault || val?.toUpperCase());
       }
 
       trigger(name);
+    };
+
+    const fmtTimeHHMMSS = (val) => {
+      const d = val ? new Date(val) : new Date();
+
+      if (Number.isNaN(d.getTime())) {
+        console.error('Invalid date:', val);
+        return '';
+      }
+
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+      return `${hh}:${mm}:${ss}`;
     };
 
     const handleGetPallidIdByTagNumber = () => {
@@ -99,6 +136,17 @@ const SupplementalProcedureModal = connect(
       // Filter out any null/empty values for final payload
       // const payload = filterNullEmptyObjects(dataObj);
       // newForm ? doUpdateMoRiverDataEntry(payload) : doAddMoRiverDataEntry(payload);
+    };
+
+    // Set Procedure Date to current date.
+    const fillCurrentDate = () => {
+      const today = new Date().toISOString().slice(0, 10);
+      setValue('procedureDate', today, { shouldValidate: true });
+    };
+    // Set target field to current time.
+    const fillCurrentTime = (field) => {
+      const time = fmtTimeHHMMSS();
+      setValue(field, time, { shouldValidate: true });
     };
 
     const [isElColorNone, setIsElColorNone] = useState(false);
@@ -140,14 +188,14 @@ const SupplementalProcedureModal = connect(
     const [isGeneticsVialReadOnly, setIsGeneticsVialReadOnly] = useState(true);
     useEffect(() => {
       if (genetics == 'Y') {
-        setIsGeneticsVialReadOnly(false);
+        setIsGeneticsVialReadOnly(geneticVialPrefixDefault.length === 0);
         ['PDSG', 'USG'].includes(species) && setIsGeneticsVialRequired(true);
       } else {
         if (geneticVial || geneticVialNum) {
           //TODO use a different confirm method?
           const confirmed = confirm('This will clear the Genetics Vial textbox. Do you want to make this change?');
           if (confirmed) {
-            setValue('geneticVial', null);
+            setValue('geneticVial', geneticVialPrefixDefault);
             setValue('geneticVialNum', null);
             setIsGeneticsVialReadOnly(true);
             ['PDSG', 'USG'].includes(species) && setIsGeneticsVialRequired(false);
@@ -198,6 +246,7 @@ const SupplementalProcedureModal = connect(
             // modalID='suppProcFormModal'
             type='modal'
             isValid={isValid}
+            isExpandedInitially={false}
           />
         )}
         {/* may need to add to DataHeader */}
@@ -225,13 +274,13 @@ const SupplementalProcedureModal = connect(
         {/* <SupplementalDataEntryForm /> */}
         <FormProvider {...methods}>
           <GridContainer>
-            {/* <Grid row gap='md' className='padding-bottom-1'>
-                  <Grid tablet>
-                    <h3>
-                      {isEditForm ? '' : 'Create'} Supplemental Data Entry {isEditForm ? `Overview (ID: ${fid})` : ''}
-                    </h3>
-                  </Grid>
-                </Grid> */}
+            <Grid row gap='md' className='padding-bottom-1'>
+              <Grid tablet>
+                <h3>
+                  {isEditForm ? '' : 'Create'} Supplemental Data Entry {isEditForm ? `Overview (ID: ${fid})` : ''}
+                </h3>
+              </Grid>
+            </Grid>
             <Grid row gap='md' className='padding-bottom-3'>
               <Grid tablet={{ col: 4 }}>
                 <SelectInput name='pitRnz' label='PIT R/N/Z' onChange={handleChange}>
@@ -268,7 +317,7 @@ const SupplementalProcedureModal = connect(
                   ))}
                 </SelectInput>
               </Grid>
-              <Grid tablet={{ col: 3 }}>
+              <Grid tablet={{ col: 4 }}>
                 <SelectInput name='elHvx' label='EL H/V/X' onChange={handleChange} readOnly={isElColorNone}>
                   {createDropdownOptions(elastomerHvxOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
@@ -288,7 +337,7 @@ const SupplementalProcedureModal = connect(
                   ))}
                 </SelectInput>
               </Grid>
-              <Grid tablet={{ col: 3 }}>
+              <Grid tablet={{ col: 4 }}>
                 <SelectInput name='erHvx' label='ER H/V/X' onChange={handleChange} readOnly={isErColorNone}>
                   {createDropdownOptions(elastomerHvxOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
@@ -299,8 +348,8 @@ const SupplementalProcedureModal = connect(
               </Grid>
             </Grid>
             <Grid row gap='md' className='padding-bottom-3'>
-              <Grid tablet={{ col: 2 }}>
-                <SelectInput name='lScute' label='L Scute' onChange={handleChange} readOnly={isErColorNone}>
+              <Grid tablet={{ col: 3 }}>
+                <SelectInput name='lScute' label='L Scute' onChange={handleChange}>
                   {createDropdownOptions(scuteOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
@@ -308,8 +357,8 @@ const SupplementalProcedureModal = connect(
                   ))}
                 </SelectInput>
               </Grid>
-              <Grid tablet={{ col: 2 }}>
-                <SelectInput name='rScute' label='R Scute' onChange={handleChange} readOnly={isErColorNone}>
+              <Grid tablet={{ col: 3 }}>
+                <SelectInput name='rScute' label='R Scute' onChange={handleChange}>
                   {createDropdownOptions(scuteOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
@@ -317,8 +366,8 @@ const SupplementalProcedureModal = connect(
                   ))}
                 </SelectInput>
               </Grid>
-              <Grid tablet={{ col: 2 }}>
-                <SelectInput name='dScute' label='D Scute' onChange={handleChange} readOnly={isErColorNone}>
+              <Grid tablet={{ col: 3 }}>
+                <SelectInput name='dScute' label='D Scute' onChange={handleChange}>
                   {createDropdownOptions(scuteOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
@@ -388,17 +437,16 @@ const SupplementalProcedureModal = connect(
               <Grid tablet={{ col: 2 }}>
                 <TextInput
                   name='geneticVial'
-                  label='Genetic Vial #'
+                  label='Genetics Vial #'
                   type='text'
                   readOnly={isGeneticsVialReadOnly}
                   required={isGeneticsVialRequired}
                 />
               </Grid>
-              -
               <Grid tablet={{ col: 2 }}>
                 <TextInput
                   name='geneticVialNum'
-                  label=''
+                  label='-'
                   type='number'
                   readOnly={isGeneticsVialReadOnly}
                   required={isGeneticsVialRequired}
@@ -407,21 +455,257 @@ const SupplementalProcedureModal = connect(
             </Grid>
             <Grid row gap='md' className='padding-bottom-3'>
               <Grid tablet={{ col: 4 }}>
-                <Fieldset>
+                <Fieldset name='ganCheckboxGroup'>
                   <Label htmlFor='ganCheckboxGroup'>Genetic Analysis Needs</Label>
-                  <Checkbox id='gan-broodstock' label='Broodstock' name='ganCheckboxGroup' />
-                  <Checkbox id='gan-hatch-vs-wild' label='Hatch vs Wild' name='ganCheckboxGroup' />
-                  <Checkbox id='gan-species-id' label='Species ID' name='ganCheckboxGroup' />
-                  <Checkbox id='gan-archive' label='Archive' name='ganCheckboxGroup' />
-                  <Checkbox id='gan-project-37' label='Project 3.7' name='ganCheckboxGroup' />
+                  <Checkbox id='ganBroodstock' name='ganBroodstock' label='Broodstock' onChange={handleChange} />
+                  <Checkbox id='ganHatchVsWild' name='ganHatchVsWild' label='Hatch vs Wild' onChange={handleChange} />
+                  <Checkbox id='ganSpeciesId' name='ganSpeciesId' label='Species ID' onChange={handleChange} />
+                  <Checkbox id='ganArchive' name='ganArchive' label='Archive' onChange={handleChange} />
+                  <Checkbox id='ganProject37' name='ganProject37' label='Project 3.7' onChange={handleChange} />
                 </Fieldset>
               </Grid>
               <Grid tablet={{ col: 8 }}>
                 <TextArea name='otherTagInfo' label='Other Tag Info' placeholder='Value'></TextArea>
-                <TextArea name='comments' label='Comments' placeholder='Value'></TextArea>
+                <TextArea name='suppComments' label='Comments' placeholder='Value'></TextArea>
               </Grid>
             </Grid>
           </GridContainer>
+          <GridContainer>
+            <Grid row gap='md' className='padding-bottom-1'>
+              <Grid tablet>
+                <h3>Procedure Data</h3>
+              </Grid>
+              <Grid tablet={{ col: 3 }}>
+                <Button
+                  onClick={() => toggleProcedureSection()}
+                  type='button'
+                  accentStyle={showProcedureSection ? 'warm' : ''}
+                >
+                  <Icon
+                    focusable={false}
+                    className='margin-right-1'
+                    path={showProcedureSection ? mdiMinus : mdiPlus}
+                    size={'16px'}
+                  />
+                  {showProcedureSection ? 'Remove' : 'Add'} Procedure Data
+                </Button>
+              </Grid>
+            </Grid>
+          </GridContainer>
+          {showProcedureSection && (
+            <GridContainer>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='procedureDate' label='Procedure Date' type='date' onChange={handleChange} required />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='startTime' label='Start Time' onChange={handleChange} required />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='endTime' label='End Time' onChange={handleChange} required />
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-top-0'>
+                <Grid tablet={{ col: 3 }}>
+                  <Button onClick={() => fillCurrentDate()} type='button'>
+                    Set to Current Date
+                  </Button>
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <Button onClick={() => fillCurrentTime('startTime')} type='button'>
+                    Set Start Time to Current Time
+                  </Button>
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <Button onClick={() => fillCurrentTime('endTime')} type='button'>
+                    Set End Time to Current Time
+                  </Button>
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 6 }}>
+                  <SelectInput name='purpose' label='Purpose' onChange={handleChange} required>
+                    {createDropdownOptions(purposeOptions).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Grid>
+                <Grid tablet={{ col: 2 }}>
+                  <TextInput name='procedureBy' label='Procedure By' onChange={handleChange} required />
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 6 }}>
+                  <TextArea name='fishHealthComments' label='Fish Health Comments' onChange={handleChange} />
+                </Grid>
+                <Grid tablet={{ col: 4 }}>
+                  <Checkbox
+                    id='antibiotic-injections'
+                    label='Antibiotic Injections'
+                    name='antibioticCheckbox'
+                    onChange={handleChange}
+                  />
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 4 }}>
+                  <Fieldset>
+                    <Label htmlFor='procPhotosCheckboxGroup'>Photographs</Label>
+                    <Checkbox name='photo-ventral' label='Head (Ventral)' onChange={handleChange} />
+                    <Checkbox name='photo-dorsal' label='Head (Dorsal)' onChange={handleChange} />
+                    <Checkbox name='photo-left-side' label='Head (Left Side)' onChange={handleChange} />
+                  </Fieldset>
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 3 }}>
+                  <SelectInput name='oldFrequencyId' label='Old Frequency ID' onChange={handleChange}>
+                    {createDropdownOptions(frequencyId).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <SelectInput name='newFrequencyId' label='New/Current Frequency ID' onChange={handleChange}>
+                    {createDropdownOptions(frequencyId).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='oldRadioTag' label='Old Radio Tag #' type='text' onChange={handleChange} />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='oldRtSerial' label='Old RT Serial #' type='text' onChange={handleChange} />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='newRadioTag' label='New/Current Radio Tag #' type='text' onChange={handleChange} />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='newRtSerial' label='New/Current RT Serial #' type='text' onChange={handleChange} />
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 2 }}>
+                  <TextInput name='oldDstSerial' label='Old DST Serial #' type='text' onChange={handleChange} />
+                </Grid>
+                <Grid tablet={{ col: 2 }}>
+                  <TextInput name='dstSerial' label='New/Current DST Serial #' type='text' onChange={handleChange} />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='dstStartDate' label='DST Start Date' type='date' onChange={handleChange} />
+                </Grid>
+                <Grid tablet={{ col: 2 }}>
+                  <TextInput name='dstStartTime' label='DST Start Time' onChange={handleChange} />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <Fieldset>
+                    {/* <Label htmlFor='drCheckboxGroup'>???</Label> */}
+                    <Checkbox name='dst-reimplanted' label='DST Reimplanted' onChange={handleChange} />
+                  </Fieldset>
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 3 }}>
+                  <SelectInput name='sex' label='Sex' onChange={handleChange}>
+                    {createDropdownOptions(sexOptions).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <Fieldset>
+                    <Checkbox name='pi' label='PI' onChange={handleChange} />
+                  </Fieldset>
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <Fieldset>
+                    <Checkbox name='blood-sample' label='Blood Sample' onChange={handleChange} />
+                  </Fieldset>
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <Fieldset>
+                    <Checkbox name='egg-sample' label='Egg Sample' onChange={handleChange} />
+                  </Fieldset>
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 8 }}>
+                  <TextArea name='procComments' label='Comments' placeholder='Value'></TextArea>
+                </Grid>
+              </Grid>
+              <h3>Spawned Evaluation</h3>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 4 }}>
+                  <SelectInput
+                    name='spawnEval'
+                    label='Spawn Evaluation'
+                    onChange={handleChange}
+                    readOnly={isElColorNone}
+                  >
+                    {createDropdownOptions(spawnBehavior).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Grid>
+                <Grid tablet={{ col: 4 }}>
+                  <SelectInput name='evalForLocation' label='Evaluation for Location' onChange={handleChange}>
+                    {createDropdownOptions(evalLocationOptions).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Grid>
+              </Grid>
+              <h3>Reproductive Status</h3>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 6 }}>
+                  <SelectInput name='visualAssessment' label='Visual Assessment' onChange={handleChange}>
+                    {createDropdownOptions(reproductiveStatusOptions).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 6 }}>
+                  <SelectInput name='ultrasoundAssessment' label='Ultrasound Assessment' onChange={handleChange}>
+                    {createDropdownOptions(reproductiveStatusOptions).map((item, index) => (
+                      <option key={index + 1} value={item.value}>
+                        {item.text}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </Grid>
+              </Grid>
+              <Grid row gap='md' className='padding-bottom-3'>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='expectedSpawnYear' label='Expected Spawn Year' />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='ultrasoundGonadLength' label='Ultrasound Gonad Length' />
+                </Grid>
+                <Grid tablet={{ col: 3 }}>
+                  <TextInput name='gonadCondition' label='Gonad Condition' />
+                </Grid>
+              </Grid>
+            </GridContainer>
+          )}
         </FormProvider>
 
         <ModalFooter showCancelButton onSave={() => handleSave()} customClosingLogic />

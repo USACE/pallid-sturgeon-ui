@@ -1,11 +1,11 @@
 import { ValidationMessages } from '@src/utils/enums';
 import * as yup from 'yup';
 
-// const currentYear = new Date().getFullYear();
-
 export const supplementalValidationSchema = ({ projectId, species }) =>
   yup.object().shape({
     edit: yup.boolean(),
+    showProcedureSection: yup.boolean(),
+    //Supplemental fields
     pitRnz: yup.string().notRequired(),
     tagNumber: yup
       .string()
@@ -65,7 +65,7 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
     }),
     pallidFate: yup.string().when('projectId', {
       is: (val) => Number(val) !== 2,
-      then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      then: (schema) => schema.required('Required when Project is not 2'),
       otherwise: (schema) => schema.nullable().notRequired(),
     }),
     hatcheryOrigin: yup.string().when('projectId', {
@@ -88,10 +88,134 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
       then: (schema) => schema.required('Required when Species is "USG" or "PDSG" and Genetics = Yes'),
       otherwise: (schema) => schema.nullable().notRequired(),
     }),
+    ganCheckboxGroup: yup
+      .object()
+      .when(['genetics', 'ganBroodstock', 'ganHatchVsWild', 'ganSpeciesId', 'ganArchive', 'ganProject37'], {
+        is: (genetics, ganBroodstock, ganHatchVsWild, ganSpeciesId, ganArchive, ganProject37) =>
+          genetics == 'Y' && !ganBroodstock && !ganHatchVsWild && !ganSpeciesId && !ganArchive && !ganProject37,
+        then: (schema) =>
+          schema.required('At least one Genetic Analysis Needs option must be selected when Genetics is set to "Yes"'),
+        otherwise: (schema) => schema.nullable().notRequired(),
+      }),
+    ganBroodstock: yup.string().nullable().notRequired(),
+    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
+    ganHatchVsWild: yup.string().nullable().notRequired(),
+    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
+    ganSpeciesId: yup.string().nullable().notRequired(),
+    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
+    ganArchive: yup.string().nullable().notRequired(),
+    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
+    ganProject37: yup.string().nullable().notRequired(),
+    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //Procedure fields
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    oldRadioTag: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when('purpose', {
+          is: (purpose) => ['2', '5'].includes(purpose),
+          then: (schema) => schema.required('Required when Purpose is "Reimplant" or "Retired"'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    oldFrequencyId: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when(['purpose'], {
+          is: (purpose) => ['2', '5'].includes(purpose),
+          then: (schema) => schema.required('Required when Purpose is "Reimplant" or "Retired"'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    procedureDate: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    startTime: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema
+          .required(ValidationMessages.FieldRequired)
+          .matches(/^\d{2}:\d{2}:\d{2}$/, 'Must be in the format HH:MM:SS.'),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    endTime: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema
+          .required(ValidationMessages.FieldRequired)
+          .matches(/^\d{2}:\d{2}:\d{2}$/, 'Must be in the format HH:MM:SS.'),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    dstStartDate: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when('dstSerial', {
+          is: (value) => value !== null && value !== undefined && value !== '',
+          then: (schema) => schema.required('This field is required when "New/Current DST Serial #" is populated.'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    dstStartTime: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when('dstSerial', {
+          is: (value) => value !== null && value !== undefined && value !== '',
+          then: (schema) => schema.required('This field is required when "New/Current DST Serial #" is populated.'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    newRadioTag: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when(['purpose'], {
+          is: (purpose) => !['5', '6'].includes(purpose),
+          then: (schema) => schema.required('Required when Purpose is not "Retired" or "?????"'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    newFrequencyId: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when(['purpose'], {
+          is: (purpose) => !['5', '6'].includes(purpose),
+          then: (schema) => schema.required('Required when Purpose is not "Retired" or "?????"'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    newRtSerial: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when(['purpose'], {
+          is: (purpose) => !['5', '6'].includes(purpose),
+          then: (schema) => schema.required('Required when Purpose is not "Retired" or "?????"'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    evalForLocation: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when('spawnEval', {
+          is: (value) => value !== null && value !== undefined && value !== '',
+          then: (schema) => schema.required('This field is required when "Spawn Evaluation" is populated.'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
   });
 
-export const getSuppDefaultValues = ({ edit, data, user }) => ({
+export const getSuppDefaultValues = ({ edit, data, user, showProcedureSection }) => ({
   edit: edit ?? false,
+  showProcedureSection: showProcedureSection ?? false,
   pitRnz: data?.pitRnz ?? '',
   tagNumber: data?.tagNumber ?? '',
   elColor: data?.elColor ?? '',
