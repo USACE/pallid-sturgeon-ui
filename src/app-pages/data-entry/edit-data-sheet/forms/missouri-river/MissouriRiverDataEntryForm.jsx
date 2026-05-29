@@ -358,33 +358,18 @@ const MissouriRiverDataEntryForm = connect(
         clientId,
         status: 2,
         _status: 'queued',
-        version: dataObj.version ?? draft?.version ?? 0,
+        version: dataObj.version ?? 0,
       });
 
-      try {
-        newForm || payload.seId || payload.se_id
-          ? console.warn('ADD MR DATA ENTRY BUNDLE')
-          : console.warn('UPDATE MR DATA ENTRY BUNDLE');
-        setValue('clientId', clientId);
-        setValue('status', 2);
+      newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+      setValue('clientId', clientId);
+      setValue('status', 2);
 
-        sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
-        setSubmitMessage({
-          type: 'success',
-          text: 'Missouri River form submitted successfully.',
-        });
-      } catch (error) {
-        console.error('Missouri River failed, queueing offline:', error);
-        await updateData('moriver', clientId, payload);
-        setValue('clientId', clientId);
-        setValue('status', 2);
-        sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
-
-        setSubmitMessage({
-          type: 'success',
-          text: 'Missouri River form saved offline successfully. It will sync when you are back online.',
-        });
-      }
+      sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
+      setSubmitMessage({
+        type: 'success',
+        text: 'Missouri River form submitted successfully.',
+      });
     };
 
     // Set R/N value
@@ -556,7 +541,7 @@ const MissouriRiverDataEntryForm = connect(
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
     }, [errors, setFocus]);
 
-    // Set IDs
+    // Set Missouri River IDs
     useEffect(() => {
       if (newForm) {
         const fieldId = generateFieldId();
