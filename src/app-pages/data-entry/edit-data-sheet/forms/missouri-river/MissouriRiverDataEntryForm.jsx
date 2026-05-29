@@ -90,6 +90,7 @@ const MissouriRiverDataEntryForm = connect(
 
     const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
     const newForm = !dataEntryData.mrId;
+    const hasFishRecords = dataEntryFishTotalCount > 0;
 
     const ss3Options = removeDuplicates(
       setSite3Options?.map((item) => ({
@@ -195,7 +196,9 @@ const MissouriRiverDataEntryForm = connect(
 
     const methods = useForm({
       defaultValues: getMissouriRiverDefaultValues({ baseData, dataEntryData }),
-      resolver: yupResolver(getMissouriRiverSchema({ riverMile: getUpperLowerRiverMile(bend, segmentId) })),
+      resolver: yupResolver(
+        getMissouriRiverSchema({ riverMile: getUpperLowerRiverMile(bend, segmentId), hasFishRecords: hasFishRecords })
+      ),
       mode: 'onSubmit',
       reValidateMode: 'onChange',
       stateOptions: [],
@@ -889,10 +892,11 @@ const MissouriRiverDataEntryForm = connect(
                     label='Stop Time'
                     onChange={handleChange}
                     warning={
-                      deploymentType === 'p' && (stopTime === null || stopTime === '')
+                      deploymentType === 'p' && (stopTime === null || stopTime === '') && !hasFishRecords
                         ? 'Deployment type = p but the stop time is not filled in'
                         : null
                     }
+                    required={deploymentType === 'p' && hasFishRecords}
                   />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>
