@@ -58,15 +58,22 @@ const sitesDatasheetBundle = {
   selectSitesDatasheetPageSize: (state) => state.sitesDatasheet.pageSize,
   selectSitesDatasheetPageNumber: (state) => state.sitesDatasheet.pageNumber,
   selectSitesDatasheetParams: (state) => state.sitesDatasheet.params,
-  selectMoriverSitesDatasheetData: (state) => state.sitesDatasheet.missouriRiver.data,
-  selectSearchEffortDraftSitesDatasheetData: (state) =>
-    state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 1),
-  selectMoriverSitesDatasheetData: (state) => state.sitesDatasheet.missouriRiver.data,
+
+  // Missouri River Data
+  selectMoriverDraftSitesDatasheetData: (state) =>
+    state.sitesDatasheet.missouriRiver.data?.filter((row) => row.status === 1),
+  selectMoriverSitesDatasheetData: (state) =>
+    state.sitesDatasheet.missouriRiver.data?.filter((row) => row.status === 2),
+  selectMoriverSitesDraftDatasheetTotalResults: (state) =>
+    state.sitesDatasheet.missouriRiver.data?.filter((row) => row.status === 1).length,
+  selectMoriverSitesDatasheetTotalResults: (state) =>
+    state.sitesDatasheet.missouriRiver.data?.filter((row) => row.status === 2).length,
+
+  // Search Effort Data
   selectSearchEffortDraftSitesDatasheetData: (state) =>
     state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 1),
   selectSearchEffortSitesDatasheetData: (state) =>
     state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 2),
-  selectMoriverSitesDatasheetTotalResults: (state) => state.sitesDatasheet.missouriRiver.totalCount,
   selectSearchEffortSitesDatasheetTotalResults: (state) =>
     state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 2).length,
   selectSearchEffortSitesDraftDatasheetTotalResults: (state) =>

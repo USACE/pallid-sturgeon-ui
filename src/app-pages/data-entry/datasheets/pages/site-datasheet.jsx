@@ -17,6 +17,7 @@ const SiteDatasheet = connect(
   'selectMoriverSitesDatasheetTotalResults',
   'selectSearchEffortSitesDatasheetTotalResults',
   'selectSearchEffortSitesDraftDatasheetTotalResults',
+  'selectMoriverSitesDraftDatasheetTotalResults',
   'selectRouteParams',
   ({
     doSitesDatasheetLoadData,
@@ -24,6 +25,7 @@ const SiteDatasheet = connect(
     moriverSitesDatasheetTotalResults,
     searchEffortSitesDatasheetTotalResults,
     searchEffortSitesDraftDatasheetTotalResults,
+    moriverSitesDraftDatasheetTotalResults,
     routeParams,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
@@ -78,11 +80,15 @@ const SiteDatasheet = connect(
                   content: <MissouriDsTable />,
                 },
                 {
+                  title: `Missouri River Drafts (${moriverSitesDraftDatasheetTotalResults})`,
+                  content: <MissouriDsTable isDraft />,
+                },
+                {
                   title: `Search Effort (${searchEffortSitesDatasheetTotalResults})`,
                   content: <SearchDsTable />,
                 },
                 {
-                  title: `Drafts (${searchEffortSitesDraftDatasheetTotalResults})`,
+                  title: `Search Effort Drafts (${searchEffortSitesDraftDatasheetTotalResults})`,
                   content: <SearchDraftDsTable />,
                 },
               ]}

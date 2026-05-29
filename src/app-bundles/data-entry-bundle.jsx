@@ -492,7 +492,7 @@ export default {
     },
 
   doSaveFishDataEntry:
-    (formData, params) =>
+    (formData) =>
     ({ dispatch, store, apiPost }) => {
       const toastId = toast.loading('Saving datasheet...');
 
@@ -502,7 +502,7 @@ export default {
         if (!err) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
-          store.doFetchFishDataEntry(params);
+          store.doFetchFishDataEntry({ mrId: formData?.mrId, id: store.selectUserRole()?.id });
         } else {
           dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');

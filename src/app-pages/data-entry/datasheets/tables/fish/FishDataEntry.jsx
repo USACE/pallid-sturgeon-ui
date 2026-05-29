@@ -44,7 +44,7 @@ const FishDataEntry = connect(
   'selectLookupData',
   ({ doSaveFishDataEntry, doUpdateFishDataEntry, dataEntryData, dataEntryFishData, baseData, lookupData }) => {
     const { items } = dataEntryFishData;
-    const { gear } = dataEntryData;
+    const { gear, siteId } = dataEntryData;
 
     const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions } = lookupData;
 
@@ -54,7 +54,11 @@ const FishDataEntry = connect(
     const [data, setData] = useState(rowData);
     const columnHelper = createColumnHelper();
 
-    const mrFid = dataEntryData?.mrFid;
+    // Get Missouri River Draft Data
+    const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
+    const savedDraft = sessionStorage.getItem(moriverDraftKey);
+    const moriverDraft = savedDraft ? JSON.parse(savedDraft) : null;
+    const mrFid = dataEntryData?.mrFid || baseData?.mrFid || moriverDraft?.mrFid;
 
     const speciesOptions =
       fishCodes?.map((item) => ({
@@ -226,9 +230,20 @@ const FishDataEntry = connect(
       const base = getBaseDefaultValues({ baseData });
       const sequence = getNextSequence(data, mrFid);
 
+      const parentMrId =
+        dataEntryData?.mrId ??
+        dataEntryData?.mr_id ??
+        dataEntryLastParams?.mrId ??
+        dataEntryLastParams?.mr_id ??
+        searchEffortDraft?.mrId ??
+        searchEffortDraft?.mr_id;
+
       // Format new row data
       const newRowData = {
         ...base,
+        // ...defaultValues,
+        mrId: parentMrId,
+        mr_id: parentMrId,
         ffid: `${mrFid}-${sequence}`,
         mrFid,
         _status: 'new',
@@ -290,18 +305,28 @@ const FishDataEntry = connect(
 
     const handleSubmitAll = async () => {
       try {
-        const rowsToProcess = data.filter((item) => item._status === 'new' || item._status === 'edited');
-        for (let i = 0; i < rowsToProcess.length; i++) {
-          const data = rowsToProcess[i];
-          const isNew = !data.fId;
-          await FishDataEntrySchema.validate(data, { abortEarly: false });
+        data?.forEach(async (item) => {
+          const isNew = !item.fId;
+          const clientId = item.clientId ?? crypto.randomUUID();
 
+          const payload = {
+            ...item,
+            clientId,
+            // f_id: parentSeId,
+            fFid: item.seFid,
+            tFid: item.tFid,
+            // _status: 'queued',
+            // version: row.version ?? 0,
+            countF: item.countF ? parseInt(item.countF) : null,
+          };
+
+          await FishDataEntrySchema({ gear, data }).validate(item, { abortEarly: false });
           if (isNew) {
-            await doSaveFishDataEntry(data);
-          } else if (data.tId && data._status === 'edited') {
-            await doUpdateFishDataEntry(data);
+            await doSaveFishDataEntry(payload);
+          } else {
+            await doUpdateFishDataEntry(payload);
           }
-        }
+        });
       } catch (err) {
         console.error('Submit failed:', err);
       }
