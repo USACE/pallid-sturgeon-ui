@@ -79,7 +79,7 @@ const FishDataEntry = connect(
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 150,
         }),
-        columnHelper.accessor('ffid', {
+        columnHelper.accessor('fFid', {
           header: 'Field ID',
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 150,
@@ -241,10 +241,9 @@ const FishDataEntry = connect(
       // Format new row data
       const newRowData = {
         ...base,
-        // ...defaultValues,
         mrId: parentMrId,
         mr_id: parentMrId,
-        ffid: `${mrFid}-${sequence}`,
+        fFid: `${mrFid}-${sequence}`,
         mrFid,
         _status: 'new',
       };
@@ -260,7 +259,7 @@ const FishDataEntry = connect(
       const newRowData = {
         ...lastRowData,
         fid: null, // Reset fid if copying a save data object
-        ffid: `${mrFid}-${sequence}`,
+        fFid: `${mrFid}-${sequence}`,
         _status: 'new',
         mrFid: mrFid,
       };
@@ -312,11 +311,8 @@ const FishDataEntry = connect(
           const payload = {
             ...item,
             clientId,
-            // f_id: parentSeId,
-            fFid: item.seFid,
+            fFid: item.fFid,
             tFid: item.tFid,
-            // _status: 'queued',
-            // version: row.version ?? 0,
             countF: item.countF ? parseInt(item.countF) : null,
           };
 
