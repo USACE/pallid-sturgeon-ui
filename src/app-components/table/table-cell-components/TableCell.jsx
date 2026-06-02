@@ -22,17 +22,6 @@ const formatSelectValue = (value, options) => {
   return options?.find((option) => option.value === value) || { value: value, label: value };
 };
 
-// const formatSelectValue = (value, options) => {
-//   if (!value || !options) return null;
-
-//   if (typeof value === 'object' && value.value !== undefined) {
-//     return value;
-//   }
-//   const match = options?.find((opt) => String(opt.value) === String(value));
-
-//   return match || null;
-// };
-
 const getSelectOptionValue = (option) => {
   if (!option) return null;
   return option.value;
@@ -51,25 +40,6 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
   );
 
   const debouncedUpdateRef = useRef();
-
-  // useEffect(() => {
-  //   let newVal;
-
-  //   if (type === 'select') {
-  //     const raw = getValue();
-
-  //     newVal = typeof raw === 'object' ? raw?.value : (raw ?? '');
-  //   } else {
-  //     newVal = getValue();
-  //   }
-
-  //   setValue(newVal);
-  //   previousValueRef.current = newVal;
-
-  //   if (column.id === 'frequencyIdCode') {
-  //     console.log('FINAL SELECT VALUE:', newVal);
-  //   }
-  // }, [getValue, type]);
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
@@ -132,31 +102,6 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
       updateValue(optionValue);
     }
   };
-
-  // const handleComboboxChange = async (option) => {
-  //   const optionValue = getSelectOptionValue(opton);
-  //   const optionValueBeforeBlur = value?.value;
-  //   console.log('Initial value:', value);
-  //   console.log('What is option:', option);
-  //   console.log('What is the value:', value?.value);
-
-  //   const meta = column.columnDef.meta;
-  //   console.log('What is meta:', meta);
-
-  //   // const isNumberSelect = column.columnDef.meta?.valueType === 'number';
-
-  //   // if (meta?.valueType === 'number') {
-  //   //   optionValue = optionValue === '' ? null : Number(optionValue);
-  //   //   console.log('What is the value type:', meta?.valueType);
-  //   //   console.log('What is the option value:', optionValue);
-  //   // }
-
-  //   if (hasValueChanged(optionValueBeforeBlur, optionValue)) {
-  //     setValue(option);
-  //     console.log('Final option:', option);
-  //     updateValue(optionValue);
-  //   }
-  // };
 
   const handleComboboxBlur = async (option) => {
     const optionValue = getSelectOptionValue(option);
