@@ -2,6 +2,7 @@ import { ValidationMessages } from '@src/utils/enums';
 import * as yup from 'yup';
 
 export const notRequiredSpeciesArr = ['NFSH', 'NDNF', 'CAN', 'CNFH'];
+export const gearMbArr = ['LDN500', 'LDN750', 'LDN1000'];
 
 export const FishDataEntrySchema = ({ gear, data }) =>
   yup
@@ -11,56 +12,75 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .string()
         .when('species', {
           is: (species) =>
-            gear?.startsWith('TL') || gear?.startsWith('LDN') || !notRequiredSpeciesArr.includes(species),
+            species !== null &&
+            species !== '' &&
+            species !== undefined &&
+            (gear?.startsWith('TL') || gear?.startsWith('LDN')) &&
+            !notRequiredSpeciesArr.includes(species),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
         .test({
-          test: (value) => value && (['M', 'B'].includes(value) || Number(value)),
+          // Panel/Hook field must be a number or 'M' or 'B'
+          test: (panelHook) => {
+            if (panelHook === undefined || panelHook === null || panelHook === '') return true;
+            if (['M', 'B'].includes(panelHook) || Number(panelHook)) return true;
+            return false;
+          },
           message: 'Value must be a number or M or B',
         }),
       species: yup
         .string()
         .test({
           test: (species) => {
-            if (species && species === 'NFSH' && data?.length > 0) {
-              data?.filter((row) => row.species === 'NFSH').length > 1;
-            }
+            if (
+              (species === null && species === '' && species === undefined) ||
+              (gear === null && gear === '') ||
+              data?.length < 1
+            )
+              return true;
+            if (!gearMbArr.includes(gear) && species === 'NFSH')
+              return !(data?.filter((item) => item.species === 'NFSH')?.length > 1);
             return true;
           },
           message: 'Cannot have more than one record for the species NFSH',
         })
         .test({
           test: (species) => {
-            if (species && species === 'CNFH' && data?.length > 1) {
-              return data?.filter((row) => row.species === 'CNFH').length > 1;
-            }
+            if ((species === null && species === '' && species === undefined) || data?.length < 1) return true;
+            if (species === 'CNFH') return !(data?.filter((item) => item.species === 'CNFH')?.length > 1);
             return true;
           },
           message: 'Cannot have more than one record for the species CNFH',
         })
         .test({
           test: (species) => {
-            if (species && species === 'CAN' && data?.length > 1) {
-              return data?.filter((row) => row.species === 'CAN').length > 1;
-            }
+            if ((species === null && species === '' && species === undefined) || data?.length < 1) return true;
+            if (species === 'CNA') return !(data?.filter((item) => item.species === 'CNA')?.length > 1);
             return true;
           },
-          message: 'Cannot have more than one record for the species CAN',
+          message: 'Cannot have more than one record for the species CNA',
         })
         .test({
           test: (species) => {
-            if (species && species === 'NDNF' && data?.length > 1) {
-              return data?.filter((row) => row.species === 'NDNF').length <= 1;
-            }
+            if ((species === null && species === '' && species === undefined) || data?.length < 1) return true;
+            if (species === 'NDNF') return !(data?.filter((item) => item.species === 'NDNF')?.length > 1);
             return true;
           },
           message: 'Cannot have more than one record for the species NDNF',
         })
         .test({
           test: (species, { parent: { panelHook } }) => {
-            if (species === 'NFSH' && panelHook === 'M' && data?.length > 1) {
-              return data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'M')?.length <= 1;
+            if (
+              (species === null && species === '' && species === undefined) ||
+              (gear === null && gear === '') ||
+              data?.length < 1
+            )
+              return true;
+            if (gearMbArr.includes(gear) && species === 'NFSH') {
+              if (panelHook === 'M') {
+                return !(data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'M')?.length <= 1);
+              }
             }
             return true;
           },
@@ -68,8 +88,16 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         })
         .test({
           test: (species, { parent: { panelHook } }) => {
-            if (species === 'NFSH' && panelHook === 'B' && data?.length > 1) {
-              return data?.filter((row) => row.species === species && row.panelHook === 'B')?.length <= 1;
+            if (
+              (species === null && species === '' && species === undefined) ||
+              (gear === null && gear === '') ||
+              data?.length < 1
+            )
+              return true;
+            if (gearMbArr.includes(gear) && species === 'NFSH') {
+              if (panelHook === 'M') {
+                return !(data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'B')?.length <= 1);
+              }
             }
             return true;
           },

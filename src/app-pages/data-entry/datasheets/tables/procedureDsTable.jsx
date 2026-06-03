@@ -49,9 +49,9 @@ const ProcedureDsTable = connect(
   }) => {
     const gridRef = useRef();
     const { items } = dataEntryProcedure;
-    const { frequencyIds } = lookupData;
+    const { frequencyId } = lookupData;
 
-    const getFrequencyIdString = (id) => frequencyIds?.filter((item) => item.code === id)?.[0]?.description;
+    const getFrequencyIdString = (id) => frequencyId?.filter((item) => item.code === id)?.[0]?.description;
 
     const setDates = useCallback((id) => {
       const rowNode = gridRef.current.api.getRowNode(String(id));
@@ -225,7 +225,7 @@ const ProcedureDsTable = connect(
             <AgGridColumn
               field='oldFrequencyId'
               cellEditor='selectEditor'
-              cellEditorParams={{ options: createDropdownOptions(frequencyIds), type: 'number' }}
+              cellEditorParams={{ options: createDropdownOptions(frequencyId), type: 'number' }}
               valueFormatter={(params) => getFrequencyIdString(params.data.oldFrequencyId)}
               width={150}
               sortable
@@ -277,7 +277,7 @@ const ProcedureDsTable = connect(
               field='newFreqId'
               headerName='New Frequency Id'
               cellEditor='selectEditor'
-              cellEditorParams={{ options: createDropdownOptions(frequencyIds), type: 'number' }}
+              cellEditorParams={{ options: createDropdownOptions(frequencyId), type: 'number' }}
               valueFormatter={(params) => getFrequencyIdString(params.data.newFreqId)}
               width={150}
               sortable

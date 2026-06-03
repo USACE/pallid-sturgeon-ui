@@ -1,3 +1,16 @@
+export const CreateComboboxOptions = (data) => {
+  if (!data) return [];
+
+  return data.map((item) => {
+    const { code, description } = item;
+
+    return {
+      value: code,
+      label: `${code} - ${description}`,
+    };
+  });
+};
+
 export const createDropdownOptions = (data) => {
   if (!data) return [];
 
