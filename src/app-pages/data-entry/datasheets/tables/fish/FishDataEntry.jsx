@@ -50,7 +50,6 @@ const FishDataEntry = connect(
 
     const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
-    const [tableErrors, setTableErrors] = useState();
     const [data, setData] = useState(rowData);
     const columnHelper = createColumnHelper();
 
@@ -305,7 +304,7 @@ const FishDataEntry = connect(
     const handleSubmitAll = async () => {
       try {
         data?.forEach(async (item) => {
-          const isNew = !item.fId;
+          const isNew = !item.fid;
           const clientId = item.clientId ?? crypto.randomUUID();
 
           const payload = {
@@ -343,7 +342,7 @@ const FishDataEntry = connect(
           placeholderText='No Fish Data found.'
           removeMultipleRows={handleRemoveMultipleRows}
           addMultipleRows={handleAddMultipleRows}
-          rowErrorCallback={setTableErrors}
+          rowErrorCallback={() => {}}
           tableVersion='FishTable'
           updateSourceData={handleUpdateData}
           validationSchema={FishDataEntrySchema({ gear, data })}
