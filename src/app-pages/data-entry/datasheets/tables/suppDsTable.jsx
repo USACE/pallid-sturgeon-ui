@@ -24,6 +24,7 @@ import {
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import { tabToNextCell } from './helpers';
+import { createDropdownOptions } from '../../helpers';
 
 const SuppDsTable = connect(
   'doModalOpen',
@@ -33,6 +34,7 @@ const SuppDsTable = connect(
   'selectDataEntryLastParams',
   'selectUserRole',
   'selectBaseData',
+  'selectLookupData',
   ({
     doModalOpen,
     doSaveSupplementalDataEntry,
@@ -41,6 +43,7 @@ const SuppDsTable = connect(
     dataEntryLastParams,
     userRole,
     baseData,
+    lookupData,
     isAddRow,
     setIsAddRow,
     setRowId,
@@ -48,6 +51,7 @@ const SuppDsTable = connect(
     const gridRef = useRef();
     const [isEditingRow, setIsEditingRow] = useState(false);
     const { items } = dataEntrySupplemental;
+    const { scuteLocations } = lookupData;
 
     const defaultValues = {
       fid: baseData?.fid,
@@ -222,7 +226,7 @@ const SuppDsTable = connect(
               field='scuteloc'
               headerName='Scute'
               cellEditor='selectEditor'
-              cellEditorParams={{ options: ScuteOptions }}
+              cellEditorParams={{ options: createDropdownOptions(scuteLocations) }}
               sortable
               unSortIcon
             />
@@ -231,7 +235,7 @@ const SuppDsTable = connect(
               field='scuteloc2'
               headerName='Scute 2'
               cellEditor='selectEditor'
-              cellEditorParams={{ options: ScuteOptions }}
+              cellEditorParams={{ options: createDropdownOptions(scuteLocations) }}
               sortable
               unSortIcon
             />
