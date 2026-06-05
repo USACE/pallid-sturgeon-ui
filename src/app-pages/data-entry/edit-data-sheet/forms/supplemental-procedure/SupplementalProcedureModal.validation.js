@@ -97,15 +97,15 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
           schema.required('At least one Genetic Analysis Needs option must be selected when Genetics is set to "Yes"'),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-    ganBroodstock: yup.string().nullable().notRequired(),
+    broodstock: yup.string().nullable().notRequired(),
     // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
-    ganHatchVsWild: yup.string().nullable().notRequired(),
+    hatchWild: yup.string().nullable().notRequired(),
     // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
-    ganSpeciesId: yup.string().nullable().notRequired(),
+    speciesId: yup.string().nullable().notRequired(),
     // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
-    ganArchive: yup.string().nullable().notRequired(),
+    archive: yup.string().nullable().notRequired(),
     // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
-    ganProject37: yup.string().nullable().notRequired(),
+    project37: yup.string().nullable().notRequired(),
     // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Procedure fields
@@ -232,4 +232,10 @@ export const getSuppDefaultValues = ({ edit, data, user, showProcedureSection })
   genetics: data?.genetics ?? '',
   geneticVial: data?.geneticVial ?? '',
   geneticVialNum: data?.geneticVialNum ?? '',
+  // Checkbox fields
+  broodstock: data?.broodstock ?? false,
+  hatchWild: data?.hatchWild ?? false,
+  speciesId: data?.speciesId ?? false,
+  archive: data?.archive ?? false,
+  project37: data?.project37 ?? false,
 });

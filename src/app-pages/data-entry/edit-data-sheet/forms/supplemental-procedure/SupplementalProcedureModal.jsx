@@ -4,7 +4,7 @@ import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.fo
 import Card from '@components/card';
 import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 
-import { Button, Grid, Checkbox, Label, GridContainer, Fieldset } from '@trussworks/react-uswds';
+import { Button, Grid, Label, GridContainer, Fieldset } from '@trussworks/react-uswds';
 
 import { useCallback, useEffect, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
@@ -19,6 +19,7 @@ import { createDropdownOptions, isEmpty, fmtTimeHHMMSS } from '@pages/data-entry
 import ErrorSummary from '@components/error-summary/ErrorSummary';
 import Icon from '@components/icon/icon';
 import { mdiMinus, mdiPlus } from '@mdi/js';
+import Checkbox from '@src/app-components/check-box/Checkbox';
 
 const SupplementalProcedureModal = connect(
   'selectDataEntryData',
@@ -83,7 +84,7 @@ const SupplementalProcedureModal = connect(
       clearErrors,
     } = methods;
 
-    //console.log('getValues', getValues());
+    console.warn('VALUES: ', getValues());
     //console.log('errors', errors);
     // const toggleProcedureSection = () => setShowProcedureSection(!showProcedureSection);
     const toggleProcedureSection = () => {
@@ -102,6 +103,7 @@ const SupplementalProcedureModal = connect(
     };
 
     const handleChange = (e) => {
+      console.warn('e: ', e);
       const name = e?.target?.name;
       const val = e?.target?.value;
 
@@ -218,15 +220,23 @@ const SupplementalProcedureModal = connect(
       if (isValid) {
         const values = getValues();
         // Format any values need for final payload
-        const suppProcDataObj = {
-          ...values,
-          // bendrivermile: parseFloat(values?.bendrivermile),
-          // temp: parseFloat(values?.temp),
-          // u2: String(values?.u2),
+        const suppDataObj = {
+          // Checkbox fields
+          broodstock: values?.broodstock === true ? 1 : 0,
+          hatchWild: values?.hatchWild === true ? 1 : 0,
+          speciesId: values?.speciesId === true ? 1 : 0,
+          archive: values?.archive === true ? 1 : 0,
+          project37: values?.project37 === true ? 1 : 0,
         };
+        const procDataObj = {};
         // Filter out any null/empty values for final payload
         // const payload = filterNullEmptyObjects(suppProcDataObj);
         // newForm ? doUpdateSuppProcDataEntry(payload) : doAddSuppProcDataEntry(payload);
+        if (showProcedureSection) {
+          console.warn('Submitted SUPP & PROC data: ', { ...values, ...suppDataObj, ...procDataObj });
+        } else {
+          console.warn('Submitted SUPP data: ', { ...values, ...suppDataObj, ...procDataObj });
+        }
       } else {
         trigger();
       }
@@ -455,14 +465,12 @@ const SupplementalProcedureModal = connect(
             </Grid>
             <Grid row gap='md' className='padding-bottom-3'>
               <Grid tablet={{ col: 4 }}>
-                <Fieldset name='ganCheckboxGroup'>
-                  <Label htmlFor='ganCheckboxGroup'>Genetic Analysis Needs</Label>
-                  <Checkbox id='ganBroodstock' name='ganBroodstock' label='Broodstock' onChange={handleChange} />
-                  <Checkbox id='ganHatchVsWild' name='ganHatchVsWild' label='Hatch vs Wild' onChange={handleChange} />
-                  <Checkbox id='ganSpeciesId' name='ganSpeciesId' label='Species ID' onChange={handleChange} />
-                  <Checkbox id='ganArchive' name='ganArchive' label='Archive' onChange={handleChange} />
-                  <Checkbox id='ganProject37' name='ganProject37' label='Project 3.7' onChange={handleChange} />
-                </Fieldset>
+                <Label>Genetic Analysis Needs</Label>
+                <Checkbox id='check-broodstock' name='broodstock' label='Broodstock' onChange={handleChange} />
+                <Checkbox id='check-hatch-wild' name='hatchWild' label='Hatch vs Wild' onChange={handleChange} />
+                <Checkbox id='check-species-id' name='speciesId' label='Species ID' onChange={handleChange} />
+                <Checkbox id='check-archive' name='archive' label='Archive' onChange={handleChange} />
+                <Checkbox id='check-project-37' name='project37' label='Project 3.7' onChange={handleChange} />
               </Grid>
               <Grid tablet={{ col: 8 }}>
                 <TextArea name='otherTagInfo' label='Other Tag Info' placeholder='Value'></TextArea>
