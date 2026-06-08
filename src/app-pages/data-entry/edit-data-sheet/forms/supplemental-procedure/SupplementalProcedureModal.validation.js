@@ -88,15 +88,6 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
       then: (schema) => schema.required('Required when Species is "USG" or "PDSG" and Genetics = Yes'),
       otherwise: (schema) => schema.nullable().notRequired(),
     }),
-    ganCheckboxGroup: yup
-      .object()
-      .when(['genetics', 'ganBroodstock', 'ganHatchVsWild', 'ganSpeciesId', 'ganArchive', 'ganProject37'], {
-        is: (genetics, ganBroodstock, ganHatchVsWild, ganSpeciesId, ganArchive, ganProject37) =>
-          genetics == 'Y' && !ganBroodstock && !ganHatchVsWild && !ganSpeciesId && !ganArchive && !ganProject37,
-        then: (schema) =>
-          schema.required('At least one Genetic Analysis Needs option must be selected when Genetics is set to "Yes"'),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
     ganBroodstock: yup.string().nullable().notRequired(),
     // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
     ganHatchVsWild: yup.string().nullable().notRequired(),
@@ -107,6 +98,15 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
     // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
     ganProject37: yup.string().nullable().notRequired(),
     // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
+    // ganCheckboxGroup: yup
+    //   .object()
+    //   .when(['genetics', 'ganBroodstock', 'ganHatchVsWild', 'ganSpeciesId', 'ganArchive', 'ganProject37'], {
+    //     is: (genetics, ganBroodstock, ganHatchVsWild, ganSpeciesId, ganArchive, ganProject37) =>
+    //       genetics == 'Y' && !ganBroodstock && !ganHatchVsWild && !ganSpeciesId && !ganArchive && !ganProject37,
+    //     then: (schema) =>
+    //       schema.required('At least one Genetic Analysis Needs option must be selected when Genetics is set to "Yes"'),
+    //     otherwise: (schema) => schema.nullable().notRequired(),
+    //   }),
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Procedure fields
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,6 +211,41 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
         }),
       otherwise: (schema) => schema.nullable().notRequired(),
     }),
+    visualAssessment: yup.string().nullable().notRequired(),
+    ultrasoundAssessment: yup.string().nullable().notRequired(),
+    sex: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when(['visualAssessment', 'ultrasoundAssessment'], {
+          is: (visualAssessment, ultrasoundAssessment) =>
+            (visualAssessment !== null && visualAssessment !== undefined && visualAssessment !== '') ||
+            (ultrasoundAssessment !== null && ultrasoundAssessment !== undefined && ultrasoundAssessment !== ''),
+          then: (schema) =>
+            schema.required('This field is required when "Visual Assessment" or "Ultrasound Assessment" is populated.'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    expectedSpawnYear: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when(['visualAssessment', 'ultrasoundAssessment'], {
+          is: (visualAssessment, ultrasoundAssessment) =>
+            (visualAssessment !== null && visualAssessment !== undefined && visualAssessment !== '') ||
+            (ultrasoundAssessment !== null && ultrasoundAssessment !== undefined && ultrasoundAssessment !== ''),
+          then: (schema) =>
+            schema
+              .required('This field is required when "Visual Assessment" or "Ultrasound Assessment" is populated.')
+              .test('expectedSpawnYear-valid-year', 'Expected Spawn Year must be the current year or current year + 1.', (value) => {
+                if (!value) return true;
+                const currentYear = new Date().getFullYear();
+                const year = parseInt(value, 10);
+                return year === currentYear || year === currentYear + 1;
+              }),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
   });
 
 export const getSuppDefaultValues = ({ edit, data, user, showProcedureSection }) => ({
@@ -232,4 +267,24 @@ export const getSuppDefaultValues = ({ edit, data, user, showProcedureSection })
   genetics: data?.genetics ?? '',
   geneticVial: data?.geneticVial ?? '',
   geneticVialNum: data?.geneticVialNum ?? '',
+  ganBroodstock: data?.ganBroodstock ?? '',
+  ganHatchVsWild: data?.ganHatchVsWild ?? '',
+  ganSpeciesId: data?.ganSpeciesId ?? '',
+  ganArchive: data?.ganArchive ?? '',
+  ganProject37: data?.ganProject37 ?? '',
+  oldRadioTag: data?.oldRadioTag ?? '',
+  oldFrequencyId: data?.oldFrequencyId ?? '',
+  procedureDate: data?.procedureDate ?? '',
+  startTime: data?.startTime ?? '',
+  endTime: data?.endTime ?? '',
+  dstStartDate: data?.dstStartDate ?? '',
+  dstStartTime: data?.dstStartTime ?? '',
+  newRadioTag: data?.newRadioTag ?? '',
+  newFrequencyId: data?.newFrequencyId ?? '',
+  newRtSerial: data?.newRtSerial ?? '',
+  evalForLocation: data?.evalForLocation ?? '',
+  visualAssessment: data?.visualAssessment ?? '',
+  ultrasoundAssessment: data?.ultrasoundAssessment ?? '',
+  sex: data?.sex ?? '',
+  expectedSpawnYear: data?.expectedSpawnYear ?? '',
 });
