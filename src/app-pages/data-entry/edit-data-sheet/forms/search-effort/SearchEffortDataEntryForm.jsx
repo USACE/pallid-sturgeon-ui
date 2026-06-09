@@ -20,8 +20,6 @@ import { db } from '@src/app-pages/data-entry/offline/db';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
 
-console.log('GPS POC flag', import.meta.env.VITE_USE_UBLOX_POC, USE_UBLOX_POC);
-
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
 const isEmpty = (obj) => Object.keys(obj).length === 0;
