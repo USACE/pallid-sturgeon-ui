@@ -7,7 +7,7 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
     showProcedureSection: yup.boolean(),
     //Supplemental fields
     pitRnz: yup.string().notRequired(),
-    tagNumber: yup
+    tagnumber: yup
       .string()
       .transform((value) => (value ? value.toUpperCase() : value))
       .matches(/^[A-NP-Z0-9.]*$/, "Must be alphanumeric, cannot contain 'O', and be uppercase.")
@@ -217,7 +217,7 @@ export const getSuppDefaultValues = ({ edit, data, user, showProcedureSection })
   edit: edit ?? false,
   showProcedureSection: showProcedureSection ?? false,
   pitRnz: data?.pitRnz ?? '',
-  tagNumber: data?.tagNumber ?? '',
+  tagnumber: data?.tagnumber ?? '',
   elColor: data?.elColor ?? '',
   elHvx: data?.elHvx ?? '',
   erColor: data?.erColor ?? '',

@@ -22,6 +22,7 @@ import loadingBundle from './loading-bundle';
 import baseDataBundle from './base-data-bundle';
 import complexStateBundle from './complex-state-bundle';
 import lookupBundle from './lookup-bundle';
+import pallidIdBundle from './pallid-id-bundle';
 
 // Mock Token User
 const mockTokenApplicationAdmin =
@@ -61,5 +62,6 @@ export default composeBundles(
   loadingBundle,
   baseDataBundle,
   complexStateBundle,
-  lookupBundle
+  lookupBundle,
+  pallidIdBundle
 );

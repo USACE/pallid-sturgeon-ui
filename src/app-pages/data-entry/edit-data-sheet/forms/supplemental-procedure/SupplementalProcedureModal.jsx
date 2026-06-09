@@ -6,12 +6,12 @@ import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 
 import { Button, Grid, Label, GridContainer, Fieldset } from '@trussworks/react-uswds';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import TextInput from '@components/new-inputs/text-input/TextInput';
 import TextArea from '@components/new-inputs/text-area/TextArea';
 import SelectInput from '@components/new-inputs/select-input/SelectInput';
-import PallidIdOverview from './pallidIdOverview';
+import PallidIdOverview from './pallid-id-overview/pallidIdOverview';
 import classNames from 'classnames';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { getSuppDefaultValues, supplementalValidationSchema } from './SupplementalProcedureModal.validation';
@@ -22,17 +22,18 @@ import { mdiMinus, mdiPlus } from '@mdi/js';
 import Checkbox from '@src/app-components/check-box/Checkbox';
 
 const SupplementalProcedureModal = connect(
+  'doGetPallidIdData',
   'selectDataEntryData',
-  'selectRouteParams',
   'selectIsEditForm',
   'selectBaseData',
   'selectLookupData',
   'doModalClose',
-  ({ dataEntryData, routeParams, isEditForm, baseData, lookupData, doModalClose }) => {
-    const siteId = routeParams?.siteId;
-    const seId = routeParams?.seId;
+  ({ doGetPallidIdData, dataEntryData, isEditForm, baseData, lookupData, doModalClose, row: fishData }) => {
+    console.warn('data: ', fishData);
+    console.warn('baseData: ', baseData);
 
-    const { fid, bend, fieldoffice, season, projectId, segmentId, species } = baseData;
+    const { fid, bend, fieldoffice, season, projectId, segmentId } = baseData;
+    const { mrFid, fFid, species } = fishData;
 
     const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -93,6 +94,8 @@ const SupplementalProcedureModal = connect(
       clearErrors();
     };
 
+    const tagnumber = watch('tagnumber');
+
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
 
@@ -107,7 +110,7 @@ const SupplementalProcedureModal = connect(
       const name = e?.target?.name;
       const val = e?.target?.value;
 
-      if (name === 'tagNumber') {
+      if (name === 'tagnumber') {
         setValue(name, val?.toUpperCase());
       } else if (name === 'geneticVial' && geneticVialPrefixDefault.length) {
         fmtGeneticsVial(geneticVialPrefixDefault || val?.toUpperCase());
@@ -131,13 +134,8 @@ const SupplementalProcedureModal = connect(
     };
 
     const handleGetPallidIdByTagNumber = () => {
-      const tagNumber = getValues('tagNumber');
-      //TODO load pallid ID data?
-
-      // Format any values need for final payload
-      // Filter out any null/empty values for final payload
-      // const payload = filterNullEmptyObjects(dataObj);
-      // newForm ? doUpdateMoRiverDataEntry(payload) : doAddMoRiverDataEntry(payload);
+      // Load pallid ID data
+      doGetPallidIdData(tagnumber);
     };
 
     // Set Procedure Date to current date.
@@ -266,12 +264,12 @@ const SupplementalProcedureModal = connect(
               <Grid row>
                 <Grid tablet={{ col: 6 }}>
                   <p className='margin-bottom-0'>
-                    <span className='text-bold'>MR FID:</span> -TODO-
+                    <span className='text-bold'>MR FID:</span> {mrFid || ''}
                   </p>
                 </Grid>
                 <Grid tablet={{ col: 6 }}>
                   <p className='margin-bottom-0'>
-                    <span className='text-bold'>F FID:</span> -TODO-
+                    <span className='text-bold'>F FID:</span> {fFid || ''}
                   </p>
                 </Grid>
               </Grid>
@@ -287,7 +285,7 @@ const SupplementalProcedureModal = connect(
             <Grid row gap='md' className='padding-bottom-1'>
               <Grid tablet>
                 <h3>
-                  {isEditForm ? '' : 'Create'} Supplemental Data Entry {isEditForm ? `Overview (ID: ${fid})` : ''}
+                  {isEditForm ? '' : 'Create'} Supplemental Data Entry {isEditForm ? `Overview` : ''}
                 </h3>
               </Grid>
             </Grid>
@@ -302,7 +300,7 @@ const SupplementalProcedureModal = connect(
                 </SelectInput>
               </Grid>
               <Grid tablet={{ col: 3 }}>
-                <TextInput name='tagNumber' label='Tag Number' onChange={handleChange} />
+                <TextInput name='tagnumber' label='Tag Number' onChange={handleChange} />
               </Grid>
               <Grid tablet={{ col: 2 }}>
                 <Button className={saveBtnClasses} onClick={handleGetPallidIdByTagNumber} type='button'>
