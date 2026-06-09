@@ -30,6 +30,12 @@ console.log('GPS POC flag', import.meta.env.VITE_USE_UBLOX_POC, USE_UBLOX_POC);
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
+const GPS_OPTIONS = {
+  enableHighAccuracy: true,
+  timeout: 15000,
+  maximumAge: 0,
+};
+
 const createDropdownOptions = (data) => {
   if (!data) return [];
 
@@ -144,7 +150,7 @@ const TelemetryDataEntry = connect(
       }
 
       console.log('[GPS SOURCE] using browser geolocation fallback');
-      return browserGps.captureBestOf();
+      return browserGps.captureOnce();
     };
 
     const fmtTimeHHMMSS = (val) => {
@@ -165,7 +171,7 @@ const TelemetryDataEntry = connect(
       try {
         console.log('GPS capturing for row', rowIndex);
 
-        const fix = await captureOnce();
+        const fix = await captureGpsFix();
         const time = fmtTimeHHMMSS();
 
         console.log('GPS result:', { fix, time });
