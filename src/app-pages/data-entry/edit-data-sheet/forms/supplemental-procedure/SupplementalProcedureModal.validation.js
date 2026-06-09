@@ -98,15 +98,10 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
     broodstock: yup.string().nullable().notRequired(),
-    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
     hatchWild: yup.string().nullable().notRequired(),
-    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
     speciesId: yup.string().nullable().notRequired(),
-    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
     archive: yup.string().nullable().notRequired(),
-    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
     project37: yup.string().nullable().notRequired(),
-    // .transform((originalValue) => (originalValue === 'on' ? 1 : 0)),
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //Procedure fields
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,6 +206,45 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
         }),
       otherwise: (schema) => schema.nullable().notRequired(),
     }),
+    visualAssessment: yup.string().nullable().notRequired(),
+    ultrasoundAssessment: yup.string().nullable().notRequired(),
+    sex: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when(['visualAssessment', 'ultrasoundAssessment'], {
+          is: (visualAssessment, ultrasoundAssessment) =>
+            (visualAssessment !== null && visualAssessment !== undefined && visualAssessment !== '') ||
+            (ultrasoundAssessment !== null && ultrasoundAssessment !== undefined && ultrasoundAssessment !== ''),
+          then: (schema) =>
+            schema.required('This field is required when "Visual Assessment" or "Ultrasound Assessment" is populated.'),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
+    expectedSpawnYear: yup.string().when('showProcedureSection', {
+      is: true,
+      then: (schema) =>
+        schema.when(['visualAssessment', 'ultrasoundAssessment'], {
+          is: (visualAssessment, ultrasoundAssessment) =>
+            (visualAssessment !== null && visualAssessment !== undefined && visualAssessment !== '') ||
+            (ultrasoundAssessment !== null && ultrasoundAssessment !== undefined && ultrasoundAssessment !== ''),
+          then: (schema) =>
+            schema
+              .required('This field is required when "Visual Assessment" or "Ultrasound Assessment" is populated.')
+              .test(
+                'expectedSpawnYear-valid-year',
+                'Expected Spawn Year must be the current year or current year + 1.',
+                (value) => {
+                  if (!value) return true;
+                  const currentYear = new Date().getFullYear();
+                  const year = parseInt(value, 10);
+                  return year === currentYear || year === currentYear + 1;
+                }
+              ),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      otherwise: (schema) => schema.nullable().notRequired(),
+    }),
   });
 
 export const getSuppDefaultValues = ({ edit, data, user, showProcedureSection }) => ({
@@ -232,10 +266,24 @@ export const getSuppDefaultValues = ({ edit, data, user, showProcedureSection })
   genetics: data?.genetics ?? '',
   geneticVial: data?.geneticVial ?? '',
   geneticVialNum: data?.geneticVialNum ?? '',
-  // Checkbox fields
   broodstock: data?.broodstock ?? false,
   hatchWild: data?.hatchWild ?? false,
   speciesId: data?.speciesId ?? false,
   archive: data?.archive ?? false,
   project37: data?.project37 ?? false,
+  oldRadioTag: data?.oldRadioTag ?? '',
+  oldFrequencyId: data?.oldFrequencyId ?? '',
+  procedureDate: data?.procedureDate ?? '',
+  startTime: data?.startTime ?? '',
+  endTime: data?.endTime ?? '',
+  dstStartDate: data?.dstStartDate ?? '',
+  dstStartTime: data?.dstStartTime ?? '',
+  newRadioTag: data?.newRadioTag ?? '',
+  newFrequencyId: data?.newFrequencyId ?? '',
+  newRtSerial: data?.newRtSerial ?? '',
+  evalForLocation: data?.evalForLocation ?? '',
+  visualAssessment: data?.visualAssessment ?? '',
+  ultrasoundAssessment: data?.ultrasoundAssessment ?? '',
+  sex: data?.sex ?? '',
+  expectedSpawnYear: data?.expectedSpawnYear ?? '',
 });
