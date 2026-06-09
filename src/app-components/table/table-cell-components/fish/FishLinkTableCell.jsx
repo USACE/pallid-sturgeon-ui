@@ -7,6 +7,7 @@ const getModalProps = ({ row, isEdit }) => ({
   data: row.original,
   edit: isEdit,
   rowIndex: row.index,
+  row: row.original,
 });
 
 const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, modalComponent, row }) => {

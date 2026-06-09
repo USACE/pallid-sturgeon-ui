@@ -6,13 +6,13 @@ import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 
 import { Button, Grid, Label, GridContainer, Fieldset } from '@trussworks/react-uswds';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import TextInput from '@components/new-inputs/text-input/TextInput';
 import TextArea from '@components/new-inputs/text-area/TextArea';
 import Checkbox from '@components/check-box/Checkbox';
 import SelectInput from '@components/new-inputs/select-input/SelectInput';
-import PallidIdOverview from './pallidIdOverview';
+import PallidIdOverview from './pallid-id-overview/pallidIdOverview';
 import classNames from 'classnames';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { getSuppDefaultValues, supplementalValidationSchema } from './SupplementalProcedureModal.validation';
@@ -20,19 +20,18 @@ import { createDropdownOptions, isEmpty, fmtTimeHHMMSS } from '@pages/data-entry
 import ErrorSummary from '@components/error-summary/ErrorSummary';
 import Icon from '@components/icon/icon';
 import { mdiMinus, mdiPlus } from '@mdi/js';
+import Checkbox from '@src/app-components/check-box/Checkbox';
 
 const SupplementalProcedureModal = connect(
+  'doGetPallidIdData',
   'selectDataEntryData',
-  'selectRouteParams',
   'selectIsEditForm',
   'selectBaseData',
   'selectLookupData',
   'doModalClose',
-  ({ dataEntryData, routeParams, isEditForm, baseData, lookupData, doModalClose }) => {
-    const siteId = routeParams?.siteId;
-    const seId = routeParams?.seId;
-
-    const { fid, bend, fieldoffice, season, projectId, segmentId, species } = baseData;
+  ({ doGetPallidIdData, dataEntryData, isEditForm, baseData, lookupData, doModalClose, row: fishData }) => {
+    const { fid, bend, fieldoffice, season, projectId, segmentId } = baseData;
+    const { mrFid, fFid, species } = fishData;
 
     const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -90,6 +89,8 @@ const SupplementalProcedureModal = connect(
       clearErrors();
     };
 
+    const tagnumber = watch('tagnumber');
+
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
 
@@ -100,7 +101,7 @@ const SupplementalProcedureModal = connect(
     const erColor = watch('erColor');
     const genetics = watch('genetics');
     const geneticsVial = watch('geneticsVial');
-    
+
     const geneticsVialPrefix = projectId === 1 ? 'STURG-' : '';
 
     const ensureGeneticsVialPrefix = (val) => {
@@ -117,7 +118,7 @@ const SupplementalProcedureModal = connect(
       const name = e?.target?.name;
       const val = e?.target?.value;
 
-      if (name === 'tagNumber') {
+      if (name === 'tagnumber') {
         setValue(name, val?.toUpperCase());
       } else if (name === 'geneticsVial') {
         ensureGeneticsVialPrefix(val);
@@ -141,13 +142,8 @@ const SupplementalProcedureModal = connect(
     };
 
     const handleGetPallidIdByTagNumber = () => {
-      const tagNumber = getValues('tagNumber');
-      //TODO load pallid ID data?
-
-      // Format any values need for final payload
-      // Filter out any null/empty values for final payload
-      // const payload = filterNullEmptyObjects(dataObj);
-      // newForm ? doUpdateMoRiverDataEntry(payload) : doAddMoRiverDataEntry(payload);
+      // Load pallid ID data
+      doGetPallidIdData(tagnumber);
     };
 
     // Set Procedure Date to current date.
@@ -197,7 +193,9 @@ const SupplementalProcedureModal = connect(
       } else {
         if (geneticsVial) {
           //TODO use a different confirm method?
-          const confirmed = (geneticsVial === geneticsVialPrefix) || confirm('This will clear the Genetics Vial textbox. Do you want to make this change?');
+          const confirmed =
+            geneticsVial === geneticsVialPrefix ||
+            confirm('This will clear the Genetics Vial textbox. Do you want to make this change?');
           if (confirmed) {
             setValue('geneticsVial', null);
             setIsGeneticsVialReadOnly(true);
@@ -221,15 +219,23 @@ const SupplementalProcedureModal = connect(
       if (isValid) {
         const values = getValues();
         // Format any values need for final payload
-        const suppProcDataObj = {
-          ...values,
-          // bendrivermile: parseFloat(values?.bendrivermile),
-          // temp: parseFloat(values?.temp),
-          // u2: String(values?.u2),
+        const suppDataObj = {
+          // Checkbox fields
+          broodstock: values?.broodstock === true ? 1 : 0,
+          hatchWild: values?.hatchWild === true ? 1 : 0,
+          speciesId: values?.speciesId === true ? 1 : 0,
+          archive: values?.archive === true ? 1 : 0,
+          project37: values?.project37 === true ? 1 : 0,
         };
+        const procDataObj = {};
         // Filter out any null/empty values for final payload
         // const payload = filterNullEmptyObjects(suppProcDataObj);
         // newForm ? doUpdateSuppProcDataEntry(payload) : doAddSuppProcDataEntry(payload);
+        if (showProcedureSection) {
+          console.warn('Submitted SUPP & PROC data: ', { ...values, ...suppDataObj, ...procDataObj });
+        } else {
+          console.warn('Submitted SUPP data: ', { ...values, ...suppDataObj, ...procDataObj });
+        }
       } else {
         trigger();
       }
@@ -272,12 +278,12 @@ const SupplementalProcedureModal = connect(
               <Grid row>
                 <Grid tablet={{ col: 6 }}>
                   <p className='margin-bottom-0'>
-                    <span className='text-bold'>MR FID:</span> -TODO-
+                    <span className='text-bold'>MR FID:</span> {mrFid || ''}
                   </p>
                 </Grid>
                 <Grid tablet={{ col: 6 }}>
                   <p className='margin-bottom-0'>
-                    <span className='text-bold'>F FID:</span> -TODO-
+                    <span className='text-bold'>F FID:</span> {fFid || ''}
                   </p>
                 </Grid>
               </Grid>
@@ -293,7 +299,7 @@ const SupplementalProcedureModal = connect(
             <Grid row gap='md' className='padding-bottom-1'>
               <Grid tablet>
                 <h3>
-                  {isEditForm ? '' : 'Create'} Supplemental Data Entry {isEditForm ? `Overview (ID: ${fid})` : ''}
+                  {isEditForm ? '' : 'Create'} Supplemental Data Entry {isEditForm ? `Overview` : ''}
                 </h3>
               </Grid>
             </Grid>
@@ -308,7 +314,7 @@ const SupplementalProcedureModal = connect(
                 </SelectInput>
               </Grid>
               <Grid tablet={{ col: 3 }}>
-                <TextInput name='tagNumber' label='Tag Number' onChange={handleChange} />
+                <TextInput name='tagnumber' label='Tag Number' onChange={handleChange} />
               </Grid>
               <Grid tablet={{ col: 2 }}>
                 <Button className={saveBtnClasses} onClick={handleGetPallidIdByTagNumber} type='button'>
@@ -463,14 +469,12 @@ const SupplementalProcedureModal = connect(
             </Grid>
             <Grid row gap='md' className='padding-bottom-3'>
               <Grid tablet={{ col: 4 }}>
-                <Fieldset name='ganCheckboxGroup'>
-                  <Label htmlFor='ganCheckboxGroup'>Genetic Analysis Needs</Label>
-                  <Checkbox name='ganBroodstock' label='Broodstock' onChange={handleChange} />
-                  <Checkbox name='ganHatchVsWild' label='Hatch vs Wild' onChange={handleChange} />
-                  <Checkbox name='ganSpeciesId' label='Species ID' onChange={handleChange} />
-                  <Checkbox name='ganArchive' label='Archive' onChange={handleChange} />
-                  <Checkbox name='ganProject37' label='Project 3.7' onChange={handleChange} />
-                </Fieldset>
+                <Label>Genetic Analysis Needs</Label>
+                <Checkbox id='check-broodstock' name='broodstock' label='Broodstock' onChange={handleChange} />
+                <Checkbox id='check-hatch-wild' name='hatchWild' label='Hatch vs Wild' onChange={handleChange} />
+                <Checkbox id='check-species-id' name='speciesId' label='Species ID' onChange={handleChange} />
+                <Checkbox id='check-archive' name='archive' label='Archive' onChange={handleChange} />
+                <Checkbox id='check-project-37' name='project37' label='Project 3.7' onChange={handleChange} />
               </Grid>
               <Grid tablet={{ col: 8 }}>
                 <TextArea
