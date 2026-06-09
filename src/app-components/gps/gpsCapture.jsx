@@ -56,7 +56,7 @@ export const useGpsCapture = (customOptions = {}) => {
           setPermission(p.state);
           console.info('Permission state change:', p.state);
         };
-      } catch {
+      } catch (err) {
         if (isMounted) setPermission('unknown');
         console.warn('Could not query geolocation permission', err);
       }

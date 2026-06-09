@@ -5,6 +5,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { createColumnHelper } from '@tanstack/react-table';
 import _isEqual from 'lodash/isEqual';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
+import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
@@ -22,6 +23,10 @@ import '@pages/data-entry/dataentry.scss';
 import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { db } from '@src/app-pages/data-entry/offline/db';
+
+const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
+
+console.log('GPS POC flag', import.meta.env.VITE_USE_UBLOX_POC, USE_UBLOX_POC);
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -83,7 +88,6 @@ const TelemetryDataEntry = connect(
     const [tableIsDirty, setTableIsDirty] = useState(false);
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
-    const { captureOnce } = useGpsCapture();
     const siteId = routeParams?.siteId;
     const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
     const savedDraft = sessionStorage.getItem(searchDraftKey);
@@ -130,6 +134,19 @@ const TelemetryDataEntry = connect(
       loadOfflineLookups();
     }, []);
 
+    const browserGps = useGpsCapture(GPS_OPTIONS);
+    const ubloxGps = useUbloxSerialGps();
+
+    const captureGpsFix = async () => {
+      if (USE_UBLOX_POC && ubloxGps.isConnected && ubloxGps.latestFix) {
+        console.log('[GPS SOURCE] using u-blox satellite serial GPS');
+        return ubloxGps.captureOnce();
+      }
+
+      console.log('[GPS SOURCE] using browser geolocation fallback');
+      return browserGps.captureBestOf();
+    };
+
     const fmtTimeHHMMSS = (val) => {
       const d = val ? new Date(val) : new Date();
 
@@ -155,13 +172,14 @@ const TelemetryDataEntry = connect(
 
         const computedValues = {
           captureTime: time,
-          captureLatitude: fix.lat,
-          captureLongitude: fix.lng,
+          captureLatitude: Number(fix.lat),
+          captureLongitude: Number(fix.lng),
         };
 
         handleUpdateData(rowIndex, null, computedValues);
       } catch (err) {
         console.error('GPS error', err);
+        window.alert(`GPS capture failed: ${err?.message || err}`);
       }
     };
 
@@ -437,13 +455,14 @@ const TelemetryDataEntry = connect(
             // Update properties
             newData[rowIndex] = {
               ...newData[rowIndex],
-              [columnId]: updatedValue,
+              ...(columnId === null && typeof updatedValue === 'object' ? updatedValue : { [columnId]: updatedValue }),
             };
             if (newData[rowIndex]._status !== 'new') {
               newData[rowIndex]._status = 'edited';
             }
             return newData;
           }
+          return oldData;
         });
       },
       [setData]
@@ -562,6 +581,16 @@ const TelemetryDataEntry = connect(
         <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
           Copy Last Row
         </Button>
+        {USE_UBLOX_POC && (
+          <Grid row gap='sm' className='margin-y-2'>
+            <Button type='button' onClick={ubloxGps.connect}>
+              Connect u-blox Satellite GPS
+            </Button>
+            <div>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</div>
+            {ubloxGps.latestFix && <div>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</div>}
+            {ubloxGps.lastError && <div>GPS Error: {ubloxGps.lastError.message}</div>}
+          </Grid>
+        )}
         <DataEntryTable
           addRow={handleAddRow}
           columns={tableColumns}
