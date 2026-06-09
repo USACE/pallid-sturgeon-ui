@@ -30,9 +30,6 @@ const SupplementalProcedureModal = connect(
   'selectLookupData',
   'doModalClose',
   ({ doGetPallidIdData, dataEntryData, isEditForm, baseData, lookupData, doModalClose, row: fishData }) => {
-    console.warn('data: ', fishData);
-    console.warn('baseData: ', baseData);
-
     const { fid, bend, fieldoffice, season, projectId, segmentId } = baseData;
     const { mrFid, fFid, species } = fishData;
 
@@ -118,7 +115,6 @@ const SupplementalProcedureModal = connect(
     };
 
     const handleChange = (e) => {
-      console.warn('e: ', e);
       const name = e?.target?.name;
       const val = e?.target?.value;
 
