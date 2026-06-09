@@ -579,8 +579,14 @@ const SearchEffortDataEntryForm = connect(
             )}
 
             <Grid row gap='sm' table={{ col: 3 }}>
-              <Button onClick={handleCaptureStart} type='button'>
-                Capture Start GPS
+              <Button
+                onClick={handleCaptureStart}
+                type='button'
+                disabled={USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix}
+              >
+                {USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix
+                  ? 'Waiting for Satellite Fix...'
+                  : 'Capture Start GPS'}
               </Button>
             </Grid>
             <Grid row gap='md' table={{ col: 3 }}>
