@@ -1,5 +1,5 @@
 import { Button } from '@trussworks/react-uswds';
-import Icon from '@components/icon/Icon';
+import Icon from '@components/icon/icon';
 import { mdiCloseOctagon, mdiPlusBox } from '@mdi/js';
 import './headerCell.scss';
 
@@ -14,32 +14,32 @@ const HeaderCell = ({ table }) => {
   };
 
   return (
-      <div className='d-flex justify-content-start margin-top-1'>
-        <div className='d-flex width-full justify-content-end'>
-          {rowCount > 0 && (
-            <div style={{ whiteSpace: 'nowrap' }}>
-              <Button
-                className='add-row-button'
-                onClick={meta?.addRow}
-                size='small'
-                title='Add New Row'
-                // disabled={isReadOnly}
-              >
-                <Icon focusable={false} className='margin-right-1' path={mdiPlusBox} size={'16px'} />
-                Add New Row
-              </Button>
-            </div>
-          )}
-          {selectedRows?.length > 0 && (
-            <div style={{ whiteSpace: 'nowrap' }}>
-              <Button className='remove-button' onClick={removeRows} size='small' title='Remove Selected Rows'>
-                <Icon focusable={false} path={mdiCloseOctagon} size={'16px'} />
-                Remove Selected Rows
-              </Button>
-            </div>
-          )}
-        </div>
+    <div className='d-flex justify-content-start margin-top-1'>
+      <div className='d-flex width-full justify-content-end'>
+        {rowCount > 0 && (
+          <div style={{ whiteSpace: 'nowrap' }}>
+            <Button
+              className='add-row-button'
+              onClick={meta?.addRow}
+              size='small'
+              title='Add New Row'
+              // disabled={isReadOnly}
+            >
+              <Icon focusable={false} className='margin-right-1' path={mdiPlusBox} size={'16px'} />
+              Add New Row
+            </Button>
+          </div>
+        )}
+        {selectedRows?.length > 0 && (
+          <div style={{ whiteSpace: 'nowrap' }}>
+            <Button className='remove-button' onClick={removeRows} size='small' title='Remove Selected Rows'>
+              <Icon focusable={false} path={mdiCloseOctagon} size={'16px'} />
+              Remove Selected Rows
+            </Button>
+          </div>
+        )}
       </div>
+    </div>
   );
 };
 
