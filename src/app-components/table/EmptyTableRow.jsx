@@ -1,4 +1,4 @@
-import Icon from '@components/icon/Icon';
+import Icon from '@components/icon/icon';
 import { mdiPlusBox } from '@mdi/js';
 import { Button } from '@trussworks/react-uswds';
 

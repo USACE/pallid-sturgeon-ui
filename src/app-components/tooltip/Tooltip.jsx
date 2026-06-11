@@ -4,7 +4,7 @@ import { mdiAlertCircle, mdiHelpCircle } from '@mdi/js';
 import classnames from 'classnames';
 
 import TooltipModal from './TooltipModal';
-import Icon from '@components/icon/Icon';
+import Icon from '@components/icon/icon';
 
 import './tooltip.scss';
 

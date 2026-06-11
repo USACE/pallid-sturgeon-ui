@@ -7,7 +7,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import Icon from '@components/icon/Icon';
+import Icon from '@components/icon/icon';
 import { mdiArrowUp, mdiArrowDown } from '@mdi/js';
 import { Label, Select, Table, Pagination, Checkbox } from '@trussworks/react-uswds';
 
