@@ -2,9 +2,21 @@ import { useFormContext } from 'react-hook-form';
 import { Checkbox as USWDSCheckbox } from '@trussworks/react-uswds';
 import classNames from 'classnames';
 
-import './checkbox.scss';
+import './checkbox.scss'; 
 
-const Checkbox = ({ id, label, name, onChange = () => {}, onBlur = () => {}, value, tile, ...customProps }) => {
+const Checkbox = ({
+  id,
+  label,
+  name,
+  onChange = () => {},
+  onBlur = () => {},
+  value,
+  tile,
+  validations,
+  hint,
+  warning,
+  ...customProps
+}) => {
   const {
     register,
     formState: { errors },
@@ -12,12 +24,18 @@ const Checkbox = ({ id, label, name, onChange = () => {}, onBlur = () => {}, val
   } = useFormContext();
   const inputError = errors[name];
 
+  const handleBlur = (e) => {
+    onBlur(e);
+  };
+
+  const handleChange = (e) => {
+    onChange(e);
+  };
+
   const { ref: checkboxRef, ...rest } = register(name, {
-    onBlur,
-    onChange: async (e) => {
-      await trigger(name);
-      onChange(e);
-    },
+    onBlur: handleBlur,
+    onChange: handleChange,
+    ...validations,
   });
 
   const classes = classNames({
@@ -28,7 +46,7 @@ const Checkbox = ({ id, label, name, onChange = () => {}, onBlur = () => {}, val
   return (
     <USWDSCheckbox
       className={classes}
-      id={id ?? value}
+      id={name}
       inputRef={checkboxRef}
       label={label}
       name={name}

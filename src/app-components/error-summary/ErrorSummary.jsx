@@ -67,8 +67,11 @@ const ErrorSummary = ({ errors, type = 'base', modalID, isValid, isExpandedIniti
   const scrollById = (errorID, modalID) => {
     if (modalID) {
       const modal = document.getElementById(modalID);
-      modal.querySelector(`#${errorID}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
-      modal.querySelector(`#${errorID}`).focus();
+        const target = modal?.querySelector(`#${errorID}`);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.focus();
+        }
     } else {
       const targetID = `${errorID}_li${typeSuffix}`;
       document.getElementById(errorID).scrollIntoView({ behavior: 'smooth', block: 'center' });

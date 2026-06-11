@@ -20,7 +20,6 @@ import { createDropdownOptions, isEmpty, fmtTimeHHMMSS } from '@pages/data-entry
 import ErrorSummary from '@components/error-summary/ErrorSummary';
 import Icon from '@components/icon/icon';
 import { mdiMinus, mdiPlus } from '@mdi/js';
-import Checkbox from '@src/app-components/check-box/Checkbox';
 
 const SupplementalProcedureModal = connect(
   'doGetPallidIdData',
@@ -61,10 +60,8 @@ const SupplementalProcedureModal = connect(
         supplementalValidationSchema({
           projectId: projectId,
           species: species,
-          // showProcedureSection: showProcedureSection,
         })
       ),
-      // context: { showProcedureSection: showProcedureSection },
       mode: 'onSubmit',
       reValidateMode: 'onChange',
       stateOptions: [],
@@ -115,15 +112,26 @@ const SupplementalProcedureModal = connect(
     };
 
     const handleChange = (e) => {
+
       const name = e?.target?.name;
       const val = e?.target?.value;
+      const ganFields = ['broodstock', 'hatchWild', 'speciesId', 'archive', 'project37'];
+
+      // TODO: changing "Genetics Y/N" or "Broodstock" checkbox will start showing errors as if
+      // page was submitted. This is because of the custom validation that requires at least one
+      // checkbox to be selected if Genetics Y/N = Y. Need to figure out how to only trigger that
+      // validation after user has attempted to submit, not while they are still making changes.
+      if (name === 'genetics' || ganFields.includes(name)) {
+        trigger(['genetics', ...ganFields]);
+        return;
+      }
 
       if (name === 'tagnumber') {
         setValue(name, val?.toUpperCase());
       } else if (name === 'geneticsVial') {
         ensureGeneticsVialPrefix(val);
       }
-
+      
       trigger(name);
     };
 
@@ -170,7 +178,7 @@ const SupplementalProcedureModal = connect(
     // The system shall reset the ER H/V/X field to null if the user selects None as a value for ER Color
     useEffect(() => {
       if (erColor == 'N') {
-        setValue('elHvx', '', { shouldValidate: true });
+        setValue('erHvx', '', { shouldValidate: true });
         setIsErColorNone(true);
       } else {
         setIsErColorNone(false);
@@ -214,7 +222,7 @@ const SupplementalProcedureModal = connect(
 
     // The Hatchery Origin field shall be required where project is not equal to 2
     const isHatcheryOriginRequired = Number(projectId) !== 2;
-
+    
     const handleSave = () => {
       if (isValid) {
         const values = getValues();
@@ -299,7 +307,7 @@ const SupplementalProcedureModal = connect(
             <Grid row gap='md' className='padding-bottom-1'>
               <Grid tablet>
                 <h3>
-                  {isEditForm ? '' : 'Create'} Supplemental Data Entry {isEditForm ? `Overview` : ''}
+                  {isEditForm ? '' : 'Create'} Supplemental Data Entry {isEditForm ? 'Overview' : ''}
                 </h3>
               </Grid>
             </Grid>
@@ -470,11 +478,15 @@ const SupplementalProcedureModal = connect(
             <Grid row gap='md' className='padding-bottom-3'>
               <Grid tablet={{ col: 4 }}>
                 <Label>Genetic Analysis Needs</Label>
-                <Checkbox id='check-broodstock' name='broodstock' label='Broodstock' onChange={handleChange} />
-                <Checkbox id='check-hatch-wild' name='hatchWild' label='Hatch vs Wild' onChange={handleChange} />
-                <Checkbox id='check-species-id' name='speciesId' label='Species ID' onChange={handleChange} />
-                <Checkbox id='check-archive' name='archive' label='Archive' onChange={handleChange} />
-                <Checkbox id='check-project-37' name='project37' label='Project 3.7' onChange={handleChange} />
+                <Checkbox
+                  name='broodstock'
+                  label='Broodstock'
+                  onChange={handleChange}
+                />
+                <Checkbox name='hatchWild' label='Hatch vs Wild' onChange={handleChange} />
+                <Checkbox name='speciesId' label='Species ID' onChange={handleChange} />
+                <Checkbox name='archive' label='Archive' onChange={handleChange} />
+                <Checkbox name='project37' label='Project 3.7' onChange={handleChange} />
               </Grid>
               <Grid tablet={{ col: 8 }}>
                 <TextArea
