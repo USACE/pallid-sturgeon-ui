@@ -28,9 +28,19 @@ const MissouriDsTable = connect(
   'doUpdateUrl',
   'doUpdateComplexStateField',
   'selectMoriverSitesDatasheetData',
+  'selectMoriverDraftSitesDatasheetData',
   'selectRouteParams',
-  ({ doResetFormData, doUpdateUrl, doUpdateComplexStateField, moriverSitesDatasheetData, routeParams }) => {
+  ({
+    doResetFormData,
+    doUpdateUrl,
+    doUpdateComplexStateField,
+    moriverDraftSitesDatasheetData,
+    moriverSitesDatasheetData,
+    routeParams,
+    isDraft,
+  }) => {
     const siteId = routeParams?.siteId;
+    const data = isDraft ? moriverDraftSitesDatasheetData : moriverSitesDatasheetData;
 
     const handleAddButtonClick = () => {
       doUpdateComplexStateField({ name: 'isEditForm', value: false });
@@ -69,7 +79,7 @@ const MissouriDsTable = connect(
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
           <AgGridReact
             rowHeight={35}
-            rowData={moriverSitesDatasheetData}
+            rowData={data}
             defaultColDef={{
               width: 150,
             }}

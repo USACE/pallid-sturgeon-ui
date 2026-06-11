@@ -1,4 +1,4 @@
-import { use, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -12,10 +12,13 @@ import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEff
 import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
+import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 import { generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
+
+const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -84,7 +87,21 @@ const SearchEffortDataEntryForm = connect(
       clearErrors,
     } = methods;
 
-    const { captureBestOf } = useGpsCapture(GPS_OPTIONS);
+    const browserGps = useGpsCapture(GPS_OPTIONS);
+    const ubloxGps = useUbloxSerialGps();
+
+    const captureGpsBest = async () => {
+      if (USE_UBLOX_POC && ubloxGps.isConnected && ubloxGps.latestFix) {
+        console.log('[GPS SOURCE] using u-blox satellite serial GPS');
+        return {
+          best: ubloxGps.latestFix,
+          samples: [ubloxGps.latestFix],
+        };
+      }
+
+      console.log('[GPS SOURCE] using browser geolocation fallback');
+      return browserGps.captureBestOf(5, 700);
+    };
 
     console.warn('VALUES: ', getValues());
 
@@ -104,13 +121,15 @@ const SearchEffortDataEntryForm = connect(
 
     const handleCaptureStart = async () => {
       try {
-        const { best } = await captureBestOf(5, 700);
+        const { best } = await captureGpsBest();
 
-        setValue('startLatitude', best.lat, { shouldValidate: true });
-        setValue('startLongitude', best.lng, { shouldValidate: true });
-        setValue('startTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+        setValue('startLatitude', Number(best.lat), { shouldValidate: true });
+        setValue('startLongitude', Number(best.lng), { shouldValidate: true });
+        setValue('startTime', fmtTimeHHMMSS(), { shouldValidate: true });
 
-        window.alert(`Captured START\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+        window.alert(
+          `Captured START\nsource=${best.source || 'browser'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+        );
       } catch (e) {
         console.error(e);
         window.alert(`GPS capture failed: ${e?.message || e}`);
@@ -119,13 +138,15 @@ const SearchEffortDataEntryForm = connect(
 
     const handleCaptureStop = async () => {
       try {
-        const { best } = await captureBestOf(5, 700);
+        const { best } = await captureGpsBest();
 
-        setValue('stopLatitude', best.lat, { shouldValidate: true });
-        setValue('stopLongitude', best.lng, { shouldValidate: true });
-        setValue('stopTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+        setValue('stopLatitude', Number(best.lat), { shouldValidate: true });
+        setValue('stopLongitude', Number(best.lng), { shouldValidate: true });
+        setValue('stopTime', fmtTimeHHMMSS(), { shouldValidate: true });
 
-        window.alert(`Captured STOP\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`);
+        window.alert(
+          `Captured STOP\nsource=${best.source}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+        );
       } catch (e) {
         console.error(e);
         window.alert(`GPS capture failed: ${e?.message || e}`);
@@ -546,9 +567,26 @@ const SearchEffortDataEntryForm = connect(
                 warning={!hasTelemetry ? getTelemetryWarning() : ''}
               />
             </Grid>
+            {USE_UBLOX_POC && (
+              <Grid row gap='sm'>
+                <Button type='button' onClick={ubloxGps.connect}>
+                  Connect u-blox Satellite GPS
+                </Button>
+                <div>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</div>
+                {ubloxGps.latestFix && <div>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</div>}
+                {ubloxGps.lastError && <div>GPS Error: {ubloxGps.lastError.message}</div>}
+              </Grid>
+            )}
+
             <Grid row gap='sm' table={{ col: 3 }}>
-              <Button onClick={handleCaptureStart} type='button'>
-                Capture Start GPS
+              <Button
+                onClick={handleCaptureStart}
+                type='button'
+                disabled={USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix}
+              >
+                {USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix
+                  ? 'Waiting for Satellite Fix...'
+                  : 'Capture Start GPS'}
               </Button>
             </Grid>
             <Grid row gap='md' table={{ col: 3 }}>

@@ -1,9 +1,11 @@
-import React, { useRef, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import { createColumnHelper } from '@tanstack/react-table';
 import _isEqual from 'lodash/isEqual';
+import { Button } from '@trussworks/react-uswds';
+import classNames from 'classnames';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
@@ -16,59 +18,46 @@ import FloyTagMrTableCell from '@src/app-components/table/table-cell-components/
 import FloyTagTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell';
 import CountTableCell from '@src/app-components/table/table-cell-components/fish/CountTableCell';
 import FloyTagPrefixTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell.prefix';
+import FishLinkTableCell from '@src/app-components/table/table-cell-components/fish/FishLinkTableCell';
+import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
 
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
-import FishLinkTableCell from '@src/app-components/table/table-cell-components/fish/FishLinkTableCell';
-import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
+import { CreateComboboxOptions, createDropdownOptions } from '@src/app-pages/data-entry/dataEntryHelper';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 
-const createDropdownOptions = (data) => {
-  if (!data) return [];
+const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
-  return data.map((item) => {
-    const { code, description } = item;
-
-    return {
-      value: code,
-      text: description,
-    };
-  });
-};
-
-const createComboboxOptions = (data) => {
-  if (!data) return [];
-
-  return data.map((item) => {
-    const { code, description } = item;
-
-    return {
-      value: code,
-      label: `${code} - ${description}`,
-    };
-  });
+const getNextSequence = (data, mrFid) => {
+  const existing = data.filter((item) => item.mrFid === mrFid);
+  return existing.length + 1;
 };
 
 const FishDataEntry = connect(
+  'doSaveFishDataEntry',
+  'doUpdateFishDataEntry',
   'selectDataEntryData',
   'selectDataEntryFishData',
   'selectBaseData',
   'selectLookupData',
-  ({ dataEntryData, dataEntryFishData, baseData, lookupData }) => {
+  ({ doSaveFishDataEntry, doUpdateFishDataEntry, dataEntryData, dataEntryFishData, baseData, lookupData }) => {
     const { items } = dataEntryFishData;
-    const { gear } = dataEntryData;
+    const { gear, siteId } = dataEntryData;
 
     const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions } = lookupData;
 
     const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
-    const [tableErrors, setTableErrors] = useState();
     const [data, setData] = useState(rowData);
-    const [tableIsDirty, setTableIsDirty] = useState(false);
-    const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
+
+    // Get Missouri River Draft Data
+    const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
+    const savedDraft = sessionStorage.getItem(moriverDraftKey);
+    const moriverDraft = savedDraft ? JSON.parse(savedDraft) : null;
+    const mrFid = dataEntryData?.mrFid || baseData?.mrFid || moriverDraft?.mrFid;
 
     const speciesOptions =
       fishCodes?.map((item) => ({
@@ -81,15 +70,6 @@ const FishDataEntry = connect(
       mode: 'onBlur',
       defaultValues: getFishRiverDefaultValues({ baseData: baseData, dataEntryData: dataEntryFishData }),
     });
-    const {
-      formState: { errors, dirtyFields },
-      setValue,
-      watch,
-      setError,
-      clearErrors,
-      trigger,
-      reset,
-    } = methods;
 
     const tableColumns = useMemo(
       () => [
@@ -98,7 +78,7 @@ const FishDataEntry = connect(
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 150,
         }),
-        columnHelper.accessor('ffid', {
+        columnHelper.accessor('fFid', {
           header: 'Field ID',
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 150,
@@ -130,7 +110,7 @@ const FishDataEntry = connect(
           size: 200,
           meta: {
             type: 'combobox',
-            options: createComboboxOptions(speciesOptions),
+            options: CreateComboboxOptions(speciesOptions),
           },
         }),
         columnHelper.accessor('lengthType', {
@@ -247,11 +227,42 @@ const FishDataEntry = connect(
     const handleAddRow = () => {
       // Add default values here
       const base = getBaseDefaultValues({ baseData });
+      const sequence = getNextSequence(data, mrFid);
+
+      const parentMrId =
+        dataEntryData?.mrId ??
+        dataEntryData?.mr_id ??
+        dataEntryLastParams?.mrId ??
+        dataEntryLastParams?.mr_id ??
+        searchEffortDraft?.mrId ??
+        searchEffortDraft?.mr_id;
+
+      // Format new row data
       const newRowData = {
         ...base,
-        countF: 1,
+        mrId: parentMrId,
+        mr_id: parentMrId,
+        fFid: `${mrFid}-${sequence}`,
+        mrFid,
+        _status: 'new',
       };
+
       setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
+    };
+
+    const handleCopyLastRowBtn = () => {
+      const sequence = getNextSequence(data, mrFid);
+      // Grab last object from data array
+      const lastRowData = data.slice(-1)[0];
+      // Format new row data
+      const newRowData = {
+        ...lastRowData,
+        fid: null, // Reset fid if copying a save data object
+        fFid: `${mrFid}-${sequence}`,
+        _status: 'new',
+        mrFid: mrFid,
+      };
+      setData((prev) => (prev ? [...prev, newRowData] : []));
     };
 
     const handleAddMultipleRows = (rows) => {
@@ -290,16 +301,37 @@ const FishDataEntry = connect(
       [setData]
     );
 
-    useEffect(() => {
-      const tableDataChanged = !_isEqual(data, prevTableDataRef.current);
-      tableDataChanged && setTableIsDirty(true);
-    }, [data]);
+    const handleSubmitAll = async () => {
+      try {
+        data?.forEach(async (item) => {
+          const isNew = !item.fid;
+          const clientId = item.clientId ?? crypto.randomUUID();
 
-    //Reset the dirty states of the fields after a save.
-    // useResetDirtyFields(isTouched, requestAPIData, reset, trigger);
+          const payload = {
+            ...item,
+            clientId,
+            fFid: item.fFid,
+            tFid: item.tFid,
+            countF: item.countF ? parseInt(item.countF) : null,
+          };
+
+          await FishDataEntrySchema({ gear, data }).validate(item, { abortEarly: false });
+          if (isNew) {
+            await doSaveFishDataEntry(payload);
+          } else {
+            await doUpdateFishDataEntry(payload);
+          }
+        });
+      } catch (err) {
+        console.error('Submit failed:', err);
+      }
+    };
 
     return (
       <FormProvider {...methods}>
+        <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
+          Copy Last Row
+        </Button>
         <DataEntryTable
           addRow={handleAddRow}
           columns={tableColumns}
@@ -310,11 +342,14 @@ const FishDataEntry = connect(
           placeholderText='No Fish Data found.'
           removeMultipleRows={handleRemoveMultipleRows}
           addMultipleRows={handleAddMultipleRows}
-          rowErrorCallback={setTableErrors}
+          rowErrorCallback={() => {}}
           tableVersion='FishTable'
           updateSourceData={handleUpdateData}
           validationSchema={FishDataEntrySchema({ gear, data })}
         />
+        <Button className={saveBtnClasses} onClick={() => handleSubmitAll()} type='button'>
+          Submit
+        </Button>
       </FormProvider>
     );
   }

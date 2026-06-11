@@ -22,6 +22,7 @@ import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import {
   createDropdownOptions,
   fmtTimeHHMMSS,
+  generateFieldId,
   isEmpty,
   removeDuplicates,
 } from '@src/app-pages/data-entry/dataEntryHelper';
@@ -43,7 +44,18 @@ const MissouriRiverDataEntryForm = connect(
   'selectBaseData',
   'selectDataEntryData',
   'selectLookupData',
-  ({ doUpdateBaseData, doAddMoRiverDataEntry, doUpdateMoRiverDataEntry, baseData, dataEntryData, lookupData }) => {
+  'selectRouteParams',
+  'selectDataEntryFishTotalCount',
+  ({
+    doUpdateBaseData,
+    doAddMoRiverDataEntry,
+    doUpdateMoRiverDataEntry,
+    baseData,
+    dataEntryData,
+    lookupData,
+    routeParams,
+    dataEntryFishTotalCount,
+  }) => {
     const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
     const {
       bendRiverMile,
@@ -67,6 +79,7 @@ const MissouriRiverDataEntryForm = connect(
       subsampleTypes,
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
+    const siteId = routeParams?.siteId;
 
     const [gearCodeOptions, setGearCodeOptions] = useState(gearCodes);
     const [mesoOptions, setMesoOptions] = useState(mesos);
@@ -75,7 +88,9 @@ const MissouriRiverDataEntryForm = connect(
     const [ss1Options, setSs1Options] = useState([]);
     const [ss2Options, setSs2Options] = useState([]);
 
+    const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
     const newForm = !dataEntryData.mrId;
+    const hasFishRecords = dataEntryFishTotalCount > 0;
 
     const ss3Options = removeDuplicates(
       setSite3Options?.map((item) => ({
@@ -181,7 +196,9 @@ const MissouriRiverDataEntryForm = connect(
 
     const methods = useForm({
       defaultValues: getMissouriRiverDefaultValues({ baseData, dataEntryData }),
-      resolver: yupResolver(getMissouriRiverSchema({ riverMile: getUpperLowerRiverMile(bend, segmentId) })),
+      resolver: yupResolver(
+        getMissouriRiverSchema({ riverMile: getUpperLowerRiverMile(bend, segmentId), hasFishRecords: hasFishRecords })
+      ),
       mode: 'onSubmit',
       reValidateMode: 'onChange',
       stateOptions: [],
@@ -269,6 +286,31 @@ const MissouriRiverDataEntryForm = connect(
       return;
     };
 
+    const formatDataObj = () => {
+      const values = getValues();
+      // Format any values need for final payload
+      return {
+        ...values,
+        bendrivermile: parseFloat(values?.bendrivermile),
+        depth1: parseFloat(values?.depth1),
+        depth2: parseFloat(values?.depth2),
+        depth3: parseFloat(values?.depth3),
+        distance: parseFloat(values?.distance),
+        startLatitude: formatCoordFlt(values.startLatitude) ?? '',
+        startLongitude: formatCoordFlt(values.startLongitude) ?? '',
+        stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
+        stopLongitude: formatCoordFlt(values.stopLongitude) ?? '',
+        temp: parseFloat(values?.temp),
+        u2: String(values?.u2),
+        velocitybot1: parseFloat(values?.velocitybot1),
+        velocity081: parseFloat(values?.velocity081),
+        velocity02or061: parseFloat(values?.velocity02or061),
+        velocitybot2: parseFloat(values?.velocitybot2),
+        velocity082: parseFloat(values?.velocity082),
+        velocity02or062: parseFloat(values?.velocity02or062),
+      };
+    };
+
     const handleChange = (e) => {
       const name = e?.target?.name;
       const val = e?.target?.value;
@@ -280,36 +322,54 @@ const MissouriRiverDataEntryForm = connect(
       trigger(name);
     };
 
-    const handleSave = () => {
-      if (isValid) {
-        const values = getValues();
-        // Format any values need for final payload
-        const dataObj = {
-          ...values,
-          bendrivermile: parseFloat(values?.bendrivermile),
-          depth1: parseFloat(values?.depth1),
-          depth2: parseFloat(values?.depth2),
-          depth3: parseFloat(values?.depth3),
-          distance: parseFloat(values?.distance),
-          startLatitude: formatCoordFlt(values.startLatitude) ?? '',
-          startLongitude: formatCoordFlt(values.startLongitude) ?? '',
-          stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
-          stopLongitude: formatCoordFlt(values.stopLongitude) ?? '',
-          temp: parseFloat(values?.temp),
-          u2: String(values?.u2),
-          velocitybot1: parseFloat(values?.velocitybot1),
-          velocity081: parseFloat(values?.velocity081),
-          velocity02or061: parseFloat(values?.velocity02or061),
-          velocitybot2: parseFloat(values?.velocitybot2),
-          velocity082: parseFloat(values?.velocity082),
-          velocity02or062: parseFloat(values?.velocity02or062),
-        };
-        // Filter out any null/empty values for final payload
-        const payload = filterNullEmptyObjects(dataObj);
-        newForm ? doUpdateMoRiverDataEntry(payload) : doAddMoRiverDataEntry(payload);
-      } else {
-        trigger();
+    const doSaveDraft = () => {
+      if (!isValid) return;
+
+      const dataObj = formatDataObj();
+      const clientId = dataObj?.clientId ?? crypto.randomUUID();
+      const payload = filterNullEmptyObjects({
+        ...dataObj,
+        clientId,
+        siteId: dataObj.siteId || Number(siteId),
+        status: 1,
+      });
+
+      try {
+        newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+        sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
+        setValue('mrFid', payload?.mrFid);
+      } catch (error) {
+        console.error('Save draft failed:', error);
       }
+      setValue('clientId', clientId);
+      setValue('status', 1);
+      doUpdateCurrentTab(1);
+    };
+
+    const doSubmit = async () => {
+      setValue('status', 2);
+      if (!isValid) return;
+
+      const dataObj = formatDataObj();
+      const clientId = dataObj.clientId ?? crypto.randomUUID();
+
+      const payload = filterNullEmptyObjects({
+        ...dataObj,
+        clientId,
+        status: 2,
+        _status: 'queued',
+        version: dataObj.version ?? 0,
+      });
+
+      newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+      setValue('clientId', clientId);
+      setValue('status', 2);
+
+      sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
+      setSubmitMessage({
+        type: 'success',
+        text: 'Missouri River form submitted successfully.',
+      });
     };
 
     // Set R/N value
@@ -481,6 +541,17 @@ const MissouriRiverDataEntryForm = connect(
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
     }, [errors, setFocus]);
 
+    // Set Missouri River IDs
+    useEffect(() => {
+      if (newForm) {
+        const fieldId = generateFieldId();
+        setValue('mrFid', fieldId);
+      } else if (!newForm) {
+        setValue('mrId', dataEntryData?.mrId);
+        setValue('mrFid', dataEntryData?.mrFid);
+      }
+    }, [newForm, setValue, dataEntryData]);
+
     return (
       <FormProvider {...methods}>
         {isShowErrorSummary && <ErrorSummary errors={errors} type='form' isValid={isValid} />}
@@ -492,11 +563,19 @@ const MissouriRiverDataEntryForm = connect(
             <Grid tablet={{ col: 2 }}>
               <TextInput name='seFid' label='SE Field ID (Date-Time-SE#)' readOnly />
             </Grid>
-            <Grid tablet={{ col: 2 }}>
-              <Button className={saveBtnClasses} onClick={handleSubmit(handleSave)} type='button'>
-                Save
-              </Button>
-            </Grid>
+            {dataEntryFishTotalCount === 0 ? (
+              <Grid tablet={{ col: 2 }}>
+                <Button className={saveBtnClasses} onClick={handleSubmit(doSaveDraft)} type='button'>
+                  Save as Draft
+                </Button>
+              </Grid>
+            ) : (
+              <Grid tablet={{ col: 2 }}>
+                <Button className={saveBtnClasses} onClick={doSubmit} type='button'>
+                  Submit
+                </Button>
+              </Grid>
+            )}
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
@@ -798,10 +877,11 @@ const MissouriRiverDataEntryForm = connect(
                     label='Stop Time'
                     onChange={handleChange}
                     warning={
-                      deploymentType === 'p' && (stopTime === null || stopTime === '')
+                      deploymentType === 'p' && (stopTime === null || stopTime === '') && !hasFishRecords
                         ? 'Deployment type = p but the stop time is not filled in'
                         : null
                     }
+                    required={deploymentType === 'p' && hasFishRecords}
                   />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>

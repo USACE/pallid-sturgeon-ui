@@ -17,7 +17,7 @@ const formatObj = (pos) => ({
   altitudeAccuracy: pos?.coords?.altitudeAccuracy ?? null,
   heading: pos?.coords?.heading ?? null,
   speed: pos?.coords?.speed ?? null,
-  capturedAt: dateTime,
+  capturedAt: dateTime(),
 });
 
 export const useGpsCapture = (customOptions = {}) => {
@@ -56,7 +56,7 @@ export const useGpsCapture = (customOptions = {}) => {
           setPermission(p.state);
           console.info('Permission state change:', p.state);
         };
-      } catch {
+      } catch (err) {
         if (isMounted) setPermission('unknown');
         console.warn('Could not query geolocation permission', err);
       }
@@ -114,11 +114,13 @@ export const useGpsCapture = (customOptions = {}) => {
         }
       }
 
+      samples.sort((a, b) => (a.accuracy ?? 999999) - (b.accuracy ?? 999999));
+
       const result = {
         best: samples[0], // lowest accuracy value
         samples, // all readings
       };
-      samples.sort((a, b) => (a.accuracy ?? 999999) - (b.accuracy ?? 999999));
+
       console.info('captureBestOf func finish, best:', result?.best);
       return result;
     },

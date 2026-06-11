@@ -5,6 +5,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { createColumnHelper } from '@tanstack/react-table';
 import _isEqual from 'lodash/isEqual';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
+import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
@@ -23,7 +24,17 @@ import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offl
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { db } from '@src/app-pages/data-entry/offline/db';
 
+const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
+
+console.log('GPS POC flag', import.meta.env.VITE_USE_UBLOX_POC, USE_UBLOX_POC);
+
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
+
+const GPS_OPTIONS = {
+  enableHighAccuracy: true,
+  timeout: 15000,
+  maximumAge: 0,
+};
 
 const createDropdownOptions = (data) => {
   if (!data) return [];
@@ -36,6 +47,11 @@ const createDropdownOptions = (data) => {
       text: description,
     };
   });
+};
+
+const getNextSequence = (data, seFid) => {
+  const existing = data.filter((item) => item.seFid === seFid);
+  return existing.length + 1;
 };
 
 const TelemetryDataEntry = connect(
@@ -66,14 +82,18 @@ const TelemetryDataEntry = connect(
     const { frequencyId, spawnBehavior, macros, mesos, positionConfidence } = lookupData;
     const { items } = dataEntryTelemetryData;
 
-    const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
+    const rowData = items?.map((item) => ({
+      ...item,
+      bendRiverMile: baseData?.bendRiverMile,
+      captureTime: item.captureDate ?? '',
+      spawnBehavior: item.suspectedSpawningActivity ?? '',
+    }));
     const [tableKey, setTableKey] = useState(0);
     const [tableErrors, setTableErrors] = useState();
-    const [data, setData] = useState([]);
+    const [data, setData] = useState(rowData);
     const [tableIsDirty, setTableIsDirty] = useState(false);
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
-    const { captureOnce } = useGpsCapture();
     const siteId = routeParams?.siteId;
     const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
     const savedDraft = sessionStorage.getItem(searchDraftKey);
@@ -120,38 +140,18 @@ const TelemetryDataEntry = connect(
       loadOfflineLookups();
     }, []);
 
-    useEffect(() => {
-      if (items) {
-        console.log('Fetched items:', items);
-        items.forEach((item, index) => {
-          console.log(
-            'row',
-            index,
-            'captureTime:',
-            item.captureTime,
-            'spawnBehavior:',
-            item.spawnBehavior,
-            'frequencyId:',
-            item.frequencyIdCode
-          );
-        });
+    const browserGps = useGpsCapture(GPS_OPTIONS);
+    const ubloxGps = useUbloxSerialGps();
 
-        const idOptions = createDropdownOptions(frequencyId);
-
-        const mapped = items.map((item) => {
-          const match = idOptions?.find((opt) => String(opt.value) === String(item.frequencyIdCode));
-
-          return {
-            ...item,
-            bendRiverMile: baseData?.bendRiverMile,
-            captureTime: item.captureDate ?? '',
-            spawnBehavior: item.suspectedSpawningActivity ?? '',
-            frequencyIdCode: item.frequencyIdCode != null ? match || null : null,
-          };
-        });
-        setData(mapped);
+    const captureGpsFix = async () => {
+      if (USE_UBLOX_POC && ubloxGps.isConnected && ubloxGps.latestFix) {
+        console.log('[GPS SOURCE] using u-blox satellite serial GPS');
+        return ubloxGps.captureOnce();
       }
-    }, [items, baseData, frequencyId]);
+
+      console.log('[GPS SOURCE] using browser geolocation fallback');
+      return browserGps.captureOnce();
+    };
 
     const fmtTimeHHMMSS = (val) => {
       const d = val ? new Date(val) : new Date();
@@ -171,20 +171,21 @@ const TelemetryDataEntry = connect(
       try {
         console.log('GPS capturing for row', rowIndex);
 
-        const fix = await captureOnce();
+        const fix = await captureGpsFix();
         const time = fmtTimeHHMMSS();
 
         console.log('GPS result:', { fix, time });
 
         const computedValues = {
           captureTime: time,
-          captureLatitude: fix.lat,
-          captureLongitude: fix.lng,
+          captureLatitude: Number(fix.lat),
+          captureLongitude: Number(fix.lng),
         };
 
         handleUpdateData(rowIndex, null, computedValues);
       } catch (err) {
         console.error('GPS error', err);
+        window.alert(`GPS capture failed: ${err?.message || err}`);
       }
     };
 
@@ -216,39 +217,6 @@ const TelemetryDataEntry = connect(
           header: 'Field ID',
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 150,
-        }),
-        columnHelper.accessor('copy', {
-          header: 'Copy Data',
-          cell: ({ row }) => (
-            <Button
-              className={saveBtnClasses}
-              onClick={() => {
-                if (row.index === 0) return;
-
-                const prevRow = data[row.index - 1];
-                console.log('Previous row:', prevRow);
-
-                handleUpdateData(row.index, null, {
-                  radioTagNum: prevRow.radioTagNum ?? '',
-                  frequencyIdCode:
-                    prevRow.frequencyIdCode && typeof prevRow.frequencyIdCode === 'object'
-                      ? prevRow.frequencyIdCode
-                      : prevRow.frequencyIdCode != null
-                        ? {
-                            value: prevRow.frequencyIdCode,
-                            text:
-                              createDropdownOptions(frequencyId).find(
-                                (opt) => String(opt.value) === String(prevRow.frequencyIdCode)
-                              )?.text || '',
-                          }
-                        : null,
-                });
-              }}
-              type='button'
-            >
-              Copy Data
-            </Button>
-          ),
         }),
         columnHelper.accessor('bend', {
           header: 'Bend',
@@ -444,10 +412,9 @@ const TelemetryDataEntry = connect(
         ...base,
         se_id: parentSeId,
         tFid: `${seFid}-${sequenceText}`,
-        seFid,
+        seFid: seFid,
         ...defaultValues,
         _status: 'new',
-        // countF: 1,
       };
       setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
     };
@@ -458,6 +425,21 @@ const TelemetryDataEntry = connect(
         const newRows = [...oldData, ...rows];
         return newRows;
       });
+    };
+
+    const handleCopyLastRowBtn = () => {
+      const sequence = getNextSequence(data, seFid);
+      // Grab last object from data array
+      const lastRowData = data.slice(-1)[0];
+      // Format new row data
+      const newRowData = {
+        ...lastRowData,
+        tId: null, // Reset fid if copying a save data object
+        tFid: `${seFid}-${sequence}`,
+        _status: 'new',
+        seFid: seFid,
+      };
+      setData((prev) => (prev ? [...prev, newRowData] : []));
     };
 
     const handleRemoveMultipleRows = useCallback(
@@ -471,31 +453,26 @@ const TelemetryDataEntry = connect(
       [setData, setTableKey]
     );
 
-    const handleUpdateData = useCallback((rowIndex, columnId, value) => {
-      setData((oldData) => {
-        if (!oldData) return [];
-
-        const newData = [...oldData];
-        if (!newData[rowIndex]) return oldData;
-
-        if (typeof value === 'object' && columnId === null) {
-          newData[rowIndex] = {
-            ...newData[rowIndex],
-            ...value,
-          };
-        } else {
-          newData[rowIndex] = {
-            ...newData[rowIndex],
-            [columnId]: value,
-          };
-        }
-
-        if (newData[rowIndex]._status !== 'new') {
-          newData[rowIndex]._status = 'edited';
-        }
-        return newData;
-      });
-    }, []);
+    const handleUpdateData = useCallback(
+      (rowIndex, columnId, updatedValue) => {
+        setData((oldData) => {
+          const newData = oldData ? [...oldData] : null;
+          if (newData && newData[rowIndex]) {
+            // Update properties
+            newData[rowIndex] = {
+              ...newData[rowIndex],
+              ...(columnId === null && typeof updatedValue === 'object' ? updatedValue : { [columnId]: updatedValue }),
+            };
+            if (newData[rowIndex]._status !== 'new') {
+              newData[rowIndex]._status = 'edited';
+            }
+            return newData;
+          }
+          return oldData;
+        });
+      },
+      [setData]
+    );
 
     const formatRow = (row) => {
       return {
@@ -607,32 +584,43 @@ const TelemetryDataEntry = connect(
 
     return (
       <FormProvider {...methods}>
-        <>
-          <DataEntryTable
-            addRow={handleAddRow}
-            columns={tableColumns}
-            data={data}
-            initialTableState={{}}
-            key={tableKey}
-            placeholderClick={handleAddRow}
-            placeholderText='No Telemetry Data found.'
-            removeMultipleRows={handleRemoveMultipleRows}
-            addMultipleRows={handleAddMultipleRows}
-            rowErrorCallback={setTableErrors}
-            tableVersion='TelemetryTable'
-            updateSourceData={handleUpdateData}
-            validationSchema={telemetryDataEntrySchema}
-          />
-          <Button
-            className={saveBtnClasses}
-            onClick={() => {
-              handleSubmitAll();
-            }}
-            type='button'
-          >
-            Submit
-          </Button>
-        </>
+        <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
+          Copy Last Row
+        </Button>
+        {USE_UBLOX_POC && (
+          <Grid row gap='sm' className='margin-y-2'>
+            <Button type='button' onClick={ubloxGps.connect}>
+              Connect u-blox Satellite GPS
+            </Button>
+            <div>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</div>
+            {ubloxGps.latestFix && <div>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</div>}
+            {ubloxGps.lastError && <div>GPS Error: {ubloxGps.lastError.message}</div>}
+          </Grid>
+        )}
+        <DataEntryTable
+          addRow={handleAddRow}
+          columns={tableColumns}
+          data={data}
+          initialTableState={{}}
+          key={tableKey}
+          placeholderClick={handleAddRow}
+          placeholderText='No Telemetry Data found.'
+          removeMultipleRows={handleRemoveMultipleRows}
+          addMultipleRows={handleAddMultipleRows}
+          rowErrorCallback={setTableErrors}
+          tableVersion='TelemetryTable'
+          updateSourceData={handleUpdateData}
+          validationSchema={telemetryDataEntrySchema}
+        />
+        <Button
+          className={saveBtnClasses}
+          onClick={() => {
+            handleSubmitAll();
+          }}
+          type='button'
+        >
+          Submit
+        </Button>
       </FormProvider>
     );
   }

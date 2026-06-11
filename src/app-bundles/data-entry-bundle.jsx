@@ -492,7 +492,7 @@ export default {
     },
 
   doSaveFishDataEntry:
-    (formData, params) =>
+    (formData) =>
     ({ dispatch, store, apiPost }) => {
       const toastId = toast.loading('Saving datasheet...');
 
@@ -502,7 +502,7 @@ export default {
         if (!err) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
-          store.doFetchFishDataEntry(params);
+          store.doFetchFishDataEntry({ mrId: formData?.mrId, id: store.selectUserRole()?.id });
         } else {
           dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -625,17 +625,17 @@ export default {
     },
 
   doUpdateFishDataEntry:
-    (rowData, params) =>
+    (formData) =>
     ({ dispatch, store, apiPut }) => {
       const toastId = toast.loading('Saving fish datasheet...');
 
       const url = '/psapi/fishDataEntry';
 
-      apiPut(url, rowData, (err, _body) => {
+      apiPut(url, formData, (err, _body) => {
         if (!err) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_FINISHED' });
-          store.doFetchFishDataEntry(params);
+          store.doFetchFishDataEntry({ mrId: formData?.mrId, id: store.selectUserRole()?.id });
         } else {
           dispatch({ type: 'FISH_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your entries and please try again.');
@@ -644,13 +644,13 @@ export default {
     },
 
   doUpdateSupplementalDataEntry:
-    (rowData, params) =>
+    (formData, params) =>
     ({ dispatch, store, apiPut }) => {
       const toastId = toast.loading('Saving supplemental datasheet...');
 
       const url = '/psapi/supplementalDataEntry';
 
-      apiPut(url, rowData, (err, _body) => {
+      apiPut(url, formData, (err, _body) => {
         if (!err) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'SUPPLEMENTAL_DATA_ENTRY_UPDATE_FINISHED' });
@@ -666,13 +666,13 @@ export default {
     },
 
   doUpdateProcedureDataEntry:
-    (rowData, params) =>
+    (formData, params) =>
     ({ dispatch, store, apiPut }) => {
       const toastId = toast.loading('Saving procedure datasheet...');
 
       const url = '/psapi/procedureDataEntry';
 
-      apiPut(url, rowData, (err, _body) => {
+      apiPut(url, formData, (err, _body) => {
         if (!err) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'PROCEDURE_DATA_ENTRY_UPDATE_FINISHED' });

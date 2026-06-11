@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { notRequiredSpeciesArr } from '@src/app-pages/data-entry/datasheets/tables/fish/FishDataEntry.validation';
-import Icon from '@src/app-components/icon/icon';
-import { mdiAlert } from '@mdi/js';
 
 const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
@@ -15,7 +13,12 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   const debouncedUpdateRef = useRef();
 
-  const isRequired = columnMeta?.gear?.startsWith('TL') || columnMeta?.gear?.startsWith('LDN');
+  const isRequired =
+    species !== null &&
+    species !== '' &&
+    species !== undefined &&
+    (columnMeta?.gear?.startsWith('TL') || columnMeta?.gear?.startsWith('LDN')) &&
+    !notRequiredSpeciesArr.includes(species);
 
   const updateValue = useCallback((newValue) => {
     debouncedUpdateRef.current(newValue);
@@ -66,7 +69,7 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
         maxLength={4000}
         onBlur={handleBlur}
         onChange={handleChange}
-        required={columnMeta?.required || isRequired || !notRequiredSpeciesArr.includes(species)}
+        required={isRequired}
         style={{
           width: '100%',
           borderColor: 'hsl(0, 0%, 80%)',

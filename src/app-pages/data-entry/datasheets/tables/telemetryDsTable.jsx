@@ -43,11 +43,11 @@ const TelemetryDsTable = connect(
     lookupData,
   }) => {
     const { items } = dataEntryTelemetryData;
-    const { frequencyIds } = lookupData;
+    const { frequencyId } = lookupData;
 
     const gridRef = useRef();
 
-    const getFrequencyIdString = (id) => frequencyIds?.filter((item) => item.code === id)?.[0]?.description;
+    const getFrequencyIdString = (id) => frequencyId?.filter((item) => item.code === id)?.[0]?.description;
 
     const rowData = items?.map((item) => ({
       ...item,
@@ -174,7 +174,7 @@ const TelemetryDsTable = connect(
               headerName='Frequency Id'
               cellEditor='selectEditor'
               cellEditorParams={{
-                options: createDropdownOptions(frequencyIds),
+                options: createDropdownOptions(frequencyId),
                 type: 'number',
                 isRequired: true,
               }}
