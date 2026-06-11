@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
@@ -326,6 +326,11 @@ const FishDataEntry = connect(
         console.error('Submit failed:', err);
       }
     };
+
+    useEffect(() => {
+      const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
+      setData(rowData);
+    }, [items]);
 
     return (
       <FormProvider {...methods}>

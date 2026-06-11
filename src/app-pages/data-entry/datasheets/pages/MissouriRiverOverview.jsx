@@ -68,6 +68,8 @@ const MissouriRiverOverview = connect(
         </div>
         {/* Top Level Info */}
         <DataHeader />
+        {/* Approval Fields */}
+        <Approval />
         {/* Form Fields */}
         <Card className='mt-3'>
           <Card.Header text='Missouri River and Related Data' />
