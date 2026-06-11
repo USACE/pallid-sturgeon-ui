@@ -2,11 +2,11 @@ import { useReducer, useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import Papa from 'papaparse';
 
-import Button from '@components/button';
 import Card from '@components/card';
 import DragInput from '@components/drag-input';
 import Select from '@components/select';
 import Breadcrumb from '@src/app-components/breadcrumb';
+import LoaderButton from '@src/app-components/loader/LoaderButton';
 
 import { keyAsText } from '@src/utils';
 import { getIsRequired, reduceCsvState, formatAsNumber, formatJsonKey } from './dataUploadHelper';
@@ -24,7 +24,8 @@ export default connect(
   'doFetchUploadSessionLogs',
   'doUploadAllFiles',
   'selectUploadLogs',
-  ({ doFetchUploadSessionLogs, doUploadAllFiles, uploadLogs }) => {
+  'selectLoadingButtonState',
+  ({ doFetchUploadSessionLogs, doUploadAllFiles, uploadLogs, loadingButtonState }) => {
     const [recorder, setRecorder] = useState('');
     const [version, setVersion] = useState(null);
     const [files, setFiles] = useState({
@@ -135,13 +136,15 @@ export default connect(
                   );
                 })}
                 <hr />
-                <Button
+                <LoaderButton
                   isOutline
-                  variant='info'
-                  text='Submit Files'
-                  handleClick={() => uploadAllFiles()}
+                  title='Submit Files'
+                  onClick={() => uploadAllFiles()}
                   isDisabled={submitIsDisabled()}
-                />
+                  isLoading={loadingButtonState}
+                >
+                  Submit Files
+                </LoaderButton>
               </>
             )}
           </Card.Body>
