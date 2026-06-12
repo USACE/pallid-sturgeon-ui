@@ -14,9 +14,6 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
   const debouncedUpdateRef = useRef();
 
   const isRequired =
-    species !== null &&
-    species !== '' &&
-    species !== undefined &&
     (columnMeta?.gear?.startsWith('TL') || columnMeta?.gear?.startsWith('LDN')) &&
     !notRequiredSpeciesArr.includes(species);
 

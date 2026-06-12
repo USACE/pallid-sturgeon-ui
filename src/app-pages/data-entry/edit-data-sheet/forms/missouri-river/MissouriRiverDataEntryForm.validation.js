@@ -142,8 +142,8 @@ export const getMissouriRiverSchema = ({ riverMile, hasFishRecords }) =>
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .required(ValidationMessages.FieldRequired)
         .test({
-          test: (value) => (Number(value) >= -111 && Number(value) <= -89) || Number(value) === 0,
-          message: 'Value must be between -111 and -89 degrees.  Enter 0 if unknown',
+          test: (value) => (Number(value) >= -100 && Number(value) <= -89) || Number(value) === 0,
+          message: 'Value must be between -100 and -89 degrees.  Enter 0 if unknown',
         })
         .nullable()
         .notRequired(),
@@ -173,7 +173,7 @@ export const getMissouriRiverSchema = ({ riverMile, hasFishRecords }) =>
           otherwise: (schema) => schema.nullable().notRequired(),
         })
         .test({
-          test: (value) => (Number(value) >= -111 && Number(value) <= -89) || Number(value) === 0,
+          test: (value) => (Number(value) >= -115 && Number(value) <= -89) || Number(value) === 0,
           message: 'Value must be between -111 and -89 degrees.  Enter 0 if unknown',
         }),
       u1: yup.string().when('project', {

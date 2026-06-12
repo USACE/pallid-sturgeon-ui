@@ -17,6 +17,14 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const debouncedUpdateRef = useRef();
 
   const isRequired = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
+  const isDisabled = () => {
+    if (species || count) {
+      if (count > 1) return true;
+      if ((species !== null || species !== undefined) && (count !== null || count !== undefined)) {
+        return isRequired;
+      }
+    }
+  };
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
@@ -64,7 +72,7 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   return (
     <input
       aria-label='Length'
-      disabled={columnMeta?.readOnly || !isRequired}
+      disabled={columnMeta?.readOnly || isDisabled()}
       id={cell.id}
       maxLength={4000}
       onBlur={handleBlur}

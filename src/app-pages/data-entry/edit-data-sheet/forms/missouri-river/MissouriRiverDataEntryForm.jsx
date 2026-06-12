@@ -37,6 +37,8 @@ const GPS_OPTIONS = {
   maximumAge: 0,
 };
 
+const currentDate = new Date().toISOString().split('T')[0];
+
 const MissouriRiverDataEntryForm = connect(
   'doUpdateBaseData',
   'doAddMoRiverDataEntry',
@@ -238,6 +240,7 @@ const MissouriRiverDataEntryForm = connect(
     const macro = watch('macro');
     const gearCode = watch('gear');
     const gearType = watch('gearType');
+    const setdate = watch('setdate');
     const subsamplepass = watch('subsamplepass');
     const micro = watch('micro');
     const microStructure = watch('microStructure');
@@ -580,15 +583,35 @@ const MissouriRiverDataEntryForm = connect(
 
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>
-              <TextInput name='setdate' label='Set Date' type='date' onChange={handleChange} required />
+              <TextInput
+                name='setdate'
+                label='Set Date'
+                type='date'
+                onChange={handleChange}
+                disabled={deploymentType === 'p' && setdate !== currentDate}
+                required
+              />
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <TextInput name='subsample' label='Subsample' type='number' onChange={handleChange} required />
               {/* @TODO: "Next Subsample" button counts up by 1 */}
+              <Button className={saveBtnClasses} onClick={() => {}} type='button'>
+                Next Subsample
+              </Button>
             </Grid>
             <Grid tablet={{ col: 1 }}>
-              <TextInput name='subsamplepass' label='Pass' type='number' onChange={handleChange} required />
+              <TextInput
+                className={saveBtnClasses}
+                name='subsamplepass'
+                label='Pass'
+                type='number'
+                onChange={handleChange}
+                required
+              />
               {/* @TODO: "Next Pass" button counts up by 1 */}
+              <Button className={saveBtnClasses} onClick={() => {}} type='button'>
+                Next Pass
+              </Button>
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <SelectInput name='subsamplen' label='Subsample R/N' onChange={handleChange} required>
