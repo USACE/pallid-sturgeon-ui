@@ -248,8 +248,8 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
         const { genetics, broodstock, hatchWild, speciesId, archive, project37 } = values || {};
         if (genetics == 'Y' && !broodstock && !hatchWild && !speciesId && !archive && !project37) {
           return this.createError({
-            path: 'broodstock',
-            message: 'At least one Genetic Analysis Needs option must be selected when Genetics is set to "Yes"',
+            path: 'checkboxGroup',
+            message: 'Genetic Analysis Needs: At least one option must be selected when Genetics is set to "Yes"',
           });
         }
 

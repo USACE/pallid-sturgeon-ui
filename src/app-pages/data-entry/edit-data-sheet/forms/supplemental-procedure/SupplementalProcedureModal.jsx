@@ -21,6 +21,29 @@ import ErrorSummary from '@components/error-summary/ErrorSummary';
 import Icon from '@components/icon/icon';
 import { mdiMinus, mdiPlus } from '@mdi/js';
 
+const geneticNeedsCheckboxes = [
+  {
+    name: 'broodstock',
+    label: 'Broodstock',
+  },
+  {
+    name: 'hatchWild',
+    label: 'Hatch vs Wild',
+  },
+  {
+    name: 'speciesId',
+    label: 'Species ID',
+  },
+  {
+    name: 'archive',
+    label: 'Archive',
+  },
+  {
+    name: 'project37',
+    label: 'Project 3.7',
+  },
+];
+
 const SupplementalProcedureModal = connect(
   'doGetPallidIdData',
   'selectDataEntryData',
@@ -112,26 +135,15 @@ const SupplementalProcedureModal = connect(
     };
 
     const handleChange = (e) => {
-
       const name = e?.target?.name;
       const val = e?.target?.value;
-      const ganFields = ['broodstock', 'hatchWild', 'speciesId', 'archive', 'project37'];
-
-      // TODO: changing "Genetics Y/N" or "Broodstock" checkbox will start showing errors as if
-      // page was submitted. This is because of the custom validation that requires at least one
-      // checkbox to be selected if Genetics Y/N = Y. Need to figure out how to only trigger that
-      // validation after user has attempted to submit, not while they are still making changes.
-      if (name === 'genetics' || ganFields.includes(name)) {
-        trigger(['genetics', ...ganFields]);
-        return;
-      }
 
       if (name === 'tagnumber') {
         setValue(name, val?.toUpperCase());
       } else if (name === 'geneticsVial') {
         ensureGeneticsVialPrefix(val);
       }
-      
+
       trigger(name);
     };
 
@@ -222,7 +234,7 @@ const SupplementalProcedureModal = connect(
 
     // The Hatchery Origin field shall be required where project is not equal to 2
     const isHatcheryOriginRequired = Number(projectId) !== 2;
-    
+
     const handleSave = () => {
       if (isValid) {
         const values = getValues();
@@ -477,16 +489,20 @@ const SupplementalProcedureModal = connect(
             </Grid>
             <Grid row gap='md' className='padding-bottom-3'>
               <Grid tablet={{ col: 4 }}>
-                <Label>Genetic Analysis Needs</Label>
-                <Checkbox
-                  name='broodstock'
-                  label='Broodstock'
-                  onChange={handleChange}
-                />
-                <Checkbox name='hatchWild' label='Hatch vs Wild' onChange={handleChange} />
-                <Checkbox name='speciesId' label='Species ID' onChange={handleChange} />
-                <Checkbox name='archive' label='Archive' onChange={handleChange} />
-                <Checkbox name='project37' label='Project 3.7' onChange={handleChange} />
+                <fieldset className='margin-left-1 width-50 padding-0' id='geneticNeeds'>
+                  <Label className={genetics == 'Y' ? 'required' : ''} htmlFor='geneticNeeds'>
+                    <span id='geneticNeeds_label'>Genetic Analysis Needs</span>
+                  </Label>
+                  {geneticNeedsCheckboxes.map(({ name, label }) => (
+                    <Checkbox
+                      name={name}
+                      label={label}
+                      onChange={handleChange}
+                      tile
+                      errorName={errors?.checkboxGroup}
+                    />
+                  ))}
+                </fieldset>
               </Grid>
               <Grid tablet={{ col: 8 }}>
                 <TextArea

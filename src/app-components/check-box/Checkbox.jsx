@@ -2,7 +2,7 @@ import { useFormContext } from 'react-hook-form';
 import { Checkbox as USWDSCheckbox } from '@trussworks/react-uswds';
 import classNames from 'classnames';
 
-import './checkbox.scss'; 
+import './checkbox.scss';
 
 const Checkbox = ({
   id,
@@ -12,7 +12,7 @@ const Checkbox = ({
   onBlur = () => {},
   value,
   tile,
-  validations,
+  errorName,
   hint,
   warning,
   ...customProps
@@ -22,7 +22,7 @@ const Checkbox = ({
     formState: { errors },
     trigger,
   } = useFormContext();
-  const inputError = errors[name];
+  const inputError = errorName ? errorName : errors[name];
 
   const handleBlur = (e) => {
     onBlur(e);
@@ -35,7 +35,6 @@ const Checkbox = ({
   const { ref: checkboxRef, ...rest } = register(name, {
     onBlur: handleBlur,
     onChange: handleChange,
-    ...validations,
   });
 
   const classes = classNames({
