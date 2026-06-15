@@ -59,6 +59,8 @@ const FishDataEntry = connect(
     const moriverDraft = savedDraft ? JSON.parse(savedDraft) : null;
     const mrFid = dataEntryData?.mrFid || baseData?.mrFid || moriverDraft?.mrFid;
 
+    console.warn('data: ', data);
+
     const speciesOptions =
       fishCodes?.map((item) => ({
         code: item.alphaCode,
@@ -221,7 +223,7 @@ const FishDataEntry = connect(
           size: 200,
         }),
       ],
-      [columnHelper]
+      [columnHelper, data]
     );
 
     const handleAddRow = () => {

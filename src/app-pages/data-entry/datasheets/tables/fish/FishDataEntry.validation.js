@@ -69,40 +69,36 @@ export const FishDataEntrySchema = ({ gear, data }) =>
           },
           message: 'Cannot have more than one record for the species NDNF',
         })
+        // If Gear = LDN490, LDN749 or LDN1000, then NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'
         .test({
           test: (species, { parent: { panelHook } }) => {
+            // If no species value selected OR one or less fish rows, do not validate
             if (
               (species === null && species === '' && species === undefined) ||
               (gear === null && gear === '') ||
-              data?.length < 1
+              data?.length === 0
             )
               return true;
             if (gearMbArr.includes(gear) && species === 'NFSH') {
+              // If only one NSFH, do not validate
+              if (data?.filter((row) => row.species === 'NFSH')?.length === 1) return true;
+              // Cannot have more than 2 NFSH species if Gear = LDN490, LDN749 or LDN1000, throw error
+              if (data?.filter((row) => row.species === 'NFSH')?.length > 2) return false;
               if (panelHook === 'M') {
-                return !(data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'M')?.length <= 1);
+                return data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'M')?.length === 1;
               }
+              if (panelHook === 'B') {
+                return data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'B')?.length === 1;
+              }
+              return false;
             }
             return true;
           },
-          message: 'Cannot have more than one record for species = NFSH where Panel/Hook = M',
+          message:
+            "Gear = LDN490, LDN749 or LDN1000, NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'",
         })
-        .test({
-          test: (species, { parent: { panelHook } }) => {
-            if (
-              (species === null && species === '' && species === undefined) ||
-              (gear === null && gear === '') ||
-              data?.length < 1
-            )
-              return true;
-            if (gearMbArr.includes(gear) && species === 'NFSH') {
-              if (panelHook === 'M') {
-                return !(data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'B')?.length <= 1);
-              }
-            }
-            return true;
-          },
-          message: 'Cannot have more than one record for species = NFSH where Panel/Hook = B',
-        }),
+        .nullable()
+        .notRequired(),
       lengthType: yup.string().required(ValidationMessages.FieldRequired),
       length: yup
         .number()

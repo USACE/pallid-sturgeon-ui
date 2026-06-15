@@ -11,12 +11,21 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
   const [species, setSpecies] = useState();
+
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
 
   const debouncedUpdateRef = useRef();
 
   const isRequired = !speciesArr.includes(species);
   const isDisabled = species === 'NFSH' || speciesArr.includes(species);
+
+  useEffect(() => {
+    debouncedUpdateRef.current = debounce((newValue) => {
+      if (tableMeta?.updateData) {
+        tableMeta?.updateData(row.index, column.id, Number(newValue));
+      }
+    }, 500);
+  }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
 
   const updateValue = useCallback((newValue) => {
     debouncedUpdateRef.current(newValue);
@@ -38,14 +47,7 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
     }
   };
 
-  useEffect(() => {
-    debouncedUpdateRef.current = debounce((newValue) => {
-      if (tableMeta?.updateData) {
-        tableMeta?.updateData(row.index, column.id, newValue);
-      }
-    }, 500);
-  }, [row.index, column.id, tableMeta?.updateData, columnMeta?.type, tableMeta]);
-
+  // Get latest species values
   useEffect(() => {
     rowSpecies && setSpecies(rowSpecies);
   }, [rowSpecies]);

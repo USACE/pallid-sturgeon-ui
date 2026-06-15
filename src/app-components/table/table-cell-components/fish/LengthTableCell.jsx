@@ -17,6 +17,7 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const debouncedUpdateRef = useRef();
 
   const isRequired = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
+
   const isDisabled = () => {
     if (species || count) {
       if (count > 1) return true;
@@ -56,8 +57,8 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   // Get latest species and countF values
   useEffect(() => {
-    rowSpecies && setSpecies(rowSpecies);
-    rowCount && setCount(rowCount);
+    setSpecies(rowSpecies);
+    setCount(rowCount);
   }, [rowSpecies, rowCount]);
 
   // Reset cell value if the field is disabled
