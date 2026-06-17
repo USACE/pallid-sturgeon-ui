@@ -8,26 +8,23 @@ import Icon from '@src/app-components/icon/icon';
 const warningText = (
   <p>
     <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
-    {'Length entered is > 1600'}
+    Weight is required for a Pallid Sturgeon
   </p>
 );
 
-const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
+const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
   const [species, setSpecies] = useState();
-  const [count, setCount] = useState();
   const [showWarning, setShowWarning] = useState(false);
 
+  const project = Number(baseData?.projectId);
+
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
-  const rowCount = useMemo(() => row.getValue('countF'), [row]);
 
   const debouncedUpdateRef = useRef();
-
-  const isRequired = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
-  const isDisabled = !isRequired;
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
@@ -57,39 +54,31 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
     }
   };
 
-  // Get latest species and countF values
+  // Get latest species values
   useEffect(() => {
     setSpecies(rowSpecies);
-    setCount(rowCount);
-  }, [rowSpecies, rowCount]);
+  }, [rowSpecies]);
 
-  // Reset cell value if the field is disabled
+  // Set warning flag
   useEffect(() => {
-    const isDisabled = !isRequired;
-    if (isDisabled) {
-      setValue(null);
-      updateValue(null);
-    }
-  }, [isRequired]);
-
-  useEffect(() => {
-    if (Number(value) >= 1600) {
+    // The system shall warn the user if species = PDSG and project = 1 and weight field is null
+    if ((value === null || value === undefined) && species === 'PDSG' && Number(project) === 1) {
       setShowWarning(true);
     } else {
       setShowWarning(false);
     }
-  }, [value, setShowWarning]);
+  }, [species, project, setShowWarning]);
 
   return (
     <div>
       <input
-        aria-label='Length'
-        disabled={columnMeta?.readOnly || isDisabled}
+        aria-label='Weight'
+        disabled={columnMeta?.readOnly}
         id={cell.id}
         maxLength={4000}
         onBlur={handleBlur}
         onChange={handleChange}
-        required={isRequired}
+        required={() => {}}
         style={{
           width: '100%',
           borderColor: 'hsl(0, 0%, 80%)',
@@ -103,4 +92,4 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   );
 });
 
-export default LengthTableCell;
+export default WeightTableCell;

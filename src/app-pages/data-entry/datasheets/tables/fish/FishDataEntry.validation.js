@@ -108,7 +108,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .max(9999, 'Value cannot exceed 9999')
         .when(['species', 'countF'], {
           is: (species, count) => ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1,
-          then: (schema) => schema.required(ValidationMessages.FieldRequired),
+          then: (schema) => schema.required('Length is required for PDSG, SNSG, SNPD'),
           otherwise: (schema) => schema.nullable().notRequired(),
         }),
       weight: yup
@@ -124,12 +124,34 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .typeError()
         .min(0, 'Value cannot be negative')
         .when('species', {
-          is: (species) => !['NDNF', 'CAN', 'CNFH'].includes(species),
+          is: (species) => !['NDNF', 'CNA', 'CNFH'].includes(species),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         }),
       ftPrefix: yup.string().nullable().notRequired(),
-      floyTag: yup.string().nullable().notRequired().matches(/^\d+$/, 'Must contain only digits'),
+      floyTag: yup
+        .string()
+        .nullable()
+        .notRequired()
+        .test({
+          // The system shall not allow duplicate Floy Tag Prefix & Floy Tag entries for the same mr_fid
+          test: (floyTag, { parent: { ftPrefix } }) => {
+            if (
+              ftPrefix === null ||
+              ftPrefix === undefined ||
+              ftPrefix === '' ||
+              floyTag === null ||
+              floyTag === '' ||
+              floyTag === undefined
+            )
+              return true;
+            if (data?.filter((item) => item.floyTag === floyTag && item.ftPrefix === ftPrefix)?.length > 1) {
+              return false;
+            }
+            return true;
+          },
+          message: 'Duplicate Floy Tag entries for the same Missouri River Field ID not allowed',
+        }),
       mR: yup.string().when('floyTag', {
         is: (floyTag) => floyTag !== null && floyTag !== '' && floyTag !== undefined,
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
@@ -159,6 +181,23 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         });
       }
       return true;
+    })
+    .test('digits-only', 'Floy Tag can only accept digits', function (values) {
+      const { floyTag } = values;
+      const hasValue = floyTag !== null && floyTag !== '' && floyTag !== undefined;
+      if (hasValue && isNaN(Number(floyTag))) {
+        return this.createError({
+          path: 'floyTag',
+          message: 'Floy Tag can only accept digits',
+        });
+      }
+      if (hasValue && (floyTag.length < 5 || floyTag.length > 6)) {
+        return this.createError({
+          path: 'floyTag',
+          message: 'Floy Tag cannot be 4 digits or less, and can be 6 digits maximum.',
+        });
+      }
+      return true;
     });
 
 export const getBaseDefaultValues = ({ baseData }) => ({
@@ -175,12 +214,11 @@ export const getBaseDefaultValues = ({ baseData }) => ({
   siteId: baseData?.siteId ?? '',
 });
 
-export const getFishRiverDefaultValues = ({ baseData, dataEntryData }) => ({
-  ...getBaseDefaultValues({ baseData }),
+export const getFishRiverDefaultValues = ({ dataEntryData }) => ({
   panelHook: dataEntryData?.panelHook ?? '',
   species: dataEntryData?.species ?? '',
   lengthType: dataEntryData?.lengthType ?? '',
-  length: dataEntryData?.length ?? '',
+  length: dataEntryData?.['length'] ?? '',
   weight: dataEntryData?.weight ?? '',
   countF: dataEntryData?.countF ?? 1,
   ftPrefix: dataEntryData?.ftPrefix ?? '',

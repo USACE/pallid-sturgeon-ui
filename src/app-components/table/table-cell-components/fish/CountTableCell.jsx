@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { decimalNumberRegex } from '@src/utils/regex';
 
-const speciesArr = ['NDNF', 'CAN', 'CNFH'];
+const speciesArr = ['NDNF', 'CNA', 'CNFH'];
 
 const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
@@ -22,7 +22,7 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
       if (tableMeta?.updateData) {
-        tableMeta?.updateData(row.index, column.id, Number(newValue));
+        tableMeta?.updateData(row.index, column.id, newValue ? Number(newValue) : '');
       }
     }, 500);
   }, [row.index, column.id, tableMeta?.updateData, tableMeta]);

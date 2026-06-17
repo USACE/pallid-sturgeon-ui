@@ -20,6 +20,7 @@ import CountTableCell from '@src/app-components/table/table-cell-components/fish
 import FloyTagPrefixTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell.prefix';
 import FishLinkTableCell from '@src/app-components/table/table-cell-components/fish/FishLinkTableCell';
 import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
+import WeightTableCell from '@src/app-components/table/table-cell-components/fish/WeightTableCell';
 
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
@@ -59,7 +60,13 @@ const FishDataEntry = connect(
     const moriverDraft = savedDraft ? JSON.parse(savedDraft) : null;
     const mrFid = dataEntryData?.mrFid || baseData?.mrFid || moriverDraft?.mrFid;
 
-    console.warn('data: ', data);
+    const parentMrId =
+      dataEntryData?.mrId ??
+      dataEntryData?.mr_id ??
+      dataEntryLastParams?.mrId ??
+      dataEntryLastParams?.mr_id ??
+      searchEffortDraft?.mrId ??
+      searchEffortDraft?.mr_id;
 
     const speciesOptions =
       fishCodes?.map((item) => ({
@@ -70,7 +77,6 @@ const FishDataEntry = connect(
     const methods = useForm({
       resolver: yupResolver(FishDataEntrySchema({ gear, data })),
       mode: 'onBlur',
-      defaultValues: getFishRiverDefaultValues({ baseData: baseData, dataEntryData: dataEntryFishData }),
     });
 
     const tableColumns = useMemo(
@@ -133,7 +139,7 @@ const FishDataEntry = connect(
         }),
         columnHelper.accessor('weight', {
           header: 'Weight(grams)',
-          cell: TableCell,
+          cell: WeightTableCell,
           size: 200,
           meta: { type: 'number' },
         }),
@@ -231,17 +237,10 @@ const FishDataEntry = connect(
       const base = getBaseDefaultValues({ baseData });
       const sequence = getNextSequence(data, mrFid);
 
-      const parentMrId =
-        dataEntryData?.mrId ??
-        dataEntryData?.mr_id ??
-        dataEntryLastParams?.mrId ??
-        dataEntryLastParams?.mr_id ??
-        searchEffortDraft?.mrId ??
-        searchEffortDraft?.mr_id;
-
       // Format new row data
       const newRowData = {
         ...base,
+        ...getFishRiverDefaultValues({ dataEntryData }),
         mrId: parentMrId,
         mr_id: parentMrId,
         fFid: `${mrFid}-${sequence}`,
