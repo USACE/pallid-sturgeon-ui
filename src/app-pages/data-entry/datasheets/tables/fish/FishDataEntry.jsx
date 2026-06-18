@@ -79,6 +79,8 @@ const FishDataEntry = connect(
       mode: 'onBlur',
     });
 
+    console.warn('data: ', data);
+
     const tableColumns = useMemo(
       () => [
         columnHelper.accessor('fid', {
@@ -236,6 +238,7 @@ const FishDataEntry = connect(
       // Add default values here
       const base = getBaseDefaultValues({ baseData });
       const sequence = getNextSequence(data, mrFid);
+      const sequenceText = String(sequence).padStart(3, '0');
 
       // Format new row data
       const newRowData = {
@@ -243,7 +246,7 @@ const FishDataEntry = connect(
         ...getFishRiverDefaultValues({ dataEntryData }),
         mrId: parentMrId,
         mr_id: parentMrId,
-        fFid: `${mrFid}-${sequence}`,
+        fFid: `${mrFid}-${sequenceText}`,
         mrFid,
         _status: 'new',
       };
@@ -253,15 +256,20 @@ const FishDataEntry = connect(
 
     const handleCopyLastRowBtn = () => {
       const sequence = getNextSequence(data, mrFid);
+      const sequenceText = String(sequence).padStart(3, '0');
       // Grab last object from data array
       const lastRowData = data.slice(-1)[0];
       // Format new row data
       const newRowData = {
-        ...lastRowData,
+        // ...lastRowData,
         fid: null, // Reset fid if copying a save data object
-        fFid: `${mrFid}-${sequence}`,
-        _status: 'new',
+        fFid: `${mrFid}-${sequenceText}`,
+        mrId: parentMrId,
+        mr_id: parentMrId,
         mrFid: mrFid,
+        species: lastRowData?.species,
+        lengthType: lastRowData?.lengthType,
+        _status: 'new',
       };
       setData((prev) => (prev ? [...prev, newRowData] : []));
     };
