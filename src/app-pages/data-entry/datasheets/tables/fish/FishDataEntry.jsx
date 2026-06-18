@@ -79,8 +79,6 @@ const FishDataEntry = connect(
       mode: 'onBlur',
     });
 
-    console.warn('data: ', data);
-
     const tableColumns = useMemo(
       () => [
         columnHelper.accessor('fid', {
@@ -261,7 +259,6 @@ const FishDataEntry = connect(
       const lastRowData = data.slice(-1)[0];
       // Format new row data
       const newRowData = {
-        // ...lastRowData,
         fid: null, // Reset fid if copying a save data object
         fFid: `${mrFid}-${sequenceText}`,
         mrId: parentMrId,
