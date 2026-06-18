@@ -2,20 +2,29 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { decimalNumberRegex } from '@src/utils/regex';
+import { mdiAlert } from '@mdi/js';
+import Icon from '@src/app-components/icon/icon';
 
-const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
+const warningText = (
+  <p>
+    <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+    Weight is required for a Pallid Sturgeon
+  </p>
+);
+
+const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
   const [species, setSpecies] = useState();
+  const [showWarning, setShowWarning] = useState(false);
+
+  const project = Number(baseData?.projectId);
 
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
 
   const debouncedUpdateRef = useRef();
-
-  const isRequired = !['NDNF', 'CNA', 'CNFH', 'NFSH'].includes(species);
-  const isDisabled = !isRequired;
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
@@ -50,33 +59,37 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
     setSpecies(rowSpecies);
   }, [rowSpecies]);
 
+  // Set warning flag
   useEffect(() => {
-    if (species === 'NFSH') {
-      setValue(0);
-      updateValue(0);
-    } else if (['NDNF', 'CNA', 'CNFH'].includes(species)) {
-      setValue(null);
-      updateValue(null);
+    // The system shall warn the user if species = PDSG and project = 1 and weight field is null
+    if ((value === null || value === undefined) && species === 'PDSG' && Number(project) === 1) {
+      setShowWarning(true);
+    } else {
+      setShowWarning(false);
     }
-  }, [species]);
+  }, [species, project, setShowWarning]);
 
   return (
-    <input
-      aria-label='Floy Tag'
-      disabled={columnMeta?.readOnly || isDisabled}
-      id={cell.id}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      required={isRequired}
-      style={{
-        width: '100%',
-        borderColor: 'hsl(0, 0%, 80%)',
-        cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
-      }}
-      type='number'
-      value={value ?? ''}
-    />
+    <div>
+      <input
+        aria-label='Weight'
+        disabled={columnMeta?.readOnly}
+        id={cell.id}
+        maxLength={4000}
+        onBlur={handleBlur}
+        onChange={handleChange}
+        required={() => {}}
+        style={{
+          width: '100%',
+          borderColor: 'hsl(0, 0%, 80%)',
+          cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
+        }}
+        type='number'
+        value={value ?? ''}
+      />
+      {showWarning && warningText}
+    </div>
   );
 });
 
-export default CountTableCell;
+export default WeightTableCell;

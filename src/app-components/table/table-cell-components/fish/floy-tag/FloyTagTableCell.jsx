@@ -12,7 +12,6 @@ const FloyTagTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   const debouncedUpdateRef = useRef();
 
-  // const isRequired = floyTagPrefix !== null && floyTagPrefix !== '' && floyTagPrefix !== undefined;
   const isRequired = !!rowFloyTagPrefix;
 
   const updateValue = useCallback((newValue) => {
@@ -46,8 +45,8 @@ const FloyTagTableCell = connect(({ getValue, row, column, table, cell }) => {
       aria-label='Floy Tag'
       disabled={columnMeta?.readOnly}
       id={cell.id}
-      minLength={4}
-      maxLength={4}
+      minLength={5}
+      maxLength={6}
       onBlur={handleBlur}
       onChange={handleChange}
       required={isRequired}

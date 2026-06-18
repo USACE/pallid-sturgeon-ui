@@ -2,6 +2,15 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { decimalNumberRegex } from '@src/utils/regex';
+import { mdiAlert } from '@mdi/js';
+import Icon from '@src/app-components/icon/icon';
+
+const warningText = (
+  <p>
+    <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+    {'Length entered is > 1600'}
+  </p>
+);
 
 const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
@@ -10,6 +19,7 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const [value, setValue] = useState(initialValue);
   const [species, setSpecies] = useState();
   const [count, setCount] = useState();
+  const [showWarning, setShowWarning] = useState(false);
 
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
   const rowCount = useMemo(() => row.getValue('countF'), [row]);
@@ -17,19 +27,12 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const debouncedUpdateRef = useRef();
 
   const isRequired = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
-  const isDisabled = () => {
-    if (species || count) {
-      if (count > 1) return true;
-      if ((species !== null || species !== undefined) && (count !== null || count !== undefined)) {
-        return isRequired;
-      }
-    }
-  };
+  const isDisabled = !isRequired;
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
       if (tableMeta?.updateData) {
-        tableMeta?.updateData(row.index, column.id, Number(newValue));
+        tableMeta?.updateData(row.index, column.id, newValue ? Number(newValue) : '');
       }
     }, 500);
   }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
@@ -56,8 +59,8 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   // Get latest species and countF values
   useEffect(() => {
-    rowSpecies && setSpecies(rowSpecies);
-    rowCount && setCount(rowCount);
+    setSpecies(rowSpecies);
+    setCount(rowCount);
   }, [rowSpecies, rowCount]);
 
   // Reset cell value if the field is disabled
@@ -69,23 +72,34 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
     }
   }, [isRequired]);
 
+  useEffect(() => {
+    if (Number(value) >= 1600) {
+      setShowWarning(true);
+    } else {
+      setShowWarning(false);
+    }
+  }, [value, setShowWarning]);
+
   return (
-    <input
-      aria-label='Length'
-      disabled={columnMeta?.readOnly || isDisabled()}
-      id={cell.id}
-      maxLength={4000}
-      onBlur={handleBlur}
-      onChange={handleChange}
-      required={isRequired}
-      style={{
-        width: '100%',
-        borderColor: 'hsl(0, 0%, 80%)',
-        cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
-      }}
-      type='number'
-      value={value ?? ''}
-    />
+    <div>
+      <input
+        aria-label='Length'
+        disabled={columnMeta?.readOnly || isDisabled}
+        id={cell.id}
+        maxLength={4000}
+        onBlur={handleBlur}
+        onChange={handleChange}
+        required={isRequired}
+        style={{
+          width: '100%',
+          borderColor: 'hsl(0, 0%, 80%)',
+          cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
+        }}
+        type='number'
+        value={value ?? ''}
+      />
+      {showWarning && warningText}
+    </div>
   );
 });
 
