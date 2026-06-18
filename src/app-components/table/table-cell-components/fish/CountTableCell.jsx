@@ -3,8 +3,6 @@ import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { decimalNumberRegex } from '@src/utils/regex';
 
-const speciesArr = ['NDNF', 'CNA', 'CNFH'];
-
 const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
@@ -16,8 +14,8 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   const debouncedUpdateRef = useRef();
 
-  const isRequired = !speciesArr.includes(species);
-  const isDisabled = species === 'NFSH' || speciesArr.includes(species);
+  const isRequired = !['NDNF', 'CNA', 'CNFH', 'NFSH'].includes(species);
+  const isDisabled = !isRequired;
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
@@ -49,14 +47,14 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   // Get latest species values
   useEffect(() => {
-    rowSpecies && setSpecies(rowSpecies);
+    setSpecies(rowSpecies);
   }, [rowSpecies]);
 
   useEffect(() => {
     if (species === 'NFSH') {
       setValue(0);
       updateValue(0);
-    } else if (speciesArr.includes(species)) {
+    } else if (['NDNF', 'CNA', 'CNFH'].includes(species)) {
       setValue(null);
       updateValue(null);
     }

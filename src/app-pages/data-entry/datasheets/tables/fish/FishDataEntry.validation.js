@@ -122,9 +122,8 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .typeError()
-        .min(0, 'Value cannot be negative')
         .when('species', {
-          is: (species) => !['NDNF', 'CNA', 'CNFH'].includes(species),
+          is: (species) => !['NDNF', 'CNA', 'CNFH', 'NFSH'].includes(species),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         }),
@@ -150,20 +149,51 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             }
             return true;
           },
-          message: 'Duplicate Floy Tag entries for the same Missouri River Field ID not allowed',
+          message: 'Duplicate Floy Tag entries for the same Missouri River Field ID not allowed.',
         }),
       mR: yup.string().when('floyTag', {
         is: (floyTag) => floyTag !== null && floyTag !== '' && floyTag !== undefined,
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-      // @TODO: Might need to add some safe guards here for masking prefix and number values
       geneticsVialNumber: yup.string().when('species', {
         is: (species) => species === 'USG',
-        then: (schema) => schema.required(ValidationMessages.FieldRequired),
+        then: (schema) =>
+          schema.required(ValidationMessages.FieldRequired).test({
+            test: (geneticsVialNumber) => {
+              const num = geneticsVialNumber?.split('-')?.[1];
+              return num?.length < 5 ? false : true;
+            },
+            message: 'Genetics Vial Number needs to be a 5 digit number.',
+          }),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-      tagnumber: yup.string().nullable().notRequired(),
+      tagnumber: yup
+        .string()
+        .nullable()
+        .notRequired()
+        .test({
+          test: (tagnumber) => {
+            const hasDecimal = tagnumber?.includes('.');
+            if (hasDecimal) {
+              return !(tagnumber?.length > 14);
+            } else {
+              return !(tagnumber?.length > 10);
+            }
+          },
+          message:
+            'Tag Number is no more than 10 digits when there is no decimal and no more than 14 digits when there is a decimal.',
+        })
+        .test({
+          test: (tagnumber) => {
+            if (tagnumber === null || tagnumber === '' || tagnumber === undefined) return true;
+            if (data?.filter((item) => item.tagnumber === tagnumber)?.length > 1) {
+              return false;
+            }
+            return true;
+          },
+          message: 'Duplicate Tag Number entries for the same Missouri River Field ID not allowed.',
+        }),
       finCurl: yup.string().when(['length', 'segment', 'species'], {
         is: (length, segment, species) =>
           species === 'PDSG' && ((length < 425 && segment < 7) || (length < 250 && segment >= 7)),

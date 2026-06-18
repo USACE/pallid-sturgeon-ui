@@ -22,12 +22,12 @@ const calculateCondition = (length, segment, species, weight) => {
   }
 };
 
-const ConditionTableCell = connect('selectBaseData', ({ baseData, getValue, row, column, table, cell }) => {
-  const columnMeta = column.columnDef.meta;
+const ConditionTableCell = connect('selectBaseData', ({ baseData, row, column, table }) => {
   const tableMeta = table.options.meta;
   const [species, setSpecies] = useState();
   const [weight, setWeight] = useState();
   const [length, setLength] = useState();
+
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
   const rowWeight = useMemo(() => row.getValue('weight'), [row]);
   const rowLength = useMemo(() => row.getValue('length'), [row]);
@@ -39,16 +39,16 @@ const ConditionTableCell = connect('selectBaseData', ({ baseData, getValue, row,
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
       if (tableMeta?.updateData) {
-        tableMeta?.updateData(row.index, column.id, newValue);
+        tableMeta?.updateData(row.index, column.id, newValue ?? newValue);
       }
     }, 500);
-  }, [row.index, column.id, tableMeta?.updateData, columnMeta?.type, tableMeta]);
+  }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
 
   // Set row values to state
   useEffect(() => {
-    rowSpecies && setSpecies(rowSpecies);
-    rowWeight && setWeight(rowWeight);
-    rowLength && setLength(rowLength);
+    setSpecies(rowSpecies);
+    setWeight(rowWeight);
+    setLength(rowLength);
   }, [rowSpecies, rowWeight, rowLength]);
 
   return <span>{calculateCondition(length, segmentId, species, weight)}</span>;

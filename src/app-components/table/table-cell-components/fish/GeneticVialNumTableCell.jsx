@@ -67,13 +67,13 @@ const GeneticVialNumTableCell = connect('selectBaseData', ({ baseData, getValue,
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
       if (tableMeta?.updateData) {
-        tableMeta?.updateData(row.index, column.id, newValue);
+        tableMeta?.updateData(row.index, column.id, newValue ?? newValue);
       }
     }, 500);
   }, [row.index, column.id, tableMeta?.updateData, columnMeta?.type, tableMeta]);
 
   useEffect(() => {
-    rowSpecies && setSpecies(rowSpecies);
+    setSpecies(rowSpecies);
   }, [rowSpecies]);
 
   return (
@@ -103,12 +103,11 @@ const GeneticVialNumTableCell = connect('selectBaseData', ({ baseData, getValue,
       <div className='text-bold' style={{ fontSize: '20px' }}>
         -
       </div>
-      {/* Number - @TODO: Clean this up and specify 5 digit format */}
       <input
         aria-label='Genetic Vial Number'
-        disabled={columnMeta?.readOnly || !isRequired}
+        disabled={!isRequired}
         id={cell.id}
-        max={99999} // 5 digits max only
+        maxLength={5}
         onBlur={handleBlur}
         onChange={handleNumberChange}
         required={isRequired}
@@ -117,7 +116,7 @@ const GeneticVialNumTableCell = connect('selectBaseData', ({ baseData, getValue,
           borderColor: 'hsl(0, 0%, 80%)',
           cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
         }}
-        type='number'
+        type='text'
         value={number ?? ''}
       />
     </>
