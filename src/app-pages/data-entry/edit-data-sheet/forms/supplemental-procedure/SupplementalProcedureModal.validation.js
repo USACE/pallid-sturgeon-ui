@@ -347,7 +347,7 @@ export const getSuppProcDefaultValues = ({ edit, suppData, procData, user, showP
   newFreqId: procData?.newFreqId ?? '',
   newRtSerial: procData?.newRtSerial ?? '', // TODO: Confirm which database field this maps to, cannot find match in DS_PROCEDURE table
   sex: procData?.sex ?? '',
-  pi: procData?.pi ?? '', //TODO: Confirm which database field this maps to, cannot find match in DS_PROCEDURE table
+  pi: procData?.pi === 1 ? true : false, //TODO: Confirm which database field this maps to, cannot find match in DS_PROCEDURE table
   bloodSample: procData?.bloodSample === 1 ? true : false,
   eggSample: procData?.eggSample === 1 ? true : false,
   spawnStatus: procData?.spawnStatus ?? '',
