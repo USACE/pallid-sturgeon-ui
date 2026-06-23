@@ -9,7 +9,8 @@ const DataHeader = connect(
   'selectBaseData',
   'selectRouteParams',
   'selectDataEntryData',
-  ({ baseData, dataEntryData, type }) => {
+  'selectDataEntryFishData',
+  ({ baseData, dataEntryData, dataEntryFishData, type }) => {
     const isEmpty = Object.keys(dataEntryData).length === 0;
 
     const metadata = {
@@ -25,16 +26,22 @@ const DataHeader = connect(
       },
     };
 
+    const firstIdLabel = type === 'supp-proc' ? 'MR FID:' : `${metadata?.[type]?.text} ID:`;
+    const firstIdValue = type === 'supp-proc' ? dataEntryFishData?.items?.[0]?.mrFid : metadata?.[type]?.id;
+
+    const secondIdLabel = type === 'supp-proc' ? 'F FID:' : `${metadata?.[type]?.text} Field ID:`;
+    const secondIdValue = type === 'supp-proc' ? dataEntryFishData?.items?.[0]?.fFid : metadata?.[type]?.fid;
+
     return (
       <Card className='mb-3'>
         <Card.Body>
           {!isEmpty && (
             <Grid row gap='md' className='padding-bottom-1 border-bottom'>
               <Grid tablet={{ col: 2 }}>
-                <span className='text-bold'>{metadata?.[type]?.text} ID:</span> {metadata?.[type]?.id || '--'}
+                <span className='text-bold'>{firstIdLabel}</span> {firstIdValue || '--'}
               </Grid>
-              <Grid tablet={{ col: 2 }}>
-                <span className='text-bold'>{metadata?.[type]?.text} Field ID:</span> {metadata?.[type]?.fid || '--'}
+              <Grid tablet={{ col: 10 }}>
+                <span className='text-bold'>{secondIdLabel}</span> {secondIdValue || '--'}
               </Grid>
             </Grid>
           )}
