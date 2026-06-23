@@ -4,20 +4,37 @@ import classNames from 'classnames';
 
 import './checkbox.scss';
 
-const Checkbox = ({ id, label, name, onChange = () => {}, onBlur = () => {}, value, tile, ...customProps }) => {
+const Checkbox = ({
+  id,
+  label,
+  name,
+  onChange = () => {},
+  onBlur = () => {},
+  value,
+  tile,
+  errorName,
+  hint,
+  warning,
+  ...customProps
+}) => {
   const {
     register,
     formState: { errors },
     trigger,
   } = useFormContext();
-  const inputError = errors[name];
+  const inputError = errorName ? errorName : errors[name];
+
+  const handleBlur = (e) => {
+    onBlur(e);
+  };
+
+  const handleChange = (e) => {
+    onChange(e);
+  };
 
   const { ref: checkboxRef, ...rest } = register(name, {
-    onBlur,
-    onChange: async (e) => {
-      await trigger(name);
-      onChange(e);
-    },
+    onBlur: handleBlur,
+    onChange: handleChange,
   });
 
   const classes = classNames({
@@ -28,7 +45,7 @@ const Checkbox = ({ id, label, name, onChange = () => {}, onBlur = () => {}, val
   return (
     <USWDSCheckbox
       className={classes}
-      id={id ?? value}
+      id={name}
       inputRef={checkboxRef}
       label={label}
       name={name}

@@ -67,7 +67,8 @@ a.usa-link {
 }
 
 label.usa-label,
-div.usa-label {
+div.usa-label,
+.usa-label {
   @include mixin.input-font-styles;
   max-width: 100%;
   margin-top: 1rem;
@@ -81,6 +82,13 @@ div.usa-label {
   .optional-text {
     font-style: italic;
     margin-left: 0.5em;
+  }
+  &.required {
+    @include mixin.required-styles;
+    &::after {
+      position: absolute;
+      bottom: 0.25em;
+    }
   }
 }
 
@@ -111,5 +119,34 @@ div.usa-alert {
   .usa-alert__body {
     margin-left: 0px;
     margin-right: 0px;
+  }
+}
+
+.usa-checkbox {
+  .usa-checkbox__input--tile + [class*='__label'] {
+    border-width: 1px;
+  }
+
+  &.small-checkbox {
+    label.usa-checkbox__label {
+      font-size: 0.85rem;
+      padding-left: 1.5rem;
+
+      &::before {
+        width: 0.8rem;
+        height: 0.8rem;
+        background-size: 0.7rem auto;
+      }
+    }
+  }
+
+  &.checkbox-invalid-tile {
+    &:has(input[disabled][type='checkbox']) {
+      .usa-checkbox__label {
+        border-color: #c9c9c9 !important;
+        background-color: transparent !important;
+        background-image: none !important;
+      }
+    }
   }
 }

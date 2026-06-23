@@ -1,4 +1,5 @@
 @use '@styles/_variables' as *;
+@use '@styles/_mixins' as mixin;
 
 $inactive-color: grey;
 $success-color: #43ac6a;
@@ -111,4 +112,14 @@ input[disabled] {
 
 .asterisk-color {
   color: $color-error-asterisk !important;
+}
+
+span {
+  &.required {
+    @include mixin.required-styles;
+
+    &::after {
+      margin: 0 0.125rem;
+    }
+  }
 }

@@ -10,7 +10,7 @@ import './selectInput.scss';
 const SelectInput = ({
   children,
   className = 'width-full',
-  defaultOption = '-Select Option-',
+  defaultOption = '-Select-',
   group,
   showOptionalText = false,
   label,

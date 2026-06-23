@@ -114,3 +114,14 @@
     background-color: $input-disabled !important;
   }
 }
+
+@mixin required-styles {
+  position: relative;
+
+  &::after {
+    content: '✱';
+    font-size: 0.6rem;
+    color: $color-form-red;
+    margin-left: 0.25rem;
+  }
+}
