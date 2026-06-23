@@ -847,7 +847,6 @@ const SupplementalProcedureModal = connect(
                     ))}
                   </SelectInput>
                 </Grid>
-                <Grid tablet={{ col: 1 }}></Grid>
                 <Grid tablet={{ col: 2 }} style={checkboxAlignToInputStyle}>
                   <Fieldset>
                     <Checkbox name='pi' label='PI' onChange={handleChange} tile />
@@ -858,7 +857,7 @@ const SupplementalProcedureModal = connect(
                     <Checkbox name='bloodSample' label='Blood Sample' onChange={handleChange} tile />
                   </Fieldset>
                 </Grid>
-                <Grid tablet={{ col: 2 }} style={checkboxAlignToInputStyle}>
+                <Grid tablet={{ col: 3 }} style={checkboxAlignToInputStyle}>
                   <Fieldset>
                     <Checkbox name='eggSample' label='Egg Sample' onChange={handleChange} tile />
                   </Fieldset>
