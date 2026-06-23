@@ -1,4 +1,5 @@
 import { ValidationMessages } from '@src/utils/enums';
+import { formatDate } from '@src/utils/helpers';
 import * as yup from 'yup';
 
 export const supplementalValidationSchema = ({ projectId, species }) =>
@@ -8,12 +9,12 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
       edit: yup.boolean(),
       showProcedureSection: yup.boolean(),
       //Supplemental fields
-      pitRnz: yup.string().notRequired(),
+      pitrn: yup.string().notRequired(),
       tagnumber: yup
         .string()
         .transform((value) => (value ? value.toUpperCase() : value))
         .matches(/^[A-NP-Z0-9.]*$/, "Must be alphanumeric, cannot contain 'O', and be uppercase.")
-        .when('pitRnz', {
+        .when('pitrn', {
           is: (value) => value !== null && value !== undefined && value !== '',
           then: (schema) => schema.required('This field is required when Pit R/N/Z is selected.'),
           otherwise: (schema) => schema.notRequired(),
@@ -25,13 +26,13 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
           const maxLength = hasDecimal ? 14 : 10;
           return value.length <= maxLength;
         }),
-      elColor: yup.string().required(ValidationMessages.FieldRequired),
-      elHvx: yup.string().when('elColor', {
+      elcolor: yup.string().required(ValidationMessages.FieldRequired),
+      elhv: yup.string().when('elcolor', {
         is: (value) => value != 'N',
         then: (schema) => schema.required('This field is required when EL Color is not "N".'),
       }),
-      erColor: yup.string().required(ValidationMessages.FieldRequired),
-      erHvx: yup.string().when('erColor', {
+      ercolor: yup.string().required(ValidationMessages.FieldRequired),
+      erhv: yup.string().when('ercolor', {
         is: (value) => value != 'N',
         then: (schema) => schema.required('This field is required when ER Color is not "N".'),
       }),
@@ -59,7 +60,7 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
         .integer(ValidationMessages.IsInteger)
         .min(0, 'Value must be exactly 1 digit')
         .max(9, 'Value must be exactly 1 digit'),
-      cwt: yup.string().required(ValidationMessages.FieldRequired),
+      cwtyn: yup.string().required(ValidationMessages.FieldRequired),
       dangler: yup.string().when('projectId', {
         is: (val) => Number(val) !== 2,
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
@@ -75,18 +76,13 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-      genetics: yup.string().when(['species', 'projectId'], {
+      genetic: yup.string().when(['species', 'projectId'], {
         is: (species, projectId) => species === 'USG' && Number(projectId) !== 2,
         then: (schema) => schema.required('Required when Species is "USG" and Project = 2'),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-      geneticVial: yup.string().when(['species', 'genetics'], {
-        is: (species, genetics) => ['PDSG', 'USG'].includes(species) && genetics == 'Y',
-        then: (schema) => schema.required('Required when Species is "USG" or "PDSG" and Genetics = Yes'),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
-      geneticVialNum: yup.string().when(['species', 'genetics'], {
-        is: (species, genetics) => ['PDSG', 'USG'].includes(species) && genetics == 'Y',
+      geneticsVialNumber: yup.string().when(['species', 'genetic'], {
+        is: (species, genetic) => ['PDSG', 'USG'].includes(species) && genetic == 'Y',
         then: (schema) => schema.required('Required when Species is "USG" or "PDSG" and Genetics = Yes'),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
@@ -98,32 +94,38 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //Procedure fields
       //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-      oldRadioTag: yup.string().when('showProcedureSection', {
-        is: true,
-        then: (schema) =>
-          schema.when('purpose', {
-            is: (purpose) => ['2', '5'].includes(purpose),
-            then: (schema) => schema.required('Required when Purpose is "Reimplant" or "Retired"'),
-            otherwise: (schema) => schema.nullable().notRequired(),
-          }),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
-      oldFrequencyId: yup.string().when('showProcedureSection', {
-        is: true,
-        then: (schema) =>
-          schema.when(['purpose'], {
-            is: (purpose) => ['2', '5'].includes(purpose),
-            then: (schema) => schema.required('Required when Purpose is "Reimplant" or "Retired"'),
-            otherwise: (schema) => schema.nullable().notRequired(),
-          }),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
+      oldRadioTagNum: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+        .when('showProcedureSection', {
+          is: true,
+          then: (schema) =>
+            schema.when('purpose', {
+              is: (purpose) => ['2', '5'].includes(purpose),
+              then: (schema) => schema.required('Required when Purpose is "Reimplant" or "Retired"'),
+              otherwise: (schema) => schema.nullable().notRequired(),
+            }),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      oldFrequencyId: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+        .when('showProcedureSection', {
+          is: true,
+          then: (schema) =>
+            schema.when(['purpose'], {
+              is: (purpose) => ['2', '5'].includes(purpose),
+              then: (schema) => schema.required('Required when Purpose is "Reimplant" or "Retired"'),
+              otherwise: (schema) => schema.nullable().notRequired(),
+            }),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
       procedureDate: yup.string().when('showProcedureSection', {
         is: true,
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-      startTime: yup.string().when('showProcedureSection', {
+      procedureStartTime: yup.string().when('showProcedureSection', {
         is: true,
         then: (schema) =>
           schema
@@ -131,7 +133,7 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
             .matches(/^\d{2}:\d{2}:\d{2}$/, 'Must be in the format HH:MM:SS.'),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-      endTime: yup.string().when('showProcedureSection', {
+      procedureEndTime: yup.string().when('showProcedureSection', {
         is: true,
         then: (schema) =>
           schema
@@ -139,10 +141,28 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
             .matches(/^\d{2}:\d{2}:\d{2}$/, 'Must be in the format HH:MM:SS.'),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
+      oldRtSerial: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+        .nullable()
+        .notRequired(),
+      oldDstSerial: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+        .nullable()
+        .notRequired(),
+      dstSerialNum: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+        .when('showProcedureSection', {
+          is: true,
+          then: (schema) => schema.required(ValidationMessages.FieldRequired),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
       dstStartDate: yup.string().when('showProcedureSection', {
         is: true,
         then: (schema) =>
-          schema.when('dstSerial', {
+          schema.when('dstSerialNum', {
             is: (value) => value !== null && value !== undefined && value !== '',
             then: (schema) => schema.required('This field is required when "New/Current DST Serial #" is populated.'),
             otherwise: (schema) => schema.nullable().notRequired(),
@@ -152,62 +172,79 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
       dstStartTime: yup.string().when('showProcedureSection', {
         is: true,
         then: (schema) =>
-          schema.when('dstSerial', {
+          schema.when('dstSerialNum', {
             is: (value) => value !== null && value !== undefined && value !== '',
             then: (schema) => schema.required('This field is required when "New/Current DST Serial #" is populated.'),
             otherwise: (schema) => schema.nullable().notRequired(),
           }),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-      newRadioTag: yup.string().when('showProcedureSection', {
+      dstReimplant: yup.boolean(),
+      purpose: yup.string().nullable().notRequired(),
+      procedureBy: yup.string().max(3, 'Must not exceed 3 characters.').nullable().notRequired(),
+      antibioticInjection: yup.boolean(),
+      pVentral: yup.boolean(),
+      pDorsal: yup.boolean(),
+      pLeft: yup.boolean(),
+      fishHealthComment: yup.string().nullable().notRequired(),
+      newRadioTagNum: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+        .when('showProcedureSection', {
+          is: true,
+          then: (schema) =>
+            schema.when(['purpose'], {
+              is: (purpose) => !['5', '6'].includes(purpose),
+              then: (schema) => schema.required('Required when Purpose is not "Retired" or "?????"'),
+              otherwise: (schema) => schema.nullable().notRequired(),
+            }),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      newFreqId: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+        .when('showProcedureSection', {
+          is: true,
+          then: (schema) =>
+            schema.when(['purpose'], {
+              is: (purpose) => !['5', '6'].includes(purpose),
+              then: (schema) => schema.required('Required when Purpose is not "Retired" or "?????"'),
+              otherwise: (schema) => schema.nullable().notRequired(),
+            }),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      newRtSerial: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+        .when('showProcedureSection', {
+          is: true,
+          then: (schema) =>
+            schema.when(['purpose'], {
+              is: (purpose) => !['5', '6'].includes(purpose),
+              then: (schema) => schema.required('Required when Purpose is not "Retired" or "?????"'),
+              otherwise: (schema) => schema.nullable().notRequired(),
+            }),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      evalLocation: yup.string().when('showProcedureSection', {
         is: true,
         then: (schema) =>
-          schema.when(['purpose'], {
-            is: (purpose) => !['5', '6'].includes(purpose),
-            then: (schema) => schema.required('Required when Purpose is not "Retired" or "?????"'),
-            otherwise: (schema) => schema.nullable().notRequired(),
-          }),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
-      newFrequencyId: yup.string().when('showProcedureSection', {
-        is: true,
-        then: (schema) =>
-          schema.when(['purpose'], {
-            is: (purpose) => !['5', '6'].includes(purpose),
-            then: (schema) => schema.required('Required when Purpose is not "Retired" or "?????"'),
-            otherwise: (schema) => schema.nullable().notRequired(),
-          }),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
-      newRtSerial: yup.string().when('showProcedureSection', {
-        is: true,
-        then: (schema) =>
-          schema.when(['purpose'], {
-            is: (purpose) => !['5', '6'].includes(purpose),
-            then: (schema) => schema.required('Required when Purpose is not "Retired" or "?????"'),
-            otherwise: (schema) => schema.nullable().notRequired(),
-          }),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
-      evalForLocation: yup.string().when('showProcedureSection', {
-        is: true,
-        then: (schema) =>
-          schema.when('spawnEval', {
+          schema.when('spawnStatus', {
             is: (value) => value !== null && value !== undefined && value !== '',
             then: (schema) => schema.required('This field is required when "Spawn Evaluation" is populated.'),
             otherwise: (schema) => schema.nullable().notRequired(),
           }),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-      visualAssessment: yup.string().nullable().notRequired(),
-      ultrasoundAssessment: yup.string().nullable().notRequired(),
+      visualReproStatus: yup.string().nullable().notRequired(),
+      ultrasoundReproStatus: yup.string().nullable().notRequired(),
       sex: yup.string().when('showProcedureSection', {
         is: true,
         then: (schema) =>
-          schema.when(['visualAssessment', 'ultrasoundAssessment'], {
-            is: (visualAssessment, ultrasoundAssessment) =>
-              (visualAssessment !== null && visualAssessment !== undefined && visualAssessment !== '') ||
-              (ultrasoundAssessment !== null && ultrasoundAssessment !== undefined && ultrasoundAssessment !== ''),
+          schema.when(['visualReproStatus', 'ultrasoundReproStatus'], {
+            is: (visualReproStatus, ultrasoundReproStatus) =>
+              (visualReproStatus !== null && visualReproStatus !== undefined && visualReproStatus !== '') ||
+              (ultrasoundReproStatus !== null && ultrasoundReproStatus !== undefined && ultrasoundReproStatus !== ''),
             then: (schema) =>
               schema.required(
                 'This field is required when "Visual Assessment" or "Ultrasound Assessment" is populated.'
@@ -216,37 +253,41 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
           }),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
-      expectedSpawnYear: yup.string().when('showProcedureSection', {
-        is: true,
-        then: (schema) =>
-          schema.when(['visualAssessment', 'ultrasoundAssessment'], {
-            is: (visualAssessment, ultrasoundAssessment) =>
-              (visualAssessment !== null && visualAssessment !== undefined && visualAssessment !== '') ||
-              (ultrasoundAssessment !== null && ultrasoundAssessment !== undefined && ultrasoundAssessment !== ''),
-            then: (schema) =>
-              schema
-                .required('This field is required when "Visual Assessment" or "Ultrasound Assessment" is populated.')
-                .test(
-                  'expectedSpawnYear-valid-year',
-                  'Expected Spawn Year must be the current year or current year + 1.',
-                  (value) => {
-                    if (!value) return true;
-                    const currentYear = new Date().getFullYear();
-                    const year = parseInt(value, 10);
-                    return year === currentYear || year === currentYear + 1;
-                  }
-                ),
-            otherwise: (schema) => schema.nullable().notRequired(),
-          }),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
+      expectedSpawnYear: yup
+        .number()
+        .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+        .integer(ValidationMessages.IsInteger)
+        .when('showProcedureSection', {
+          is: true,
+          then: (schema) =>
+            schema.when(['visualReproStatus', 'ultrasoundReproStatus'], {
+              is: (visualReproStatus, ultrasoundReproStatus) =>
+                (visualReproStatus !== null && visualReproStatus !== undefined && visualReproStatus !== '') ||
+                (ultrasoundReproStatus !== null && ultrasoundReproStatus !== undefined && ultrasoundReproStatus !== ''),
+              then: (schema) =>
+                schema
+                  .required('This field is required when "Visual Assessment" or "Ultrasound Assessment" is populated.')
+                  .test(
+                    'expectedSpawnYear-valid-year',
+                    'Expected Spawn Year must be the current year or current year + 1.',
+                    (value) => {
+                      if (!value) return true;
+                      const currentYear = new Date().getFullYear();
+                      const year = parseInt(value, 10);
+                      return year === currentYear || year === currentYear + 1;
+                    }
+                  ),
+              otherwise: (schema) => schema.nullable().notRequired(),
+            }),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        }),
     })
     .test(
       'gan-checkbox-group-required',
       'At least one Genetic Analysis Needs option must be selected when Genetics is set to "Yes"',
       function (values) {
-        const { genetics, broodstock, hatchWild, speciesId, archive, project37 } = values || {};
-        if (genetics == 'Y' && !broodstock && !hatchWild && !speciesId && !archive && !project37) {
+        const { genetic, broodstock, hatchWild, speciesId, archive, project37 } = values || {};
+        if (genetic == 'Y' && !broodstock && !hatchWild && !speciesId && !archive && !project37) {
           return this.createError({
             path: 'checkboxGroup',
             message: 'Genetic Analysis Needs: At least one option must be selected when Genetics is set to "Yes"',
@@ -257,43 +298,64 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
       }
     );
 
-export const getSuppDefaultValues = ({ edit, data, user, showProcedureSection }) => ({
+export const getSuppProcDefaultValues = ({ edit, suppData, procData, user, showProcedureSection }) => ({
   edit: edit ?? false,
   showProcedureSection: showProcedureSection ?? false,
-  pitRnz: data?.pitRnz ?? '',
-  tagnumber: data?.tagnumber ?? '',
-  elColor: data?.elColor ?? '',
-  elHvx: data?.elHvx ?? '',
-  erColor: data?.erColor ?? '',
-  erHvx: data?.erHvx ?? '',
-  lScute: data?.lScute ?? '',
-  rScute: data?.rScute ?? '',
-  dScute: data?.dScute ?? '',
-  cwt: data?.cwt ?? '',
-  dangler: data?.dangler ?? '',
-  pallidFate: data?.pallidFate ?? '',
-  hatcheryOrigin: data?.hatcheryOrigin ?? '',
-  genetics: data?.genetics ?? '',
-  geneticVial: data?.geneticVial ?? '',
-  geneticVialNum: data?.geneticVialNum ?? '',
-  broodstock: data?.broodstock ?? false,
-  hatchWild: data?.hatchWild ?? false,
-  speciesId: data?.speciesId ?? false,
-  archive: data?.archive ?? false,
-  project37: data?.project37 ?? false,
-  oldRadioTag: data?.oldRadioTag ?? '',
-  oldFrequencyId: data?.oldFrequencyId ?? '',
-  procedureDate: data?.procedureDate ?? '',
-  startTime: data?.startTime ?? '',
-  endTime: data?.endTime ?? '',
-  dstStartDate: data?.dstStartDate ?? '',
-  dstStartTime: data?.dstStartTime ?? '',
-  newRadioTag: data?.newRadioTag ?? '',
-  newFrequencyId: data?.newFrequencyId ?? '',
-  newRtSerial: data?.newRtSerial ?? '',
-  evalForLocation: data?.evalForLocation ?? '',
-  visualAssessment: data?.visualAssessment ?? '',
-  ultrasoundAssessment: data?.ultrasoundAssessment ?? '',
-  sex: data?.sex ?? '',
-  expectedSpawnYear: data?.expectedSpawnYear ?? '',
+  // Supplemental fields
+  pitrn: suppData?.pitrn ?? '',
+  tagnumber: suppData?.tagnumber ?? '',
+  elcolor: suppData?.elcolor ?? '',
+  elhv: suppData?.elhv ?? '',
+  ercolor: suppData?.ercolor ?? '',
+  erhv: suppData?.erhv ?? '',
+  lscute: suppData?.lscute ?? '',
+  rscute: suppData?.rscute ?? '',
+  dscute: suppData?.dscute ?? '',
+  cwtyn: suppData?.cwtyn ?? '',
+  dangler: suppData?.dangler ?? '',
+  pallidFate: suppData?.status ?? '', // mapped from status field
+  hatcheryOrigin: suppData?.hatcheryOrigin ?? '',
+  genetic: suppData?.genetic ?? '',
+  geneticsVialNumber: suppData?.geneticsVialNumber ?? '',
+  broodstock: suppData?.broodstock === 1 ? true : false,
+  hatchWild: suppData?.hatchWild === 1 ? true : false,
+  speciesId: suppData?.speciesId === 1 ? true : false,
+  archive: suppData?.archive === 1 ? true : false,
+  project37: suppData?.project37 === 1 ? true : false,
+  otherTagInfo: suppData?.otherTagInfo ?? '',
+  suppComments: suppData?.comments ?? '', //mapped from supplemental table comments
+  // Procedure fields
+  procedureDate: procData?.procedureDate ? formatDate(procData?.procedureDate) : new Date().toISOString().split('T')[0],
+  procedureStartTime: procData?.procedureStartTime ?? '',
+  procedureEndTime: procData?.procedureEndTime ?? '',
+  purpose: procData?.purpose ?? '',
+  procedureBy: procData?.procedureBy ?? '',
+  antibioticInjection: procData?.antibioticInjection === 1 ? true : false,
+  pVentral: procData?.pVentral === 1 ? true : false,
+  pDorsal: procData?.pDorsal === 1 ? true : false,
+  pLeft: procData?.pLeft === 1 ? true : false,
+  fishHealthComment: procData?.fishHealthComment ?? '',
+  oldRadioTagNum: procData?.oldRadioTagNum ?? '',
+  oldFrequencyId: procData?.oldFrequencyId ?? '',
+  oldRtSerial: procData?.oldRtSerial ?? '', // TODO: Confirm which database field this maps to, cannot find match in DS_PROCEDURE table
+  oldDstSerial: procData?.oldDstSerial ?? '', // TODO: Confirm which database field this maps to, cannot find match in DS_PROCEDURE table
+  dstSerialNum: procData?.dstSerialNum ?? '',
+  dstStartDate: procData?.dstStartDate ? formatDate(procData?.dstStartDate) : new Date().toISOString().split('T')[0],
+  dstStartTime: procData?.dstStartTime ?? '',
+  dstReimplant: procData?.dstReimplant === 1 ? true : false,
+  newRadioTagNum: procData?.newRadioTagNum ?? '',
+  newFreqId: procData?.newFreqId ?? '',
+  newRtSerial: procData?.newRtSerial ?? '', // TODO: Confirm which database field this maps to, cannot find match in DS_PROCEDURE table
+  sex: procData?.sex ?? '',
+  pi: procData?.pi ?? '', //TODO: Confirm which database field this maps to, cannot find match in DS_PROCEDURE table
+  bloodSample: procData?.bloodSample === 1 ? true : false,
+  eggSample: procData?.eggSample === 1 ? true : false,
+  spawnStatus: procData?.spawnStatus ?? '',
+  evalLocation: procData?.evalLocation ?? '',
+  visualReproStatus: procData?.visualReproStatus ?? '',
+  ultrasoundReproStatus: procData?.ultrasoundReproStatus ?? '',
+  expectedSpawnYear: procData?.expectedSpawnYear ?? '',
+  ultrasoundGonadLength: procData?.ultrasoundGonadLength ?? '',
+  gonadCondition: procData?.gonadCondition ?? '',
+  procComments: procData?.comments ?? '', //mapped from procedure table comments
 });
