@@ -61,13 +61,11 @@ const MissouriRiverOverview = connect(
         <Breadcrumb paths={breadcrumbLinks} />
         <div className='row'>
           <div className='col-9'>
-            <h4>
-              {isEditForm ? '' : 'Create'} Missouri River Datasheet {isEditForm ? `Overview (ID: ${mrId})` : ''}
-            </h4>
+            <h4>{isEditForm ? '' : 'Create'} Missouri River Datasheet</h4>
           </div>
         </div>
         {/* Top Level Info */}
-        <DataHeader />
+        <DataHeader type='missouri-river' />
         {/* Approval Fields */}
         <Approval />
         {/* Form Fields */}

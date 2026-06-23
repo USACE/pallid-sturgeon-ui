@@ -1,77 +1,81 @@
 import { connect } from 'redux-bundler-react';
+import { Grid } from '@trussworks/react-uswds';
 
 import Card from '@components/card';
-
-import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 
 import '../../dataentry.scss';
 
 const DataHeader = connect(
   'selectBaseData',
   'selectRouteParams',
-  ({ baseData, routeParams }) => (
-    <Card className='mb-3'>
-      <Card.Body>
-        <Row>
-          <div className='col-md-12 col-xs-4'>
-            <Row className='border-bottom'>
-              <div className='col-sm-2'>
-                <b className='mr-2'>Site ID:</b>
-                {baseData?.siteId || '--'}
-              </div>
-              <div className='col-sm-2'>
-                <b className='mr-2'>Year:</b>
-                {baseData?.year || '--'}
-              </div>
-              <div className='col-sm-2'>
-                <b className='mr-2'>Field Office:</b>
-                {baseData?.fieldoffice || '--'}
-              </div>
-              <div className='col-sm-2'>
-                <b className='mr-2'>Project:</b>
-                {baseData?.projectId || '--'}
-              </div>
-              <div className='col-sm-2'>
-                <b className='mr-2'>Segment:</b>
-                {baseData?.segmentId || '--'}
-              </div>
-              <div className='col-sm-2'>
-                <b className='mr-2'>Season:</b>
-                {baseData?.season || '--'}
-              </div>
-            </Row>
-          </div>
-          <div className='col-md-12 col-xs-4 mt-2'>
-            <Row>
-              <div className='col-sm-2'>
-                <b className='mr-2'>Sample Unit Type:</b>
-                {baseData?.sampleUnitType || '--'}
-              </div>
-              <div className='col-sm-2'>
-                <b className='mr-2'>Sample Unit:</b>
-                {baseData?.bend || '--'}
-              </div>
-              <div className='col-sm-2'>
-                <b className='mr-2'>R/N:</b>
-                {baseData?.bendrn || '--'}
-              </div>
-              <div className='col-sm-2'>
-                <b className='mr-2'>Bend River Mile:</b>
-                {baseData?.bendRiverMile || '--'}
-              </div>
-              {(routeParams?.form === 'missouriRiver-edit' ||
-                routeParams?.form === 'missouriRiver-create') && (
-                <div className='col-sm-4'>
-                  <b className='mr-2'>MR FID:</b>
-                  {baseData?.mrFid || '--'}
-                </div>
-              )}
-            </Row>
-          </div>
-        </Row>
-      </Card.Body>
-    </Card>
-  )
+  'selectDataEntryData',
+  ({ baseData, dataEntryData, type }) => {
+    const isEmpty = Object.keys(dataEntryData).length === 0;
+
+    const metadata = {
+      'missouri-river': {
+        id: dataEntryData?.mrId,
+        fid: dataEntryData?.mrFid,
+        text: 'MR',
+      },
+      'search-effort': {
+        id: dataEntryData?.seId,
+        fid: dataEntryData?.seFid,
+        text: 'SE',
+      },
+    };
+
+    return (
+      <Card className='mb-3'>
+        <Card.Body>
+          {!isEmpty && (
+            <Grid row gap='md' className='padding-bottom-1 border-bottom'>
+              <Grid tablet={{ col: 2 }}>
+                <span className='text-bold'>{metadata?.[type]?.text} ID:</span> {metadata?.[type]?.id || '--'}
+              </Grid>
+              <Grid tablet={{ col: 2 }}>
+                <span className='text-bold'>{metadata?.[type]?.text} Field ID:</span> {metadata?.[type]?.fid || '--'}
+              </Grid>
+            </Grid>
+          )}
+          <Grid row gap='md' className={`padding-bottom-1 border-bottom ${!isEmpty ? 'padding-top-1' : ''}`}>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Site ID:</span> {baseData?.siteId || '--'}
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Year:</span> {baseData?.year || '--'}
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Field Office:</span> {baseData?.fieldoffice || '--'}
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Project:</span> {baseData?.projectId || '--'}
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Segment:</span> {baseData?.segmentId || '--'}
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Season:</span> {baseData?.season || '--'}
+            </Grid>
+          </Grid>
+          <Grid row gap='md' className='padding-top-1 padding-bottom-1'>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Sample Unit Type:</span> {baseData?.sampleUnitType || '--'}
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Sample Unit:</span> {baseData?.bend || '--'}
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>R/N:</span> {baseData?.bendrn || '--'}
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Bend River Mile:</span> {baseData?.bendRiverMile || '--'}
+            </Grid>
+          </Grid>
+        </Card.Body>
+      </Card>
+    );
+  }
 );
 
 export default DataHeader;
