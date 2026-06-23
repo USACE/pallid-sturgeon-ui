@@ -62,14 +62,12 @@ const SearchEffortOverview = connect(
 
         <div className='row'>
           <div className='col-9'>
-            <h4>
-              {isEditForm ? '' : 'Create'} Search Effort Datasheet {isEditForm ? `Overview (ID: ${seId})` : ''}
-            </h4>
+            <h4>{isEditForm ? '' : 'Create'} Search Effort Datasheet</h4>
           </div>
         </div>
 
         {/* Top Level Info */}
-        <DataHeader />
+        <DataHeader type='search-effort' />
 
         <div className='mt-3 mb-3'>
           <Button type='button' onClick={handleDownloadLookups} disabled={lookupDownloading}>

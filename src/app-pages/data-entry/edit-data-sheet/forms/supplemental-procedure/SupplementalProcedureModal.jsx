@@ -88,7 +88,7 @@ const SupplementalProcedureModal = connect(
     const initialProcData = procedureDataExists
       ? dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)[0]
       : null;
-      
+
     const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
     const {
@@ -474,24 +474,7 @@ const SupplementalProcedureModal = connect(
         )}
         {/* may need to add to DataHeader */}
         <section className='modal-body' id='suppProcFormModal'>
-          <Card>
-            <Card.Body>
-              <Grid row>
-                <Grid tablet={{ col: 6 }}>
-                  <p className='margin-bottom-0'>
-                    <span className='text-bold'>MR FID:</span> {mrFid || ''}
-                  </p>
-                </Grid>
-                <Grid tablet={{ col: 6 }}>
-                  <p className='margin-bottom-0'>
-                    <span className='text-bold'>F FID:</span> {fFid || ''}
-                  </p>
-                </Grid>
-              </Grid>
-              <hr></hr>
-              <DataHeader />
-            </Card.Body>
-          </Card>
+          <DataHeader type='supp-proc' />
         </section>
 
         {/* <SupplementalDataEntryForm /> */}
