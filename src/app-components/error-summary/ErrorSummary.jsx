@@ -34,8 +34,8 @@ const cleanAndTruncateLabels = (input, maxLength) => {
   return cleanedString + (truncated ? ' : ' : ': ');
 };
 
-const ErrorSummary = ({ errors, type = 'base', modalID, isValid }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
+const ErrorSummary = ({ errors, type = 'base', modalID, isValid, isExpandedInitially = true }) => {
+  const [isExpanded, setIsExpanded] = useState(isExpandedInitially);
 
   const genericErrorArray = [];
 
@@ -67,8 +67,11 @@ const ErrorSummary = ({ errors, type = 'base', modalID, isValid }) => {
   const scrollById = (errorID, modalID) => {
     if (modalID) {
       const modal = document.getElementById(modalID);
-      modal.querySelector(`#${errorID}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
-      modal.querySelector(`#${errorID}`).focus();
+        const target = modal?.querySelector(`#${errorID}`);
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          target.focus();
+        }
     } else {
       const targetID = `${errorID}_li${typeSuffix}`;
       document.getElementById(errorID).scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -143,7 +146,9 @@ const ErrorSummary = ({ errors, type = 'base', modalID, isValid }) => {
 
   return (
     (type !== 'modal' || (type === 'modal' && genericErrorCount > 0)) && (
-      <div className={`${type !== 'modal' && 'margin-top-2'} errorSummary`}>
+      <div
+        className={`${type === 'modal' ? 'errorSummary--modal' : 'margin-top-2'} errorSummary`}
+      >
         <div
           className={`usa-alert usa-alert${genericErrorCount > 0 ? '--error' : '--success'}`}
           id='error_list'
