@@ -91,12 +91,9 @@ const FishDataEntry = connect(
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 150,
         }),
-        columnHelper.display({
+        columnHelper.accessor('supplementalData', {
           header: 'Supp/Proc Link',
-          id: 'supplink',
-          cell: ({ row }) => (
-            <FishLinkTableCell row={row} rowData={rowData} modalComponent={SupplementalProcedureModal} />
-          ),
+          cell: FishLinkTableCell,
           size: 60,
           enableSorting: false,
           meta: {

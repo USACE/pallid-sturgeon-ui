@@ -1,25 +1,24 @@
 import { connect } from 'redux-bundler-react';
-import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
-import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
-import Card from '@components/card';
-import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
-
 import { Button, Grid, Label, GridContainer, Fieldset } from '@trussworks/react-uswds';
-
 import { useEffect, useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
+import classNames from 'classnames';
+import { mdiMinus, mdiPlus } from '@mdi/js';
+import { yupResolver } from '@hookform/resolvers/yup';
+
+import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
+import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
+import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
 import TextInput from '@components/new-inputs/text-input/TextInput';
 import TextArea from '@components/new-inputs/text-area/TextArea';
 import Checkbox from '@components/check-box/Checkbox';
 import SelectInput from '@components/new-inputs/select-input/SelectInput';
 import PallidIdOverview from './pallid-id-overview/pallidIdOverview';
-import classNames from 'classnames';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { getSuppProcDefaultValues, supplementalValidationSchema } from './SupplementalProcedureModal.validation';
-import { createDropdownOptions, isEmpty, fmtTimeHHMMSS } from '@pages/data-entry/dataEntryHelper';
 import ErrorSummary from '@components/error-summary/ErrorSummary';
 import Icon from '@components/icon/icon';
-import { mdiMinus, mdiPlus } from '@mdi/js';
+
+import { getSuppProcDefaultValues, supplementalValidationSchema } from './SupplementalProcedureModal.validation';
+import { createDropdownOptions, isEmpty } from '@pages/data-entry/dataEntryHelper';
 
 const geneticNeedsCheckboxes = [
   {
