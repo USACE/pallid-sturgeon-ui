@@ -26,23 +26,30 @@ import {
   isEmpty,
   removeDuplicates,
 } from '@src/app-pages/data-entry/dataEntryHelper';
+import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import {
+  captureGpsBest,
+  getOfflineDraft,
+  GPS_OPTIONS,
+  reloadOfflineDraft,
+} from '@src/app-pages/data-entry/offline/offlineHelper';
+import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
+import { isOnline } from '@src/app-pages/data-entry/offline/sync';
+import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 
 import '../../../dataentry.scss';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
-const GPS_OPTIONS = {
-  enableHighAccuracy: true,
-  timeout: 15000,
-  maximumAge: 0,
-};
-
 const currentDate = new Date().toISOString().split('T')[0];
+
+const normalize = (val) => (val ? String(val) : '');
 
 const MissouriRiverDataEntryForm = connect(
   'doUpdateBaseData',
   'doAddMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
+  'doUpdateCurrentTab',
   'selectBaseData',
   'selectDataEntryData',
   'selectLookupData',
@@ -52,13 +59,17 @@ const MissouriRiverDataEntryForm = connect(
     doUpdateBaseData,
     doAddMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
+    doUpdateCurrentTab,
     baseData,
     dataEntryData,
     lookupData,
     routeParams,
     dataEntryFishTotalCount,
   }) => {
-    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
+    // Initialize GPS
+    const { browserGps } = useGpsCapture(GPS_OPTIONS);
+    const ubloxGps = useUbloxSerialGps();
+
     const {
       bendRiverMile,
       bendSelections,
@@ -93,6 +104,8 @@ const MissouriRiverDataEntryForm = connect(
     const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
     const newForm = !dataEntryData.mrId;
     const hasFishRecords = dataEntryFishTotalCount > 0;
+
+    const online = !!isOnline();
 
     const ss3Options = removeDuplicates(
       setSite3Options?.map((item) => ({
@@ -196,14 +209,18 @@ const MissouriRiverDataEntryForm = connect(
       [getMacroMesoOptions, setMesoOptions]
     );
 
+    const defaultValues = getMissouriRiverDefaultValues({ baseData, dataEntryData });
+    const schema = getMissouriRiverSchema({
+      riverMile: getUpperLowerRiverMile(bend, segmentId),
+      hasFishRecords: hasFishRecords,
+    });
+
+    // RHF Methods Config
     const methods = useForm({
-      defaultValues: getMissouriRiverDefaultValues({ baseData, dataEntryData }),
-      resolver: yupResolver(
-        getMissouriRiverSchema({ riverMile: getUpperLowerRiverMile(bend, segmentId), hasFishRecords: hasFishRecords })
-      ),
+      defaultValues: defaultValues,
+      resolver: yupResolver(schema),
       mode: 'onSubmit',
       reValidateMode: 'onChange',
-      stateOptions: [],
     });
     const {
       formState: { errors, isValid, touchedFields, submitCount, isDirty },
@@ -213,25 +230,8 @@ const MissouriRiverDataEntryForm = connect(
       trigger,
       setValue,
       handleSubmit,
+      reset,
     } = methods;
-
-    // Capture Start and Stop Lat, Long, Time
-    const handleCapture = async (type) => {
-      try {
-        const { best } = await captureBestOf(5, 700);
-
-        setValue('startLatitude', best.lat, { shouldValidate: true });
-        setValue('startLongitude', best.lng, { shouldValidate: true });
-        setValue('startTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
-
-        window.alert(
-          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
-        );
-      } catch (e) {
-        console.error(e);
-        window.alert(`GPS capture failed: ${e?.message || e}`);
-      }
-    };
 
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
@@ -259,11 +259,15 @@ const MissouriRiverDataEntryForm = connect(
     const velocity081 = watch('velocity081');
     const u7 = watch('u7');
 
-    const normalize = (val) => (val ? String(val) : '');
-
     const isStartTimeDisabled =
       gearCode.startsWith('LDN') &&
       (velocitybot1 === null || velocitybot1 === '' || velocity081 === null || velocity081 === '');
+
+    // const loadCachedLookups = () => {
+    //   console.warn('Loading cached lookups...');
+    //   // const options = await getLookupOptions('searchTypeCodes');
+    //   // setOfflineSearchTypeCodes(options);
+    // };
 
     const getTempWarning = () => {
       if (temp > 30) {
@@ -314,18 +318,31 @@ const MissouriRiverDataEntryForm = connect(
       };
     };
 
+    // Capture Start and Stop Lat, Long, Time
+    const handleCapture = async (type) => {
+      try {
+        const { best } = await captureGpsBest({ browserGps, ubloxGps });
+
+        setValue(`${type}Latitude`, best.lat, { shouldValidate: true });
+        setValue(`${type}Longitude`, best.lng, { shouldValidate: true });
+        setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+
+        window.alert(
+          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+        );
+      } catch (e) {
+        console.error(e);
+        window.alert(`GPS capture failed: ${e?.message || e}`);
+      }
+    };
+
     const handleChange = (e) => {
       const name = e?.target?.name;
       const val = e?.target?.value;
-
-      if (name === 'recorder') {
-        setValue('recorder', val?.toUpperCase());
-      }
-
-      trigger(name);
+      name === 'recorder' && setValue('recorder', val?.toUpperCase());
     };
 
-    const doSaveDraft = () => {
+    const doSaveDraft = async () => {
       if (!isValid) return;
 
       const dataObj = formatDataObj();
@@ -334,46 +351,104 @@ const MissouriRiverDataEntryForm = connect(
         ...dataObj,
         clientId,
         siteId: dataObj.siteId || Number(siteId),
-        status: 1,
+        status: DataEntryStatuses.Draft,
+        // Offline values
+        _status: OfflineStatuses.Queued,
+        version: dataObj.version ?? 0,
       });
 
+      if (!payload.mrFid) {
+        console.error('Missing mrFid. Cannot save draft offline.');
+        return;
+      }
+
       try {
-        newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+        if (online) {
+          newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+        } else {
+          newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+        }
         sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
         setValue('mrFid', payload?.mrFid);
       } catch (error) {
         console.error('Save draft failed:', error);
+        newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
       }
+
       setValue('clientId', clientId);
-      setValue('status', 1);
+      setValue('status', DataEntryStatuses.Draft);
       doUpdateCurrentTab(1);
     };
 
     const doSubmit = async () => {
-      setValue('status', 2);
+      setValue('status', DataEntryStatuses.Submitted);
       if (!isValid) return;
 
       const dataObj = formatDataObj();
-      const clientId = dataObj.clientId ?? crypto.randomUUID();
+      const draft = getOfflineDraft({ draftKey: moriverDraftKey, fieldIdName: 'mrFid', siteId });
+      const clientId = dataObj.clientId ?? draft?.clientId ?? crypto.randomUUID();
 
       const payload = filterNullEmptyObjects({
+        ...draft,
         ...dataObj,
         clientId,
-        status: 2,
-        _status: 'queued',
-        version: dataObj.version ?? 0,
+        status: DataEntryStatuses.Submitted,
+        // Offline values
+        _status: OfflineStatuses.Queued,
+        version: dataObj.version ?? draft?.version ?? 0,
       });
 
-      newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
-      setValue('clientId', clientId);
-      setValue('status', 2);
+      try {
+        if (online) {
+          newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+        } else {
+          await createData('moriver', payload);
+        }
+      } catch (error) {
+        console.error('Submit failed, queueing offline:', error);
+        await updateData('moriver', clientId, payload);
+      }
 
+      setValue({
+        clientId: clientId,
+        status: DataEntryStatuses.Submitted,
+      });
       sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
+
       setSubmitMessage({
-        type: 'success',
-        text: 'Missouri River form submitted successfully.',
+        type: ApiStatuses.Success,
+        text: online
+          ? 'Missouri River form submitted successfully.'
+          : 'Missouri River form saved offline successfully. It will sync when you are back online.',
       });
     };
+
+    // useEffect(() => {
+    //   reloadOfflineDraft({ defaultValues, newForm, draftKey: moriverDraftKey, fieldIdName: 'mrFid', siteId });
+    // }, [newForm]);
+
+    // useEffect(() => {
+    //   loadCachedLookups();
+    // }, [loadCachedLookups]);
+
+    // useEffect(() => {
+    //   const draft = getOfflineDraft({ draftKey: moriverDraftKey, fieldIdName: 'mrFid', siteId });
+
+    //   if (newForm && draft) {
+    //     reset(
+    //       {
+    //         ...defaultValues,
+    //         ...draft,
+    //       },
+    //       {
+    //         keepDirty: false,
+    //         keepTouched: false,
+    //       }
+    //     );
+    //     return;
+    //   }
+    //   reset(defaultValues);
+    // }, [reset, defaultValues, newForm, moriverDraftKey, siteId]);
 
     // Set R/N value
     useEffect(() => {

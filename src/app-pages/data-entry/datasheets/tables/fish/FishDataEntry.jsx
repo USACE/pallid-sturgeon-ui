@@ -60,13 +60,7 @@ const FishDataEntry = connect(
     const moriverDraft = savedDraft ? JSON.parse(savedDraft) : null;
     const mrFid = dataEntryData?.mrFid || baseData?.mrFid || moriverDraft?.mrFid;
 
-    const parentMrId =
-      dataEntryData?.mrId ??
-      dataEntryData?.mr_id ??
-      dataEntryLastParams?.mrId ??
-      dataEntryLastParams?.mr_id ??
-      searchEffortDraft?.mrId ??
-      searchEffortDraft?.mr_id;
+    const parentMrId = dataEntryData?.mrId ?? dataEntryData?.mr_id;
 
     const speciesOptions =
       fishCodes?.map((item) => ({
