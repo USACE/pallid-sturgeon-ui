@@ -120,7 +120,7 @@ const MissouriDsTable = connect(
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
                 type: 'supplemental',
-                tab: 2,
+                tab: 1,
               }}
               sortable
               unSortIcon
@@ -133,7 +133,7 @@ const MissouriDsTable = connect(
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
                 type: 'procedure',
-                tab: 3,
+                tab: 1,
               }}
               sortable
               unSortIcon

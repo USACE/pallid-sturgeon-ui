@@ -1,20 +1,27 @@
+import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
-import Icon from '@components/icon/icon';
 import { mdiEye, mdiPlusBox } from '@mdi/js';
 import { Button } from '@trussworks/react-uswds';
 
-const getModalProps = ({ row, isEdit }) => ({
-  data: row.original,
-  edit: isEdit,
-  rowIndex: row.index,
-  row: row.original,
-});
+import Icon from '@components/icon/icon';
+import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
 
-const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, modalComponent, row }) => {
-  const isEdit = !!(row.original.fFid || row.original.fid);
-  const modalProps = getModalProps({ row, isEdit });
+const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, getValue, row }) => {
+  const initialValue = getValue();
+  const [value, setValue] = useState(initialValue);
 
-  const handleButtonClick = () => doModalOpen(modalComponent, modalProps);
+  // Check if supplemental data exists for Fish
+  const hasSupplemental = value > 0;
+  const isEdit = !!hasSupplemental;
+
+  const handleButtonClick = () => {
+    doModalOpen(SupplementalProcedureModal, {
+      data: row.original,
+      edit: isEdit,
+      rowIndex: row.index,
+      row: row.original,
+    });
+  };
 
   return (
     <div className='button-container'>
