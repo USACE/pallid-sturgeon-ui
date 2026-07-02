@@ -404,11 +404,11 @@ export class PSOfflineDB extends Dexie {
   constructor() {
     super('ps_offline_db');
 
-    this.version(5).stores({
+    this.version(6).stores({
       sites: 'clientId, serverId, site_id, _status',
-      moriver: 'clientId, serverId, updatedAt, setdate, _status',
+      moriver: 'clientId, serverId, mr_id, mrFid, site_id, _status',
       search: 'clientId, serverId, se_id, seFid, site_id, _status',
-      fish: 'clientId, serverId, f_id, _status',
+      fish: 'clientId, serverId, f_id, mr_id, fFid, mrFid, _status',
       telemetry: 'clientId, serverId, t_id, se_id, tFid, seFid, _status',
       supplemental: 'clientId, serverId, s_id, _status',
       procedure: 'clientId, serverId, id, _status',

@@ -57,6 +57,9 @@ export const enum ApiStatuses {
 
 export const enum OfflineStatuses {
   Queued = 'queued',
+  New = 'new',
+  Edited = 'edited',
+  Conflict = 'conflict',
 }
 
 export const enum DataEntryStatuses {

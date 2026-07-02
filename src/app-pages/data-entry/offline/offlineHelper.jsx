@@ -31,21 +31,10 @@ export const getOfflineDraft = ({ draftKey, fieldIdName, siteId }) => {
   }
 };
 
-export const reloadOfflineDraft = ({ defaultValues, newForm, draftKey, fieldIdName, siteId }) => {
-  if (!newForm) return false;
-
-  const draft = getOfflineDraft({ draftKey, fieldIdName, siteId });
-  if (!draft) return false;
-
-  reset(
-    {
-      ...defaultValues,
-      ...draft,
-    },
-    {
-      keepDirty: false,
-      keepTouched: false,
-    }
-  );
-  return true;
+export const reloadOfflineDraft = ({ defaultValues, newForm, draftKey, fieldIdName, siteId, reset }) => {
+  if (!newForm) return;
+  const draftParams = { draftKey, fieldIdName, siteId };
+  const draft = getOfflineDraft(draftParams);
+  if (!draft) return;
+  reset({ ...defaultValues, ...draft }, { keepDirty: false, keepTouched: false });
 };

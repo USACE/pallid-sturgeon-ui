@@ -36,6 +36,7 @@ import {
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
 import { isOnline } from '@src/app-pages/data-entry/offline/sync';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
+import { db } from '@src/app-pages/data-entry/offline/db';
 
 import '../../../dataentry.scss';
 
@@ -621,14 +622,32 @@ const MissouriRiverDataEntryForm = connect(
 
     // Set Missouri River IDs
     useEffect(() => {
-      if (newForm) {
-        const fieldId = generateFieldId();
-        setValue('mrFid', fieldId);
-      } else if (!newForm) {
-        setValue('mrId', dataEntryData?.mrId);
-        setValue('mrFid', dataEntryData?.mrFid);
-      }
-    }, [newForm, setValue, dataEntryData]);
+      const setFieldId = async () => {
+        if (newForm) {
+          const savedDraft = sessionStorage.getItem(moriverDraftKey);
+          const draft = savedDraft ? JSON.parse(savedDraft) : null;
+          const queueLength = await db.outbox.where('tableName').equals('ds_moriver').count();
+          const fieldId = generateFieldId(queueLength);
+          if (draft?.mrFid === fieldId) {
+            reloadOfflineDraft({
+              defaultValues,
+              newForm,
+              draftKey: moriverDraftKey,
+              fieldIdName: 'mrFid',
+              siteId,
+              reset,
+            });
+            return;
+          } else {
+            setValue('mrFid', fieldId);
+          }
+        } else if (!newForm && dataEntryData) {
+          setValue('mrId', dataEntryData.mrId);
+          setValue('mrFid', dataEntryData.mrFid);
+        }
+      };
+      setFieldId();
+    }, [newForm, dataEntryData, setValue]);
 
     return (
       <FormProvider {...methods}>
