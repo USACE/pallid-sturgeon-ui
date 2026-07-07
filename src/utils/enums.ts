@@ -54,3 +54,15 @@ export const enum ApiStatuses {
   Success = 'success',
   Failed = 'error',
 }
+
+export const enum OfflineStatuses {
+  Queued = 'queued',
+  New = 'new',
+  Edited = 'edited',
+  Conflict = 'conflict',
+}
+
+export const enum DataEntryStatuses {
+  Draft = 1,
+  Submitted = 2,
+}

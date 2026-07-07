@@ -1,30 +1,21 @@
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
-import { createColumnHelper } from '@tanstack/react-table';
 import _isEqual from 'lodash/isEqual';
 import { Button } from '@trussworks/react-uswds';
 import classNames from 'classnames';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
-import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
-import PanelHookTableCell from '@src/app-components/table/table-cell-components/fish/PanelHookTableCell';
-import LengthTableCell from '@src/app-components/table/table-cell-components/fish/LengthTableCell';
-import FinCurlTableCell from '@src/app-components/table/table-cell-components/fish/FinCurlTableCell';
-import ConditionTableCell from '@src/app-components/table/table-cell-components/fish/ConditionTableCell';
-import GeneticVialNumTableCell from '@src/app-components/table/table-cell-components/fish/GeneticVialNumTableCell';
-import FloyTagMrTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell.mr';
-import FloyTagTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell';
-import CountTableCell from '@src/app-components/table/table-cell-components/fish/CountTableCell';
-import FloyTagPrefixTableCell from '@src/app-components/table/table-cell-components/fish/floy-tag/FloyTagTableCell.prefix';
-import FishLinkTableCell from '@src/app-components/table/table-cell-components/fish/FishLinkTableCell';
-import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
-import WeightTableCell from '@src/app-components/table/table-cell-components/fish/WeightTableCell';
 
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
-import { CreateComboboxOptions, createDropdownOptions } from '@src/app-pages/data-entry/dataEntryHelper';
+
+import { db } from '@src/app-pages/data-entry/offline/db';
+import { OfflineStatuses } from '@src/utils/enums';
+import { isOnline } from '@src/app-pages/data-entry/offline/sync';
+import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
+import { getFishColumns } from './helpers.fish';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
@@ -39,34 +30,39 @@ const getNextSequence = (data, mrFid) => {
 const FishDataEntry = connect(
   'doSaveFishDataEntry',
   'doUpdateFishDataEntry',
+  'doUpdateCurrentTab',
   'selectDataEntryData',
   'selectDataEntryFishData',
   'selectBaseData',
   'selectLookupData',
-  ({ doSaveFishDataEntry, doUpdateFishDataEntry, dataEntryData, dataEntryFishData, baseData, lookupData }) => {
+  'selectRouteParams',
+  ({
+    doSaveFishDataEntry,
+    doUpdateFishDataEntry,
+    doUpdateCurrentTab,
+    dataEntryData,
+    dataEntryFishData,
+    baseData,
+    lookupData,
+    routeParams,
+  }) => {
     const { items } = dataEntryFishData;
-    const { gear, siteId } = dataEntryData;
-
+    const { gear } = dataEntryData;
+    const { siteId } = routeParams;
     const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions } = lookupData;
 
     const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
     const [data, setData] = useState(rowData);
-    const columnHelper = createColumnHelper();
 
     // Get Missouri River Draft Data
     const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
     const savedDraft = sessionStorage.getItem(moriverDraftKey);
     const moriverDraft = savedDraft ? JSON.parse(savedDraft) : null;
-    const mrFid = dataEntryData?.mrFid || baseData?.mrFid || moriverDraft?.mrFid;
+    const mrFid = dataEntryData?.mrFid || moriverDraft?.mrFid;
 
-    const parentMrId =
-      dataEntryData?.mrId ??
-      dataEntryData?.mr_id ??
-      dataEntryLastParams?.mrId ??
-      dataEntryLastParams?.mr_id ??
-      searchEffortDraft?.mrId ??
-      searchEffortDraft?.mr_id;
+    const parentMrId = dataEntryData?.mrId ?? dataEntryData?.mr_id ?? moriverDraft?.mrId ?? moriverDraft?.mr_id;
+    const online = !!isOnline();
 
     const speciesOptions =
       fishCodes?.map((item) => ({
@@ -79,160 +75,24 @@ const FishDataEntry = connect(
       mode: 'onBlur',
     });
 
-    const tableColumns = useMemo(
-      () => [
-        columnHelper.accessor('fid', {
-          header: 'Fish ID',
-          cell: ({ cell }) => <span>{cell.getValue()}</span>,
-          size: 150,
-        }),
-        columnHelper.accessor('fFid', {
-          header: 'Field ID',
-          cell: ({ cell }) => <span>{cell.getValue()}</span>,
-          size: 150,
-        }),
-        columnHelper.accessor('supplementalData', {
-          header: 'Supp/Proc Link',
-          cell: FishLinkTableCell,
-          size: 60,
-          enableSorting: false,
-          meta: {
-            centerText: true,
-            optional: true, // These values are set to prevent error styling from rendering when inappropriate.
-          },
-        }),
-        columnHelper.accessor('panelHook', {
-          header: 'Panel/Hook',
-          cell: PanelHookTableCell,
-          size: 190,
-          meta: {
-            gear: gear,
-          },
-        }),
-        columnHelper.accessor('species', {
-          header: 'Species',
-          cell: TableCell,
-          size: 200,
-          meta: {
-            type: 'combobox',
-            options: CreateComboboxOptions(speciesOptions),
-          },
-        }),
-        columnHelper.accessor('lengthType', {
-          header: 'Length Type',
-          cell: TableCell,
-          size: 200,
-          meta: {
-            type: 'select',
-            required: true,
-            options: createDropdownOptions(lengthTypes),
-          },
-        }),
-        columnHelper.accessor('length', {
-          header: 'Length(mm)',
-          cell: LengthTableCell,
-          size: 200,
-          meta: { type: 'number' },
-        }),
-        columnHelper.accessor('weight', {
-          header: 'Weight(grams)',
-          cell: WeightTableCell,
-          size: 200,
-          meta: { type: 'number' },
-        }),
-        columnHelper.accessor('countF', {
-          header: 'Count',
-          cell: CountTableCell,
-          size: 200,
-        }),
-        columnHelper.accessor('ftPrefix', {
-          header: 'Floy Tag Prefix',
-          cell: FloyTagPrefixTableCell,
-          size: 200,
-          meta: {
-            options: createDropdownOptions(floyTagPrefixes),
-          },
-        }),
-        columnHelper.accessor('floyTag', {
-          header: 'Floy Tag',
-          cell: FloyTagTableCell,
-          size: 200,
-        }),
-        columnHelper.accessor('mR', {
-          header: 'Floy Tag M/R',
-          cell: FloyTagMrTableCell,
-          size: 200,
-          meta: {
-            options: createDropdownOptions(markRecaptureOptions),
-          },
-        }),
-        columnHelper.accessor('geneticsVialNumber', {
-          header: 'Genetics Vial #',
-          cell: GeneticVialNumTableCell,
-          size: 250,
-        }),
-        columnHelper.accessor('condition', {
-          header: 'Condition',
-          cell: ConditionTableCell,
-          size: 200,
-        }),
-        columnHelper.accessor('tagnumber', {
-          header: 'Tag Number',
-          cell: TableCell,
-          size: 200,
-        }),
-        columnHelper.accessor('finCurl', {
-          header: 'Fin Curl',
-          cell: FinCurlTableCell,
-          size: 200,
-          meta: {
-            type: 'select',
-            options: yesNoOptions,
-          },
-        }),
-        columnHelper.accessor('otolith', {
-          header: 'Otolith',
-          cell: TableCell,
-          size: 200,
-          meta: {
-            type: 'select',
-            options: createDropdownOptions(fishStructures),
-          },
-        }),
-        // NOTE: Not in requirements, but display historic data
-        columnHelper.accessor('raySpine', {
-          header: 'Ray Spine',
-          cell: ({ cell }) => <span>{cell.getValue()}</span>,
-          size: 200,
-        }),
-        columnHelper.accessor('KN', {
-          header: 'KN',
-          cell: ({ cell }) => <span>{cell.getValue()}</span>,
-          size: 200,
-        }),
-        columnHelper.accessor('RSD', {
-          header: 'RSD',
-          cell: ({ cell }) => <span>{cell.getValue()}</span>,
-          size: 200,
-        }),
-        columnHelper.accessor('editInitials', {
-          header: 'Edit Initials',
-          cell: ({ cell }) => <span>{cell.getValue()}</span>,
-          size: 200,
-        }),
-        columnHelper.accessor('uploadedBy', {
-          header: 'Uploaded By',
-          cell: ({ cell }) => <span>{cell.getValue()}</span>,
-          size: 200,
-        }),
-      ],
-      [columnHelper, data]
-    );
+    const tableColumns = getFishColumns({
+      gear,
+      speciesOptions,
+      lengthTypes,
+      floyTagPrefixes,
+      markRecaptureOptions,
+      yesNoOptions,
+      fishStructures,
+    });
 
-    const handleAddRow = () => {
+    const handleAddRow = async () => {
       // Add default values here
       const base = getBaseDefaultValues({ baseData });
-      const sequence = getNextSequence(data, mrFid);
+
+      const localRows = await db.fish.where('mrFid').equals(mrFid).toArray();
+
+      const dbRows = data?.filter((row) => row.mrFid === mrFid) ?? [];
+      const sequence = localRows.length + dbRows.length + 1;
       const sequenceText = String(sequence).padStart(3, '0');
 
       // Format new row data
@@ -242,8 +102,8 @@ const FishDataEntry = connect(
         mrId: parentMrId,
         mr_id: parentMrId,
         fFid: `${mrFid}-${sequenceText}`,
-        mrFid,
-        _status: 'new',
+        mrFid: mrFid,
+        _status: OfflineStatuses.New,
       };
 
       setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
@@ -263,7 +123,7 @@ const FishDataEntry = connect(
         mrFid: mrFid,
         species: lastRowData?.species,
         lengthType: lastRowData?.lengthType,
-        _status: 'new',
+        _status: OfflineStatuses.New,
       };
       setData((prev) => (prev ? [...prev, newRowData] : []));
     };
@@ -295,36 +155,74 @@ const FishDataEntry = connect(
             // Update properties
             newData[rowIndex] = {
               ...newData[rowIndex],
-              [columnId]: updatedValue,
+              ...(columnId === null && typeof updatedValue === 'object' ? updatedValue : { [columnId]: updatedValue }),
             };
+            if (newData[rowIndex]._status !== OfflineStatuses.New) {
+              newData[rowIndex]._status = OfflineStatuses.Edited;
+            }
             return newData;
           }
+          return oldData;
         });
       },
       [setData]
     );
 
     const handleSubmitAll = async () => {
+      const rowsToProcess = data?.filter(
+        (row) => row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited
+      );
+
       try {
-        data?.forEach(async (item) => {
+        rowsToProcess?.forEach(async (item) => {
           const isNew = !item.fid;
           const clientId = item.clientId ?? crypto.randomUUID();
+          const parentRowMrId = parentMrId ?? item.mrId ?? item.mr_id;
 
           const payload = {
             ...item,
-            clientId,
+            clientId: clientId,
+            mr_id: parentRowMrId,
+            mrFid: item.mrFid,
             fFid: item.fFid,
-            tFid: item.tFid,
-            countF: item.countF ? parseInt(item.countF) : null,
+            _status: OfflineStatuses.Queued,
+            version: item.version ?? 0,
+            // Format values
+            countF: item?.countF !== null && item?.countF !== '' ? Number(item?.countF) : null,
+            length: item?.['length'] !== null && item?.['length'] !== '' ? Number(item?.['length']) : null,
+            condition: item?.condition !== null && item?.condition !== '' ? Number(item?.condition) : null,
+            weight: item?.weight !== null && item?.weight !== '' ? Number(item?.weight) : null,
           };
 
-          await FishDataEntrySchema({ gear, data }).validate(item, { abortEarly: false });
-          if (isNew) {
-            await doSaveFishDataEntry(payload);
-          } else {
-            await doUpdateFishDataEntry(payload);
+          await FishDataEntrySchema({ gear, data }).validate(payload, { abortEarly: false });
+
+          try {
+            if (online) {
+              if (isNew) {
+                await doSaveFishDataEntry(payload);
+              } else if (item.fid && item._status === OfflineStatuses.Edited) {
+                await doUpdateFishDataEntry(payload);
+              }
+            } else {
+              isNew ? await createData('fish', payload) : await updateData('fish', payload);
+            }
+          } catch (error) {
+            console.error('Fish API failed, queuing offline:', error);
+            isNew ? await createData('fish', payload) : await updateData('fish', payload);
           }
         });
+
+        setData((prev) =>
+          prev.map((row) =>
+            row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited
+              ? { ...row, _status: OfflineStatuses.Queued, clientId: row.clientId ?? crypto.randomUUID() }
+              : row
+          )
+        );
+
+        const draft = savedDraft ? JSON.parse(savedDraft) : {};
+        sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft }));
+        doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
       }

@@ -429,13 +429,14 @@ const TelemetryDataEntry = connect(
 
     const handleCopyLastRowBtn = () => {
       const sequence = getNextSequence(data, seFid);
+      const sequenceText = String(sequence).padStart(3, '0');
       // Grab last object from data array
       const lastRowData = data.slice(-1)[0];
       // Format new row data
       const newRowData = {
         ...lastRowData,
         tId: null, // Reset fid if copying a save data object
-        tFid: `${seFid}-${sequence}`,
+        tFid: `${seFid}-${sequenceText}`,
         _status: 'new',
         seFid: seFid,
       };
