@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import Card from '@src/app-components/card';
 import DataHeader from '../components/dataHeader';
@@ -6,8 +5,6 @@ import TabContainer from '@src/app-components/tab';
 // import TelemetryDsTable from '../tables/telemetryDsTable';
 import TelemetryDataEntry from '../tables/telemetry/TelemetryDataEntry';
 import Breadcrumb from '@src/app-components/breadcrumb';
-import { Button, Alert } from '@trussworks/react-uswds';
-import { downloadLookupsForOffline } from '../../offline/lookup-cache';
 
 import SearchEffortDataEntryForm from '../../edit-data-sheet/forms/search-effort/SearchEffortDataEntryForm';
 import '../../../data-summaries/data-summary.scss';
@@ -23,38 +20,12 @@ const SearchEffortOverview = connect(
   ({ doUpdateCurrentTab, dataEntryData, dataEntryTelemetryTotalCount, currentTab, routeParams, isEditForm, auth }) => {
     const siteId = routeParams?.siteId;
     const seId = routeParams?.seId;
-    const [lookupDownloadStatus, setLookupDownloadStatus] = useState(null);
-    const [lookupDownloading, setLookupDownloading] = useState(false);
 
     const breadcrumbLinks = [
       { text: 'Sites List', href: '/sites-list', current: false },
       { text: siteId, href: `/sites-list/${siteId}`, current: false },
       { text: `Search Effort - ${seId ? seId : 'Create'}`, current: true },
     ];
-
-    const handleDownloadLookups = async () => {
-      setLookupDownloading(true);
-      setLookupDownloadStatus(null);
-
-      try {
-        const result = await downloadLookupsForOffline(auth?.token);
-
-        setLookupDownloadStatus({
-          type: 'success',
-          message: `Offline lookups downloaded successfully. Saved ${result.count ?? 0} lookup rows.`,
-        });
-      } catch (error) {
-        console.error('Lookup download failed:', error);
-
-        setLookupDownloadStatus({
-          type: 'error',
-          message:
-            'Lookup API worked, but saving to IndexedDB failed. Check db.ts schema/version and IndexedDB stores.',
-        });
-      } finally {
-        setLookupDownloading(false);
-      }
-    };
 
     return (
       <div className='container-fluid'>
@@ -68,19 +39,6 @@ const SearchEffortOverview = connect(
 
         {/* Top Level Info */}
         <DataHeader type='search-effort' />
-
-        <div className='mt-3 mb-3'>
-          <Button type='button' onClick={handleDownloadLookups} disabled={lookupDownloading}>
-            {lookupDownloading ? 'Downloading Lookups...' : 'Download Offline Lookups'}
-          </Button>
-          {lookupDownloadStatus && (
-            <div className='mt-2'>
-              <Alert type={lookupDownloadStatus.type} headingLevel='h4' slim>
-                {lookupDownloadStatus.message}
-              </Alert>
-            </div>
-          )}
-        </div>
 
         {/* Form */}
         <Card className='mt-3'>

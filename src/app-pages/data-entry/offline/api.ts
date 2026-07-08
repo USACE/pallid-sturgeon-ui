@@ -116,8 +116,30 @@ function getAuthHeaders(token?: string): HeadersInit {
 
 export const isOnline = () => navigator.onLine;
 
-function formatPayloadForApi(entry: Partial<DataEntry>): Record<string, any> {
+function toSiteServerPayload(entry: any) {
+  return {
+    ...entry,
+
+    site_id: entry.site_id ?? entry.siteId,
+    site_fid: entry.site_fid ?? entry.siteFid,
+    project_id: entry.project_id ?? entry.projectId,
+    segment_id: entry.segment_id ?? entry.segmentId,
+    sample_unit_type: entry.sample_unit_type ?? entry.sampleUnitType,
+    bend_river_mile: entry.bend_river_mile ?? entry.bendrivermile,
+    edit_initials: entry.edit_initials ?? entry.editInitials,
+    uploaded_by: entry.uploaded_by ?? entry.uploadedBy,
+    last_updated: entry.last_updated ?? entry.lastUpdated,
+    upload_filename: entry.upload_filename ?? entry.uploadFilename,
+    upload_session_id: entry.upload_session_id ?? entry.uploadSessionId,
+  };
+}
+
+function formatPayloadForApi(entry: Partial<DataEntry>, tableName?: OutboxTable): Record<string, any> {
   const { clientId, serverId, version, updatedAt, _status, ...serverPayload } = entry;
+
+  if (tableName === 'ds_sites') {
+    return toSiteServerPayload(serverPayload);
+  }
 
   return serverPayload;
 }
@@ -252,7 +274,7 @@ export async function pushOutboxItem(
     };
   }
 
-  const payload = item.payload ? formatPayloadForApi(item.payload) : {};
+  const payload = item.payload ? formatPayloadForApi(item.payload, item.tableName) : {};
 
   if (item.tableName === 'ds_telemetry_fish' && item.op === 'create') {
     delete payload.t_id;
@@ -291,7 +313,11 @@ export async function pushOutboxItem(
 
     const returnedServerId =
       json?.[config.idField] ??
+      json?.siteId ??
+      json?.site_id ??
       json?.data?.[config.idField] ??
+      json?.data?.siteId ??
+      json?.data?.site_id ??
       json?.data?.seId ??
       json?.data?.se_id ??
       json?.data?.tId ??

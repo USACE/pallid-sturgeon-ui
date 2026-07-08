@@ -29,6 +29,17 @@ export async function downloadLookupsForOffline(token?: string) {
   const rowsToSave: LookupItem[] = [];
 
   const lookupMappings = [
+    { key: 'bendRiverMile', name: 'bendRiverMile' },
+    { key: 'bendSelections', name: 'bendSelections' },
+    { key: 'chutes', name: 'chutes' },
+    { key: 'fieldOffices', name: 'fieldOffices' },
+    { key: 'fieldOfficeSegments', name: 'fieldOfficeSegments' },
+    { key: 'projects', name: 'projects' },
+    { key: 'reach', name: 'reach' },
+    { key: 'sampleUnitTypes', name: 'sampleUnitTypes' },
+    { key: 'seasons', name: 'seasons' },
+    { key: 'segments', name: 'segments' },
+    { key: 'years', name: 'years' },
     { key: 'frequencyId', name: 'frequencyId' },
     { key: 'spawnBehavior', name: 'spawnBehavior' },
     { key: 'macros', name: 'macros' },

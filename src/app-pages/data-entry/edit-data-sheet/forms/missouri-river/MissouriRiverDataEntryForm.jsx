@@ -81,7 +81,8 @@ const MissouriRiverDataEntryForm = connect(
       subsampleTypes,
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
-    const siteId = routeParams?.siteId;
+    const siteRouteKey = routeParams?.siteId;
+    const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
 
     const [gearCodeOptions, setGearCodeOptions] = useState(gearCodes);
     const [mesoOptions, setMesoOptions] = useState(mesos);
@@ -333,7 +334,11 @@ const MissouriRiverDataEntryForm = connect(
       const payload = filterNullEmptyObjects({
         ...dataObj,
         clientId,
-        siteId: dataObj.siteId || Number(siteId),
+        siteId: isOfflineSite ? undefined : dataObj.siteId || Number(siteRouteKey),
+        site_id: isOfflineSite ? undefined : dataObj.site_id || dataObj.siteId || Number(siteRouteKey),
+        siteFid: isOfflineSite ? siteRouteKey : dataObj.siteFid,
+        site_fid: isOfflineSite ? siteRouteKey : dataObj.site_fid,
+        siteRouteKey,
         status: 1,
       });
 
@@ -359,6 +364,11 @@ const MissouriRiverDataEntryForm = connect(
       const payload = filterNullEmptyObjects({
         ...dataObj,
         clientId,
+        siteId: isOfflineSite ? undefined : dataObj.siteId || Number(siteRouteKey),
+        site_id: isOfflineSite ? undefined : dataObj.site_id || dataObj.siteId || Number(siteRouteKey),
+        siteFid: isOfflineSite ? siteRouteKey : dataObj.siteFid,
+        site_fid: isOfflineSite ? siteRouteKey : dataObj.site_fid,
+        siteRouteKey,
         status: 2,
         _status: 'queued',
         version: dataObj.version ?? 0,

@@ -105,6 +105,10 @@ export interface MoriverEntry extends DataEntry {
   mappingbox?: string;
   mr_id?: number;
   site_id?: number;
+  siteId?: number;
+  site_fid?: string;
+  siteFid?: string;
+  siteRouteKey?: string;
   micro_structure?: string;
   structure_flow?: string;
   structure_mod?: string;
@@ -145,7 +149,10 @@ export interface SearchEffortEntry extends DataEntry {
   se_fid?: string;
   ds_id?: number;
   site_id?: number;
+  siteId?: number;
   site_fid?: string;
+  siteFid?: string;
+  siteRouteKey?: string;
   temp?: number;
   conductivity?: number;
   last_updated?: string;
@@ -404,9 +411,9 @@ export class PSOfflineDB extends Dexie {
   constructor() {
     super('ps_offline_db');
 
-    this.version(5).stores({
-      sites: 'clientId, serverId, site_id, _status',
-      moriver: 'clientId, serverId, updatedAt, setdate, _status',
+    this.version(7).stores({
+      sites: 'clientId, serverId, site_id, site_fid, _status',
+      moriver: 'clientId, serverId, site_id, updatedAt, setdate, _status',
       search: 'clientId, serverId, se_id, seFid, site_id, _status',
       fish: 'clientId, serverId, f_id, _status',
       telemetry: 'clientId, serverId, t_id, se_id, tFid, seFid, _status',
