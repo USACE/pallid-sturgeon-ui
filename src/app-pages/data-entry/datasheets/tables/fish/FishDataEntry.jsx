@@ -25,9 +25,14 @@ import WeightTableCell from '@src/app-components/table/table-cell-components/fis
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 import { CreateComboboxOptions, createDropdownOptions } from '@src/app-pages/data-entry/dataEntryHelper';
+import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+import { db } from '@src/app-pages/data-entry/offline/db';
+import { OfflineStatuses } from '@src/utils/enums';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
+import { filterNullEmptyObjects } from '@src/utils/helpers';
+import { update, words } from 'lodash';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -39,13 +44,25 @@ const getNextSequence = (data, mrFid) => {
 const FishDataEntry = connect(
   'doSaveFishDataEntry',
   'doUpdateFishDataEntry',
+  'doUpdateCurrentTab',
   'selectDataEntryData',
   'selectDataEntryFishData',
   'selectBaseData',
   'selectLookupData',
-  ({ doSaveFishDataEntry, doUpdateFishDataEntry, dataEntryData, dataEntryFishData, baseData, lookupData }) => {
+  'selectRouteParams',
+  ({
+    doSaveFishDataEntry,
+    doUpdateFishDataEntry,
+    doUpdateCurrentTab,
+    dataEntryData,
+    dataEntryFishData,
+    baseData,
+    lookupData,
+    routeParams,
+  }) => {
     const { items } = dataEntryFishData;
     const { gear, siteId } = dataEntryData;
+    const siteRouteKey = routeParams?.siteId;
 
     const { fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions } = lookupData;
 
@@ -55,18 +72,24 @@ const FishDataEntry = connect(
     const columnHelper = createColumnHelper();
 
     // Get Missouri River Draft Data
-    const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
+    const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
     const savedDraft = sessionStorage.getItem(moriverDraftKey);
     const moriverDraft = savedDraft ? JSON.parse(savedDraft) : null;
-    const mrFid = dataEntryData?.mrFid || baseData?.mrFid || moriverDraft?.mrFid;
+    const mrFid =
+      dataEntryData?.mrFid ??
+      dataEntryData?.mr_fid ??
+      moriverDraft?.mrFid ??
+      moriverDraft?.mr_fid ??
+      baseData?.mrFid ??
+      baseData?.mr_fid;
 
     const parentMrId =
       dataEntryData?.mrId ??
       dataEntryData?.mr_id ??
-      dataEntryLastParams?.mrId ??
-      dataEntryLastParams?.mr_id ??
-      searchEffortDraft?.mrId ??
-      searchEffortDraft?.mr_id;
+      moriverDraft?.mrId ??
+      moriverDraft?.mr_id ??
+      baseData?.mrId ??
+      baseData?.mr_id;
 
     const speciesOptions =
       fishCodes?.map((item) => ({
@@ -91,9 +114,12 @@ const FishDataEntry = connect(
           cell: ({ cell }) => <span>{cell.getValue()}</span>,
           size: 150,
         }),
-        columnHelper.accessor('supplementalData', {
+        columnHelper.display({
           header: 'Supp/Proc Link',
-          cell: FishLinkTableCell,
+          id: 'supplink',
+          cell: ({ row }) => (
+            <FishLinkTableCell row={row} rowData={rowData} modalComponent={SupplementalProcedureModal} />
+          ),
           size: 60,
           enableSorting: false,
           meta: {
@@ -229,76 +255,145 @@ const FishDataEntry = connect(
       [columnHelper, data]
     );
 
-    const handleAddRow = () => {
-      // Add default values here
-      const base = getBaseDefaultValues({ baseData });
-      const sequence = getNextSequence(data, mrFid);
-      const sequenceText = String(sequence).padStart(3, '0');
+    const formatFishRow = (row) => ({
+      ...row,
+      countF: row?.countF !== null && row?.countF !== '' ? parseInt(row.countF) : null,
+      length: row?.length !== null && row?.length !== '' ? Number(row.length) : null,
+      condition: row?.condition !== null && row?.condition !== '' ? Number(row.condition) : null,
+      weight: row?.weight !== null && row?.weight !== '' ? Number(row.weight) : null,
+    });
 
-      // Format new row data
+    const handleAddRow = async () => {
+      const parentRowMrFid =
+        dataEntryData?.mrFid ??
+        dataEntryData?.mr_fid ??
+        moriverDraft?.mrFid ??
+        moriverDraft?.mr_fid ??
+        baseData?.mrFid ??
+        baseData?.mr_fid;
+
+      if (!parentMrFid) {
+        console.error('Cannot add Fish row: missing parent mrFid.');
+        window.alert('Save the Missouri River draft first before adding Fish.');
+        return;
+      }
+
+      const parentRowMrId =
+        dataEntryData?.mrId ??
+        dataEntryData?.mr_id ??
+        moriverDraft?.mrId ??
+        moriverDraft?.mr_id ??
+        baseData?.mrId ??
+        baseData?.mr_id;
+
+      const base = getBaseDefaultValues({ baseData });
+      const localRows = await db.fish.where('mrFid').equals(parentRowMrFid).toArray();
+      const currentRows = data?.filter((row) => String(row.mrFid ?? row.mr_fid) === String(parentRowMrFid)) ?? [];
+      const existingFids = new Set([
+        ...localRows.map((row) => row.fFid ?? row.f_fid),
+        ...currentRows.map((row) => row.fFid ?? row.f_fid),
+      ]);
+      const sequence = existingFids.size + 1;
+      const sequenceText = String(sequence).padStart(3, '0');
+      const fishFid = `${parentRowMrFid}-${sequenceText}`;
+
       const newRowData = {
         ...base,
         ...getFishRiverDefaultValues({ dataEntryData }),
-        mrId: parentMrId,
-        mr_id: parentMrId,
-        fFid: `${mrFid}-${sequenceText}`,
-        mrFid,
-        _status: 'new',
+        mrId: parentRowMrId,
+        mr_id: parentRowMrId,
+        mrFid: parentRowMrFid,
+        mr_fid: parentRowMrFid,
+        fFid: fishFid,
+        f_fid: fishFid,
+        _status: OfflineStatuses.New,
       };
 
       setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
     };
 
     const handleCopyLastRowBtn = () => {
-      const sequence = getNextSequence(data, mrFid);
+      const parentRowMrFid =
+        dataEntryData?.mrFid ??
+        dataEntryData?.mr_fid ??
+        moriverDraft?.mrFid ??
+        moriverDraft?.mr_fid ??
+        baseData?.mrFid ??
+        baseData?.mr_fid;
+
+      if (!parentRowMrFid) {
+        console.error('Cannot copy Fish row: missing parent mrFid.');
+        window.alert('Save the Missouri River draft first before copying Fish.');
+        return;
+      }
+      const lastRowData = data?.slice(-1)[0];
+
+      if (!lastRowData) {
+        window.alert('There is no Fish row to copy.');
+        return;
+      }
+
+      const parentRowMrId =
+        dataEntryData?.mrId ??
+        dataEntryData?.mr_id ??
+        moriverDraft?.mrId ??
+        moriverDraft?.mr_id ??
+        baseData?.mrId ??
+        baseData?.mr_id;
+
+      const sequence = getNextSequence(data ?? [], parentRowMrFid);
       const sequenceText = String(sequence).padStart(3, '0');
+      const fishFid = `${parentRowMrFid}-${sequenceText}`;
       // Grab last object from data array
-      const lastRowData = data.slice(-1)[0];
+
       // Format new row data
       const newRowData = {
+        ...lastRowData,
         fid: null, // Reset fid if copying a save data object
-        fFid: `${mrFid}-${sequenceText}`,
-        mrId: parentMrId,
-        mr_id: parentMrId,
-        mrFid: mrFid,
+        fFid: fishFid,
+        mrId: parentRowMrId,
+        mr_id: parentRowMrId,
+        mrFid: parentRowMrFid,
         species: lastRowData?.species,
         lengthType: lastRowData?.lengthType,
-        _status: 'new',
+        _status: OfflineStatuses.New,
       };
       setData((prev) => (prev ? [...prev, newRowData] : []));
     };
 
     const handleAddMultipleRows = (rows) => {
       // Handle any data mapping or formatting here
-      setData((oldData) => {
-        const newRows = [...oldData, ...rows];
-        return newRows;
-      });
+      setData((oldData) => [...Button(oldData ?? []), ...rows]);
     };
 
-    const handleRemoveMultipleRows = useCallback(
-      (indicesToRemove) => {
-        setData((oldData) => {
-          const newRows = oldData && oldData.filter((_, index) => !indicesToRemove.includes(index));
-          return newRows;
-        });
-        setTableKey((old) => old + 1);
-      },
-      [setData, setTableKey]
-    );
+    const handleRemoveMultipleRows = useCallback((indicesToRemove) => {
+      setData((oldData) => oldData.filter((_, index) => !indicesToRemove.includes(index)));
+      setTableKey((old) => old + 1);
+    }, []);
 
     const handleUpdateData = useCallback(
       (rowIndex, columnId, updatedValue) => {
         setData((oldData) => {
-          const newData = oldData ? [...oldData] : null;
-          if (newData && newData[rowIndex]) {
-            // Update properties
-            newData[rowIndex] = {
-              ...newData[rowIndex],
-              [columnId]: updatedValue,
-            };
-            return newData;
+          if (!oldData?.[rowIndex]) {
+            return oldData;
           }
+          const newData = [...oldData];
+
+          // Update properties
+          newData[rowIndex] = {
+            ...newData[rowIndex],
+
+            ...(columnId === null && typeof updatedValue === 'object'
+              ? updatedValue
+              : {
+                  [columnId]: updatedValue,
+                }),
+          };
+
+          if (newData[rowIndex]._status !== OfflineStatuses.New) {
+            newData[rowIndex]._status = OfflineStatuses.Edited;
+          }
+          return newData;
         });
       },
       [setData]
@@ -306,25 +401,115 @@ const FishDataEntry = connect(
 
     const handleSubmitAll = async () => {
       try {
-        data?.forEach(async (item) => {
-          const isNew = !item.fid;
-          const clientId = item.clientId ?? crypto.randomUUID();
+        const rowsToProcess =
+          data?.filter((row) => row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited) ?? [];
+
+        if (rowsToProcess.length === 0) {
+          console.log('No new or edited Fish rows to submit.');
+          return;
+        }
+
+        const submittedClientIds = [];
+
+        for (const row of rowsToProcess) {
+          // data?.forEach(async (item) => {
+          const isNew = !row.fid && !row.fId && !row.f_id;
+          const formattedRow = formatFishRow(row);
+          const clientId = row.clientId ?? crypto.randomUUID();
+
+          const parentRowMrId =
+            row.mr_id ??
+            row.mrId ??
+            dataEntryData?.mrId ??
+            dataEntryData?.mr_id ??
+            moriverDraft?.mrId ??
+            moriverDraft?.mr_id ??
+            baseData?.mrId ??
+            baseData?.mr_id;
+
+          const parentRowMrFid =
+            row.mrFid ?? row.mr_fid ?? dataEntryData?.mrFid ?? dataEntryData?.mr_fid ?? moriverDraft?.mrFid;
+          moriverDraft?.mr_fid ?? baseData?.mrFid ?? baseData?.mr_fid;
+
+          if (!parentRowMrFid) {
+            throw new Error(`Fish row ${row.fFid ?? row.f_fid ?? '(unknown)'} is missing its parent mrFid.`);
+          }
+
+          const fishFid = row.fFid ?? row.f_fid;
 
           const payload = {
-            ...item,
+            ...formattedRow,
             clientId,
-            fFid: item.fFid,
-            tFid: item.tFid,
-            countF: item.countF ? parseInt(item.countF) : null,
+            mr_id: parentRowMrId,
+            mrId: parentRowMrId,
+            mr_fid: parentRowMrFid,
+            mrFid: parentRowMrFid,
+            f_fid: fishFid,
+            fFid: fishFid,
+            tFid: row.tFid,
+            _status: OfflineStatuses.Queued,
+            version: item.version ?? 0,
+            updatedAt: new Date().toISOString(),
           };
 
-          await FishDataEntrySchema({ gear, data }).validate(item, { abortEarly: false });
-          if (isNew) {
-            await doSaveFishDataEntry(payload);
-          } else {
-            await doUpdateFishDataEntry(payload);
+          await FishDataEntrySchema({ gear, data }).validate(payload, { abortEarly: false });
+
+          try {
+            if (isOnline()) {
+              if (isNew) {
+                await doSaveFishDataEntry(payload);
+              } else if (row._status === OfflineStatuses.Edited) {
+                await doUpdateFishDataEntry(payload);
+              }
+            } else if (isNew) {
+              await createData('fish', payload);
+            } else {
+              await updateData('fish', clientId, payload);
+            }
+          } catch (err) {
+            console.error('Fish API failed, queuing offline:', err);
+
+            if (isNew) {
+              await createData('fish', payload);
+            } else {
+              await updateData('fish', clientId, payload);
+            }
           }
-        });
+          submittedClientIds.push(clientId);
+        }
+
+        let submittedIndex = 0;
+
+        setData((prev) =>
+          prev.map((row) => {
+            const wasSubmitted = row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited;
+
+            if (!wasSubmitted) {
+              return row;
+            }
+
+            const clientId = submittedClientIds[submittedIndex];
+
+            submittedIndex += 1;
+
+            return {
+              ...row,
+              _status: OfflineStatuses.Queued,
+              clientId,
+            };
+          })
+        );
+
+        const draft = moriverDraft ?? {};
+        sessionStorage.setItem(
+          moriverDraftKey,
+          JSON.stringify({
+            ...draft,
+            fishCount: 1,
+          })
+        );
+
+        doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
       }
