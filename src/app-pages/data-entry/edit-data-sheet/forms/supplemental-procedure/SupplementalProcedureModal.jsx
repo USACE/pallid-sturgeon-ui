@@ -20,6 +20,14 @@ import Icon from '@components/icon/icon';
 import { getSuppProcDefaultValues, supplementalValidationSchema } from './SupplementalProcedureModal.validation';
 import { createDropdownOptions, isEmpty } from '@pages/data-entry/dataEntryHelper';
 
+// import {
+//   getOfflineDraft,
+//   reloadOfflineDraft,
+// } from '@src/app-pages/data-entry/offline/offlineHelper';
+import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
+import { isOnline } from '@src/app-pages/data-entry/offline/sync';
+import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
+
 const geneticNeedsCheckboxes = [
   {
     name: 'broodstock',
@@ -45,7 +53,6 @@ const geneticNeedsCheckboxes = [
 
 const SupplementalProcedureModal = connect(
   'doGetPallidIdData',
-  'selectDataEntryData',
   'selectIsEditForm',
   'selectBaseData',
   'selectLookupData',
@@ -60,7 +67,6 @@ const SupplementalProcedureModal = connect(
   'selectUserRole',
   ({
     doGetPallidIdData,
-    dataEntryData,
     isEditForm,
     baseData,
     lookupData,
@@ -75,7 +81,7 @@ const SupplementalProcedureModal = connect(
     userRole,
     row: fishData,
   }) => {
-    const { bend, fieldoffice, season, projectId, segmentId } = baseData;
+    const { projectId } = baseData;
     const { fid, mrFid, fFid, species } = fishData;
 
     const supplementalDataExists = !!dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)?.length;
@@ -87,6 +93,8 @@ const SupplementalProcedureModal = connect(
     const initialProcData = procedureDataExists
       ? dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)[0]
       : null;
+
+    const suppDraftKey = `currentSupplementalDraft:${fFid}`;
 
     const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -107,21 +115,29 @@ const SupplementalProcedureModal = connect(
 
     const [showProcedureSection, setShowProcedureSection] = useState(procedureDataExists);
 
+    const online = !!isOnline();
+
+    // if (!online) {
+    //   console.warn('offline! baseData', baseData);
+    // }
+
+    const schema = supplementalValidationSchema({
+      projectId: projectId,
+      species: species,
+    });
+
+    const defaultValues = {
+      ...getSuppProcDefaultValues({
+        edit: true,
+        suppData: initialSuppData ?? {},
+        procData: initialProcData ?? {},
+        showProcedureSection: showProcedureSection,
+      }),
+    };
+
     const methods = useForm({
-      defaultValues: {
-        ...getSuppProcDefaultValues({
-          edit: true,
-          suppData: initialSuppData ?? {},
-          procData: initialProcData ?? {},
-          showProcedureSection: showProcedureSection,
-        }),
-      },
-      resolver: yupResolver(
-        supplementalValidationSchema({
-          projectId: projectId,
-          species: species,
-        })
-      ),
+      defaultValues: defaultValues,
+      resolver: yupResolver(schema),
       mode: 'onSubmit',
       reValidateMode: 'onChange',
       stateOptions: [],
@@ -130,13 +146,11 @@ const SupplementalProcedureModal = connect(
 
     const {
       formState: { errors, isValid, touchedFields, submitCount, isDirty },
-      setFocus,
       watch,
       getValues,
       setValue,
       trigger,
       reset,
-      handleSubmit,
       clearErrors,
     } = methods;
 
@@ -272,129 +286,201 @@ const SupplementalProcedureModal = connect(
     // The Hatchery Origin field shall be required where project is not equal to 2
     const isHatcheryOriginRequired = Number(projectId) !== 2;
 
-    const doSubmit = () => {
-      if (isValid) {
-        const values = getValues();
-        // Format any values need for final payload
-        const suppDataObj = {
-          tagnumber: values?.tagnumber,
-          pitrn: values?.pitrn,
-          elhv: values?.elhv,
-          elcolor: values?.elcolor,
-          erhv: values?.erhv,
-          ercolor: values?.ercolor,
-          lscute: parseFloat(values?.lscute),
-          rscute: parseFloat(values?.rscute),
-          dscute: parseFloat(values?.dscute),
-          cwtyn: values?.cwtyn,
-          dangler: values?.dangler,
-          genetic: values?.genetic,
-          geneticsVialNumber: values?.geneticsVialNumber,
-          status: values?.pallidFate,
-          hatcheryOrigin: values?.hatcheryOrigin,
-          otherTagInfo: values?.otherTagInfo,
-          comments: values?.suppComments,
-          // Checkbox fields
-          broodstock: values?.broodstock === true ? 1 : 0,
-          hatchWild: values?.hatchWild === true ? 1 : 0,
-          speciesId: values?.speciesId === true ? 1 : 0,
-          archive: values?.archive === true ? 1 : 0,
-          project37: values?.project37 === true ? 1 : 0,
-          // --- Other fields in database table, ignoring for now.
-          // sex: '',
-          // stage: '',
-          // recapture: '',
-          // photo: '',
-          // geneticNeeds: '',
-          // species: '',
-          // head: null,
-          // snouttomouth: null,
-          // inter: null,
-          // mouthwidth: null,
-          // mIb: null,
-          // lOb: null,
-          // lIb: null,
-          // rIb: null,
-          // rOb: null,
-          // anal: null,
-          // dorsal: null,
-        };
+    // if Supplemental draft exists in sessionStorage (offline mode), load it into the form
+    const getOfflineSupplementalDraft = () => {
+      console.warn('getOfflineSupplementalDraft called');
+      const savedDraft = sessionStorage.getItem(suppDraftKey);
 
-        const procDataObj = {
-          procedureDate: values?.procedureDate,
-          procedureStartTime: values?.procedureStartTime,
-          procedureEndTime: values?.procedureEndTime,
-          purpose: values?.purpose,
-          procedureBy: values?.procedureBy,
-          antibioticInjection: values?.antibioticInjection === true ? 1 : 0,
-          pVentral: values?.pVentral === true ? 1 : 0,
-          pDorsal: values?.pDorsal === true ? 1 : 0,
-          pLeft: values?.pLeft === true ? 1 : 0,
-          fishHealthComment: values?.fishHealthComment,
-          oldRadioTagNum: parseFloat(values?.oldRadioTagNum),
-          oldFrequencyId: parseFloat(values?.oldFrequencyId),
-          oldRtSerial: parseFloat(values?.oldRtSerial),
-          oldDstSerial: parseFloat(values?.oldDstSerial),
-          dstSerialNum: parseFloat(values?.dstSerialNum),
-          dstStartDate: values?.dstStartDate,
-          dstStartTime: values?.dstStartTime,
-          dstReimplant: values?.dstReimplant === true ? 1 : 0,
-          newRadioTagNum: parseFloat(values?.newRadioTagNum),
-          newFreqId: parseFloat(values?.newFreqId),
-          newRtSerial: parseFloat(values?.newRtSerial),
-          sex: values?.sex,
-          pi: values?.pi === true ? 1 : 0,
-          bloodSample: values?.bloodSample === true ? 1 : 0,
-          eggSample: values?.eggSample === true ? 1 : 0,
-          spawnStatus: values?.spawnStatus,
-          evalLocation: values?.evalLocation,
-          visualReproStatus: values?.visualReproStatus,
-          ultrasoundReproStatus: values?.ultrasoundReproStatus,
-          expectedSpawnYear: parseFloat(values?.expectedSpawnYear),
-          ultrasoundGonadLength: parseFloat(values?.ultrasoundGonadLength),
-          gonadCondition: values?.gonadCondition,
-          comments: values?.procComments,
-        };
+      console.warn('getOfflineSupplementalDraft - savedDraft:', savedDraft);
+      if (!savedDraft) return null;
+
+      console.warn('getOfflineSupplementalDraft - savedDraft found, parsing JSON');
+      try {
+        const draft = JSON.parse(savedDraft);
+        if (!draft?.fFid) return null;
+
+        if (String(draft.fFid) !== String(fFid)) {
+          return null;
+        }
+        return draft;
+      } catch (err) {
+        console.error('Failed to parse offline Supplemental draft for fFid:', fFid, err);
+        return null;
+      }
+    };
+
+    const reloadOfflineSupplementalDraft = () => {
+      console.warn('reloadOfflineSupplementalDraft called');
+      // if (isEditForm) return false;
+
+      console.warn('reloadOfflineSupplementalDraft - isEditForm is false, checking for offline draft');
+      const draft = getOfflineSupplementalDraft();
+
+      console.warn('reloadOfflineSupplementalDraft - draft:', draft);
+      if (!draft) return false;
+
+      console.warn('reloadOfflineSupplementalDraft - draft found, resetting form with draft values');
+      reset(
+        {
+          ...defaultValues,
+          ...draft,
+          // manually set fields that have different names in the form vs the draft object
+          ...{
+            suppComments: draft.comments,
+            pallidFate: draft.status,
+          },
+        },
+        {
+          keepDirty: false,
+          keepTouched: false,
+        }
+      );
+      return true;
+    };
+
+
+    const formatSuppDataObj = () => {
+      const values = getValues();
+      // Format any values need for final payload
+      return {
+        sid: initialSuppData?.sid,
+        tagnumber: values?.tagnumber,
+        pitrn: values?.pitrn,
+        elhv: values?.elhv,
+        elcolor: values?.elcolor,
+        erhv: values?.erhv,
+        ercolor: values?.ercolor,
+        lscute: parseFloat(values?.lscute),
+        rscute: parseFloat(values?.rscute),
+        dscute: parseFloat(values?.dscute),
+        cwtyn: values?.cwtyn,
+        dangler: values?.dangler,
+        genetic: values?.genetic,
+        geneticsVialNumber: values?.geneticsVialNumber,
+        status: values?.pallidFate,
+        hatcheryOrigin: values?.hatcheryOrigin,
+        otherTagInfo: values?.otherTagInfo,
+        comments: values?.suppComments,
+        // Checkbox fields
+        broodstock: values?.broodstock === true ? 1 : 0,
+        hatchWild: values?.hatchWild === true ? 1 : 0,
+        speciesId: values?.speciesId === true ? 1 : 0,
+        archive: values?.archive === true ? 1 : 0,
+        project37: values?.project37 === true ? 1 : 0,
+      };
+    };
+
+    const formatProcDataObj = () => {
+      const values = getValues();
+      // Format any values need for final payload
+      return {
+        procedureDate: values?.procedureDate,
+        procedureStartTime: values?.procedureStartTime,
+        procedureEndTime: values?.procedureEndTime,
+        purpose: values?.purpose,
+        procedureBy: values?.procedureBy,
+        antibioticInjection: values?.antibioticInjection === true ? 1 : 0,
+        pVentral: values?.pVentral === true ? 1 : 0,
+        pDorsal: values?.pDorsal === true ? 1 : 0,
+        pLeft: values?.pLeft === true ? 1 : 0,
+        fishHealthComment: values?.fishHealthComment,
+        oldRadioTagNum: parseFloat(values?.oldRadioTagNum),
+        oldFrequencyId: parseFloat(values?.oldFrequencyId),
+        oldRtSerial: parseFloat(values?.oldRtSerial),
+        oldDstSerial: parseFloat(values?.oldDstSerial),
+        dstSerialNum: parseFloat(values?.dstSerialNum),
+        dstStartDate: values?.dstStartDate,
+        dstStartTime: values?.dstStartTime,
+        dstReimplant: values?.dstReimplant === true ? 1 : 0,
+        newRadioTagNum: parseFloat(values?.newRadioTagNum),
+        newFreqId: parseFloat(values?.newFreqId),
+        newRtSerial: parseFloat(values?.newRtSerial),
+        sex: values?.sex,
+        pi: values?.pi === true ? 1 : 0,
+        bloodSample: values?.bloodSample === true ? 1 : 0,
+        eggSample: values?.eggSample === true ? 1 : 0,
+        spawnStatus: values?.spawnStatus,
+        evalLocation: values?.evalLocation,
+        visualReproStatus: values?.visualReproStatus,
+        ultrasoundReproStatus: values?.ultrasoundReproStatus,
+        expectedSpawnYear: parseFloat(values?.expectedSpawnYear),
+        ultrasoundGonadLength: parseFloat(values?.ultrasoundGonadLength),
+        gonadCondition: values?.gonadCondition,
+        comments: values?.procComments,
+      };
+    };
+
+    const getIdentifyingData = () => ({
+      fid: fid,
+      fFid: fFid,
+      mrFid: mrFid,
+      mrId: dataEntryLastParams.mrId,
+      id: userRole.id,
+    });
+
+    const doSubmit = async () => {
+      if (isValid) {
+        // Format any values need for final payload
+        const identifyingData = getIdentifyingData();
+        const suppDataObj = formatSuppDataObj();
+        const procDataObj = formatProcDataObj();
         // TODO: Maybe, unsure if necessary? Filter out any null/empty values for final payload
         // const suppPayload = filterNullEmptyObjects(suppDataObj);
         // const procPayload = filterNullEmptyObjects(procDataObj);
 
+        const suppDraft = getOfflineSupplementalDraft();
+        const suppClientId = suppDataObj.clientId ?? suppDraft?.clientId ?? crypto.randomUUID();
+
         // TODO: the way we construct the payload in this block may be clunky; maybe refactor
-        if (initialSuppData) {
-          console.warn('Updating existing SUPP data: ', { suppDataObj });
-          doUpdateSupplementalDataEntry(
-            {
-              ...{
-                sid: initialSuppData.sid,
-                fid: fid,
-                siteId: null,
-                fFid: fFid,
-                mrFid: mrFid,
-                mrId: dataEntryLastParams.mrId,
-              },
-              ...suppDataObj,
-            },
-            {
-              mrId: dataEntryLastParams.mrId,
-              id: userRole.id,
-            }
-          );
-        } else {
-          console.warn('Creating SUPP data: ', { suppDataObj });
-          doSaveSupplementalDataEntry(
-            {
-              ...{
-                fid: fid,
-                siteId: null,
-                fFid: fFid,
-                mrFid: mrFid,
-                mrId: dataEntryLastParams.mrId,
-              },
-              ...suppDataObj,
-            },
-            { mrId: dataEntryLastParams.mrId, id: userRole.id }
-          );
+        let suppPayload = {
+          ...identifyingData,
+          ...suppDraft,
+          ...suppDataObj,
+          clientId: suppClientId,
+          // Offline values
+          _status: OfflineStatuses.Queued,
+          version: suppDataObj.version ?? suppDraft?.version ?? 0,
+        };
+
+        console.warn('suppPayload', suppPayload);
+
+        const hasOfflineSuppDraft = Boolean(suppDraft?.clientId);
+        
+        if (!suppPayload.fFid) {
+          console.error('Missing fFid. Cannot save draft offline.');
+          return;
         }
+
+        try {
+          if (online) {
+            if (initialSuppData) {
+              console.warn('Online - Updating existing SUPP data: ', { suppPayload });
+              doUpdateSupplementalDataEntry(suppPayload);
+            } else {
+              console.warn('Online - Creating SUPP data: ', { suppPayload });
+              doSaveSupplementalDataEntry(suppPayload);
+            }
+          } else {
+            if (initialSuppData || hasOfflineSuppDraft) {
+              console.warn('OFFLINE - Updating existing SUPP data: ', { suppPayload });
+              await updateData('supplemental', suppClientId, suppPayload);
+            } else {
+              console.warn('OFFLINE - Creating SUPP data: ', { suppPayload });
+              await createData('supplemental', suppPayload);
+            }
+          }
+          console.warn('done with SUPP data save');
+          console.warn('suppClientId', suppClientId);
+          console.warn('suppDraftKey', suppDraftKey);
+
+          // setValue('suppClientId', suppClientId);
+          sessionStorage.setItem(suppDraftKey, JSON.stringify(suppPayload));
+        } catch (error) {
+          console.error('Submit failed, queueing offline:', error);
+          await updateData('supplemental', suppClientId, suppPayload);
+        }
+
+        // save procedure data if the section is visible (user has added procedure data)
         if (showProcedureSection) {
           if (initialProcData) {
             console.warn('Updating existing PROC data: ', { procDataObj });
@@ -404,7 +490,7 @@ const SupplementalProcedureModal = connect(
                   id: initialProcData.id,
                   sid: initialSuppData.sid,
                   fid: fid,
-                  siteId: null, //TODO: not sure where to grab this from
+                  // siteId: null, //TODO: not sure where to grab this from
                   fFid: fFid,
                   mrFid: mrFid,
                   mrId: dataEntryLastParams.mrId,
@@ -423,7 +509,7 @@ const SupplementalProcedureModal = connect(
                 ...{
                   sid: initialSuppData.sid,
                   fid: fid,
-                  siteId: null, //TODO: not sure where to grab this from
+                  // siteId: null, //TODO: not sure where to grab this from
                   fFid: fFid,
                   mrFid: mrFid,
                   mrId: dataEntryLastParams.mrId,
@@ -439,6 +525,11 @@ const SupplementalProcedureModal = connect(
         trigger();
       }
     };
+
+    useEffect(() => {
+      console.warn('useEffect - isEditForm changed, reloading offline supplemental draft');
+      reloadOfflineSupplementalDraft();
+    }, [isEditForm]);
 
     // TODO: this confirm dialog is a bit ugly
     const handleCancel = () => {
