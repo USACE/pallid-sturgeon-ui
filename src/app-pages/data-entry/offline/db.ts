@@ -186,12 +186,16 @@ export interface FishEntry extends DataEntry {
   ftnum?: string;
   ftmr?: string;
   envelopenumber?: number;
+  fid?: number;
+  fId?: number;
   f_id?: number;
   mr_id?: number;
+  mrId?: number;
   last_updated?: string;
   uploaded_by?: string;
   approved?: number;
   f_fid?: string;
+  fFid?: string;
   last_edit_comment?: string;
   edit_initial?: string;
   checkby?: string;
@@ -199,6 +203,7 @@ export interface FishEntry extends DataEntry {
   upload_filename?: string;
   upload_session_id?: number;
   mr_fid?: string;
+  mrFid?: string;
   cca_date?: string;
   rsd?: string;
   kn?: number;
@@ -208,6 +213,13 @@ export interface FishEntry extends DataEntry {
   condition?: number;
   length_type?: string;
   tagnumber?: number;
+  countF?: number;
+  lengthType?: string;
+  ftPrefix?: string;
+  floyTag?: string;
+  mR?: string;
+  geneticsVialNumber?: string;
+  finCurl?: string;
 }
 
 export interface TelemetryEntry extends DataEntry {
@@ -411,11 +423,11 @@ export class PSOfflineDB extends Dexie {
   constructor() {
     super('ps_offline_db');
 
-    this.version(7).stores({
+    this.version(8).stores({
       sites: 'clientId, serverId, site_id, site_fid, _status',
-      moriver: 'clientId, serverId, site_id, updatedAt, setdate, _status',
-      search: 'clientId, serverId, se_id, seFid, site_id, _status',
-      fish: 'clientId, serverId, f_id, _status',
+      moriver: 'clientId, serverId, mr_id, mr_fid, site_id, site_fid, siteRouteKey, updatedAt, setdate, _status',
+      search: 'clientId, serverId, se_id, seFid, site_id, site_fid, siteRouteKey, _status',
+      fish: 'clientId, serverId, f_id, fFid, mr_id, mrFid, mr_fid, _status',
       telemetry: 'clientId, serverId, t_id, se_id, tFid, seFid, _status',
       supplemental: 'clientId, serverId, s_id, _status',
       procedure: 'clientId, serverId, id, _status',
