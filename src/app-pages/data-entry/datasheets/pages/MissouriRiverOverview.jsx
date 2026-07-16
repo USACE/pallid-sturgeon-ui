@@ -1,41 +1,24 @@
-import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from '@components/card';
-import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
-import Approval from '@pages/data-entry/datasheets/components/approval';
+import DataHeader from '@src/app-pages/data-entry/datasheets/components/data-header/dataHeader';
+import Approval from '@src/app-pages/data-entry/datasheets/components/approval/approval';
 import TabContainer from '@components/tab';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import MissouriRiverDataEntryForm from '../../edit-data-sheet/forms/missouri-river/MissouriRiverDataEntryForm';
 import FishDataEntry from '../tables/fish/FishDataEntry';
 
 import '../../../data-summaries/data-summary.scss';
+import '../../dataentry.scss';
 
 const MissouriRiverOverview = connect(
   'doUpdateCurrentTab',
   'selectDataEntryData',
   'selectDataEntryFishTotalCount',
-  'selectDataEntrySupplementalTotalCount',
-  'selectDataEntryProcedureTotalCount',
   'selectCurrentTab',
   'selectRouteParams',
   'selectIsEditForm',
-  ({
-    doUpdateCurrentTab,
-    dataEntryData,
-    dataEntryFishTotalCount,
-    dataEntrySupplementalTotalCount,
-    dataEntryProcedureTotalCount,
-    currentTab,
-    routeParams,
-    isEditForm,
-  }) => {
-    const [isAddSuppRow, setIsAddSuppRow] = useState(false);
-    const [suppRowId, setSuppRowId] = useState(null);
-
-    const [isAddProcRow, setIsAddProcRow] = useState(false);
-    const [procRowId, setProcRowId] = useState(null);
-
+  ({ doUpdateCurrentTab, dataEntryData, dataEntryFishTotalCount, currentTab, routeParams, isEditForm }) => {
     const siteId = routeParams?.siteId;
     const mrId = routeParams.mrId;
 
