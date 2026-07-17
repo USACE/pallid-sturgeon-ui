@@ -27,23 +27,18 @@ import {
   removeDuplicates,
 } from '@src/app-pages/data-entry/dataEntryHelper';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
-import { captureGpsBest, getOfflineDraft, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
-import { DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
+import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
+import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
 import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
 
 import '../../../dataentry.scss';
-import { create } from 'lodash';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
-// const GPS_OPTIONS = {
-//   enableHighAccuracy: true,
-//   timeout: 15000,
-//   maximumAge: 0,
-// };
-
 const currentDate = new Date().toISOString().split('T')[0];
+
+const normalize = (val) => (val ? String(val) : '');
 
 const MissouriRiverDataEntryForm = connect(
   'doUpdateBaseData',
@@ -66,43 +61,108 @@ const MissouriRiverDataEntryForm = connect(
     routeParams,
     dataEntryFishTotalCount,
   }) => {
-    const { permission, lastError, captureBestOf } = useGpsCapture(GPS_OPTIONS);
+    // Initialize GPS
+    const { browserGps } = useGpsCapture(GPS_OPTIONS);
+    const ubloxGps = useUbloxSerialGps();
     const {
-      bendRiverMile,
-      bendSelections,
-      gearCodes,
-      filteredGearCodes,
-      gearTypes,
-      macros,
-      mesos,
-      macroMesos,
-      microHabitats,
-      microStructures,
-      u6Options,
-      u7Options,
-      microSetSite,
-      setSite1Options,
-      setSite2Options,
-      setSite3Options,
-      structureFlows,
-      structureMods,
-      subsampleTypes,
+      bendRiverMile: onlineBendRiverMile,
+      bendSelections: onlineBendSelections,
+      gearCodes: onlineGearCodes,
+      filteredGearCodes: onlineFilteredGearCodes,
+      gearTypes: onlineGearTypes,
+      macros: onlineMacros,
+      mesos: onlineMesos,
+      macroMesos: onlineMacroMesos,
+      microHabitats: onlineMicroHabitats,
+      microStructures: onlineMicroStructures,
+      u6Options: onlineU6Options,
+      u7Options: onlineU7Options,
+      microSetSite: onlineMicroSetSite,
+      setSite1Options: onlineSetSite1Options,
+      setSite2Options: onlineSetSite2Options,
+      setSite3Options: onlineSetSite3Options,
+      structureFlows: onlineStructureFlows,
+      structureMods: onlineStructureMods,
+      subsampleTypes: onlineSubsampleTypes,
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
     const siteRouteKey = routeParams?.siteId;
     const siteId = siteRouteKey;
     const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
+    const online = !!isOnline();
 
-    const [gearCodeOptions, setGearCodeOptions] = useState(gearCodes);
-    const [mesoOptions, setMesoOptions] = useState(mesos);
+    const [gearCodeOptions, setGearCodeOptions] = useState(onlineGearCodes);
+    const [mesoOptions, setMesoOptions] = useState(onlineMesos);
     const [structureFlowOptions, setStructureFlowOptions] = useState([]);
     const [structureModOptions, setStructureModOptions] = useState([]);
     const [ss1Options, setSs1Options] = useState([]);
     const [ss2Options, setSs2Options] = useState([]);
+    const [offlineLookups, setOfflineLookups] = useState({
+      bendRiverMile: [],
+      bendSelections: [],
+      gearCodes: [],
+      filteredGearCodes: [],
+      gearTypes: [],
+      macros: [],
+      mesos: [],
+      macroMesos: [],
+      microHabitats: [],
+      microStructures: [],
+      u6Options: [],
+      u7Options: [],
+      microSetSite: [],
+      setSite1Options: [],
+      setSite2Options: [],
+      setSite3Options: [],
+      structureFlows: [],
+      structureMods: [],
+      subsampleTypes: [],
+    });
 
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
     const newForm = !(dataEntryData?.mrId || dataEntryData?.mr_id || dataEntryData?.serverId);
     const hasFishRecords = dataEntryFishTotalCount > 0;
+
+    const resolveLookup = (onlineRows, offlineRows) =>
+      Array.isArray(onlineRows) && onlineRows.length > 0 ? onlineRows : (offlineRows ?? []);
+
+    const bendRiverMile = resolveLookup(onlineBendRiverMile, offlineLookups.bendRiverMile);
+
+    const bendSelections = resolveLookup(onlineBendSelections, offlineLookups.bendSelections);
+
+    const gearCodes = resolveLookup(onlineGearCodes, offlineLookups.gearCodes);
+
+    const filteredGearCodes = resolveLookup(onlineFilteredGearCodes, offlineLookups.filteredGearCodes);
+
+    const gearTypes = resolveLookup(onlineGearTypes, offlineLookups.gearTypes);
+
+    const macros = resolveLookup(onlineMacros, offlineLookups.macros);
+
+    const mesos = resolveLookup(onlineMesos, offlineLookups.mesos);
+
+    const macroMesos = resolveLookup(onlineMacroMesos, offlineLookups.macroMesos);
+
+    const microHabitats = resolveLookup(onlineMicroHabitats, offlineLookups.microHabitats);
+
+    const microStructures = resolveLookup(onlineMicroStructures, offlineLookups.microStructures);
+
+    const u6Options = resolveLookup(onlineU6Options, offlineLookups.u6Options);
+
+    const u7Options = resolveLookup(onlineU7Options, offlineLookups.u7Options);
+
+    const microSetSite = resolveLookup(onlineMicroSetSite, offlineLookups.microSetSite);
+
+    const setSite1Options = resolveLookup(onlineSetSite1Options, offlineLookups.setSite1Options);
+
+    const setSite2Options = resolveLookup(onlineSetSite2Options, offlineLookups.setSite2Options);
+
+    const setSite3Options = resolveLookup(onlineSetSite3Options, offlineLookups.setSite3Options);
+
+    const structureFlows = resolveLookup(onlineStructureFlows, offlineLookups.structureFlows);
+
+    const structureMods = resolveLookup(onlineStructureMods, offlineLookups.structureMods);
+
+    const subsampleTypes = resolveLookup(onlineSubsampleTypes, offlineLookups.subsampleTypes);
 
     const getSavedMissouriRiverDraft = () => {
       const savedDraft = sessionStorage.getItem(moriverDraftKey);
@@ -220,14 +280,18 @@ const MissouriRiverDataEntryForm = connect(
       [getMacroMesoOptions, setMesoOptions]
     );
 
+    const defaultValues = getMissouriRiverDefaultValues({ baseData, dataEntryData });
+    const schema = getMissouriRiverSchema({
+      riverMile: getUpperLowerRiverMile(bend, segmentId),
+      hasFishRecords: hasFishRecords,
+    });
+
+    // RHF Methods Config
     const methods = useForm({
-      defaultValues: getMissouriRiverDefaultValues({ baseData, dataEntryData }),
-      resolver: yupResolver(
-        getMissouriRiverSchema({ riverMile: getUpperLowerRiverMile(bend, segmentId), hasFishRecords: hasFishRecords })
-      ),
+      defaultValues: defaultValues,
+      resolver: yupResolver(schema),
       mode: 'onSubmit',
       reValidateMode: 'onChange',
-      stateOptions: [],
     });
     const {
       formState: { errors, isValid, touchedFields, submitCount, isDirty },
@@ -237,25 +301,8 @@ const MissouriRiverDataEntryForm = connect(
       trigger,
       setValue,
       handleSubmit,
+      reset,
     } = methods;
-
-    // Capture Start and Stop Lat, Long, Time
-    const handleCapture = async (type) => {
-      try {
-        const { best } = await captureBestOf(5, 700);
-
-        setValue('startLatitude', best.lat, { shouldValidate: true });
-        setValue('startLongitude', best.lng, { shouldValidate: true });
-        setValue('startTime', fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
-
-        window.alert(
-          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
-        );
-      } catch (e) {
-        console.error(e);
-        window.alert(`GPS capture failed: ${e?.message || e}`);
-      }
-    };
 
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
@@ -282,8 +329,6 @@ const MissouriRiverDataEntryForm = connect(
     const velocitybot1 = watch('velocitybot1');
     const velocity081 = watch('velocity081');
     const u7 = watch('u7');
-
-    const normalize = (val) => (val ? String(val) : '');
 
     const isStartTimeDisabled =
       gearCode.startsWith('LDN') &&
@@ -338,102 +383,92 @@ const MissouriRiverDataEntryForm = connect(
       };
     };
 
+    // Capture Start and Stop Lat, Long, Time
+    const handleCapture = async (type) => {
+      try {
+        const { best } = await captureGpsBest({ browserGps, ubloxGps });
+
+        setValue(`${type}Latitude`, best.lat, { shouldValidate: true });
+        setValue(`${type}Longitude`, best.lng, { shouldValidate: true });
+        setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+
+        window.alert(
+          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+        );
+      } catch (e) {
+        console.error(e);
+        window.alert(`GPS capture failed: ${e?.message || e}`);
+      }
+    };
+
     const handleChange = (e) => {
       const name = e?.target?.name;
       const val = e?.target?.value;
-
-      if (name === 'recorder') {
-        setValue('recorder', val?.toUpperCase());
-      }
-
-      trigger(name);
+      name === 'recorder' && setValue('recorder', val?.toUpperCase());
     };
 
     const doSaveDraft = async () => {
-      const valid = await trigger();
-
-      if (!valid) return;
+      if (!isValid) return;
 
       const dataObj = formatDataObj();
-      const existingDraft = getSavedMissouriRiverDraft();
-      const clientId = dataObj?.clientId ?? existingDraft?.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();
+      const clientId = dataObj?.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();
 
-      const mrFid = dataObj.mrFid ?? dataObj.mr_fid ?? existingDraft?.mrFid ?? existingDraft?.mr_fid;
+      const mrFid = dataObj?.mrFid ?? dataObj?.mr_fid;
 
       const payload = filterNullEmptyObjects({
-        ...existingDraft,
         ...dataObj,
         clientId,
         mrFid,
         mr_fid: mrFid,
-        siteId: isOfflineSite ? undefined : Number(dataObj.siteId ?? existingDraft?.siteId ?? siteRouteKey),
-        site_id: isOfflineSite
-          ? undefined
-          : Number(
-              dataObj.site_id ?? dataObj.siteId ?? existingDraft?.site_id ?? existingDraft?.siteId ?? siteRouteKey
-            ),
-        siteFid: isOfflineSite ? siteRouteKey : (dataObj.siteFid ?? existingDraft?.siteFid ?? baseData?.siteFid),
-        site_fid: isOfflineSite ? siteRouteKey : (dataObj.site_fid ?? existingDraft?.site_fid ?? baseData?.site_fid),
+        siteId: isOfflineSite ? undefined : Number(siteRouteKey),
+        site_id: isOfflineSite ? undefined : Number(siteRouteKey),
+        siteFid: isOfflineSite ? siteRouteKey : dataObj?.siteFid,
+        site_fid: isOfflineSite ? siteRouteKey : dataObj?.site_fid,
         siteRouteKey,
         status: DataEntryStatuses.Draft,
         _status: 'draft',
-        version: dataObj.version ?? existingDraft?.version ?? 0,
+        version: dataObj.version ?? 0,
         updatedAt: new Date().toISOString(),
       });
 
-      if (!payload.mrFid && !payload.mr_fid) {
+      if (!payload.mrFid) {
         console.error('Missing mrFid. Cannot save Missouri River draft.');
         return;
       }
 
       try {
-        if (isOnline()) {
-          if (newForm) {
-            doAddMoRiverDataEntry(payload);
-          } else {
-            doUpdateMoRiverDataEntry(payload);
-          }
+        if (online) {
+          newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
+          // newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
           await db.moriver.put(payload);
         }
         sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
+
         setValue('clientId', clientId);
-        setValue('mrFid', payload?.mrFid ?? payload.mr_fid);
+        setValue('mrFid', payload?.mrFid);
         setValue('status', DataEntryStatuses.Draft);
+
         doUpdateCurrentTab(1);
       } catch (error) {
         console.error('Save draft failed:', error);
 
-        if (!isOnline()) {
+        if (!online) {
           await db.moriver.put(payload);
-
           sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
-
-          setValue('clientId', clientId);
-          setValue('mrFid', payload?.mrFid ?? payload.mr_fid);
-          setValue('status', DataEntryStatuses.Draft);
           doUpdateCurrentTab(1);
         }
+        // newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
       }
     };
 
     const doSubmit = async () => {
       setValue('status', DataEntryStatuses.Submitted);
-
-      const valid = await trigger();
-
-      if (!valid) return;
+      if (!isValid) return;
 
       const dataObj = formatDataObj();
-      const draft =
-        getOfflineDraft({
-          draftKey: moriverDraftKey,
-          fieldIdName: 'mrFid',
-          siteId: siteRouteKey,
-        }) ?? getSavedMissouriRiverDraft();
+      // const draft = getOfflineDraft({ draftKey: moriverDraftKey, fieldIdName: 'mrFid', siteId }) ?? getSavedMissouriRiverDraft();
       const clientId = dataObj.clientId ?? draft?.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();
-
-      const mrFid = dataObj.mrFid ?? dataObj.mr_fid ?? draft?.mrFid ?? draft.mr_fid;
 
       const payload = filterNullEmptyObjects({
         ...draft,
@@ -460,32 +495,90 @@ const MissouriRiverDataEntryForm = connect(
       }
 
       try {
-        if (isOnline()) {
-          if (newForm) {
-            doAddMoRiverDataEntry(payload);
-          } else {
-            doUpdateMoRiverDataEntry(payload);
-          }
-        } else if (newForm) {
-          await createData('moriver', payload);
+        if (online) {
+          newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
-          await updateData('moriver', clientId, payload);
+          newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
         }
-      } catch (err) {
-        console.error('Missouri River API failed, queueing offline:', err);
-
-        if (newForm) {
-          await createData('moriver', payload);
-        } else {
-          await updateData('moriver', clientId, payload);
-        }
+      } catch (error) {
+        console.error('Submit failed, queueing offline:', error);
+        newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
       }
+
       setValue('clientId', clientId);
       setValue('status', DataEntryStatuses.Submitted);
       setValue('mrFid', payload.mrFid ?? payload.mr_fid);
-
       sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
+
+      setSubmitMessage({
+        type: ApiStatuses.Success,
+        text: online
+          ? 'Missouri River form submitted successfully.'
+          : 'Missouri River form saved offline successfully. It will sync when you are back online.',
+      });
     };
+
+    // load offline lookup
+    // useEffect(() => {
+    //   const loadOfflineLookups = async () => {
+    //     try {
+    //       const names = [
+    //         'bendRiverMile',
+    //         'bendSelections',
+    //         'gearCodes',
+    //         'filteredGearCodes',
+    //         'gearTypes',
+    //         'macros',
+    //         'mesos',
+    //         'macroMesos',
+    //         'microHabitats',
+    //         'microStructures',
+    //         'u6Options',
+    //         'u7Options',
+    //         'microSetSite',
+    //         'setSite1Options',
+    //         'setSite2Options',
+    //         'setSite3Options',
+    //         'structureFlows',
+    //         'structureMods',
+    //         'subsampleTypes',
+    //       ];
+
+    //       const entries = await Promise.all(names.map(async (name) => [name, await getLookupOptions(name)]));
+    //       setOfflineLookups(Object.fromEntries(entries));
+    //     } catch (err) {
+    //       console.error('Failed to load Missouri River offline lookups:', error);
+    //     }
+    //   };
+    //   void loadOfflineLookups();
+    // });
+
+    // useEffect(() => {
+    //   reloadOfflineDraft({ defaultValues, newForm, draftKey: moriverDraftKey, fieldIdName: 'mrFid', siteId });
+    // }, [newForm]);
+
+    // useEffect(() => {
+    //   loadCachedLookups();
+    // }, [loadCachedLookups]);
+
+    // useEffect(() => {
+    //   const draft = getOfflineDraft({ draftKey: moriverDraftKey, fieldIdName: 'mrFid', siteId });
+
+    //   if (newForm && draft) {
+    //     reset(
+    //       {
+    //         ...defaultValues,
+    //         ...draft,
+    //       },
+    //       {
+    //         keepDirty: false,
+    //         keepTouched: false,
+    //       }
+    //     );
+    //     return;
+    //   }
+    //   reset(defaultValues);
+    // }, [reset, defaultValues, newForm, moriverDraftKey, siteId]);
 
     // Set R/N value
     useEffect(() => {
@@ -658,14 +751,13 @@ const MissouriRiverDataEntryForm = connect(
 
     // Set Missouri River IDs
     useEffect(() => {
-      const setField = async () => {
+      const setFieldId = async () => {
         if (newForm) {
           const draft = getSavedMissouriRiverDraft();
           const draftSiteRouteKey =
             draft?.siteRouteKey ?? draft?.siteFid ?? draft?.site_fid ?? draft?.siteId ?? draft?.site_id;
 
           const belongsToCurrentSite = draft && String(draftSiteRouteKey) === String(siteRouteKey);
-
           if (belongsToCurrentSite && (draft?.mrFid || draft?.mr_fid)) {
             reset(
               {
@@ -682,15 +774,15 @@ const MissouriRiverDataEntryForm = connect(
           }
           const localMrCount = await db.moriver.count();
           const fieldId = generateFieldId(localMrCount);
-
           setValue('mrFid', fieldId);
           return;
+        } else if (!newForm && dataEntryData) {
+          setValue('mrId', dataEntryData?.mrId ?? dataEntryData?.mr_id);
+          setValue('mrFid', dataEntryData?.mrFid ?? dataEntryData?.mr_fid);
         }
-        setValue('mrId', dataEntryData?.mrId ?? dataEntryData?.mr_id);
-        setValue('mrFid', dataEntryData?.mrFid ?? dataEntryData?.mr_fid);
       };
-      void setField();
-    }, [newForm, setValue, dataEntryData, moriverDraftKey, reset, siteRouteKey, defaultValues]);
+      setFieldId();
+    }, [newForm, dataEntryData, setValue]);
 
     return (
       <FormProvider {...methods}>

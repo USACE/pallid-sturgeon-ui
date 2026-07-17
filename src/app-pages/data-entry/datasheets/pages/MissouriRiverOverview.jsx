@@ -36,16 +36,8 @@ const MissouriRiverOverview = connect(
     const [isAddProcRow, setIsAddProcRow] = useState(false);
     const [procRowId, setProcRowId] = useState(null);
 
-    const siteRouteKey = routeParams?.siteId;
-    const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
-    let moriverDraft = null;
-    const missouriRiverParentId =
-      dataEntryData?.mrId ||
-      dataEntryData?.mr_id ||
-      dataEntryData?.mrFid ||
-      dataEntryData?.mr_fid ||
-      moriverDraft?.mrFid ||
-      moriverDraft?.mr_fid;
+    const siteId = routeParams?.siteId;
+    const mrId = routeParams.mrId;
 
     const breadcrumbLinks = [
       {
@@ -93,7 +85,7 @@ const MissouriRiverOverview = connect(
                 {
                   title: `Fish (${dataEntryFishTotalCount})`,
                   content: <FishDataEntry />,
-                  isDisabled: !!!missouriRiverParentId, // Disable tab when no Missouri River data exists yet
+                  isDisabled: !!!dataEntryData?.mrId, // Disable tab when no Missouri River data exists yet
                 },
               ]}
               onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}
