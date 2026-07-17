@@ -2,7 +2,7 @@ import { ValidationMessages } from '@src/utils/enums';
 import { formatDate } from '@src/utils/helpers';
 import * as yup from 'yup';
 
-export const supplementalValidationSchema = ({ projectId, species }) =>
+export const suppProcValidationSchema = ({ projectId, species }) =>
   yup
     .object()
     .shape({
