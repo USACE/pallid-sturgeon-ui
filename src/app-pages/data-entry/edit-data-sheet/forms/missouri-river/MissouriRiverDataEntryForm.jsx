@@ -118,65 +118,33 @@ const MissouriRiverDataEntryForm = connect(
       structureMods: [],
       subsampleTypes: [],
     });
+    const [submitMessage, setSubmitMessage] = useState(null);
 
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
     const newForm = !(dataEntryData?.mrId || dataEntryData?.mr_id || dataEntryData?.serverId);
-    const hasFishRecords = dataEntryFishTotalCount > 0;
 
     const resolveLookup = (onlineRows, offlineRows) =>
       Array.isArray(onlineRows) && onlineRows.length > 0 ? onlineRows : (offlineRows ?? []);
 
     const bendRiverMile = resolveLookup(onlineBendRiverMile, offlineLookups.bendRiverMile);
-
     const bendSelections = resolveLookup(onlineBendSelections, offlineLookups.bendSelections);
-
     const gearCodes = resolveLookup(onlineGearCodes, offlineLookups.gearCodes);
-
     const filteredGearCodes = resolveLookup(onlineFilteredGearCodes, offlineLookups.filteredGearCodes);
-
     const gearTypes = resolveLookup(onlineGearTypes, offlineLookups.gearTypes);
-
     const macros = resolveLookup(onlineMacros, offlineLookups.macros);
-
     const mesos = resolveLookup(onlineMesos, offlineLookups.mesos);
-
     const macroMesos = resolveLookup(onlineMacroMesos, offlineLookups.macroMesos);
-
     const microHabitats = resolveLookup(onlineMicroHabitats, offlineLookups.microHabitats);
-
     const microStructures = resolveLookup(onlineMicroStructures, offlineLookups.microStructures);
-
     const u6Options = resolveLookup(onlineU6Options, offlineLookups.u6Options);
-
     const u7Options = resolveLookup(onlineU7Options, offlineLookups.u7Options);
-
     const microSetSite = resolveLookup(onlineMicroSetSite, offlineLookups.microSetSite);
-
     const setSite1Options = resolveLookup(onlineSetSite1Options, offlineLookups.setSite1Options);
-
     const setSite2Options = resolveLookup(onlineSetSite2Options, offlineLookups.setSite2Options);
-
     const setSite3Options = resolveLookup(onlineSetSite3Options, offlineLookups.setSite3Options);
-
     const structureFlows = resolveLookup(onlineStructureFlows, offlineLookups.structureFlows);
-
     const structureMods = resolveLookup(onlineStructureMods, offlineLookups.structureMods);
-
     const subsampleTypes = resolveLookup(onlineSubsampleTypes, offlineLookups.subsampleTypes);
-
-    const getSavedMissouriRiverDraft = () => {
-      const savedDraft = sessionStorage.getItem(moriverDraftKey);
-      if (!savedDraft) {
-        return null;
-      }
-
-      try {
-        return JSON.parse(savedDraft);
-      } catch (err) {
-        console.error('Failed to parse Missouri River draft:', err);
-        return null;
-      }
-    };
 
     const ss3Options = removeDuplicates(
       setSite3Options?.map((item) => ({
@@ -280,10 +248,13 @@ const MissouriRiverDataEntryForm = connect(
       [getMacroMesoOptions, setMesoOptions]
     );
 
-    const defaultValues = getMissouriRiverDefaultValues({ baseData, dataEntryData });
+    const defaultValues = getMissouriRiverDefaultValues({
+      baseData,
+      dataEntryData,
+      fishCount: dataEntryFishTotalCount,
+    });
     const schema = getMissouriRiverSchema({
       riverMile: getUpperLowerRiverMile(bend, segmentId),
-      hasFishRecords: hasFishRecords,
     });
 
     // RHF Methods Config
@@ -330,9 +301,14 @@ const MissouriRiverDataEntryForm = connect(
     const velocity081 = watch('velocity081');
     const u7 = watch('u7');
 
+    const fishCount = Number(watch('fishCount') || 0);
+    const hasFishRecords = fishCount >= 1;
+
     const isStartTimeDisabled =
       gearCode.startsWith('LDN') &&
       (velocitybot1 === null || velocitybot1 === '' || velocity081 === null || velocity081 === '');
+
+    console.warn('fishCount: ', fishCount, hasFishRecords);
 
     const getTempWarning = () => {
       if (temp > 30) {
@@ -381,6 +357,44 @@ const MissouriRiverDataEntryForm = connect(
         velocity082: parseFloat(values?.velocity082),
         velocity02or062: parseFloat(values?.velocity02or062),
       };
+    };
+
+    const getOfflineDraft = () => {
+      const savedDraft = sessionStorage.getItem(moriverDraftKey);
+      if (!savedDraft) return null;
+
+      try {
+        const draft = JSON.parse(savedDraft);
+        if (!draft?.mrFid) return null;
+
+        if (
+          String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey)
+        ) {
+          return null;
+        }
+        return draft;
+      } catch (err) {
+        console.error('Failed to parse offline Missouri River draft:', err);
+        return null;
+      }
+    };
+
+    const reloadOfflineDraft = () => {
+      if (!newForm) return false;
+      const draft = getOfflineDraft();
+      if (!draft) return false;
+      reset(
+        {
+          ...defaultValues,
+          ...draft,
+          fishCount: Number(draft.fishCount || dataEntryFishTotalCount || 0),
+        },
+        {
+          keepDirty: false,
+          keepTouched: false,
+        }
+      );
+      return true;
     };
 
     // Capture Start and Stop Lat, Long, Time
@@ -467,15 +481,13 @@ const MissouriRiverDataEntryForm = connect(
       if (!isValid) return;
 
       const dataObj = formatDataObj();
-      // const draft = getOfflineDraft({ draftKey: moriverDraftKey, fieldIdName: 'mrFid', siteId }) ?? getSavedMissouriRiverDraft();
+      const draft = getOfflineDraft();
       const clientId = dataObj.clientId ?? draft?.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();
 
-      const payload = filterNullEmptyObjects({
+      const formattedValues = {
         ...draft,
         ...dataObj,
         clientId,
-        mrFid,
-        mr_fid: mrFid,
         siteId: isOfflineSite ? undefined : Number(dataObj.siteId ?? draft?.siteId ?? siteRouteKey),
         site_id: isOfflineSite
           ? undefined
@@ -487,7 +499,13 @@ const MissouriRiverDataEntryForm = connect(
         _status: OfflineStatuses.Queued,
         version: dataObj.version ?? draft?.version ?? 0,
         updatedAt: new Date().toISOString(),
-      });
+      };
+
+      console.warn('doSubmit formattedValues: ', formattedValues);
+
+      const payload = filterNullEmptyObjects(formattedValues);
+
+      console.warn('payload: ', payload);
 
       if (!payload.mrFid && !payload.mr_fid) {
         console.error('Missing mrFid. Cannot submit Missouri River form.');
@@ -517,6 +535,10 @@ const MissouriRiverDataEntryForm = connect(
           : 'Missouri River form saved offline successfully. It will sync when you are back online.',
       });
     };
+
+    useEffect(() => {
+      reloadOfflineDraft();
+    }, [newForm, dataEntryFishTotalCount]);
 
     // load offline lookup
     // useEffect(() => {
@@ -554,21 +576,18 @@ const MissouriRiverDataEntryForm = connect(
     // });
 
     // useEffect(() => {
-    //   reloadOfflineDraft({ defaultValues, newForm, draftKey: moriverDraftKey, fieldIdName: 'mrFid', siteId });
-    // }, [newForm]);
-
-    // useEffect(() => {
     //   loadCachedLookups();
     // }, [loadCachedLookups]);
 
     // useEffect(() => {
-    //   const draft = getOfflineDraft({ draftKey: moriverDraftKey, fieldIdName: 'mrFid', siteId });
+    //   const draft = getOfflineDraft();
 
     //   if (newForm && draft) {
     //     reset(
     //       {
     //         ...defaultValues,
     //         ...draft,
+    //         fishCount: Number(draft.fishCount || dataEntryFishTotalCount || 0),
     //       },
     //       {
     //         keepDirty: false,
@@ -578,7 +597,7 @@ const MissouriRiverDataEntryForm = connect(
     //     return;
     //   }
     //   reset(defaultValues);
-    // }, [reset, defaultValues, newForm, moriverDraftKey, siteId]);
+    // }, [reset, defaultValues, newForm, dataEntryFishTotalCount]);
 
     // Set R/N value
     useEffect(() => {
@@ -753,7 +772,8 @@ const MissouriRiverDataEntryForm = connect(
     useEffect(() => {
       const setFieldId = async () => {
         if (newForm) {
-          const draft = getSavedMissouriRiverDraft();
+          const savedDraft = sessionStorage.getItem(moriverDraftKey);
+          const draft = JSON.parse(savedDraft);
           const draftSiteRouteKey =
             draft?.siteRouteKey ?? draft?.siteFid ?? draft?.site_fid ?? draft?.siteId ?? draft?.site_id;
 
@@ -787,6 +807,13 @@ const MissouriRiverDataEntryForm = connect(
     return (
       <FormProvider {...methods}>
         {isShowErrorSummary && <ErrorSummary errors={errors} type='form' isValid={isValid} />}
+        {submitMessage && (
+          <div className={`usa-alert usa-alert--${submitMessage.type}`} role='status'>
+            <div className='usa-alert__body'>
+              <p className='usa-alert__text'>{submitMessage.text}</p>
+            </div>
+          </div>
+        )}
         <div className='container-fluid margin-top-1'>
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>

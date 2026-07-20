@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from '@components/card';
@@ -15,27 +14,10 @@ const MissouriRiverOverview = connect(
   'doUpdateCurrentTab',
   'selectDataEntryData',
   'selectDataEntryFishTotalCount',
-  'selectDataEntrySupplementalTotalCount',
-  'selectDataEntryProcedureTotalCount',
   'selectCurrentTab',
   'selectRouteParams',
   'selectIsEditForm',
-  ({
-    doUpdateCurrentTab,
-    dataEntryData,
-    dataEntryFishTotalCount,
-    dataEntrySupplementalTotalCount,
-    dataEntryProcedureTotalCount,
-    currentTab,
-    routeParams,
-    isEditForm,
-  }) => {
-    const [isAddSuppRow, setIsAddSuppRow] = useState(false);
-    const [suppRowId, setSuppRowId] = useState(null);
-
-    const [isAddProcRow, setIsAddProcRow] = useState(false);
-    const [procRowId, setProcRowId] = useState(null);
-
+  ({ doUpdateCurrentTab, dataEntryData, dataEntryFishTotalCount, currentTab, routeParams, isEditForm }) => {
     const siteId = routeParams?.siteId;
     const mrId = routeParams.mrId;
 
@@ -85,7 +67,7 @@ const MissouriRiverOverview = connect(
                 {
                   title: `Fish (${dataEntryFishTotalCount})`,
                   content: <FishDataEntry />,
-                  isDisabled: !!!dataEntryData?.mrId, // Disable tab when no Missouri River data exists yet
+                  // isDisabled: online ? !!!dataEntryData?.mrId : !!!moriverDraft?.mrFid, // Disable tab when no Missouri River data exists yet
                 },
               ]}
               onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}

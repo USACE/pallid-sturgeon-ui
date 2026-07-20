@@ -16,9 +16,10 @@ export const gearReqFields = {
   velocity02or062: ['GN18', 'GN81', 'GN14', 'GN41', 'OT04', 'TN', 'TLC1', 'TLC2', 'POT02'],
 };
 
-export const getMissouriRiverSchema = ({ riverMile, hasFishRecords }) =>
+export const getMissouriRiverSchema = ({ riverMile }) =>
   yup.object().shape(
     {
+      fishCount: yup.number().nullable(),
       setdate: yup.string().required(ValidationMessages.FieldRequired),
       subsample: yup
         .number()
@@ -148,7 +149,7 @@ export const getMissouriRiverSchema = ({ riverMile, hasFishRecords }) =>
         .nullable()
         .notRequired(),
       stopTime: yup.string().when('deploymentType', {
-        is: (deploymentType) => deploymentType === 'p' && hasFishRecords,
+        is: (deploymentType) => deploymentType === 'p',
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
@@ -444,12 +445,13 @@ const getBaseDefaultValues = ({ baseData }) => ({
   siteId: baseData?.siteId ?? '',
 });
 
-export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData }) => ({
+export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData, fishCount = 0 }) => ({
   ...getBaseDefaultValues({ baseData }),
   mrFid: dataEntryData?.mrFid ?? '',
   seFid: dataEntryData?.seFid ?? '',
   mrId: dataEntryData?.mrId ?? '',
   seId: dataEntryData?.SeId ?? '',
+  fishCount: Number(fishCount || 0),
   setdate: dataEntryData?.setdate ? formatDate(dataEntryData?.setdate) : new Date().toISOString().split('T')[0],
   subsample: dataEntryData?.subsample ?? 1,
   subsamplepass: dataEntryData?.subsamplepass ?? 1,
