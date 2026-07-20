@@ -9,7 +9,7 @@ import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
-import { Button, Alert, Grid } from '@trussworks/react-uswds';
+import { Button, Grid } from '@trussworks/react-uswds';
 import classNames from 'classnames';
 
 import {
@@ -55,24 +55,20 @@ const getNextSequence = (data, seFid) => {
 };
 
 const TelemetryDataEntry = connect(
-  'doModalOpen',
   'doSaveTelemetryDataEntry',
   'doUpdateTelemetryDataEntry',
   'selectDataEntryTelemetryData',
   'selectDataEntryLastParams',
-  'selectUserRole',
   'selectBaseData',
   'selectDataEntryData',
   'selectLookupData',
   'doUpdateCurrentTab',
   'selectRouteParams',
   ({
-    doModalOpen,
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
     dataEntryTelemetryData,
     dataEntryLastParams,
-    userRole,
     baseData,
     dataEntryData,
     lookupData,
@@ -195,13 +191,7 @@ const TelemetryDataEntry = connect(
       defaultValues: getTelemetryDefaultValues({ baseData: baseData, dataEntryData: dataEntryTelemetryData }),
     });
     const {
-      formState: { errors, dirtyFields },
-      setValue,
-      watch,
-      setError,
-      clearErrors,
-      trigger,
-      reset,
+      formState: { errors },
     } = methods;
 
     console.warn('Check errors:', errors);

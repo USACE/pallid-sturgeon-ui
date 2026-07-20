@@ -50,6 +50,9 @@ const DataHeader = connect(
               <span className='text-bold'>Site ID:</span> {baseData?.siteId || '--'}
             </Grid>
             <Grid tablet={{ col: 2 }}>
+              <span className='text-bold'>Site Field ID:</span> {baseData?.siteFid || '--'}
+            </Grid>
+            <Grid tablet={{ col: 2 }}>
               <span className='text-bold'>Year:</span> {baseData?.year || '--'}
             </Grid>
             <Grid tablet={{ col: 2 }}>

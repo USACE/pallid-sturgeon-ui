@@ -29,12 +29,48 @@ export async function downloadLookupsForOffline(token?: string) {
   const rowsToSave: LookupItem[] = [];
 
   const lookupMappings = [
+    // sites
+    { key: 'bendRiverMile', name: 'bendRiverMile' },
+    { key: 'bendSelections', name: 'bendSelections' },
+    { key: 'chutes', name: 'chutes' },
+    { key: 'fieldOffices', name: 'fieldOffices' },
+    { key: 'fieldOfficeSegments', name: 'fieldOfficeSegments' },
+    { key: 'projects', name: 'projects' },
+    { key: 'reach', name: 'reach' },
+    { key: 'sampleUnitTypes', name: 'sampleUnitTypes' },
+    { key: 'seasons', name: 'seasons' },
+    { key: 'segments', name: 'segments' },
+    { key: 'years', name: 'years' },
+    // telemetry
     { key: 'frequencyId', name: 'frequencyId' },
     { key: 'spawnBehavior', name: 'spawnBehavior' },
     { key: 'macros', name: 'macros' },
     { key: 'mesos', name: 'mesos' },
     { key: 'positionConfidence', name: 'positionConfidence' },
+    // search effort
     { key: 'searchTypes', name: 'searchTypeCodes' },
+    // missouri river
+    { key: 'gearCodes', name: 'gearCodes' },
+    { key: 'filteredGearCodes', name: 'filteredGearCodes' },
+    { key: 'gearTypes', name: 'gearTypes' },
+    { key: 'macroMesos', name: 'macroMesos' },
+    { key: 'microHabitats', name: 'microHabitats' },
+    { key: 'microStructures', name: 'microStructures' },
+    { key: 'u6Options', name: 'u6Options' },
+    { key: 'u7Options', name: 'u7Options' },
+    { key: 'microSetSite', name: 'microSetSite' },
+    { key: 'setSite1Options', name: 'setSite1Options' },
+    { key: 'setSite2Options', name: 'setSite2Options' },
+    { key: 'setSite3Options', name: 'setSite3Options' },
+    { key: 'structureFlows', name: 'structureFlows' },
+    { key: 'structureMods', name: 'structureMods' },
+    { key: 'subsampleTypes', name: 'subsampleTypes' },
+    // fish
+    { key: 'fishCodes', name: 'fishCodes' },
+    { key: 'fishStructures', name: 'fishStructures' },
+    { key: 'floyTagPrefixes', name: 'floyTagPrefixes' },
+    { key: 'lengthTypes', name: 'lengthTypes' },
+    { key: 'markRecaptureOptions', name: 'markRecaptureOptions' },
   ];
 
   for (const mapping of lookupMappings) {
