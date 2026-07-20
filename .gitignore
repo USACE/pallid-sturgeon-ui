@@ -26,8 +26,4 @@ yarn-error.log*
 yarn.lock
 /nbproject/private/
 envvars.list
-htdocs
-httpd
 kdata
-keycloak
-docker-compose.yaml
