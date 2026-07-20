@@ -308,8 +308,6 @@ const MissouriRiverDataEntryForm = connect(
       gearCode.startsWith('LDN') &&
       (velocitybot1 === null || velocitybot1 === '' || velocity081 === null || velocity081 === '');
 
-    console.warn('fishCount: ', fishCount, hasFishRecords);
-
     const getTempWarning = () => {
       if (temp > 30) {
         return 'Temp is greater than 30';
@@ -501,11 +499,7 @@ const MissouriRiverDataEntryForm = connect(
         updatedAt: new Date().toISOString(),
       };
 
-      console.warn('doSubmit formattedValues: ', formattedValues);
-
       const payload = filterNullEmptyObjects(formattedValues);
-
-      console.warn('payload: ', payload);
 
       if (!payload.mrFid && !payload.mr_fid) {
         console.error('Missing mrFid. Cannot submit Missouri River form.');
