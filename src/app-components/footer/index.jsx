@@ -1,6 +1,5 @@
 import { mdiCopyright } from '@mdi/js';
 
-import CuiBanner from '../cui-banner';
 import Icon from '@components/icon/icon';
 
 import './footer.scss';
@@ -14,12 +13,11 @@ const Footer = () => (
             <strong>
               <Icon path={mdiCopyright} />
             </strong>{' '}
-            U.S. Army Corps of Engineers {new Date().getFullYear()}
+            U.S. Army Corps of Engineers {new Date().getFullYear()} - v{import.meta.env.VITE_VERSION}
           </p>
         </div>
       </div>
     </footer>
-    <CuiBanner />
   </div>
 );
 

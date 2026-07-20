@@ -131,6 +131,7 @@ const SitesFormModal = connect(
     const sampleUnitType = watch('sampleUnitType');
     const segment = watch('segmentId');
     const bend = watch('bend');
+    const season = watch('season');
 
     const sampleUnitOptions = useMemo(
       () =>
@@ -196,6 +197,7 @@ const SitesFormModal = connect(
                 code: castedValues.bend,
                 sampleUnitType: sampleUnitType,
                 segment: castedValues.segmentId,
+                season: season,
               },
               castedValues
             );

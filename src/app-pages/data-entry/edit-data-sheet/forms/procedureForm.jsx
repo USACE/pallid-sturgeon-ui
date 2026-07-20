@@ -6,7 +6,6 @@ import Card from '@components/card';
 import { Input, Row, SelectCustomLabel, TextArea } from './_shared/helper';
 import {
   purposeOptions,
-  frequencyIdOptions,
   sexOptions,
   spawnEvaluationOptions,
   evalLocationsOptions,
@@ -159,16 +158,10 @@ const ProcedureForm = connect(
 
         // Format Date
         if (dataEntryProcedure.items[0].procedureDate.includes('T')) {
-          handleSelect(
-            'procedureDate',
-            formatDate(dataEntryProcedure.items[0].procedureDate)
-          );
+          handleSelect('procedureDate', formatDate(dataEntryProcedure.items[0].procedureDate));
         }
         if (dataEntryProcedure.items[0].dstStartDate.includes('T')) {
-          handleSelect(
-            'dstStartDate',
-            formatDate(dataEntryProcedure.items[0].dstStartDate)
-          );
+          handleSelect('dstStartDate', formatDate(dataEntryProcedure.items[0].dstStartDate));
         }
 
         // @TODO: consolidate statements if possible
@@ -242,11 +235,7 @@ const ProcedureForm = connect(
                   name='procedureDate'
                   label='Procedure Date'
                   type='date'
-                  value={
-                    state['procedureDate']
-                      ? state['procedureDate'].split('T')[0]
-                      : ''
-                  }
+                  value={state['procedureDate'] ? state['procedureDate'].split('T')[0] : ''}
                   onChange={handleChange}
                   isRequired
                 />
@@ -294,7 +283,6 @@ const ProcedureForm = connect(
                   name='oldFrequencyId'
                   label='Old Frequency ID'
                   value={Number(state['oldFrequencyId'])}
-                  options={frequencyIdOptions}
                   onChange={(val) => handleSelect('oldFrequencyId', val)}
                 />
               </div>
@@ -312,11 +300,7 @@ const ProcedureForm = connect(
                   name='dstStartDate'
                   label='DST Start Date'
                   type='date'
-                  value={
-                    state['dstStartDate']
-                      ? state['dstStartDate'].split('T')[0]
-                      : ''
-                  }
+                  value={state['dstStartDate'] ? state['dstStartDate'].split('T')[0] : ''}
                   onChange={handleChange}
                   isRequired
                 />
@@ -360,7 +344,6 @@ const ProcedureForm = connect(
                   name='newFreqId'
                   label='New Frequency ID'
                   value={Number(state['newFreqId'])}
-                  options={frequencyIdOptions}
                   onChange={(val) => handleSelect('newFreqId', val)}
                   isRequired
                 />
@@ -509,12 +492,7 @@ const ProcedureForm = connect(
                 />
               </div>
               <div className='col-4'>
-                <TextArea
-                  name='comments'
-                  label='Comments'
-                  value={state['comments']}
-                  onChange={handleChange}
-                />
+                <TextArea name='comments' label='Comments' value={state['comments']} onChange={handleChange} />
               </div>
               <div className='col-4'>
                 <TextArea

@@ -35,6 +35,7 @@ export default {
     (params) =>
     ({ dispatch, apiPost, store }) => {
       dispatch({ type: 'UPLOAD_FILES_START' });
+      store.doSetLoadingButtonState(true);
       const toastId = toast.loading('Uploading files, please wait...');
 
       const { files, data, recorder } = params;
@@ -95,12 +96,14 @@ export default {
             type: 'UPDATE_UPLOAD',
             payload: body,
           });
+          store.doSetLoadingButtonState(false);
           dispatch({ type: 'UPLOAD_FILES_FINISHED' });
           tSuccess(toastId, 'Successfully uploaded all files!');
           store.doFetchUploadSessionLogs({
             uploadSessionId: body.uploadSessionId,
           });
         } else {
+          store.doSetLoadingButtonState(false);
           dispatch({ type: 'UPLOAD_FILES_ERROR', payload: err });
           tError(toastId, 'Failed to upload files. Please verify file formats and try again.');
         }
