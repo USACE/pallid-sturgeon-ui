@@ -9,6 +9,8 @@ import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
 import SearchDraftDsTable from '../../edit-data-sheet/forms/search-effort/searchDraftDsTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
+import { getSiteRouteParams, isOfflineSiteRouteKey } from '../../offline/site-route-key';
+import { db } from '../../offline/db';
 
 import '../../dataentry.scss';
 
@@ -16,6 +18,7 @@ const SiteDatasheet = connect(
   'doSitesDatasheetLoadData',
   'doUpdateSitesDatasheetParams',
   'selectBaseData',
+  'doUpdateBaseData',
   'selectMoriverSitesDatasheetTotalResults',
   'selectSearchEffortSitesDatasheetTotalResults',
   'selectSearchEffortSitesDraftDatasheetTotalResults',
@@ -24,6 +27,7 @@ const SiteDatasheet = connect(
   ({
     doSitesDatasheetLoadData,
     doUpdateSitesDatasheetParams,
+    doUpdateBaseData,
     moriverSitesDatasheetTotalResults,
     searchEffortSitesDatasheetTotalResults,
     searchEffortSitesDraftDatasheetTotalResults,
@@ -31,9 +35,8 @@ const SiteDatasheet = connect(
     routeParams,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
-    const siteId = routeParams?.siteId ?? null;
-
-    console.log('The numbers where?:', searchEffortSitesDatasheetTotalResults);
+    const siteRouteKey = routeParams?.siteId ?? null;
+    const isOfflineSite = isOfflineSiteRouteKey(siteRouteKey);
 
     const breadcrumbLinks = [
       {
@@ -42,27 +45,62 @@ const SiteDatasheet = connect(
         current: false,
       },
       {
-        text: siteId,
-        href: `/sites-list/${siteId}`,
+        text: siteRouteKey,
+        href: `/sites-list/${siteRouteKey}`,
         current: false,
       },
     ];
 
     useEffect(() => {
-      const params = { siteId: siteId };
+      const params = getSiteRouteParams(siteRouteKey);
       doUpdateSitesDatasheetParams(params);
-    }, [siteId, currentTab, doUpdateSitesDatasheetParams]);
+    }, [siteRouteKey, currentTab, doUpdateSitesDatasheetParams]);
 
     useEffect(() => {
+      if (!navigator.onLine && isOfflineSite) {
+        return;
+      }
+
       doSitesDatasheetLoadData();
-    }, [siteId, currentTab]);
+    }, [siteRouteKey, currentTab]);
+
+    useEffect(() => {
+      async function loadOfflineSiteBaseData() {
+        if (!String(siteRouteKey).startsWith('SITE-')) return;
+
+        const localSite = await db.sites.where('site_fid').equals(siteRouteKey).first();
+
+        if (!localSite) {
+          console.warn('No offline site found for site_fid:', siteRouteKey);
+          return;
+        }
+
+        const normalizedSite = {
+          ...localSite,
+          siteId: localSite.siteId ?? localSite.site_id,
+          siteFid: localSite.siteFid ?? localSite.site_fid,
+          projectId: localSite.projectId ?? localSite.project_id,
+          segmentId: localSite.segmentId ?? localSite.segment_id,
+          sampleUnitType: localSite.sampleUnitType ?? localSite.sample_unit_type,
+          bendRiverMile: localSite.bendRiverMile ?? localSite.bend_river_mile ?? localSite.brm_id,
+        };
+
+        Object.entries(normalizedSite).forEach(([name, value]) => {
+          doUpdateBaseData(name, value);
+        });
+      }
+
+      loadOfflineSiteBaseData();
+    }, [siteRouteKey, doUpdateBaseData]);
 
     return (
       <div className='container-fluid'>
         <Breadcrumb paths={breadcrumbLinks} />
         <div className='row'>
           <div className='col'>
-            <h4>Datasheets for Site ID: {siteId}</h4>
+            <h4>
+              Datasheets for {isOfflineSite ? 'Site Field ID' : 'Site ID'}: {siteRouteKey}
+            </h4>
           </div>
         </div>
         {/* Top Level Info */}
@@ -72,8 +110,9 @@ const SiteDatasheet = connect(
           <Card.Header text='Datasheet Workflows' />
           <Card.Body>
             <p>
-              Select any tab to view Missouri River or Search Effort datasheet data for Site ID: {siteId}. Click on the
-              datasheet ID number to view/edit data and any related data.
+              Select any tab to view Missouri River or Search Effort datasheet data for{' '}
+              {isOfflineSite ? 'Site Field ID' : 'Site ID'}: {siteRouteKey}. Click on the datasheet ID number to
+              view/edit data and any related data.
             </p>
             <TabContainer
               tabs={[

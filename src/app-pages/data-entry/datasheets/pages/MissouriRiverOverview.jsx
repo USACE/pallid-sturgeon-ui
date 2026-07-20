@@ -68,7 +68,7 @@ const MissouriRiverOverview = connect(
                 {
                   title: `Fish (${dataEntryFishTotalCount})`,
                   content: <FishDataEntry />,
-                  isDisabled: !!!dataEntryData?.mrId, // Disable tab when no Missouri River data exists yet
+                  // isDisabled: online ? !!!dataEntryData?.mrId : !!!moriverDraft?.mrFid, // Disable tab when no Missouri River data exists yet
                 },
               ]}
               onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}

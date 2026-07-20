@@ -1,5 +1,6 @@
 import { db, type OutboxItem } from './db';
 import { pushOutboxItem } from './api';
+import { server } from 'typescript';
 
 export type SyncResult = {
   tried: number;
@@ -13,15 +14,15 @@ export function isOnline(): boolean {
   return typeof navigator !== 'undefined' ? navigator.onLine : false;
 }
 
-// const tablePriority: Record<OutboxItem['tableName'], number> = {
-//   ds_sites: 1,
-//   ds_search: 2,
-//   ds_telemetry_fish: 3,
-//   ds_moriver: 4,
-//   ds_fish: 5,
-//   ds_supplemental: 6,
-//   ds_procedure: 7,
-// };
+const tablePriority: Record<OutboxItem['tableName'], number> = {
+  ds_sites: 1,
+  ds_search: 2,
+  ds_moriver: 2,
+  ds_telemetry_fish: 3,
+  ds_fish: 4,
+  ds_supplemental: 5,
+  ds_procedure: 6,
+};
 
 function getTable(tableName: string) {
   switch (tableName) {
@@ -41,6 +42,92 @@ function getTable(tableName: string) {
       return db.procedure;
     default:
       throw new Error(`Unknown table: ${tableName}`);
+  }
+}
+
+async function patchSiteChildrenAfterCreate(siteItem: OutboxItem, siteResult: any) {
+  if (siteItem.tableName !== 'ds_sites') return;
+  if (siteItem.op !== 'create') return;
+
+  const serverSiteId =
+    siteResult.serverId ??
+    siteResult.json?.site_id ??
+    siteResult.json?.siteId ??
+    siteResult.json?.data?.site_id ??
+    siteResult.json?.data?.siteId ??
+    siteResult.json?.data;
+
+  if (!serverSiteId) {
+    console.warn('Site create synced but no site_id returned:', siteResult);
+    return;
+  }
+
+  const sitePayload = siteItem.payload ?? {};
+  const siteFid = sitePayload.site_fid ?? sitePayload.siteFid;
+
+  if (!siteFid) {
+    console.warn('Site create synced but no site_fid found:', siteItem);
+    return;
+  }
+
+  const pendingItems = await db.outbox.toArray();
+
+  for (const pending of pendingItems) {
+    if (pending._id == null) continue;
+
+    const payload = pending.payload ?? {};
+    const payloadSiteFid = payload.site_fid ?? payload.siteFid ?? payload.siteRouteKey;
+
+    if (payloadSiteFid !== siteFid) continue;
+
+    await db.outbox.update(pending._id, {
+      payload: {
+        ...payload,
+        site_id: Number(serverSiteId),
+        siteId: Number(serverSiteId),
+        siteFid,
+        site_fid: siteFid,
+        siteRouteKey: String(serverSiteId),
+      },
+    });
+  }
+
+  const searchRows = await db.search.toArray();
+
+  for (const row of searchRows) {
+    const searchRow: any = row;
+
+    const rowSiteFid = row.site_fid ?? row.siteFid ?? row.siteRouteKey;
+
+    if (rowSiteFid === siteFid) {
+      await db.search.put({
+        ...searchRow,
+        site_id: Number(serverSiteId),
+        siteId: Number(serverSiteId),
+        site_fid: siteFid,
+        siteFid,
+        siteRouteKey: String(serverSiteId),
+      } as any);
+    }
+  }
+
+  const moriverRows = await db.moriver.toArray();
+
+  for (const row of moriverRows) {
+    const moriverRow: any = row;
+
+    const rowSiteFid = moriverRow.site_fid ?? moriverRow.siteFid ?? moriverRow.siteRouteKey;
+
+    if (rowSiteFid === siteFid) {
+      await db.moriver.put({
+        ...moriverRow,
+        site_id: Number(serverSiteId),
+        siteId: Number(serverSiteId),
+        site_fid: siteFid,
+        siteFid,
+        siteRouteKey: String(serverSiteId),
+      } as any);
+    }
   }
 }
 
@@ -124,7 +211,9 @@ export async function syncNow(token?: string): Promise<SyncResult> {
     return { tried: 0, ok: 0, errors: 1, conflicts: 0, draftSkip: 0 };
   }
 
-  const items = await db.outbox.orderBy('ts').toArray();
+  const items = (await db.outbox.toArray()).sort(
+    (a, b) => (tablePriority[a.tableName] ?? 99) - (tablePriority[b.tableName] ?? 99) || a.ts - b.ts
+  );
 
   if (!items.length) {
     return { tried: 0, ok: 0, errors: 0, conflicts: 0, draftSkip: 0 };
@@ -135,17 +224,24 @@ export async function syncNow(token?: string): Promise<SyncResult> {
   let conflicts = 0;
   let draftSkip = 0;
 
-  for (const item of items) {
+  for (const itemSnap of items) {
     try {
-      if (!item.tableName) {
-        console.warn('Skipping outbox item with missing tableName', item);
+      if (!itemSnap.tableName) {
+        console.warn('Skipping outbox item with missing tableName', itemSnap);
         errors++;
         continue;
       }
 
-      if (item._id == null) {
-        console.warn('Skipping outbox item without _id:', item);
+      if (itemSnap._id == null) {
+        console.warn('Skipping outbox item without _id:', itemSnap);
         errors++;
+        continue;
+      }
+
+      const item = await db.outbox.get(itemSnap._id);
+
+      if (!item) {
+        console.log('Outbox item already removed, skipping:', itemSnap._id);
         continue;
       }
 
@@ -181,6 +277,7 @@ export async function syncNow(token?: string): Promise<SyncResult> {
           });
         });
 
+        await patchSiteChildrenAfterCreate(item, res);
         await patchSearchChildrenAfterCreate(item, res);
       } else if (res.status === 'conflict') {
         conflicts++;
@@ -199,7 +296,7 @@ export async function syncNow(token?: string): Promise<SyncResult> {
         });
       }
     } catch (err) {
-      console.error('Sync error:', item, err);
+      console.error('Sync error:', itemSnap, err);
       errors++;
     }
   }

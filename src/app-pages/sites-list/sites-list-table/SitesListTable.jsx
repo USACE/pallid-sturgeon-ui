@@ -24,7 +24,10 @@ const SitesListTable = connect(
   ({ doModalOpen, doDomainBendRnFetch, sitesData, exportData }) => {
     const handleAddButton = () => {
       doModalOpen(SitesFormModal);
-      doDomainBendRnFetch();
+
+      if (navigator.onLine) {
+        doDomainBendRnFetch();
+      }
     };
 
     return (
