@@ -1,0 +1,50 @@
+services: 
+    #api:
+    #    image: pallid-sturgeon-api:latest
+    #    env_file: ./envvars.list
+    #    ports:
+    #      - "700:80"
+    #      - "701:8080"
+    # --------------------------------
+    api:
+        build: 
+            context: ./api/.
+            dockerfile: Dockerfile
+        develop:
+            watch:
+            - action: rebuild
+            path: ./api
+            target: /go/src/app
+        env_file: ./envvars.list
+        entrypoint: /go/bin/pallid_sturgeon_api
+        ports:
+          - "700:80"
+          - "701:8080"
+    # --------------------------------
+    apache:
+        build: ./httpd/.
+        ports:
+            # - 80:80
+            - 443:443
+        volumes:
+            - ./htdocs:/usr/local/apache2/htdocs
+    # --------------------------------
+    auth:
+        build: ./keycloak/.
+        command: ["start","--auto-build", "--features-disabled=admin2"]  
+        environment:
+            - KEYCLOAK_ADMIN=admin
+            - KEYCLOAK_ADMIN_PASSWORD=admin
+            - KC_FEATURES=admin-fine-grained-authz
+            - KC_HOSTNAME=dev2.crrel.mil
+            - KC_PROXY=edge
+            - KC_HTTP_RELATIVE_PATH=/auth
+            - KC_HTTPS_KEY_STORE_FILE=/conf/server.keystore
+            - KC_HTTPS_KEY_STORE_PASSWORD=testme
+            - KC_HTTP_ENABLED=true
+        ports:
+           - 8081:8080
+           - 8443:8443
+        volumes:
+            - ./kdata:/opt/keycloak/data
+      # --------------------------------

@@ -35,6 +35,7 @@ export default ({ mode }) => {
       sourcemap: true,
     },
     server: {
+      allowedHosts: ['host.docker.internal'],
       open: true,
       host: true,
       port: 3000,
