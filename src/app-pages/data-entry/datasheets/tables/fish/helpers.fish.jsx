@@ -59,6 +59,7 @@ export const getFishColumns = ({
       size: 200,
       meta: {
         type: 'combobox',
+        required: true,
         options: CreateComboboxOptions(speciesOptions),
       },
     }),
