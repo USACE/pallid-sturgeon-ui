@@ -5,13 +5,6 @@ import { decimalNumberRegex } from '@src/utils/regex';
 import { mdiAlert } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
 
-const warningText = (
-  <p>
-    <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
-    {'Length entered is > 1600'}
-  </p>
-);
-
 const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
@@ -98,7 +91,12 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
         type='number'
         value={value ?? ''}
       />
-      {showWarning && warningText}
+      {showWarning && (
+        <p>
+          <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+          {'Length entered is > 1600'}
+        </p>
+      )}
     </div>
   );
 });
