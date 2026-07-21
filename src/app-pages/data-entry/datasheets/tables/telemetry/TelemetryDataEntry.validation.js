@@ -1,12 +1,11 @@
 import { ValidationMessages } from '@src/utils/enums';
-// import { latRegex, lngRegex } from '@src/utils/regex';
 import * as yup from 'yup';
 
 export const telemetryDataEntrySchema = yup.object().shape({
   seFid: yup.string().nullable(),
   tFid: yup.string().nullable(),
   bend: yup.string().when('searchTypeCode', {
-    is: (v) => v === 'RS',
+    is: (searchTypeCode) => searchTypeCode === 'RS',
     then: (schema) => schema.required(ValidationMessages.FieldRequired),
     otherwise: (schema) => schema.nullable(),
   }),
@@ -27,7 +26,7 @@ export const telemetryDataEntrySchema = yup.object().shape({
     .required(ValidationMessages.FieldRequired)
     .test({
       test: (value) => (Number(value) >= -100 && Number(value) <= -89) || Number(value) === 0,
-      message: 'Value must be between -100 and -89 degrees.  Enter 0 if unknown',
+      message: 'Value must be between -100 and -89 degrees. Enter 0 if unknown',
     }),
   spawnBehavior: yup.string().nullable(),
   positionConfidence: yup.number().required(ValidationMessages.FieldRequired),
@@ -52,7 +51,7 @@ export const getBaseDefaultValues = ({ baseData }) => ({
   project: baseData?.projectId ?? '',
   segment: baseData?.segmentId ?? '',
   season: baseData?.season ?? '',
-  bend: baseData?.bend ?? '',
+  // bend: baseData?.bend ?? '',
   sampleUnitType: baseData?.sampleUnitType ?? '',
   bendrn: baseData?.bendrn ?? '',
   bendrivermile: baseData?.bendRiverMile ?? '',
