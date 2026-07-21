@@ -58,12 +58,14 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   // Reset cell value if the field is disabled
   useEffect(() => {
-    const isDisabled = !isRequired;
+    // Avoid clearing during transient mount states before dependent fields are loaded.
+    if (species === undefined || count === undefined) return;
+
     if (isDisabled) {
       setValue(null);
       updateValue(null);
     }
-  }, [isRequired]);
+  }, [isDisabled]);
 
   useEffect(() => {
     if (Number(value) >= 1600) {
