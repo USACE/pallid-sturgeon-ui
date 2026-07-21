@@ -146,7 +146,7 @@ const FishDataEntry = connect(
       const lastRowData = data?.slice(-1)[0];
       // Format new row data
       const newRowData = {
-        ...lastRowData,
+        // ...lastRowData,
         fid: null, // Reset fid if copying a save data object
         fFid: fishFid,
         mrId: parentMrId,
@@ -154,6 +154,7 @@ const FishDataEntry = connect(
         mrFid: parentMrFid,
         species: lastRowData?.species,
         lengthType: lastRowData?.lengthType,
+        countF: 1,
         _status: OfflineStatuses.New,
       };
       setData((prev) => (prev ? [...prev, newRowData] : []));
