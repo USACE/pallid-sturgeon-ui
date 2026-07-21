@@ -49,6 +49,7 @@ const MissouriRiverDataEntryForm = connect(
   'selectDataEntryData',
   'selectLookupData',
   'selectRouteParams',
+  'selectDataEntryFishData',
   'selectDataEntryFishTotalCount',
   ({
     doUpdateBaseData,
@@ -59,6 +60,7 @@ const MissouriRiverDataEntryForm = connect(
     dataEntryData,
     lookupData,
     routeParams,
+    dataEntryFishData,
     dataEntryFishTotalCount,
   }) => {
     // Initialize GPS
@@ -253,8 +255,12 @@ const MissouriRiverDataEntryForm = connect(
       dataEntryData,
       fishCount: dataEntryFishTotalCount,
     });
+    const hasPDSG =
+      dataEntryFishData?.items?.some((item) => String(item?.species || '').trim().toUpperCase() === 'PDSG') ?? false;
+
     const schema = getMissouriRiverSchema({
       riverMile: getUpperLowerRiverMile(bend, segmentId),
+      hasPDSG,
     });
 
     // RHF Methods Config
@@ -1269,7 +1275,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocitybot1'
                     label='1-Velocity (bot)'
                     onChange={handleChange}
-                    required={gearReqFields.velocitybot1.includes(gearCode)}
+                    required={hasPDSG && gearReqFields.velocitybot1.includes(gearCode)}
                     readOnly={gearType === 'S' && !gearReqFields.velocitybot1.includes(gearCode)}
                     type='number'
                   />
@@ -1279,7 +1285,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity081'
                     label='1-Velocity (0.8 or 0.5)'
                     onChange={handleChange}
-                    required={gearReqFields.velocity081.includes(gearCode) || depth2 >= 1.2}
+                    required={hasPDSG && (gearReqFields.velocity081.includes(gearCode) || depth2 >= 1.2)}
                     readOnly={
                       gearType === 'S' &&
                       !gearReqFields.velocity081.includes(gearCode) &&
@@ -1304,7 +1310,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocitybot2'
                     label='2-Velocity (bot)'
                     onChange={handleChange}
-                    required={gearReqFields.velocitybot2.includes(gearCode)}
+                    required={hasPDSG && gearReqFields.velocitybot2.includes(gearCode)}
                     readOnly={gearType === 'S' && !gearReqFields.velocitybot2.includes(gearCode)}
                     type='number'
                   />
@@ -1314,7 +1320,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity082'
                     label='2-Velocity (0.8 or 0.5)'
                     onChange={handleChange}
-                    required={gearReqFields.velocity082.includes(gearCode) || depth2 >= 1.2}
+                    required={hasPDSG && (gearReqFields.velocity082.includes(gearCode) || depth2 >= 1.2)}
                     readOnly={
                       gearType === 'S' &&
                       !gearReqFields.velocity082.includes(gearCode) &&
@@ -1328,7 +1334,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity02or062'
                     label='2-Velocity (0.2 or 0.6)'
                     onChange={handleChange}
-                    required={gearReqFields.velocity02or062.includes(gearCode)}
+                    required={hasPDSG && gearReqFields.velocity02or062.includes(gearCode)}
                     readOnly={gearType === 'S' && !gearReqFields.velocity02or062.includes(gearCode)}
                     type='number'
                   />

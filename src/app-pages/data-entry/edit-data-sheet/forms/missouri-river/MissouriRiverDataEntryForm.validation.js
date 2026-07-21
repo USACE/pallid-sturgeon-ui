@@ -16,7 +16,7 @@ export const gearReqFields = {
   velocity02or062: ['GN18', 'GN81', 'GN14', 'GN41', 'OT04', 'TN', 'TLC1', 'TLC2', 'POT02'],
 };
 
-export const getMissouriRiverSchema = ({ riverMile }) =>
+export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false }) =>
   yup.object().shape(
     {
       fishCount: yup.number().nullable(),
@@ -345,7 +345,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when('gear', {
-          is: (val) => gearReqFields.velocitybot1.includes(val),
+          is: (val) => hasPDSG && gearReqFields.velocitybot1.includes(val),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -359,7 +359,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when(['depth2', 'gear'], {
-          is: (depth2, gear) => gearReqFields.velocity081.includes(gear) || depth2 >= 1.2,
+          is: (depth2, gear) => hasPDSG && (gearReqFields.velocity081.includes(gear) || depth2 >= 1.2),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -384,7 +384,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when('gear', {
-          is: (val) => gearReqFields.velocitybot2.includes(val),
+          is: (val) => hasPDSG && gearReqFields.velocitybot2.includes(val),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -398,7 +398,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when(['depth2', 'gear'], {
-          is: (depth2, gear) => gearReqFields.velocity082.includes(gear) || depth2 >= 1.2,
+          is: (depth2, gear) => hasPDSG && (gearReqFields.velocity082.includes(gear) || depth2 >= 1.2),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -412,7 +412,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when('gear', {
-          is: (val) => gearReqFields.velocity02or062.includes(val),
+          is: (val) => hasPDSG && gearReqFields.velocity02or062.includes(val),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
