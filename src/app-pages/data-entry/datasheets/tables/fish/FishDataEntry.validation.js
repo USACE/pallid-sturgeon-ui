@@ -1,7 +1,7 @@
 import { ValidationMessages } from '@src/utils/enums';
 import * as yup from 'yup';
 
-export const notRequiredSpeciesArr = ['NFSH', 'NDNF', 'CAN', 'CNFH'];
+export const notRequiredSpeciesArr = ['NFSH', 'NDNF', 'CNA', 'CNFH'];
 export const gearMbArr = ['LDN500', 'LDN750', 'LDN1000'];
 
 export const FishDataEntrySchema = ({ gear, data }) =>
