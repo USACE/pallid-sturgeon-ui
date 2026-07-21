@@ -4,6 +4,8 @@ import ModalHeader from './PrimaryModal.header';
 import useListener from '@src/customHooks/useListener';
 import classNames from 'classnames';
 
+import './modal.scss';
+
 const sizeMap = {
   sm: false,
   md: true,
@@ -45,7 +47,7 @@ const ModalContent = connect(
         {...customProps}
       >
         <ModalHeader title={title} />
-        <div id='primary-modal-content' className='primary-modal-content'>
+        <div id='primary-modal-content' className='primary-modal-content modal-body'>
           {children}
         </div>
       </Modal>
