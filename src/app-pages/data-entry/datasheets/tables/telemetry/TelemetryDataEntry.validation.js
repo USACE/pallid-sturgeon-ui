@@ -1,12 +1,11 @@
 import { ValidationMessages } from '@src/utils/enums';
-// import { latRegex, lngRegex } from '@src/utils/regex';
 import * as yup from 'yup';
 
 export const telemetryDataEntrySchema = yup.object().shape({
   seFid: yup.string().nullable(),
   tFid: yup.string().nullable(),
   bend: yup.string().when('searchTypeCode', {
-    is: (v) => v === 'RS',
+    is: (searchTypeCode) => searchTypeCode === 'RS',
     then: (schema) => schema.required(ValidationMessages.FieldRequired),
     otherwise: (schema) => schema.nullable(),
   }),
@@ -52,7 +51,7 @@ export const getBaseDefaultValues = ({ baseData }) => ({
   project: baseData?.projectId ?? '',
   segment: baseData?.segmentId ?? '',
   season: baseData?.season ?? '',
-  bend: baseData?.bend ?? '',
+  // bend: baseData?.bend ?? '',
   sampleUnitType: baseData?.sampleUnitType ?? '',
   bendrn: baseData?.bendrn ?? '',
   bendrivermile: baseData?.bendRiverMile ?? '',
