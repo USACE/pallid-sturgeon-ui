@@ -97,8 +97,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
           message:
             "Gear = LDN490, LDN749 or LDN1000, NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'",
         })
-        .nullable()
-        .notRequired(),
+        .required(ValidationMessages.FieldRequired),
       lengthType: yup.string().required(ValidationMessages.FieldRequired),
       length: yup
         .number()
