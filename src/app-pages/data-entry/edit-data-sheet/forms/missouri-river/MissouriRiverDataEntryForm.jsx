@@ -275,6 +275,8 @@ const MissouriRiverDataEntryForm = connect(
       reset,
     } = methods;
 
+    const shouldAutoValidate = submitCount > 0;
+
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
 
@@ -400,9 +402,9 @@ const MissouriRiverDataEntryForm = connect(
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
 
-        setValue(`${type}Latitude`, best.lat, { shouldValidate: true });
-        setValue(`${type}Longitude`, best.lng, { shouldValidate: true });
-        setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+        setValue(`${type}Latitude`, best.lat, { shouldValidate: shouldAutoValidate });
+        setValue(`${type}Longitude`, best.lng, { shouldValidate: shouldAutoValidate });
+        setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: shouldAutoValidate });
 
         window.alert(
           `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
@@ -623,14 +625,14 @@ const MissouriRiverDataEntryForm = connect(
         normalize(setSite3),
       ];
       if (split.join('') !== currentDigits.join('')) {
-        setValue('microStructure', split[0] || '', { shouldValidate: true });
-        setValue('structureFlow', split[1] || '', { shouldValidate: true });
-        setValue('structureMod', split[2] || '', { shouldValidate: true });
-        setValue('setSite1', split[3] || '', { shouldValidate: true });
-        setValue('setSite2', split[4] || '', { shouldValidate: true });
-        setValue('setSite3', split[5] || '', { shouldValidate: true });
+        setValue('microStructure', split[0] || '', { shouldValidate: shouldAutoValidate });
+        setValue('structureFlow', split[1] || '', { shouldValidate: shouldAutoValidate });
+        setValue('structureMod', split[2] || '', { shouldValidate: shouldAutoValidate });
+        setValue('setSite1', split[3] || '', { shouldValidate: shouldAutoValidate });
+        setValue('setSite2', split[4] || '', { shouldValidate: shouldAutoValidate });
+        setValue('setSite3', split[5] || '', { shouldValidate: shouldAutoValidate });
       }
-    }, [micro]);
+    }, [micro, shouldAutoValidate]);
 
     // Sync Digits (Micro Structure, Structure Flow, Structure Mod, Set Site 1, Set Site 2, Set Site 3) -> Micro code
     useEffect(() => {
@@ -647,39 +649,39 @@ const MissouriRiverDataEntryForm = connect(
       const joined = digits.join('');
       if (joined !== micro) {
         setValue('micro', joined, {
-          shouldValidate: true,
+          shouldValidate: shouldAutoValidate,
           shouldDirty: false,
         });
       }
-    }, [microStructure, structureFlow, structureMod, setSite1, setSite2, setSite3]);
+    }, [microStructure, structureFlow, structureMod, setSite1, setSite2, setSite3, shouldAutoValidate]);
 
     // Set Structure Flow and SetSite1 options and reset values when necessary
     useEffect(() => {
-      setValue('setSite1', '', { shouldValidate: true });
-      setValue('structureFlow', '', { shouldValidate: true });
+      setValue('setSite1', '', { shouldValidate: shouldAutoValidate });
+      setValue('structureFlow', '', { shouldValidate: shouldAutoValidate });
       setSs1Options(getSs1Options(microStructure));
       setStructureFlowOptions(getStructureFlowOptions(microStructure));
-    }, [microStructure]);
+    }, [microStructure, shouldAutoValidate]);
 
     // Set Structure Mod options and reset Structure Mod value when necessary
     useEffect(() => {
-      setValue('structureMod', '', { shouldValidate: true });
+      setValue('structureMod', '', { shouldValidate: shouldAutoValidate });
       setStructureModOptions(getStructureModOptions(structureFlow));
-    }, [structureFlow]);
+    }, [structureFlow, shouldAutoValidate]);
 
     // Set SetSite1 options and reset SetSite1 value when necessary
     useEffect(() => {
-      setValue('setSite2', '', { shouldValidate: true });
+      setValue('setSite2', '', { shouldValidate: shouldAutoValidate });
       setSs2Options(getSs2Options(setSite1));
-    }, [setSite1]);
+    }, [setSite1, shouldAutoValidate]);
 
     // Both Velocity (bot) 1 and Velocity (0.8 or 0.5) 1 must be filled out before setting the start time when using a Larval Drift Net gear.
     useEffect(() => {
       if (gearCode.startsWith('LDN') && velocitybot1 === null && velocity081 === null) {
         // Reset start time under these conditions
-        setValue('startTime', '', { shouldValidate: true });
+        setValue('startTime', '', { shouldValidate: shouldAutoValidate });
       }
-    }, [gearCode, velocitybot1, velocity081]);
+    }, [gearCode, velocitybot1, velocity081, shouldAutoValidate]);
 
     useEffect(() => {
       if (gearCode) {
@@ -718,40 +720,40 @@ const MissouriRiverDataEntryForm = connect(
       if (structureFlowOptions.length > 0) {
         if (dataEntryData?.structureFlow) {
           setValue('structureFlow', dataEntryData?.structureFlow);
-          trigger('structureFlow');
+          shouldAutoValidate && trigger('structureFlow');
         }
       }
-    }, [dataEntryData, structureFlowOptions]);
+    }, [dataEntryData, structureFlowOptions, shouldAutoValidate, trigger]);
 
     // Populate Structure Mod Dropdown Value from Existing API Data
     useEffect(() => {
       if (structureModOptions.length > 0) {
         if (dataEntryData?.structureMod) {
           setValue('structureMod', dataEntryData?.structureMod);
-          trigger('structureMod');
+          shouldAutoValidate && trigger('structureMod');
         }
       }
-    }, [dataEntryData, structureModOptions]);
+    }, [dataEntryData, structureModOptions, shouldAutoValidate, trigger]);
 
     // Populate Set Site 1 Dropdown Value from Existing API Data
     useEffect(() => {
       if (ss1Options.length > 0) {
         if (dataEntryData?.setSite1) {
           setValue('setSite1', dataEntryData?.setSite1);
-          trigger('setSite1');
+          shouldAutoValidate && trigger('setSite1');
         }
       }
-    }, [dataEntryData, ss1Options]);
+    }, [dataEntryData, ss1Options, shouldAutoValidate, trigger]);
 
     // Populate Set Site 2 Dropdown Value from Existing API Data
     useEffect(() => {
       if (ss2Options.length > 0) {
         if (dataEntryData?.setSite2) {
           setValue('setSite2', dataEntryData?.setSite2);
-          trigger('setSite2');
+          shouldAutoValidate && trigger('setSite2');
         }
       }
-    }, [dataEntryData, ss2Options]);
+    }, [dataEntryData, ss2Options, shouldAutoValidate, trigger]);
 
     // netrivermile in baseData
     useEffect(() => {
