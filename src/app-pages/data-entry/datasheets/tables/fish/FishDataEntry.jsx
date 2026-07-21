@@ -66,6 +66,7 @@ const FishDataEntry = connect(
     const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
     const [data, setData] = useState(rowData);
+    const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
 
     // Get Missouri River Draft Data
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
@@ -189,38 +190,61 @@ const FishDataEntry = connect(
     );
 
     const handleSubmitAll = async () => {
+      setValidationErrorRowCount(0);
+
       const rowsToProcess = data?.filter(
         (row) => row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited
       );
 
       try {
-        rowsToProcess?.forEach(async (item) => {
-          const isNew = !item.fid;
-          const clientId = item.clientId ?? crypto.randomUUID();
-          const parentRowMrId = item.mrId ?? item.mr_id;
-          const parentRowMrFid = item.mrFid ?? item.mr_fid;
-          const fishFid = item.fFid ?? item.f_fid;
+        const rowPayloads =
+          rowsToProcess?.map((item) => {
+            const isNew = !item.fid;
+            const clientId = item.clientId ?? crypto.randomUUID();
+            const parentRowMrId = item.mrId ?? item.mr_id;
+            const parentRowMrFid = item.mrFid ?? item.mr_fid;
+            const fishFid = item.fFid ?? item.f_fid;
 
-          const payload = {
-            ...item,
-            clientId: clientId,
-            mr_id: parentRowMrId,
-            mrId: parentRowMrId,
-            mr_fid: parentRowMrFid,
-            mrFid: parentRowMrFid,
-            fFid: fishFid,
-            _status: OfflineStatuses.Queued,
-            version: item.version ?? 0,
-            updatedAt: new Date().toISOString(),
-            // Format values
-            countF: item?.countF !== null && item?.countF !== '' ? Number(item?.countF) : null,
-            length: item?.['length'] !== null && item?.['length'] !== '' ? Number(item?.['length']) : null,
-            condition: item?.condition !== null && item?.condition !== '' ? Number(item?.condition) : null,
-            weight: item?.weight !== null && item?.weight !== '' ? Number(item?.weight) : null,
-          };
+            const payload = {
+              ...item,
+              clientId: clientId,
+              mr_id: parentRowMrId,
+              mrId: parentRowMrId,
+              mr_fid: parentRowMrFid,
+              mrFid: parentRowMrFid,
+              fFid: fishFid,
+              _status: OfflineStatuses.Queued,
+              version: item.version ?? 0,
+              updatedAt: new Date().toISOString(),
+              // Format values
+              countF: item?.countF !== null && item?.countF !== '' ? Number(item?.countF) : null,
+              length: item?.['length'] !== null && item?.['length'] !== '' ? Number(item?.['length']) : null,
+              condition: item?.condition !== null && item?.condition !== '' ? Number(item?.condition) : null,
+              weight: item?.weight !== null && item?.weight !== '' ? Number(item?.weight) : null,
+            };
 
-          await schema.validate(payload, { abortEarly: false });
+            return { item, payload, isNew };
+          }) ?? [];
 
+        // Validate all rows first; if any fail, stay on Fish and do not submit any rows.
+        const validationResults = await Promise.all(
+          rowPayloads.map(async ({ payload }) => {
+            try {
+              await schema.validate(payload, { abortEarly: false });
+              return true;
+            } catch {
+              return false;
+            }
+          })
+        );
+        const invalidRowCount = validationResults.filter((isValid) => !isValid).length;
+
+        if (invalidRowCount > 0) {
+          setValidationErrorRowCount(invalidRowCount);
+          return;
+        }
+
+        for (const { item, payload, isNew } of rowPayloads) {
           try {
             if (online) {
               if (isNew) {
@@ -235,7 +259,7 @@ const FishDataEntry = connect(
             console.error('Fish API failed, queuing offline:', error);
             isNew ? await createData('fish', payload) : await updateData('fish', payload);
           }
-        });
+        }
 
         setData((prev) =>
           prev.map((row) =>
@@ -307,6 +331,13 @@ const FishDataEntry = connect(
         <Button className={saveBtnClasses} onClick={() => handleSubmitAll()} type='button'>
           Submit
         </Button>
+        {validationErrorRowCount > 0 && (
+          <p aria-live='polite' className='margin-y-1 text-secondary-dark'>
+            {validationErrorRowCount} row{validationErrorRowCount === 1 ? '' : 's'}
+            {validationErrorRowCount === 1 ? ' has ' : ' have '}validation errors that must be corrected before data can
+            be submitted.
+          </p>
+        )}
       </FormProvider>
     );
   }
