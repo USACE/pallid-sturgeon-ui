@@ -20,7 +20,7 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const debouncedUpdateRef = useRef();
 
   const isRequired = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
-  const isDisabled = !isRequired;
+  const isDisabled = Number(count) > 1;
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
