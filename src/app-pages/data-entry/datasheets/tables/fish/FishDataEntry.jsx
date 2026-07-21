@@ -67,6 +67,7 @@ const FishDataEntry = connect(
     const [tableKey, setTableKey] = useState(0);
     const [data, setData] = useState(rowData);
     const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
+    const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
 
     // Get Missouri River Draft Data
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
@@ -190,6 +191,7 @@ const FishDataEntry = connect(
     );
 
     const handleSubmitAll = async () => {
+      setIsSubmitAttempted(true);
       setValidationErrorRowCount(0);
 
       const rowsToProcess = data?.filter(
@@ -324,6 +326,7 @@ const FishDataEntry = connect(
           removeMultipleRows={handleRemoveMultipleRows}
           addMultipleRows={handleAddMultipleRows}
           rowErrorCallback={() => {}}
+          showValidationErrors={isSubmitAttempted}
           tableVersion='FishTable'
           updateSourceData={handleUpdateData}
           validationSchema={FishDataEntrySchema({ gear, data })}

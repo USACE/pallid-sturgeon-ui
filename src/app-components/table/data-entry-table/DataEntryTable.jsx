@@ -35,6 +35,7 @@ const DataEntryTable = ({
   placeholderText,
   placeholderClick,
   ignoredHeaders,
+  showValidationErrors = true,
 }) => {
   const [rowErrors, setRowErrors] = useState();
 
@@ -155,7 +156,7 @@ const DataEntryTable = ({
     },
   });
   return (
-    <>
+    <div className={showValidationErrors ? 'show-validation-errors' : ''}>
       <div
         style={{ minWidth: '600px', maxWidth: `${table.getTotalSize() > 1500 ? 'auto' : table.getTotalSize() + 'px'}` }}
       >
@@ -254,16 +255,16 @@ const DataEntryTable = ({
               {table.getRowModel()?.rows?.map((row) => (
                 <tr
                   key={row.id}
-                  className={`${row.getIsSelected() ? 'selected-row' : ''} ${rowErrors && rowErrors?.[row.id] && Object.keys(rowErrors[row.id])?.length !== 0 ? 'row-error' : ''}`}
+                  className={`${row.getIsSelected() ? 'selected-row' : ''} ${showValidationErrors && rowErrors && rowErrors?.[row.id] && Object.keys(rowErrors[row.id])?.length !== 0 ? 'row-error' : ''}`}
                 >
                   {row.getVisibleCells().map((cell) => {
                     const cellError = rowErrors?.[row.id]?.[cell.column.id];
-                    const isCellError = cellError !== undefined;
+                    const isCellError = showValidationErrors && cellError !== undefined;
                     const cellClasses = isCellError ? 'cell-error' : '';
                     return (
                       <td className={cellClasses} key={cell.id} style={{ width: cell.column.getSize() + 'px' }}>
                         <div className='d-flex align-items-center'>
-                          {cellError && (
+                          {showValidationErrors && cellError && (
                             <Tooltip
                               iconSize='large'
                               place='bottom'
@@ -333,7 +334,7 @@ const DataEntryTable = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
