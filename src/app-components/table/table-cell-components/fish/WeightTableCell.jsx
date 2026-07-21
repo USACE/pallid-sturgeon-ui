@@ -5,13 +5,6 @@ import { decimalNumberRegex } from '@src/utils/regex';
 import { mdiAlert } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
 
-const warningText = (
-  <p>
-    <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
-    Weight is required for a Pallid Sturgeon
-  </p>
-);
-
 const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
@@ -67,7 +60,7 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
     } else {
       setShowWarning(false);
     }
-  }, [species, project, setShowWarning]);
+  }, [value, species, project]);
 
   return (
     <div>
@@ -87,7 +80,12 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
         type='number'
         value={value ?? ''}
       />
-      {showWarning && warningText}
+      {showWarning && (
+        <p>
+          <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+          Weight is required for a Pallid Sturgeon
+        </p>
+      )}
     </div>
   );
 });
