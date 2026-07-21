@@ -808,7 +808,7 @@ const MissouriRiverDataEntryForm = connect(
             </div>
           </div>
         )}
-        <div className='container-fluid margin-top-1'>
+        <div className='container-fluid test-moriver margin-top-1'>
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>
               <TextInput name='mrFid' label='MR Field ID (Date-Time-MR#)' readOnly />
@@ -844,10 +844,6 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <TextInput name='subsample' label='Subsample' type='number' onChange={handleChange} required />
-              {/* @TODO: "Next Subsample" button counts up by 1 */}
-              <Button className={saveBtnClasses} onClick={() => {}} type='button'>
-                Next Subsample
-              </Button>
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <TextInput
@@ -858,10 +854,6 @@ const MissouriRiverDataEntryForm = connect(
                 onChange={handleChange}
                 required
               />
-              {/* @TODO: "Next Pass" button counts up by 1 */}
-              <Button className={saveBtnClasses} onClick={() => {}} type='button'>
-                Next Pass
-              </Button>
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <SelectInput name='subsamplen' label='Subsample R/N' onChange={handleChange} required>

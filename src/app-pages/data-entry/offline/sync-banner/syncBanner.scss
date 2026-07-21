@@ -1,0 +1,43 @@
+@use '@styles/_variables' as *;
+@use '@styles/_theme' as theme;
+
+.sync-bar {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+}
+
+.sync-status {
+  padding: 3px 10px;
+  border-radius: 10%;
+  border: 1px solid #ccc;
+  font-weight: 500;
+  margin-right: 5px;
+  color: white;
+
+  &.online {
+    background: #0dac28;
+  }
+
+  &.offline {
+    background: #bb3b3b;
+  }
+}
+
+.sync-button {
+  padding: 5px 12px;
+  border-radius: 10%;
+  border: 1px solid #ddd;
+  background-color: #f7f7f7;
+  cursor: not-allowed;
+
+  &.syncing {
+    background-color: #ddd;
+    cursor: not-allowed;
+  }
+}
+
+.sync-message {
+  font-size: 12;
+  color: #555;
+}

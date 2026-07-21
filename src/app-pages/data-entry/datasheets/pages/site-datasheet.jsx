@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 
 import Card from '@components/card';
 import TabContainer from '@components/tab/tabContainer';
-import DataHeader from '../components/dataHeader';
+import DataHeader from '../components/data-header/dataHeader';
 
 import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
@@ -11,6 +11,8 @@ import SearchDraftDsTable from '../../edit-data-sheet/forms/search-effort/search
 import Breadcrumb from '@src/app-components/breadcrumb';
 import { getSiteRouteParams, isOfflineSiteRouteKey } from '../../offline/site-route-key';
 import { db } from '../../offline/db';
+
+import '../../dataentry.scss';
 
 const SiteDatasheet = connect(
   'doSitesDatasheetLoadData',

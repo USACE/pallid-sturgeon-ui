@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 
 import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
 import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
-import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
+import DataHeader from '@src/app-pages/data-entry/datasheets/components/data-header/dataHeader';
 import TextInput from '@components/new-inputs/text-input/TextInput';
 import TextArea from '@components/new-inputs/text-area/TextArea';
 import Checkbox from '@components/check-box/Checkbox';

@@ -1,4 +1,5 @@
 @use '@styles/_variables';
+@use '@styles/_theme' as theme;
 
 body:has(.usa-modal-overlay) {
   overflow: hidden;
@@ -8,8 +9,16 @@ div.usa-modal__content div.usa-modal__main {
   max-width: none;
 }
 
+//background-color: var(--color-modal);
+
+.primary-modal-content {
+  &.modal-body {
+    background-color: var(--color-modal) !important;
+  }
+}
+
 div.usa-modal {
-  color: inherit;
+  color: var(--color-modal-text);
   font-size: inherit;
   font-family: inherit;
   line-height: inherit;
@@ -57,7 +66,7 @@ div.usa-modal {
 
   .primary-modal-header,
   .primary-modal-footer {
-    background-color: variables.$color-white;
+    background-color: var(--color-modal);
     display: flex;
     position: sticky;
     z-index: 1000;
