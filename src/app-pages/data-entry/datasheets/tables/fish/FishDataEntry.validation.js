@@ -99,7 +99,11 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         })
         .required(ValidationMessages.FieldRequired),
       lengthType: yup.string().when('length', {
-        is: (length) => length !== null && length !== undefined && length !== '',
+        is: (length) =>
+          length !== null &&
+          length !== undefined &&
+          length !== '' &&
+          Number(length) !== 0,
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
