@@ -77,7 +77,7 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
           borderColor: 'hsl(0, 0%, 80%)',
           cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
         }}
-        type='number'
+        type='text'
         value={value ?? ''}
       />
       {showWarning && (

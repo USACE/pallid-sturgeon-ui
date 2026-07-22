@@ -90,7 +90,7 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
           borderColor: 'hsl(0, 0%, 80%)',
           cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
         }}
-        type='number'
+        type='text'
         value={value ?? ''}
       />
       {showWarning && (
