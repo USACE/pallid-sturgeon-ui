@@ -180,6 +180,8 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             const hasDecimal = tagnumber?.includes('.');
             if (hasDecimal) {
               return !(tagnumber?.length > 14);
+            } else {
+              return true;
             }
           },
           message:
