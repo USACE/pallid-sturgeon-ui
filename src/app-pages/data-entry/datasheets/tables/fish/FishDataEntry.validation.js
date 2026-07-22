@@ -180,12 +180,10 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             const hasDecimal = tagnumber?.includes('.');
             if (hasDecimal) {
               return !(tagnumber?.length > 14);
-            } else {
-              return !(tagnumber?.length > 10);
             }
           },
           message:
-            'Tag Number is no more than 10 digits when there is no decimal and no more than 14 digits when there is a decimal.',
+            'Tag Number may be no more than 14 digits when there is a decimal.',
         })
         .test({
           test: (tagnumber) => {
