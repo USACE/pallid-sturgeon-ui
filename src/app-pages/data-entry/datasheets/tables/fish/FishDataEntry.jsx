@@ -22,9 +22,32 @@ import '@pages/data-entry/dataentry.scss';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
-const getNextSequence = (data, mrFid) => {
-  const existing = data.filter((item) => item.mrFid === mrFid);
-  return existing.length + 1;
+
+// Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
+// localRows never seems to return anything(?) - feel free to change if there is an issue.
+// const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
+// const dbRows = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
+// const sequence = localRows.length + dbRows.length + 1;
+const getNextFishFid = (data, parentMrFid) => {
+  const existing = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
+
+  const maxSequence = existing.reduce((currentMax, row) => {
+    const fieldId = row?.fFid ?? '';
+    const sequencePart = String(fieldId).split('-').pop();
+    const sequenceNumber = Number(sequencePart);
+
+    if (Number.isFinite(sequenceNumber) && sequenceNumber > currentMax) {
+      return sequenceNumber;
+    }
+
+    return currentMax;
+  }, 0);
+
+  const nextSequence = maxSequence + 1;
+  const sequenceText = String(nextSequence).padStart(3, '0');
+  const fishFid = `${parentMrFid}-${sequenceText}`;
+
+  return fishFid;
 };
 
 const FishDataEntry = connect(
@@ -110,13 +133,7 @@ const FishDataEntry = connect(
     const handleAddRow = async () => {
       // Add default values here
       const base = getBaseDefaultValues({ baseData });
-
-      const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
-
-      const dbRows = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
-      const sequence = localRows.length + dbRows.length + 1;
-      const sequenceText = String(sequence).padStart(3, '0');
-      const fishFid = `${parentMrFid}-${sequenceText}`;
+      const fishFid = getNextFishFid(data ?? [], parentMrFid);
 
       const newRowData = {
         ...base,
@@ -139,9 +156,7 @@ const FishDataEntry = connect(
         window.alert('Save the Missouri River draft first before copying Fish.');
         return;
       }
-      const sequence = getNextSequence(data ?? [], parentMrFid);
-      const sequenceText = String(sequence).padStart(3, '0');
-      const fishFid = `${parentMrFid}-${sequenceText}`;
+      const fishFid = getNextFishFid(data ?? [], parentMrFid);
       // Grab last object from data array
       const lastRowData = data?.slice(-1)[0];
       // Format new row data
