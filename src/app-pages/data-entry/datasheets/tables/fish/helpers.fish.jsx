@@ -63,21 +63,20 @@ export const getFishColumns = ({
         options: CreateComboboxOptions(speciesOptions),
       },
     }),
+    columnHelper.accessor('length', {
+      header: 'Length(mm)',
+      cell: LengthTableCell,
+      size: 200,
+      meta: { type: 'number' },
+    }),
     columnHelper.accessor('lengthType', {
       header: 'Length Type',
       cell: TableCell,
       size: 200,
       meta: {
         type: 'select',
-        required: true,
         options: createDropdownOptions(lengthTypes),
       },
-    }),
-    columnHelper.accessor('length', {
-      header: 'Length(mm)',
-      cell: LengthTableCell,
-      size: 200,
-      meta: { type: 'number' },
     }),
     columnHelper.accessor('weight', {
       header: 'Weight(grams)',

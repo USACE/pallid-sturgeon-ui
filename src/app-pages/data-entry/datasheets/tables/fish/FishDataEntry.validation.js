@@ -98,7 +98,11 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             "Gear = LDN490, LDN749 or LDN1000, NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'",
         })
         .required(ValidationMessages.FieldRequired),
-      lengthType: yup.string().required(ValidationMessages.FieldRequired),
+      lengthType: yup.string().when('length', {
+        is: (length) => length !== null && length !== undefined && length !== '',
+        then: (schema) => schema.required(ValidationMessages.FieldRequired),
+        otherwise: (schema) => schema.nullable().notRequired(),
+      }),
       length: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
