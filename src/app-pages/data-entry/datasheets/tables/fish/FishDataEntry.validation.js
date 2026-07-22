@@ -69,7 +69,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
           },
           message: 'Cannot have more than one record for the species NDNF',
         })
-        // If Gear = LDN490, LDN749 or LDN1000, then NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'
+        // If Gear = LDN500, LDN750, or LDN1000, then NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'
         .test({
           test: (species, { parent: { panelHook } }) => {
             // If no species value selected OR one or less fish rows, do not validate
@@ -82,7 +82,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             if (gearMbArr.includes(gear) && species === 'NFSH') {
               // If only one NSFH, do not validate
               if (data?.filter((row) => row.species === 'NFSH')?.length === 1) return true;
-              // Cannot have more than 2 NFSH species if Gear = LDN490, LDN749 or LDN1000, throw error
+              // Cannot have more than 2 NFSH species if Gear = LDN500, LDN750 or LDN1000, throw error
               if (data?.filter((row) => row.species === 'NFSH')?.length > 2) return false;
               if (panelHook === 'M') {
                 return data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'M')?.length === 1;
@@ -95,7 +95,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             return true;
           },
           message:
-            "Gear = LDN490, LDN749 or LDN1000, NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'",
+            "Gear = LDN500, LDN750, or LDN1000, NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'",
         })
         .required(ValidationMessages.FieldRequired),
       lengthType: yup.string().when('length', {
