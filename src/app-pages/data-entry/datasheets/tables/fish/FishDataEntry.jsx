@@ -332,6 +332,7 @@ const FishDataEntry = connect(
           addRow={handleAddRow}
           columns={tableColumns}
           data={data}
+          enablePagination={false}
           initialTableState={{}}
           key={tableKey}
           placeholderClick={handleAddRow}

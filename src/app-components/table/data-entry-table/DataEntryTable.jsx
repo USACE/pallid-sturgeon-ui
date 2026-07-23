@@ -36,6 +36,7 @@ const DataEntryTable = ({
   placeholderClick,
   ignoredHeaders,
   showValidationErrors = true,
+  enablePagination = true,
 }) => {
   const [rowErrors, setRowErrors] = useState();
 
@@ -115,20 +116,23 @@ const DataEntryTable = ({
     data: data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(enablePagination ? { getPaginationRowModel: getPaginationRowModel() } : {}),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    manualPagination: false,
+    ...(enablePagination ? { manualPagination: false, autoResetPageIndex: false } : {}),
     enableRowSelection: true,
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
-    autoResetPageIndex: false,
     initialState: {
       ...initialTableState,
-      pagination: {
-        pageIndex: 0,
-        pageSize: 10,
-      },
+      ...(enablePagination
+        ? {
+            pagination: {
+              pageIndex: 0,
+              pageSize: 10,
+            },
+          }
+        : {}),
       sorting,
     },
     meta: {
@@ -287,7 +291,7 @@ const DataEntryTable = ({
           </Table>
         </div>
       </div>
-      {table.getCoreRowModel().rows.length >= 11 && (
+      {enablePagination && table.getCoreRowModel().rows.length >= 11 && (
         <div className='pn-table-container'>
           <div className='pagination-container'>
             <div className='d-flex justify-content-center usa-prose'>
