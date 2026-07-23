@@ -235,10 +235,10 @@ const FishDataEntry = connect(
               version: item.version ?? 0,
               updatedAt: new Date().toISOString(),
               // Format values
-              countF: item?.countF !== null && item?.countF !== '' ? Number(item?.countF) : null,
-              length: item?.['length'] !== null && item?.['length'] !== '' ? Number(item?.['length']) : null,
-              condition: item?.condition !== null && item?.condition !== '' ? Number(item?.condition) : null,
-              weight: item?.weight !== null && item?.weight !== '' ? Number(item?.weight) : null,
+              countF: item?.countF == null || item?.countF === '' ? null : Number(item?.countF),
+              length: item?.['length'] == null || item?.['length'] === '' ? null : Number(item?.['length']),
+              condition: item?.condition == null || item?.condition === '' ? null : Number(item?.condition),
+              weight: item?.weight == null || item?.weight === '' ? null : Number(item?.weight),
             };
 
             return { item, payload, isNew };

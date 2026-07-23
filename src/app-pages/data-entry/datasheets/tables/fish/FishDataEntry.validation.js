@@ -99,18 +99,14 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         })
         .required(ValidationMessages.FieldRequired),
       lengthType: yup.string().when('length', {
-        is: (length) =>
-          length !== null &&
-          length !== undefined &&
-          length !== '' &&
-          Number(length) !== 0,
+        is: (length) => length !== null && length !== undefined && length !== '' && Number(length) !== 0,
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
       length: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .typeError(ValidationMessages.FieldRequired)
+        .typeError(ValidationMessages.FieldMustBeNumber)
         .min(0, 'Value cannot be negative')
         .max(9999, 'Value cannot exceed 9999')
         .when(['species', 'countF'], {
@@ -121,14 +117,15 @@ export const FishDataEntrySchema = ({ gear, data }) =>
       weight: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .typeError()
+        .typeError(ValidationMessages.FieldMustBeNumber)
         .min(0, 'Value cannot be negative')
         .nullable()
         .notRequired(),
       countF: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .typeError()
+        .typeError(ValidationMessages.FieldMustBeNumber)
+        .min(0, 'Value cannot be negative')
         .when('species', {
           is: (species) => !['NDNF', 'CNA', 'CNFH', 'NFSH'].includes(species),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
