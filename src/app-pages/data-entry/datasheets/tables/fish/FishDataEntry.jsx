@@ -328,9 +328,6 @@ const FishDataEntry = connect(
 
     return (
       <FormProvider {...methods}>
-        <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
-          Copy Last Row
-        </Button>
         <DataEntryTable
           addRow={handleAddRow}
           columns={tableColumns}
@@ -347,6 +344,9 @@ const FishDataEntry = connect(
           updateSourceData={handleUpdateData}
           validationSchema={FishDataEntrySchema({ gear, data })}
         />
+        <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
+          Copy Last Row
+        </Button>
         <Button className={saveBtnClasses} onClick={() => handleSubmitAll()} type='button'>
           Submit
         </Button>
