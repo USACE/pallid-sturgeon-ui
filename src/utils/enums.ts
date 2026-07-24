@@ -66,3 +66,8 @@ export const enum DataEntryStatuses {
   Draft = 1,
   Submitted = 2,
 }
+
+export const enum CssTheme {
+  Dark = 'dark',
+  Light = 'light',
+}

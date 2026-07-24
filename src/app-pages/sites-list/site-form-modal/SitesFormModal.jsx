@@ -14,47 +14,77 @@ import ErrorSummary from '@components/error-summary/ErrorSummary';
 import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
 import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
 
+import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+
 import { fieldOfficeTypes, projectTypes } from '@src/utils/enums';
 import { getSitesDefaultValues, sitesValidationSchema } from './SitesFormModal.validation';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 
 import '../sitesList.scss';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 
 const createDropdownOptions = (data) => {
   if (!data) return [];
 
-  return data.map((item) => {
-    const { code, description } = item;
-
-    return {
-      value: code,
-      text: description,
-    };
-  });
+  return data.map((item) => ({
+    value: item.code ?? item.value ?? item.year,
+    text: item.description ?? item.text ?? item.label ?? item.year,
+  }));
 };
 
 const SitesFormModal = connect(
   'doAddSite',
   'doUpdateSite',
+  'doUpdateUrl',
   'selectLookupData',
   'selectUserRole',
   'selectUsersData',
-  ({ doAddSite, doUpdateSite, lookupData, userRole, usersData, edit, data }) => {
-    const {
-      bendRiverMile: bendRiverMileData,
-      bendSelections: bends,
-      chutes,
-      fieldOffices,
-      fieldOfficeSegments,
-      projects,
-      reach: reachData,
-      sampleUnitTypes,
-      seasons,
-      segments,
-      years,
-    } = lookupData;
+  ({ doAddSite, doUpdateSite, doUpdateUrl, lookupData, userRole, usersData, edit, data }) => {
     const [bendOptions, setBendOptions] = useState([]);
     const [segmentOptions, setSegmentOptions] = useState([]);
+    const [offlineLookups, setOfflineLookups] = useState({});
+
+    useEffect(() => {
+      async function loadOfflineLookups() {
+        const lookupNames = [
+          'bendRiverMile',
+          'bendSelections',
+          'chutes',
+          'fieldOffices',
+          'fieldOfficeSegments',
+          'projects',
+          'reach',
+          'sampleUnitTypes',
+          'seasons',
+          'segments',
+          'years',
+        ];
+
+        const results = await Promise.all(lookupNames.map(async (name) => [name, await getLookupOptions(name)]));
+
+        setOfflineLookups(Object.fromEntries(results));
+      }
+      loadOfflineLookups();
+    }, []);
+
+    const bendRiverMileData =
+      lookupData?.bendRiverMile?.length > 0 ? lookupData.bendRiverMile : (offlineLookups.bendRiverMile ?? []);
+    const bends =
+      lookupData?.bendSelections?.length > 0 ? lookupData.bendSelections : (offlineLookups.bendSelections ?? []);
+    const chutes = lookupData?.chutes?.length > 0 ? lookupData.chutes : (offlineLookups.chutes ?? []);
+    const fieldOffices =
+      lookupData?.fieldOffices?.length > 0 ? lookupData.fieldOffices : (offlineLookups.fieldOffices ?? []);
+    const fieldOfficeSegments =
+      lookupData?.fieldOfficeSegments?.length > 0
+        ? lookupData.fieldOfficeSegments
+        : (offlineLookups.fieldOfficeSegments ?? []);
+    const projects = lookupData?.projects?.length > 0 ? lookupData.projects : (offlineLookups.projects ?? []);
+    const reachData = lookupData?.reachData?.length > 0 ? lookupData.reachData : (offlineLookups.reachData ?? []);
+    const sampleUnitTypes =
+      lookupData?.sampleUnitTypes?.length > 0 ? lookupData.sampleUnitTypes : (offlineLookups.sampleUnitTypes ?? []);
+    const seasons = lookupData?.seasons?.length > 0 ? lookupData.seasons : (offlineLookups.seasons ?? []);
+    const segments = lookupData?.segments?.length > 0 ? lookupData.segments : (offlineLookups.segments ?? []);
+    const years = lookupData?.years?.length > 0 ? lookupData.years : (offlineLookups.years ?? []);
 
     const bendDataMapping = {
       B: bendRiverMileData,
@@ -188,23 +218,51 @@ const SitesFormModal = connect(
       }
     };
 
-    const handleSave = () => {
-      if (isValid) {
-        const values = getValues();
-        const dataObj = {
-          ...values,
-          segmentId: values.segmentId.value,
-          bend: values.bend.value,
-          projectId: Number(values.projectId),
-          year: Number(values.year),
-          siteId: Number(values.siteId),
-          bendRiverMile: String(values?.bendRiverMile),
-        };
-        // Filter out any null/empty values for final payload
-        const payload = filterNullEmptyObjects(dataObj);
-        data?.siteId ? doUpdateSite(payload) : doAddSite(payload);
-      } else {
-        trigger();
+    const handleSave = async () => {
+      const valid = await trigger();
+      if (!valid) return;
+
+      const values = getValues();
+      const clientId = values.clientId ?? data?.clientId ?? crypto.randomUUID();
+      const generateSiteFid = `SITE-${clientId.slice(0, 8)}`;
+
+      const finalSiteFid = values.siteFid || values.site_fid || data?.siteFid || data?.site_fid || generateSiteFid;
+
+      const dataObj = {
+        ...values,
+        clientId,
+        siteFid: finalSiteFid,
+        site_fid: finalSiteFid,
+        segmentId: values.segmentId?.value,
+        bend: values.bend.value,
+        projectId: Number(values.projectId),
+        year: Number(values.year),
+        siteId: Number(values.siteId),
+        bendRiverMile: String(values?.bendRiverMile),
+        _status: 'queued',
+        version: values.version ?? 0,
+        updatedAt: new Date().toISOString(),
+      };
+
+      const payload = filterNullEmptyObjects(dataObj);
+
+      try {
+        if (isOnline()) {
+          data?.siteId || data?.site_id ? doUpdateSite(payload) : doAddSite(payload);
+        } else {
+          data?.siteId || data?.site_id
+            ? await updateData('sites', clientId, payload)
+            : await createData('sites', payload);
+        }
+      } catch (error) {
+        console.error('Site save failed, queuing offline:', error);
+
+        data?.siteId || data?.site_id
+          ? await updateData('sites', clientId, payload)
+          : await createData('sites', payload);
+      }
+      if (!isOnline()) {
+        doUpdateUrl(`/sites-list/${finalSiteFid}`);
       }
     };
 

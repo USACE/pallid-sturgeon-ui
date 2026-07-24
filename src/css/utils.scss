@@ -17,19 +17,14 @@
 
 .row-dupe {
   background-color: inherit;
-  color: "red";
-}
-
-.overflow-ellipsis {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  color: 'red';
 }
 
 .box {
   background-color: #fff;
   border-radius: 6px;
-  box-shadow: 0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
+  box-shadow:
+    0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
     0 0 0 1px rgba(10, 10, 10, 0.02);
   color: #4a4a4a;
   display: block;

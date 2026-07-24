@@ -2,8 +2,6 @@ import * as yup from 'yup';
 import { ValidationMessages } from '@src/utils/enums';
 import { formatDate } from '@src/utils/helpers';
 
-// TODO: set this to the actual value from searchTypeOptions for "River Sweep"
-
 export const getSearchEffortSchema = () =>
   yup.object().shape({
     seId: yup.mixed().nullable(),
@@ -13,7 +11,7 @@ export const getSearchEffortSchema = () =>
     recorder: yup.string().required(ValidationMessages.FieldRequired).max(3, 'Value must be at most 3 characters'),
     searchTypeCode: yup.string().required(ValidationMessages.FieldRequired),
     searchDay: yup.string().when('searchTypeCode', {
-      is: (v) => v === 'RS',
+      is: (searchTypeCode) => searchTypeCode === 'RS',
       then: (schema) => schema.required(ValidationMessages.FieldRequired),
       otherwise: (schema) => schema.nullable(),
     }),
@@ -49,17 +47,10 @@ export const getSearchEffortSchema = () =>
       .when('telemetryCount', {
         is: (val) => Number(val) > 0,
         then: (schema) =>
-          schema
-            .required(ValidationMessages.FieldRequired)
-            // .test('valid-lat', 'Value must be between 36 and 50 degrees. (Enter 0 if unknown)', (value) => {
-            //   if (value === undefined) return false;
-            //   const num = Number(value);
-            //   return (num >= 36 && num <= 50) || num === 0;
-            // }),
-            .test({
-              test: (val) => (Number(val) >= 36 && Number(val) <= 50) || Number(val) === 0,
-              message: 'Value must be between 36 and 50 degrees. (Enter 0 if unknown)',
-            }),
+          schema.required(ValidationMessages.FieldRequired).test({
+            test: (val) => (Number(val) >= 36 && Number(val) <= 49) || Number(val) === 0,
+            message: 'Value must be between 36 and 49 degrees. (Enter 0 if unknown)',
+          }),
         otherwise: (schema) =>
           schema
             .transform((value, originalValue) => (originalValue === '' ? null : value))
@@ -72,17 +63,10 @@ export const getSearchEffortSchema = () =>
       .when('telemetryCount', {
         is: (val) => Number(val) > 0,
         then: (schema) =>
-          schema
-            .required(ValidationMessages.FieldRequired)
-            // .test('valid-lng', 'Value must be between -115 and -88 degrees.  Enter 0 if unknown', (value) => {
-            //   if (value === undefined) return false;
-            //   const num = Number(value);
-            //   return (num >= -115 && num <= -88) || num === 0;
-            // }),
-            .test({
-              test: (val) => (Number(val) >= -115 && Number(val) <= -88) || Number(val) === 0,
-              message: 'Value must be between -115 and -88 degrees. (Enter 0 if unknown)',
-            }),
+          schema.required(ValidationMessages.FieldRequired).test({
+            test: (val) => (Number(val) >= -100 && Number(val) <= -89) || Number(val) === 0,
+            message: 'Value must be between -100 and -89 degrees. (Enter 0 if unknown)',
+          }),
         otherwise: (schema) =>
           schema
             .transform((value, originalValue) => (originalValue === '' ? null : value))
@@ -100,7 +84,7 @@ export const getSearchEffortDefaultValues = ({ dataEntryData, telemetryCount = 0
   searchDate: dataEntryData?.searchDate ? formatDate(dataEntryData.searchDate) : new Date().toISOString().split('T')[0],
   recorder: dataEntryData?.recorder ?? '',
   searchTypeCode: dataEntryData?.searchTypeCode ?? '',
-  searchDay: dataEntryData?.searchDay ? formatDate(dataEntryData.searchDay) : '',
+  searchDay: dataEntryData?.searchDay ?? '',
   startTime: dataEntryData?.startTime ?? '',
   startLatitude: dataEntryData?.startLatitude ?? '',
   startLongitude: dataEntryData?.startLongitude ?? '',

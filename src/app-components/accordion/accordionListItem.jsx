@@ -32,7 +32,7 @@ const AccordionListItem = ({
     <div className={itemClasses}>
       <div className={headingClasses} onClick={() => toggleAccordion()}>
         <Icon className='ml-3 accordion-icon' focusable={false} path={isOpen ? mdiMenuDown : mdiMenuRight} />
-        <p className='text-primary'>{headingText}</p>
+        <p className='text-bold margin-top-2'>{headingText}</p>
       </div>
       <div className={contentClasses}>
         <div className='accordion-body'>{children}</div>
