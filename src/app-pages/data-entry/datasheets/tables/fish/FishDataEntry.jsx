@@ -197,8 +197,8 @@ const FishDataEntry = connect(
         rowsToProcess?.forEach(async (item) => {
           const isNew = !item.fid;
           const clientId = item.clientId ?? crypto.randomUUID();
-          const parentRowMrId = item.mrId ?? item.mr_id;
-          const parentRowMrFid = item.mrFid ?? item.mr_fid;
+          const parentRowMrId = item.mrId ?? item.mr_id ?? parentMrId;
+          const parentRowMrFid = item.mrFid ?? item.mr_fid ?? parentMrFid;
           const fishFid = item.fFid ?? item.f_fid;
 
           const payload = {
