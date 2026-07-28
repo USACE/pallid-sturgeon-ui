@@ -269,6 +269,7 @@ async function patchMoriverChildrenAfterCreate(outboxItem: OutboxItem, dataResul
 
     await db.outbox.update(pending._id, updates);
 
+    // Inject MrId to Fish Data
     const fishRows = await db.fish.where('mrFid').equals(mrFid).toArray();
 
     for (const row of fishRows) {
