@@ -817,13 +817,13 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
             {!hasFishRecords ? (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={handleSubmit(doSaveDraft)} type='button'>
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
                 </Button>
               </Grid>
             ) : (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={doSubmit} type='button'>
+                <Button className='add-btn save-btn' onClick={doSubmit} type='button'>
                   Submit
                 </Button>
               </Grid>
@@ -1084,7 +1084,7 @@ const MissouriRiverDataEntryForm = connect(
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>
-                  <Button onClick={() => handleCapture('start')} type='button'>
+                  <Button onClick={() => handleCapture('start')} type='button' className='primary-btn margin-left-1'>
                     Capture Start GPS
                   </Button>
                 </Grid>
@@ -1165,7 +1165,7 @@ const MissouriRiverDataEntryForm = connect(
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>
-                  <Button onClick={() => handleCapture('stop')} type='button'>
+                  <Button onClick={() => handleCapture('stop')} type='button' className='primary-btn margin-left-1'>
                     Capture Stop GPS
                   </Button>
                 </Grid>

@@ -482,15 +482,25 @@ const SearchEffortDataEntryForm = connect(
             </Grid>
             {!hasTelemetry ? (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={handleSubmit(doSaveDraft)} type='button'>
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
                 </Button>
               </Grid>
             ) : (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={handleSubmit(doSubmit)} type='button'>
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSubmit)} type='button'>
                   Submit
                 </Button>
+              </Grid>
+            )}
+            {USE_UBLOX_POC && (
+              <Grid row gap='sm'>
+                <Button type='button' className='primary-btn save-btn' onClick={ubloxGps.connect}>
+                  Connect u-blox Satellite GPS
+                </Button>
+                <div>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</div>
+                {ubloxGps.latestFix && <div>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</div>}
+                {ubloxGps.lastError && <div>GPS Error: {ubloxGps.lastError.message}</div>}
               </Grid>
             )}
           </Grid>
@@ -579,16 +589,6 @@ const SearchEffortDataEntryForm = connect(
                 warning={!hasTelemetry ? getTelemetryWarning() : ''}
               />
             </Grid>
-            {USE_UBLOX_POC && (
-              <Grid row gap='sm'>
-                <Button type='button' onClick={ubloxGps.connect}>
-                  Connect u-blox Satellite GPS
-                </Button>
-                <div>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</div>
-                {ubloxGps.latestFix && <div>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</div>}
-                {ubloxGps.lastError && <div>GPS Error: {ubloxGps.lastError.message}</div>}
-              </Grid>
-            )}
 
             <Grid row gap='sm' table={{ col: 3 }}>
               <Button
