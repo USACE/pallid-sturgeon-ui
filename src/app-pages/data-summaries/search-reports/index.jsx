@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from '@components/card';
-import DownloadAsCSV from '@components/downloadAsCSV';
+import DownloadAsCSV from '@src/app-components/csv-download-button/downloadAsCSV';
 import Pagination from '@components/pagination';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import DSSearchReportTable from './components/dsSearchReportTable';

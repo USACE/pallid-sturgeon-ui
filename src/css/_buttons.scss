@@ -2,8 +2,12 @@
 
 // Mixins
 @mixin button-styles($color, $hover-color) {
-  color: $color;
+  // color: $color;
+  // box-shadow: inset 0 0 0 1px $color;
+  // Filled Button
+  background-color: $color;
   box-shadow: inset 0 0 0 1px $color;
+  color: white;
   font-weight: 500;
   font-size: small;
   line-height: normal;
@@ -25,17 +29,29 @@
 // Button variants
 .usa-button {
   &.add-btn {
-    @include button-styles($color-success, $color-success-hover);
+    @include button-styles($color-success, #4c7754);
     &:disabled {
       @include disabled-button-styles;
     }
   }
   &.clear-btn {
-    @include button-styles($color-gray-light, $color-gray-light);
+    @include button-styles($color-gray-light, #7c7c7c);
     position: absolute;
     bottom: 0;
     right: 0;
 
+    &:disabled {
+      @include disabled-button-styles;
+    }
+  }
+  &.primary-btn {
+    @include button-styles(#005ea2, #04395f);
+    &:disabled {
+      @include disabled-button-styles;
+    }
+  }
+  &.secondary-btn {
+    @include button-styles($color-primary, rgb(4, 48, 80));
     &:disabled {
       @include disabled-button-styles;
     }

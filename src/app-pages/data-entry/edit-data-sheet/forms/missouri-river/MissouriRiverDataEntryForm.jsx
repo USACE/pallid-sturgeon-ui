@@ -33,6 +33,8 @@ import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offl
 import { db } from '@src/app-pages/data-entry/offline/db';
 
 import '../../../dataentry.scss';
+import { mdiCrosshairsGps } from '@mdi/js';
+import Icon from '@src/app-components/icon/icon';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -817,13 +819,13 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
             {!hasFishRecords ? (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={handleSubmit(doSaveDraft)} type='button'>
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
                 </Button>
               </Grid>
             ) : (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={doSubmit} type='button'>
+                <Button className='add-btn save-btn' onClick={doSubmit} type='button'>
                   Submit
                 </Button>
               </Grid>
@@ -1084,7 +1086,12 @@ const MissouriRiverDataEntryForm = connect(
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>
-                  <Button onClick={() => handleCapture('start')} type='button'>
+                  <Button
+                    onClick={() => handleCapture('start')}
+                    type='button'
+                    className='primary-btn margin-left-1 margin-top-1'
+                  >
+                    <Icon path={mdiCrosshairsGps} className='margin-right-1' />
                     Capture Start GPS
                   </Button>
                 </Grid>
@@ -1165,7 +1172,12 @@ const MissouriRiverDataEntryForm = connect(
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>
-                  <Button onClick={() => handleCapture('stop')} type='button'>
+                  <Button
+                    onClick={() => handleCapture('stop')}
+                    type='button'
+                    className='primary-btn margin-left-1 margin-top-1'
+                  >
+                    <Icon path={mdiCrosshairsGps} className='margin-right-1' />
                     Capture Stop GPS
                   </Button>
                 </Grid>

@@ -25,8 +25,8 @@ export const telemetryDataEntrySchema = yup.object().shape({
     .transform((value, originalValue) => (originalValue === '' ? undefined : value))
     .required(ValidationMessages.FieldRequired)
     .test({
-      test: (value) => (Number(value) >= -100 && Number(value) <= -89) || Number(value) === 0,
-      message: 'Value must be between -100 and -89 degrees. Enter 0 if unknown',
+      test: (value) => (Number(value) >= -110 && Number(value) <= -89) || Number(value) === 0,
+      message: 'Value must be between -110 and -89 degrees. Enter 0 if unknown',
     }),
   spawnBehavior: yup.string().nullable(),
   positionConfidence: yup.number().required(ValidationMessages.FieldRequired),
