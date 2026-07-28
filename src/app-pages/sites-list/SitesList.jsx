@@ -7,10 +7,11 @@ import Breadcrumb from '@src/app-components/breadcrumb';
 import Pagination from '@components/pagination';
 import Card from '@src/app-components/card';
 
-import { Button, Alert } from '@trussworks/react-uswds';
+import { Alert } from '@trussworks/react-uswds';
 import { downloadLookupsForOffline } from '../data-entry/offline/lookup-cache';
 
 import './sitesList.scss';
+import LoaderButton from '@src/app-components/loader/LoaderButton';
 
 const breadcrumbLinks = [
   {
@@ -81,12 +82,18 @@ const SitesList = connect(
         <SitesListFilter />
         <Card>
           <Card.Header text='Sites List' />
-          <div className='mt-3 mb-3'>
-            <Button type='button' onClick={handleDownloadLookups} disabled={lookupDownloading}>
-              {lookupDownloading ? 'Downloading Lookups...' : 'Download Offline Lookups'}
-            </Button>
+          <div className='margin-top-2 margin-bottom-1'>
+            <LoaderButton
+              className='margin-left-2 primary-btn'
+              disabled={lookupDownloading}
+              isLoading={lookupDownloading}
+              onClick={handleDownloadLookups}
+              type='button'
+            >
+              <span className='text-bold'>Download Offline Lookups</span>
+            </LoaderButton>
             {lookupDownloadStatus && (
-              <div className='mt-2'>
+              <div className='margin-top-1'>
                 <Alert type={lookupDownloadStatus.type} headingLevel='h4' slim>
                   {lookupDownloadStatus.message}
                 </Alert>
@@ -96,7 +103,7 @@ const SitesList = connect(
           <Card.Body>
             <SitesListTable />
             <Pagination
-              className='mt-3'
+              className='margin-top-2'
               itemCount={sitesTotalResults}
               defaultItemsPerPage={20}
               handlePageChange={(pageNumber, pageSize) => doSetSitesPagination({ pageNumber, pageSize })}
