@@ -45,6 +45,16 @@ function getTable(tableName: string) {
   }
 }
 
+const enum TableName {
+  Moriver = 'ds_moriver',
+  Search = 'ds_search',
+  Telemetry = 'ds_telemetry_fish',
+  Fish = 'ds_fish',
+  Sites = 'ds_sites',
+  Supplemental = 'ds_supplemental',
+  Procedure = 'ds_procedure',
+}
+
 async function patchSiteChildrenAfterCreate(siteItem: OutboxItem, siteResult: any) {
   if (siteItem.tableName !== 'ds_sites') return;
   if (siteItem.op !== 'create') return;
@@ -201,6 +211,77 @@ async function patchSearchChildrenAfterCreate(searchItem: OutboxItem, searchResu
   }
 }
 
+async function patchMoriverChildrenAfterCreate(outboxItem: OutboxItem, dataResult: any) {
+  if (outboxItem.tableName !== TableName.Moriver) return;
+  if (outboxItem.op !== 'create') return;
+
+  const serverMrId = dataResult.serverId ?? dataResult.json?.data ?? dataResult.json?.mrId ?? dataResult.json?.mr_id;
+
+  if (!serverMrId) {
+    console.warn('Search create synced but no mr_id returned:', dataResult);
+    return;
+  }
+
+  const moriverPayload = outboxItem.payload ?? {};
+  const mrFid = moriverPayload.mrFid ?? moriverPayload.mr_fid;
+
+  if (!mrFid) {
+    console.warn('Search create synced but no mrFid found:', outboxItem);
+    return;
+  }
+
+  const pendingItems = await db.outbox.toArray();
+
+  console.log('Pending outbox items before patch:', pendingItems);
+
+  for (const pending of pendingItems) {
+    if (pending._id == null) continue;
+
+    const payload = pending.payload ?? {};
+    const payloadMrFid = payload.mrFid ?? payload.mr_fid;
+
+    const isMoriverUpdate =
+      pending.tableName === TableName.Moriver &&
+      pending.op === 'update' &&
+      (pending.clientId === outboxItem.clientId || payloadMrFid === mrFid);
+
+    const isRelatedFish = pending.tableName === TableName.Fish && payloadMrFid === mrFid;
+
+    if (!isMoriverUpdate && !isRelatedFish) continue;
+
+    const updates: Partial<OutboxItem> = {
+      payload: {
+        ...payload,
+        mr_id: serverMrId,
+        mrId: serverMrId,
+      },
+    };
+
+    if (isMoriverUpdate) {
+      updates.serverId = undefined;
+
+      updates.payload = {
+        ...updates.payload,
+        f_id: undefined,
+        fid: undefined,
+      };
+    }
+
+    await db.outbox.update(pending._id, updates);
+
+    // Inject MrId to Fish Data
+    const fishRows = await db.fish.where('mrFid').equals(mrFid).toArray();
+
+    for (const row of fishRows) {
+      await db.fish.put({
+        ...row,
+        mr_id: serverMrId,
+        mrId: serverMrId,
+      });
+    }
+  }
+}
+
 export async function syncNow(token?: string): Promise<SyncResult> {
   if (!isOnline()) {
     return { tried: 0, ok: 0, errors: 0, conflicts: 0, draftSkip: 0 };
@@ -279,6 +360,7 @@ export async function syncNow(token?: string): Promise<SyncResult> {
 
         await patchSiteChildrenAfterCreate(item, res);
         await patchSearchChildrenAfterCreate(item, res);
+        await patchMoriverChildrenAfterCreate(item, res);
       } else if (res.status === 'conflict') {
         conflicts++;
 

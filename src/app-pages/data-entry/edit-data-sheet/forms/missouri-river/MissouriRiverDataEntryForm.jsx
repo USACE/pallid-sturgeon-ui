@@ -365,11 +365,10 @@ const MissouriRiverDataEntryForm = connect(
         const draft = JSON.parse(savedDraft);
         if (!draft?.mrFid) return null;
 
-        if (
-          String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey)
-        ) {
-          return null;
-        }
+        const checkSiteId =
+          String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey);
+        if (checkSiteId) return null;
+
         return draft;
       } catch (err) {
         console.error('Failed to parse offline Missouri River draft:', err);
