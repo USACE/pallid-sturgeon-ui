@@ -89,6 +89,7 @@ const TelemetryDataEntry = connect(
     const [tableErrors, setTableErrors] = useState();
     const [data, setData] = useState(rowData);
     const [tableIsDirty, setTableIsDirty] = useState(false);
+    const [online, setOnline] = useState(isOnline());
     const prevTableDataRef = useRef([]);
     const columnHelper = createColumnHelper();
     const siteId = routeParams?.siteId;
@@ -135,6 +136,19 @@ const TelemetryDataEntry = connect(
       }
 
       loadOfflineLookups();
+    }, []);
+
+    useEffect(() => {
+      const handleOnline = () => setOnline(true);
+      const handleOffline = () => setOnline(false);
+
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
+
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+      };
     }, []);
 
     const browserGps = useGpsCapture(GPS_OPTIONS);
@@ -197,15 +211,6 @@ const TelemetryDataEntry = connect(
 
     console.warn('Check errors:', errors);
 
-    const tableColumns = getTelemetryColumns({
-      frequencyId,
-      positionConfidence,
-      spawnBehavior,
-      mesos,
-      macros,
-      handleCaptureRow,
-    });
-
     const handleAddRow = async () => {
       // Add default values here
       const base = getBaseDefaultValues({ baseData });
@@ -226,6 +231,7 @@ const TelemetryDataEntry = connect(
 
       const newRowData = {
         ...base,
+        seId: parentSeId,
         se_id: parentSeId,
         tFid: `${seFid}-${sequenceText}`,
         seFid: seFid,
@@ -269,6 +275,16 @@ const TelemetryDataEntry = connect(
       },
       [setData, setTableKey]
     );
+    
+    const tableColumns = getTelemetryColumns({
+      frequencyId,
+      positionConfidence,
+      spawnBehavior,
+      mesos,
+      macros,
+      handleCaptureRow,
+      online,
+    });
 
     const handleUpdateData = useCallback(
       (rowIndex, columnId, updatedValue) => {
@@ -288,7 +304,7 @@ const TelemetryDataEntry = connect(
           return oldData;
         });
       },
-      [setData]
+      []
     );
 
     const formatRow = (row) => {
@@ -335,9 +351,14 @@ const TelemetryDataEntry = connect(
             baseData?.seId ??
             baseData?.se_id;
 
+          if (!parentSeId & isOnline()) {
+            throw new Error('Search Effort ID is missing.');
+          }
+
           const payload = {
             ...formattedRow,
             clientId,
+            seId: parentSeId,
             se_id: parentSeId,
             seFid: row.seFid,
             tFid: row.tFid,
@@ -366,7 +387,13 @@ const TelemetryDataEntry = connect(
               }
             }
           } catch (error) {
-            console.error('Telemetry API failed, queuing offline:', error);
+            console.error('Telemetry save failed', error);
+
+            if (isOnline()) {
+              throw error;
+            }
+
+            console.log('Connection was lost. Queuing Telemetry row offline.');
 
             if (isNew) {
               await createData('telemetry', payload);

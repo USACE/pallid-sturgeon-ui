@@ -27,6 +27,7 @@ export const getTelemetryColumns = ({
   mesos,
   macros,
   handleCaptureRow,
+  online,
 }) => {
   const columnHelper = createColumnHelper();
 
@@ -186,7 +187,7 @@ export const getTelemetryColumns = ({
       size: 200,
       meta: { type: 'text' },
     }),
-    columnHelper.accessor('editInitials', {
+    ...(online ? [columnHelper.accessor('editInitials', {
       header: 'Edit Initials',
       cell: TableCell,
       size: 200,
@@ -209,5 +210,6 @@ export const getTelemetryColumns = ({
       cell: ({ cell }) => <span>{cell.getValue()}</span>,
       size: 190,
     }),
+  ] : []),
   ];
 };
