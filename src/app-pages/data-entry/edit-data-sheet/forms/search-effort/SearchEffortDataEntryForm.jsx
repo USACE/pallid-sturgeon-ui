@@ -52,11 +52,15 @@ const SearchEffortDataEntryForm = connect(
     doUpdateCurrentTab,
   }) => {
     const prevIsEditFormRef = useRef(isEditForm);
-    const siteId = routeParams?.siteId;
+    const siteRouteKey = routeParams?.siteId;
+    const siteId = siteRouteKey;
     const { searchTypeCodes } = lookupData;
     const [offlineSearchTypeCodes, setOfflineSearchTypeCodes] = useState([]);
     const [submitMessage, setSubmitMessage] = useState(null);
     const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
+    const isOfflineSite = String(siteId).startsWith('SITE-');
+
+    console.log('Check these codes!', searchTypeCodes);
 
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
@@ -84,7 +88,6 @@ const SearchEffortDataEntryForm = connect(
       trigger,
       reset,
       handleSubmit,
-      clearErrors,
     } = methods;
 
     const browserGps = useGpsCapture(GPS_OPTIONS);
@@ -156,8 +159,6 @@ const SearchEffortDataEntryForm = connect(
     const searchTypeCode = watch('searchTypeCode');
     const telemetryCount = Number(watch('telemetryCount') || 0);
     const hasTelemetry = telemetryCount >= 1;
-
-    console.log('watch it!:', searchTypeCode);
     const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
     const getTelemetryWarning = () => {
@@ -188,7 +189,13 @@ const SearchEffortDataEntryForm = connect(
         temp: values.temp !== '' ? Number(values.temp) : values.temp,
         conductivity: values.conductivity !== '' ? Number(values.conductivity) : values.conductivity,
 
-        siteId: values.siteId !== undefined && values.siteId !== '' ? Number(values.siteId) : Number(siteId),
+        siteId: isOfflineSite ? undefined : Number(values.siteId || siteRouteKey),
+        site_id: isOfflineSite ? undefined : Number(values.site_id || values.siteId || siteRouteKey),
+
+        siteFid: isOfflineSite ? siteRouteKey : values.siteFid,
+        site_fid: isOfflineSite ? siteRouteKey : values.site_fid,
+
+        siteRouteKey,
         dsId: values.dsId ?? 1,
       };
 
@@ -209,10 +216,15 @@ const SearchEffortDataEntryForm = connect(
       const payload = filterNullEmptyObjects({
         ...values,
         clientId,
-        siteId: values.siteId || Number(siteId),
+        siteId: isOfflineSite ? undefined : Number(siteRouteKey),
+        site_id: isOfflineSite ? undefined : Number(siteRouteKey),
+        siteFid: isOfflineSite ? siteRouteKey : values.siteFid,
+        site_fid: isOfflineSite ? siteRouteKey : values.site_fid,
+        siteRouteKey,
         status: 1,
-        _status: 'queued',
+        _status: 'draft',
         version: values.version ?? 0,
+        updatedAt: new Date().toISOString(),
       });
 
       if (!payload.seFid) {
@@ -223,18 +235,18 @@ const SearchEffortDataEntryForm = connect(
       try {
         if (isOnline()) {
           if (isEditForm) {
-            doUpdateSearchDataEntry(payload, () => {});
+            doUpdateSearchDataEntry(payload);
           } else {
-            doSaveSearchDataEntry(payload, (val) => {
-              if (val) setValue('seId', val);
-            });
+            const response = await doSaveSearchDataEntry(payload);
+            const savedSeId = response?.data;
+            if (savedSeId) {
+              payload.seId = savedSeId;
+              payload.se_id = savedSeId;
+              setValue('seId', savedSeId);
+            }
           }
         } else {
-          if (isEditForm) {
-            await updateData('search', clientId, payload);
-          } else {
-            await createData('search', payload);
-          }
+          await db.search.put(payload);
         }
         sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
 
@@ -246,22 +258,16 @@ const SearchEffortDataEntryForm = connect(
       } catch (error) {
         console.error('Save draft failed:', error);
 
-        if (isEditForm) {
-          await updateData('search', clientId, payload);
-        } else {
-          await createData('search', payload);
+        if (!isOnline()) {
+          await db.search.put(payload);
+          sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
+          doUpdateCurrentTab(1);
         }
-
-        setValue('clientId', clientId);
-        setValue('status', 1);
-        doUpdateCurrentTab(1);
       }
     };
 
     const doSubmit = async () => {
       setValue('status', 2);
-      const valid = await trigger();
-      if (!valid) return;
 
       const values = getCastedValues();
       const draft = getOfflineSearchEffortDraft();
@@ -272,9 +278,15 @@ const SearchEffortDataEntryForm = connect(
         ...draft,
         ...values,
         clientId,
+        siteId: isOfflineSite ? undefined : Number(siteRouteKey),
+        site_id: isOfflineSite ? undefined : Number(siteRouteKey),
+        siteFid: isOfflineSite ? siteRouteKey : (values.siteFid ?? draft?.siteFid),
+        site_fid: isOfflineSite ? siteRouteKey : (values.site_fid ?? draft?.site_fid),
+        siteRouteKey,
         status: 2,
         _status: 'queued',
         version: values.version ?? draft?.version ?? 0,
+        updatedAt: new Date().toISOString(),
       });
 
       try {
@@ -302,7 +314,7 @@ const SearchEffortDataEntryForm = connect(
       } catch (error) {
         console.error('Search submit failed, queueing offline:', error);
 
-        await updateData('search', clientId, payload);
+        await updateData('search', payload);
 
         setValue('clientId', clientId);
         setValue('status', 2);
@@ -324,7 +336,7 @@ const SearchEffortDataEntryForm = connect(
         const draft = JSON.parse(savedDraft);
         if (!draft?.seFid) return null;
 
-        if (String(draft.siteId) !== String(siteId)) {
+        if (String(draft.siteRouteKey || draft.siteFid || draft.site_fid || draft.siteId) !== String(siteRouteKey)) {
           return null;
         }
         return draft;
@@ -373,8 +385,7 @@ const SearchEffortDataEntryForm = connect(
       const count = Number(dataEntryTelemetryTotalCount || 0);
 
       setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
-      clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
-    }, [dataEntryTelemetryTotalCount, setValue, trigger, clearErrors]);
+    }, [dataEntryTelemetryTotalCount, setValue]);
 
     useEffect(() => {
       const draft = getOfflineSearchEffortDraft();
@@ -477,7 +488,7 @@ const SearchEffortDataEntryForm = connect(
               </Grid>
             ) : (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={doSubmit} type='button'>
+                <Button className={saveBtnClasses} onClick={handleSubmit(doSubmit)} type='button'>
                   Submit
                 </Button>
               </Grid>
@@ -503,15 +514,16 @@ const SearchEffortDataEntryForm = connect(
               <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
                 {searchTypeCodes.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
-                    {opt.code}
+                    {`${opt.code} - ${opt.description}`}
                   </option>
                 ))}
               </SelectInput>
-              {searchTypeCode === 'RS' && (
-                <Grid tablet={{ col: 12 }}>
-                  <TextInput name='searchDay' label='Search Day' type='date' required />
-                </Grid>
-              )}
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <Grid tablet={{ col: 12 }}>
+                <TextInput name='searchDay' label='Search Day' type='number' required={searchTypeCode === 'RS'} />
+              </Grid>
             </Grid>
 
             <Grid tablet={{ col: 2 }}>

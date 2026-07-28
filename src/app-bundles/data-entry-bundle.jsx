@@ -553,7 +553,8 @@ export default {
 
   doSaveSearchDataEntry:
     (formData) =>
-    ({ dispatch, store, apiPost }) => {
+    ({ dispatch, store, apiPost }) => 
+      new Promise((resolve, reject) => {
       const toastId = toast.loading('Saving datasheet...');
 
       const url = '/psapi/searchDataEntry';
@@ -568,13 +569,17 @@ export default {
           });
           store.doFetchSearchDataEntry();
           store.doUpdateCurrentTab(1);
-          store.doUpdateUrl(`/sites-list/${formData?.siteId}`);
+          if (Number(formData?.status) !== 1) {
+            store.doUpdateUrl(`/sites-list/${formData?.siteId}`);
+          }
+          resolve(_body);
         } else {
           dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
+          reject(err || _body);
         }
       });
-    },
+    }),
 
   doSaveTelemetryDataEntry:
     (formData) =>
