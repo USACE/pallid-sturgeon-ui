@@ -24,6 +24,8 @@ import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offl
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { db } from '@src/app-pages/data-entry/offline/db';
 import { getTelemetryColumns } from './helpers.telemetry';
+import Icon from '@src/app-components/icon/icon';
+import { mdiContentCopy } from '@mdi/js';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
 
@@ -275,7 +277,7 @@ const TelemetryDataEntry = connect(
       },
       [setData, setTableKey]
     );
-    
+
     const tableColumns = getTelemetryColumns({
       frequencyId,
       positionConfidence,
@@ -286,26 +288,23 @@ const TelemetryDataEntry = connect(
       online,
     });
 
-    const handleUpdateData = useCallback(
-      (rowIndex, columnId, updatedValue) => {
-        setData((oldData) => {
-          const newData = oldData ? [...oldData] : null;
-          if (newData && newData[rowIndex]) {
-            // Update properties
-            newData[rowIndex] = {
-              ...newData[rowIndex],
-              ...(columnId === null && typeof updatedValue === 'object' ? updatedValue : { [columnId]: updatedValue }),
-            };
-            if (newData[rowIndex]._status !== 'new') {
-              newData[rowIndex]._status = 'edited';
-            }
-            return newData;
+    const handleUpdateData = useCallback((rowIndex, columnId, updatedValue) => {
+      setData((oldData) => {
+        const newData = oldData ? [...oldData] : null;
+        if (newData && newData[rowIndex]) {
+          // Update properties
+          newData[rowIndex] = {
+            ...newData[rowIndex],
+            ...(columnId === null && typeof updatedValue === 'object' ? updatedValue : { [columnId]: updatedValue }),
+          };
+          if (newData[rowIndex]._status !== 'new') {
+            newData[rowIndex]._status = 'edited';
           }
-          return oldData;
-        });
-      },
-      []
-    );
+          return newData;
+        }
+        return oldData;
+      });
+    }, []);
 
     const formatRow = (row) => {
       return {
@@ -428,10 +427,8 @@ const TelemetryDataEntry = connect(
 
     return (
       <FormProvider {...methods}>
-        <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
-          Copy Last Row
-        </Button>
-        {USE_UBLOX_POC && (
+        {/* @TODO: Check if we still need this button here, if already in Search Effort */}
+        {/* {USE_UBLOX_POC && (
           <Grid row gap='sm' className='margin-y-2'>
             <Button type='button' onClick={ubloxGps.connect}>
               Connect u-blox Satellite GPS
@@ -440,7 +437,7 @@ const TelemetryDataEntry = connect(
             {ubloxGps.latestFix && <div>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</div>}
             {ubloxGps.lastError && <div>GPS Error: {ubloxGps.lastError.message}</div>}
           </Grid>
-        )}
+        )} */}
         <DataEntryTable
           addRow={handleAddRow}
           columns={tableColumns}
@@ -456,15 +453,21 @@ const TelemetryDataEntry = connect(
           updateSourceData={handleUpdateData}
           validationSchema={telemetryDataEntrySchema}
         />
-        <Button
-          className={saveBtnClasses}
-          onClick={() => {
-            handleSubmitAll();
-          }}
-          type='button'
-        >
-          Submit
-        </Button>
+        <div style={{ justifyContent: 'space-between', display: 'flex' }}>
+          <Button
+            className='margin-top-2 add-btn'
+            onClick={() => {
+              handleSubmitAll();
+            }}
+            type='button'
+          >
+            Submit
+          </Button>
+          <Button className='margin-top-2 secondary-btn' onClick={() => handleCopyLastRowBtn()} type='button'>
+            <Icon focusable={false} className='margin-right-1' path={mdiContentCopy} />
+            Copy Last Row
+          </Button>
+        </div>
       </FormProvider>
     );
   }

@@ -19,6 +19,8 @@ import { getFishColumns } from './helpers.fish';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
+import Icon from '@src/app-components/icon/icon';
+import { mdiContentCopy } from '@mdi/js';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -197,8 +199,8 @@ const FishDataEntry = connect(
         rowsToProcess?.forEach(async (item) => {
           const isNew = !item.fid;
           const clientId = item.clientId ?? crypto.randomUUID();
-          const parentRowMrId = item.mrId ?? item.mr_id;
-          const parentRowMrFid = item.mrFid ?? item.mr_fid;
+          const parentRowMrId = item.mrId ?? item.mr_id ?? parentMrId;
+          const parentRowMrFid = item.mrFid ?? item.mr_fid ?? parentMrFid;
           const fishFid = item.fFid ?? item.f_fid;
 
           const payload = {
@@ -286,9 +288,6 @@ const FishDataEntry = connect(
 
     return (
       <FormProvider {...methods}>
-        <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
-          Copy Last Row
-        </Button>
         <DataEntryTable
           addRow={handleAddRow}
           columns={tableColumns}
@@ -304,9 +303,15 @@ const FishDataEntry = connect(
           updateSourceData={handleUpdateData}
           validationSchema={FishDataEntrySchema({ gear, data })}
         />
-        <Button className={saveBtnClasses} onClick={() => handleSubmitAll()} type='button'>
-          Submit
-        </Button>
+        <div style={{ justifyContent: 'space-between', display: 'flex' }}>
+          <Button className='margin-top-2 add-btn' onClick={() => handleSubmitAll()} type='button'>
+            Submit
+          </Button>
+          <Button className='margin-top-2 secondary-btn' onClick={() => handleCopyLastRowBtn()} type='button'>
+            <Icon focusable={false} className='margin-right-1' path={mdiContentCopy} />
+            Copy Last Row
+          </Button>
+        </div>
       </FormProvider>
     );
   }
