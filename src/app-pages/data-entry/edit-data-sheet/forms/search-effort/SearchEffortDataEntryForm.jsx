@@ -60,6 +60,8 @@ const SearchEffortDataEntryForm = connect(
     const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
     const isOfflineSite = String(siteId).startsWith('SITE-');
 
+    console.log('Check these codes!', searchTypeCodes);
+
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
       [dataEntryData?.siteId, dataEntryTelemetryTotalCount]
@@ -86,7 +88,6 @@ const SearchEffortDataEntryForm = connect(
       trigger,
       reset,
       handleSubmit,
-      clearErrors,
     } = methods;
 
     const browserGps = useGpsCapture(GPS_OPTIONS);
@@ -236,7 +237,13 @@ const SearchEffortDataEntryForm = connect(
           if (isEditForm) {
             doUpdateSearchDataEntry(payload);
           } else {
-            doSaveSearchDataEntry(payload);
+            const response = await doSaveSearchDataEntry(payload);
+            const savedSeId = response?.data;
+            if (savedSeId) {
+              payload.seId = savedSeId;
+              payload.se_id = savedSeId;
+              setValue('seId', savedSeId);
+            }
           }
         } else {
           await db.search.put(payload);
@@ -261,8 +268,6 @@ const SearchEffortDataEntryForm = connect(
 
     const doSubmit = async () => {
       setValue('status', 2);
-      const valid = await trigger();
-      if (!valid) return;
 
       const values = getCastedValues();
       const draft = getOfflineSearchEffortDraft();
@@ -380,8 +385,7 @@ const SearchEffortDataEntryForm = connect(
       const count = Number(dataEntryTelemetryTotalCount || 0);
 
       setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
-      clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
-    }, [dataEntryTelemetryTotalCount, setValue, trigger, clearErrors]);
+    }, [dataEntryTelemetryTotalCount, setValue]);
 
     useEffect(() => {
       const draft = getOfflineSearchEffortDraft();
@@ -484,7 +488,7 @@ const SearchEffortDataEntryForm = connect(
               </Grid>
             ) : (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={doSubmit} type='button'>
+                <Button className={saveBtnClasses} onClick={handleSubmit(doSubmit)} type='button'>
                   Submit
                 </Button>
               </Grid>
@@ -510,7 +514,7 @@ const SearchEffortDataEntryForm = connect(
               <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
                 {searchTypeCodes.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
-                    {opt.description}
+                    {`${opt.code} - ${opt.description}`}
                   </option>
                 ))}
               </SelectInput>

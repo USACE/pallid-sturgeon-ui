@@ -29,8 +29,8 @@ export const getSearchEffortSchema = () =>
       .transform((value, originalValue) => (originalValue === '' ? undefined : value))
       .required(ValidationMessages.FieldRequired)
       .test({
-        test: (value) => (Number(value) >= -100 && Number(value) <= -89) || Number(value) === 0,
-        message: 'Value must be between -100 and -89 degrees.  Enter 0 if unknown',
+        test: (value) => (Number(value) >= -110 && Number(value) <= -89) || Number(value) === 0,
+        message: 'Value must be between -110 and -89 degrees.  Enter 0 if unknown',
       }),
     stopTime: yup.string().when('telemetryCount', {
       is: (val) => Number(val) > 0,
@@ -42,8 +42,9 @@ export const getSearchEffortSchema = () =>
           .notRequired(),
     }),
     stopLatitude: yup
-      .string()
+      .number()
       .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+      .typeError('Value must be a number')
       .when('telemetryCount', {
         is: (val) => Number(val) > 0,
         then: (schema) =>
@@ -53,23 +54,22 @@ export const getSearchEffortSchema = () =>
           }),
         otherwise: (schema) =>
           schema
-            .transform((value, originalValue) => (originalValue === '' ? null : value))
             .nullable()
             .notRequired(),
       }),
     stopLongitude: yup
-      .string()
+      .number()
       .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+      .typeError('Value must be a number')
       .when('telemetryCount', {
         is: (val) => Number(val) > 0,
         then: (schema) =>
           schema.required(ValidationMessages.FieldRequired).test({
-            test: (val) => (Number(val) >= -100 && Number(val) <= -89) || Number(val) === 0,
-            message: 'Value must be between -100 and -89 degrees. (Enter 0 if unknown)',
+            test: (val) => (Number(val) >= -110 && Number(val) <= -89) || Number(val) === 0,
+            message: 'Value must be between -110 and -89 degrees. (Enter 0 if unknown)',
           }),
         otherwise: (schema) =>
           schema
-            .transform((value, originalValue) => (originalValue === '' ? null : value))
             .nullable()
             .notRequired(),
       }),
