@@ -5,6 +5,8 @@ import { getPendingCount, syncNow } from '../sync';
 import { db } from '../db';
 import { useLiveQuery } from 'dexie-react-hooks';
 
+import OfflineSetupButton from '../initiate-offline-setup/OfflineSetupButton';
+
 import './syncBanner.scss';
 
 const SyncBanner = connect('selectAuth', ({ auth }) => {
@@ -47,6 +49,7 @@ const SyncBanner = connect('selectAuth', ({ auth }) => {
         {syncing ? 'Syncing...' : `Sync${pending ? ` (${pending})` : ''}`}
       </button>
       {message && <span className='sync-message'>{message}</span>}
+      <OfflineSetupButton />
     </div>
   );
 });
