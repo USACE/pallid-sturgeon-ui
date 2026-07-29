@@ -180,12 +180,6 @@ const FishDataEntry = connect(
         return;
       }
 
-      console.warn('[Fish Copy Last Row] Source row selected', {
-        HIGHLIGHT_SPECIES: lastRowData?.species,
-        HIGHLIGHT_LENGTH_TYPE: lastRowData?.lengthType,
-        rowData: lastRowData,
-      });
-
       // Format new row data
       const newRowData = {
         // ...lastRowData,
