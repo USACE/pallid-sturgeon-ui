@@ -16,7 +16,7 @@ import { generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
-import { mdiCrosshairsGps, mdiEarth } from '@mdi/js';
+import { mdiCrosshairsGps } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
@@ -488,19 +488,6 @@ const SearchEffortDataEntryForm = connect(
                 <Button className='add-btn save-btn' onClick={handleSubmit(doSubmit)} type='button'>
                   Submit
                 </Button>
-              )}
-              {USE_UBLOX_POC && (
-                <span>
-                  <Button type='button' className='primary-btn save-btn' onClick={ubloxGps.connect}>
-                    <span>
-                      <Icon path={mdiEarth} className='margin-right-1' />
-                    </span>
-                    Connect u-blox Satellite GPS
-                  </Button>
-                  <span>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</span>
-                  {ubloxGps.latestFix && <span>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</span>}
-                  {ubloxGps.lastError && <span>GPS Error: {ubloxGps.lastError.message}</span>}
-                </span>
               )}
             </Grid>
           </Grid>

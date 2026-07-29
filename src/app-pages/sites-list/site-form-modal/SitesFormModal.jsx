@@ -228,6 +228,14 @@ const SitesFormModal = connect(
 
       const finalSiteFid = values.siteFid || values.site_fid || data?.siteFid || data?.site_fid || generateSiteFid;
 
+      // Need params obj for online save/update
+      const paramsObj = {
+        code: values?.bend?.value,
+        sampleUnitType: values?.sampleUnitType,
+        segment: values?.segmentId?.value,
+        season: values?.segmentId,
+      };
+
       const dataObj = {
         ...values,
         clientId,
@@ -248,7 +256,7 @@ const SitesFormModal = connect(
 
       try {
         if (isOnline()) {
-          data?.siteId || data?.site_id ? doUpdateSite(payload) : doAddSite(payload);
+          data?.siteId || data?.site_id ? doUpdateSite(payload) : doAddSite(paramsObj, payload);
         } else {
           data?.siteId || data?.site_id
             ? await updateData('sites', clientId, payload)
