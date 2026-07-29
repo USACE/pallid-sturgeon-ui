@@ -1,3 +1,5 @@
+import { mdiCrosshairsGps } from '@mdi/js';
+import Icon from '@src/app-components/icon/icon';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Button } from '@trussworks/react-uswds';
@@ -46,7 +48,7 @@ export const getTelemetryColumns = ({
       header: 'Bend',
       cell: TableCell,
       size: 100,
-      meta: { readOnly: true },
+      meta: { type: 'number' },
     }),
     columnHelper.accessor('bendRiverMile', {
       header: 'Bend River Mile',
@@ -72,8 +74,8 @@ export const getTelemetryColumns = ({
     columnHelper.accessor('captureButton', {
       header: 'Capture Button',
       cell: ({ row }) => (
-        <Button className={saveBtnClasses} onClick={() => handleCaptureRow(row.index)} type='button'>
-          Capture Button
+        <Button className='primary-btn' onClick={() => handleCaptureRow(row.index)} type='button'>
+          <Icon path={mdiCrosshairsGps} />
         </Button>
       ),
       size: 200,
@@ -187,29 +189,32 @@ export const getTelemetryColumns = ({
       size: 200,
       meta: { type: 'text' },
     }),
-    ...(online ? [columnHelper.accessor('editInitials', {
-      header: 'Edit Initials',
-      cell: TableCell,
-      size: 200,
-      meta: { type: 'text' },
-    }),
-    columnHelper.accessor('lastEditComment', {
-      header: 'Last Edit Comment',
-      cell: TableCell,
-      size: 200,
-      meta: { type: 'text' },
-    }),
-    columnHelper.accessor('checkby', {
-      header: 'Check By',
-      cell: TableCell,
-      size: 200,
-      meta: { type: 'text' },
-    }),
-    columnHelper.accessor('uploadedBy', {
-      header: 'Uploaded By',
-      cell: ({ cell }) => <span>{cell.getValue()}</span>,
-      size: 190,
-    }),
-  ] : []),
+    ...(online
+      ? [
+          columnHelper.accessor('editInitials', {
+            header: 'Edit Initials',
+            cell: TableCell,
+            size: 200,
+            meta: { type: 'text' },
+          }),
+          columnHelper.accessor('lastEditComment', {
+            header: 'Last Edit Comment',
+            cell: TableCell,
+            size: 200,
+            meta: { type: 'text' },
+          }),
+          columnHelper.accessor('checkby', {
+            header: 'Check By',
+            cell: TableCell,
+            size: 200,
+            meta: { type: 'text' },
+          }),
+          columnHelper.accessor('uploadedBy', {
+            header: 'Uploaded By',
+            cell: ({ cell }) => <span>{cell.getValue()}</span>,
+            size: 190,
+          }),
+        ]
+      : []),
   ];
 };

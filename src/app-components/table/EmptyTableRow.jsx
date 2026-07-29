@@ -14,12 +14,7 @@ const EmptyTableRow = ({
         {placeholderText}
         {onAddClick && (
           <div className='margin-top-1'>
-            <Button
-              className='button-small text-normal'
-              disabled={isReadOnly}
-              onClick={() => onAddClick()}
-              type='button'
-            >
+            <Button className='primary-btn' disabled={isReadOnly} onClick={() => onAddClick()} type='button'>
               <Icon className='margin-right-1' focusable={false} path={mdiPlusBox} size='16px' />
               {addButtonText}
             </Button>

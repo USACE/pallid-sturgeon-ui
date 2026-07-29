@@ -40,7 +40,9 @@ const Approval = ({ checkby, complete, qc }) => (
               // handleClick={() => doUpdateMoRiverDataEntry(formData)}
               isDisabled
             /> */}
-            <Button type='button'>Save</Button>
+            <Button type='button' className='add-btn'>
+              Save
+            </Button>
           </div>
         </div>
       </Row>

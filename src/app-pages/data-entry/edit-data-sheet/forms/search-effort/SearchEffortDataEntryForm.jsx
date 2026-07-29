@@ -9,7 +9,6 @@ import { Button, Grid } from '@trussworks/react-uswds';
 import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 
 import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEffortDataEntryForm.validation';
-import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
@@ -17,10 +16,10 @@ import { generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
+import { mdiCrosshairsGps, mdiEarth } from '@mdi/js';
+import Icon from '@src/app-components/icon/icon';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
-
-const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
 const isEmpty = (obj) => Object.keys(obj).length === 0;
 
@@ -480,19 +479,30 @@ const SearchEffortDataEntryForm = connect(
             <Grid tablet={{ col: 3 }}>
               <TextInput name='seFid' label='SE Field ID (Date-Time-SE#)' readOnly />
             </Grid>
-            {!hasTelemetry ? (
-              <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={handleSubmit(doSaveDraft)} type='button'>
+            <Grid tablet={{ col: 6 }}>
+              {!hasTelemetry ? (
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
                 </Button>
-              </Grid>
-            ) : (
-              <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={handleSubmit(doSubmit)} type='button'>
+              ) : (
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSubmit)} type='button'>
                   Submit
                 </Button>
-              </Grid>
-            )}
+              )}
+              {USE_UBLOX_POC && (
+                <span>
+                  <Button type='button' className='primary-btn save-btn' onClick={ubloxGps.connect}>
+                    <span>
+                      <Icon path={mdiEarth} className='margin-right-1' />
+                    </span>
+                    Connect u-blox Satellite GPS
+                  </Button>
+                  <span>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</span>
+                  {ubloxGps.latestFix && <span>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</span>}
+                  {ubloxGps.lastError && <span>GPS Error: {ubloxGps.lastError.message}</span>}
+                </span>
+              )}
+            </Grid>
           </Grid>
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>
@@ -538,6 +548,17 @@ const SearchEffortDataEntryForm = connect(
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>
               <TextInput name='startTime' label='Start Time (hh:mm:ss)' required />
+              <Button
+                onClick={handleCaptureStart}
+                type='button'
+                disabled={USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix}
+                className='primary-btn margin-top-1'
+              >
+                <Icon path={mdiCrosshairsGps} className='margin-right-1' />
+                {USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix
+                  ? 'Waiting for Satellite Fix...'
+                  : 'Capture Start GPS'}
+              </Button>
             </Grid>
 
             <Grid tablet={{ col: 2 }}>
@@ -556,6 +577,12 @@ const SearchEffortDataEntryForm = connect(
                 disabled={!hasTelemetry}
                 warning={!hasTelemetry ? getTelemetryWarning() : ''}
               />
+              {hasTelemetry && (
+                <Button onClick={handleCaptureStop} type='button' className='primary-btn margin-top-1'>
+                  <Icon path={mdiCrosshairsGps} className='margin-right-1' />
+                  Capture Stop GPS
+                </Button>
+              )}
             </Grid>
 
             <Grid tablet={{ col: 2 }}>
@@ -578,33 +605,6 @@ const SearchEffortDataEntryForm = connect(
                 disabled={!hasTelemetry}
                 warning={!hasTelemetry ? getTelemetryWarning() : ''}
               />
-            </Grid>
-            {USE_UBLOX_POC && (
-              <Grid row gap='sm'>
-                <Button type='button' onClick={ubloxGps.connect}>
-                  Connect u-blox Satellite GPS
-                </Button>
-                <div>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</div>
-                {ubloxGps.latestFix && <div>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</div>}
-                {ubloxGps.lastError && <div>GPS Error: {ubloxGps.lastError.message}</div>}
-              </Grid>
-            )}
-
-            <Grid row gap='sm' table={{ col: 3 }}>
-              <Button
-                onClick={handleCaptureStart}
-                type='button'
-                disabled={USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix}
-              >
-                {USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix
-                  ? 'Waiting for Satellite Fix...'
-                  : 'Capture Start GPS'}
-              </Button>
-            </Grid>
-            <Grid row gap='md' table={{ col: 3 }}>
-              <Button onClick={handleCaptureStop} type='button'>
-                Capture Stop GPS
-              </Button>
             </Grid>
           </Grid>
         </>
