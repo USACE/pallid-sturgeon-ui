@@ -282,6 +282,177 @@ async function patchMoriverChildrenAfterCreate(outboxItem: OutboxItem, dataResul
   }
 }
 
+async function patchFishChildrenAfterCreate(fishItem: OutboxItem, fishResult: any) {
+  if (fishItem.tableName !== TableName.Fish) return;
+  if (fishItem.op !== 'create') return;
+
+  const serverFishId =
+    fishResult.serverId ??
+    (typeof fishResult.json === 'number' ? fishResult.json : undefined) ??
+    fishResult.json?.f_id ??
+    fishResult.json?.fId ??
+    fishResult.json?.fid ??
+    fishResult.json?.data?.f_id ??
+    fishResult.json?.data?.fId ??
+    fishResult.json?.data?.fid ??
+    fishResult.json?.data(typeof fishResult?.json?.data === 'number' ? fishResult?.data : undefined);
+
+  if (!serverFishId) {
+    console.warn('Fish create synced but no fish ID was returned:', fishResult);
+    return;
+  }
+
+  const fishPayload = fishItem.payload ?? {};
+
+  const fishFid = fishPayload.fFid ?? fishPayload.f_fid;
+
+  if (!fishFid) {
+    console.warn('Fish create synced but no fFid was found:', fishItem);
+    return;
+  }
+
+  const pendingItems = await db.outbox.toArray();
+
+  for (const pending of pendingItems) {
+    if (pending._id == null) continue;
+
+    const isSupplemental = pending.tableName === TableName.Supplemental;
+    const isProcedure = pending.tableName === TableName.Procedure;
+
+    if (!isSupplemental && !isProcedure) {
+      continue;
+    }
+
+    const payload = pending.payload ?? {};
+    const payloadFishFid = payload.fFid ?? payload.f_fid;
+
+    if (String(payloadFishFid) !== String(fishFid)) {
+      continue;
+    }
+
+    await db.outbox.update(pending._id, {
+      payload: {
+        ...payload,
+        fid: Number(serverFishId),
+        fId: Number(serverFishId),
+        f_id: Number(serverFishId),
+        fFid: fishFid,
+        f_fid: fishFid,
+      },
+    });
+  }
+  const supplementalRows = await db.supplemental.toArray();
+
+  for (const row of supplementalRows) {
+    const rowFishFid = row.fFid ?? row.f_fid;
+
+    if (String(rowFishFid) !== String(fishFid)) {
+      continue;
+    }
+    await db.supplemental.put({
+      ...row,
+      fid: Number(serverFishId),
+      fId: Number(serverFishId),
+      f_id: Number(serverFishId),
+      fFid: fishFid,
+      f_fid: fishFid,
+    });
+  }
+  const procedureRows = await db.procedure.toArray();
+
+  for (const row of procedureRows) {
+    const rowFishFid = row.fFid ?? row.f_fid;
+
+    if (String(rowFishFid) !== String(fishFid)) {
+      continue;
+    }
+
+    await db.procedure.put({
+      ...row,
+      fid: Number(serverFishId),
+      fId: Number(serverFishId),
+      fFid: fishFid,
+      f_fid: fishFid,
+    });
+  }
+}
+
+async function patchSupplementalChildrenAfterCreate(supplementalItem: OutboxItem, supplementalResult: any) {
+  if (supplementalItem.tableName !== TableName.Supplemental) {
+    return;
+  }
+
+  if (supplementalItem.op !== 'create') {
+    return;
+  }
+
+  console.log('Supplemental sync result:', supplementalResult);
+
+  const serverSupplementalId =
+    supplementalResult.serverId ??
+    supplementalResult.json?.sid ??
+    supplementalResult.json?.s_id ??
+    supplementalResult.json?.sId ??
+    supplementalResult.json?.id ??
+    supplementalResult.json?.data?.sid ??
+    supplementalResult.json?.data?.s_id ??
+    supplementalResult.json?.data?.sId ??
+    supplementalResult.json?.data?.id ??
+    supplementalResult.json?.data;
+
+  if (!serverSupplementalId) {
+    console.warn('Supplemental create synced but no sid was returned:', supplementalResult);
+    return;
+  }
+
+  const supplementalPayload = supplementalItem.payload ?? {};
+  const fishFid = supplementalPayload.fFid ?? supplementalPayload.f_fid;
+
+  if (!fishFid) {
+    console.warn('Supplemental create synced but no fFid was found:', supplementalItem);
+    return;
+  }
+
+  const pendingItems = await db.outbox.toArray();
+
+  for (const pending of pendingItems) {
+    if (pending._id == null) continue;
+
+    if (pending.tableName !== TableName.Procedure) {
+      continue;
+    }
+
+    const payload = pending.payload ?? {};
+    const payloadFishFid = payload.fFid ?? payload.f_fid;
+
+    if (String(payloadFishFid) !== String(fishFid)) {
+      continue;
+    }
+
+    await db.outbox.update(pending._id, {
+      payload: {
+        ...payload,
+        sid: Number(serverSupplementalId),
+        s_id: Number(serverSupplementalId),
+      },
+    });
+  }
+  const procedureRows = await db.procedure.toArray();
+
+  for (const row of procedureRows) {
+    const rowFishFid = row.fFid ?? row.f_fid;
+
+    if (String(rowFishFid) !== String(fishFid)) {
+      continue;
+    }
+    await db.procedure.put({
+      ...row,
+      sid: Number(serverSupplementalId),
+      s_id: Number(serverSupplementalId),
+    });
+  }
+}
+
 export async function syncNow(token?: string): Promise<SyncResult> {
   if (!isOnline()) {
     return { tried: 0, ok: 0, errors: 0, conflicts: 0, draftSkip: 0 };
@@ -331,6 +502,41 @@ export async function syncNow(token?: string): Promise<SyncResult> {
       const table: any = getTable(item.tableName);
       const localRow: any = await table.get(item.clientId);
 
+      if (item.tableName === TableName.Supplemental && item.op === 'create') {
+        const payload = item.payload ?? {};
+        const fishId = Number(payload.f_id ?? payload.fid ?? payload.fId ?? 0);
+
+        if (!Number.isFinite(fishId) || fishId <= 0) {
+          console.warn('Skipping Supplemental because Fish has not synced yet:', {
+            outboxId: item._id,
+            clientId: item.clientId,
+            f_id: payload.f_id,
+            fid: payload.fid,
+            fId: payload.fId,
+            fFid: payload.fFid ?? payload.f_fid,
+          });
+          draftSkip++;
+          continue;
+        }
+      }
+
+      if (item.tableName === TableName.Procedure && item.op === 'create') {
+        const payload = item.payload ?? {};
+        const supplementalId = Number(payload.s_id ?? payload.sid ?? 0);
+
+        if (!Number.isFinite(supplementalId) || supplementalId <= 0) {
+          console.warn('Skipping Procedure because Supplemental has not synced yet:', {
+            outboxId: item._id,
+            clientId: item.clientId,
+            s_id: payload.s_id,
+            sid: payload.sid,
+            fFid: payload.fFid ?? payload.f_fid,
+          });
+          draftSkip++;
+          continue;
+        }
+      }
+
       const res: any = await pushOutboxItem(item, token);
 
       console.log('Sync result:', res);
@@ -361,6 +567,8 @@ export async function syncNow(token?: string): Promise<SyncResult> {
         await patchSiteChildrenAfterCreate(item, res);
         await patchSearchChildrenAfterCreate(item, res);
         await patchMoriverChildrenAfterCreate(item, res);
+        await patchFishChildrenAfterCreate(item, res);
+        await patchSupplementalChildrenAfterCreate(item, res);
       } else if (res.status === 'conflict') {
         conflicts++;
 

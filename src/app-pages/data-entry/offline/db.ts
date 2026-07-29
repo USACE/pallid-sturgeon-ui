@@ -291,7 +291,10 @@ export interface SupplementalEntry extends DataEntry {
   anal?: number;
   dorsal?: number;
   s_id?: number;
+  sId?: number;
   f_id?: number;
+  fId?: number;
+  fid?: number;
   recapture?: string;
   other_tag_info?: string;
   genetics_vial_number?: string;
@@ -302,10 +305,12 @@ export interface SupplementalEntry extends DataEntry {
   hatchery_origin?: string;
   genetic_needs?: string;
   mr_id?: number;
+  mrId?: number;
   last_updated?: string;
   uploaded_by?: string;
   approved?: number;
   f_fid?: string;
+  fFid?: string;
   photo?: string;
   last_edit_comment?: string;
   edit_initials?: string;
@@ -338,6 +343,9 @@ export interface SupplementalEntry extends DataEntry {
 export interface ProcedureEntry extends DataEntry {
   id?: number;
   f_id?: number;
+  fId?: number;
+  fid?: number;
+  fFid?: string;
   f_fid?: string;
   purpose_code?: string;
   procedure_date?: string;
@@ -376,7 +384,10 @@ export interface ProcedureEntry extends DataEntry {
   edit_initials?: string;
   last_edit_comment?: string;
   mr_fid?: string;
+  mrFid?: string;
   s_id?: number;
+  sid?: number;
+  sId?: number;
   serial_num?: string;
 }
 
@@ -423,14 +434,14 @@ export class PSOfflineDB extends Dexie {
   constructor() {
     super('ps_offline_db');
 
-    this.version(8).stores({
+    this.version(9).stores({
       sites: 'clientId, serverId, site_id, site_fid, _status',
       moriver: 'clientId, serverId, mr_id, mr_fid, site_id, site_fid, siteRouteKey, updatedAt, setdate, _status',
       search: 'clientId, serverId, se_id, seFid, site_id, site_fid, siteRouteKey, _status',
       fish: 'clientId, serverId, f_id, fFid, mr_id, mrFid, mr_fid, _status',
       telemetry: 'clientId, serverId, t_id, se_id, tFid, seFid, _status',
-      supplemental: 'clientId, serverId, s_id, _status',
-      procedure: 'clientId, serverId, id, _status',
+      supplemental: 'clientId, serverId, s_id, f_id, fFid, f_fid, _status',
+      procedure: 'clientId, serverId, id, s_id, f_id, fFid, f_fid, _status',
 
       outbox: '++_id, tableName, op, ts, clientId, serverId',
       meta: 'key',
