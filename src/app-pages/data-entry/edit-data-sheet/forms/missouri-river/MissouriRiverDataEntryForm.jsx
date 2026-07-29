@@ -348,6 +348,8 @@ const MissouriRiverDataEntryForm = connect(
         startLongitude: formatCoordFlt(values.startLongitude) ?? '',
         stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
         stopLongitude: formatCoordFlt(values.stopLongitude) ?? '',
+        subsample: parseFloat(values?.subsample),
+        subsamplepass: parseFloat(values?.subsample),
         temp: parseFloat(values?.temp),
         u2: String(values?.u2),
         velocitybot1: parseFloat(values?.velocitybot1),
