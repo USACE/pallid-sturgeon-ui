@@ -86,6 +86,7 @@ const MissouriDsTable = connect(
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
                 type: 'missouriRiver',
+                tab: 0,
               }}
               sortable
               unSortIcon

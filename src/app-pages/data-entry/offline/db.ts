@@ -104,6 +104,7 @@ export interface MoriverEntry extends DataEntry {
   comments?: string;
   mappingbox?: string;
   mr_id?: number;
+  mrId?: number;
   site_id?: number;
   siteId?: number;
   site_fid?: string;
@@ -120,6 +121,7 @@ export interface MoriverEntry extends DataEntry {
   uploaded_by?: string;
   approved?: number;
   mr_fid?: string;
+  mrFid?: string;
   last_edit_comment?: string;
   edit_initials?: string;
   complete?: number;
@@ -137,6 +139,7 @@ export interface MoriverEntry extends DataEntry {
 
 export interface SearchEffortEntry extends DataEntry {
   se_id?: number;
+  seId?: number;
   search_date?: string;
   recorder?: string;
   search_type_code?: string;
@@ -147,6 +150,7 @@ export interface SearchEffortEntry extends DataEntry {
   stop_latitude?: number;
   stop_longitude?: number;
   se_fid?: string;
+  seFid?: string;
   ds_id?: number;
   site_id?: number;
   siteId?: number;
@@ -226,6 +230,7 @@ export interface TelemetryEntry extends DataEntry {
   t_id?: number;
   t_fid?: string;
   se_id?: number;
+  seId?: number;
   bend?: number;
   radio_tag_num?: number;
   frequency_id_code?: number;
@@ -249,6 +254,7 @@ export interface TelemetryEntry extends DataEntry {
   upload_filename?: string;
   checkby?: string;
   se_fid?: string;
+  seFid?: string;
   edit_initials?: string;
   last_edit_comment?: string;
   suspected_spawning_activity?: number;

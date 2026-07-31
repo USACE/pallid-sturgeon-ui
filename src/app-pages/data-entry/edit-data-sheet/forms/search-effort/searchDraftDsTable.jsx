@@ -13,12 +13,12 @@ const telemetryCellStyle = (params) => ({
 
 const SearchDraftDsTable = connect(
   'doUpdateUrl',
-  'selectSearchEffortDraftSitesDatasheetData',
+  'selectSearchEffortSitesDraftDatasheetData',
   'selectRouteParams',
-  ({ doUpdateUrl, searchEffortDraftSitesDatasheetData, routeParams }) => {
+  ({ doUpdateUrl, searchEffortSitesDraftDatasheetData, routeParams }) => {
     const siteId = routeParams?.siteId;
 
-    const draftRows = searchEffortDraftSitesDatasheetData?.filter((row) => row.status === 1) ?? [];
+    const draftRows = searchEffortSitesDraftDatasheetData ?? [];
 
     const handleAddButtonClick = () => {
       doUpdateComplexStateField({ name: 'isEditForm', value: false });
@@ -58,6 +58,7 @@ const SearchDraftDsTable = connect(
               cellRenderer='searchIdCellRenderer'
               cellRendererParams={{
                 type: 'searchEffort',
+                tab: 0,
               }}
               sortable
               unSortIcon

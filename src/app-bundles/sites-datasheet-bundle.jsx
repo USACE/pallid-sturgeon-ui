@@ -1,5 +1,6 @@
 import { queryFromObject } from '@src/utils';
 import { ApiStatuses } from '@src/utils/enums';
+import { db } from '@src/app-pages/data-entry/offline/db';
 
 const sitesDatasheetBundle = {
   name: 'sitesDatasheet',
@@ -36,8 +37,8 @@ const sitesDatasheetBundle = {
           return {
             ...state,
             missouriRiver: {
-              data: payload.items,
-              totalCount: payload.totalCount,
+              data: payload.items ?? [],
+              totalCount: payload.items?.length ?? 0,
             },
           };
         case 'UPDATE_SEARCH_EFFORT_SITES_DATASHEET':
@@ -45,7 +46,7 @@ const sitesDatasheetBundle = {
             ...state,
             searchEffort: {
               data: payload.items,
-              totalCount: payload.totalCount,
+              totalCount: payload.items?.length ?? 0,
             },
           };
         default:
@@ -70,7 +71,7 @@ const sitesDatasheetBundle = {
     state.sitesDatasheet.missouriRiver.data?.filter((row) => row.status === 2).length,
 
   // Search Effort Data
-  selectSearchEffortDraftSitesDatasheetData: (state) =>
+  selectSearchEffortSitesDraftDatasheetData: (state) =>
     state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 1),
   selectSearchEffortSitesDatasheetData: (state) =>
     state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 2),
@@ -80,10 +81,42 @@ const sitesDatasheetBundle = {
     state.sitesDatasheet.searchEffort.data?.filter((row) => row.status === 1).length,
 
   doSitesDatasheetLoadData:
-    () =>
-    ({ store }) => {
-      store.doFetchMoRiverSitesDatasheets();
-      store.doFetchSearchEffortSitesDatasheets();
+    (siteRouteKeyFromPage = null) =>
+    async ({ dispatch, store }) => {
+      if (navigator.onLine) {
+        store.doFetchMoRiverSitesDatasheets();
+        store.doFetchSearchEffortSitesDatasheets();
+        return;
+      }
+      const params = store.selectSitesDatasheetParams();
+      const siteRouteKey =
+        siteRouteKeyFromPage ?? params?.siteId ?? params?.site_id ?? params?.siteFid ?? params?.site_fid;
+      const moriverData = await db.moriver.toArray();
+      const searchData = await db.search.toArray();
+      const matchCurrentSite = (row) => {
+        const rowSiteKey = [row?.siteRouteKey, row?.siteFid, row?.site_fid, row?.siteId, row?.site_id];
+        return rowSiteKey.some(
+          (value) => value !== undefined && value !== null && String(value) === String(siteRouteKey)
+        );
+      };
+      const siteMoriverData = moriverData.filter(matchCurrentSite);
+      const siteSearchData = searchData.filter(matchCurrentSite);
+
+      dispatch({
+        type: 'UPDATE_MORIVER_SITES_DATASHEET',
+        payload: {
+          items: siteMoriverData,
+          totalCount: siteMoriverData.length,
+        },
+      });
+
+      dispatch({
+        type: 'UPDATE_SEARCH_EFFORT_SITES_DATASHEET',
+        payload: {
+          items: siteSearchData,
+          totalCount: siteSearchData.length,
+        },
+      });
     },
 
   doFetchMoRiverSitesDatasheets:

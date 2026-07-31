@@ -16,9 +16,11 @@ const MrIdCellRenderer = connect(
     type,
     tab = 0,
   }) => {
-    const mrId = type === 'home' ? data.mrID : data.mrId;
+    const mrId = type === 'home' ? data.mrID : (data.mrId ?? data.mr_id ?? data.mrFid ?? data.mr_fid);
+    const mrDisplayId =
+      type === 'home' ? data.mrID : (data.mrId ?? data.mr_id ?? String(data.mrFid ?? data.mr_fid ?? '').slice(-3));
     const typeText = {
-      missouriRiver: data.mrId,
+      missouriRiver: mrDisplayId,
       fish: data.fishCount,
       supplemental: data.suppCount,
       procedure: data.procCount,
@@ -28,9 +30,9 @@ const MrIdCellRenderer = connect(
     const handleClick = () => {
       doUpdateCurrentTab(tab);
       doUpdateComplexStateField({ name: 'isEditForm', value: true });
-      doFetchMoRiverDataEntry({ tableId: mrId }, false, true, true);
       // Reset form data
       doResetFormData();
+      doFetchMoRiverDataEntry({ tableId: mrId }, false, true, true);
     };
 
     return <Button size='small' variant='link' className='p-0 mb-1' text={typeText[type]} handleClick={handleClick} />;

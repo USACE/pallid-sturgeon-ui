@@ -31,6 +31,7 @@ import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/o
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
 import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
+import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 
 import '../../../dataentry.scss';
 import { mdiCrosshairsGps } from '@mdi/js';
@@ -47,6 +48,7 @@ const MissouriRiverDataEntryForm = connect(
   'doAddMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
   'doUpdateCurrentTab',
+  'doUpdateUrl',
   'selectBaseData',
   'selectDataEntryData',
   'selectLookupData',
@@ -57,6 +59,7 @@ const MissouriRiverDataEntryForm = connect(
     doAddMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
     doUpdateCurrentTab,
+    doUpdateUrl,
     baseData,
     dataEntryData,
     lookupData,
@@ -523,7 +526,9 @@ const MissouriRiverDataEntryForm = connect(
       setValue('clientId', clientId);
       setValue('status', DataEntryStatuses.Submitted);
       setValue('mrFid', payload.mrFid ?? payload.mr_fid);
-      sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
+      sessionStorage.removeItem(moriverDraftKey);
+      refreshSiteDatasheet();
+      doUpdateUrl(`/sites-list/${siteRouteKey}`);
 
       setSubmitMessage({
         type: ApiStatuses.Success,
