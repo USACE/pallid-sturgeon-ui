@@ -8,6 +8,8 @@
   .usa-select {
     @include mixin.input-styles;
     margin-top: 0;
+    padding: 0;
+    padding-left: 5px;
 
     &.usa-select:disabled {
       background-color: $input-disabled;

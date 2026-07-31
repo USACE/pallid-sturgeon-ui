@@ -10,6 +10,7 @@ const sizeMap = {
   sm: false,
   md: true,
   lg: true,
+  xl: true,
 };
 
 const ModalContent = connect(
@@ -17,6 +18,7 @@ const ModalContent = connect(
   ({ doModalClose, children, className = '', hasCloseButton = false, size = 'lg', title, ...customProps }) => {
     const modalClasses = classNames(className, {
       'modal-md': size === 'md',
+      'modal-xl': size === 'xl',
     });
 
     useListener('keydown', (e) => {
@@ -46,7 +48,7 @@ const ModalContent = connect(
         isLarge={sizeMap[size || 'lg']}
         {...customProps}
       >
-        <ModalHeader title={title} />
+        {title && <ModalHeader title={title} />}
         <div id='primary-modal-content' className='primary-modal-content modal-body'>
           {children}
         </div>

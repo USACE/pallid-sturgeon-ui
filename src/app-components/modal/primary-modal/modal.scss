@@ -58,6 +58,10 @@ div.usa-modal {
     max-width: 42rem;
   }
 
+  &.modal-xl {
+    max-width: 90rem;
+  }
+
   &:has(footer) {
     #primary-modal-content {
       padding-bottom: 4rem;

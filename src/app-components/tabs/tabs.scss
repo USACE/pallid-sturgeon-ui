@@ -1,0 +1,45 @@
+@use '@styles/_variables';
+
+.tab-controls {
+  display: flex;
+  font-size: 0.9rem;
+
+  > button {
+    background-color: transparent;
+    border-color: transparent;
+    border-style: solid;
+    border-width: 0 0 4px 0;
+    color: variables.$color-primary-dark;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1em;
+    margin-bottom: -1px;
+    max-width: 340px;
+    padding: 0.75rem 1rem;
+    position: relative;
+
+    > div {
+      text-align: left;
+    }
+
+    &.active {
+      cursor: default;
+      pointer-events: none;
+      border-color: variables.$link-color;
+    }
+  }
+
+  border-bottom: 2px solid variables.$color-primary-light;
+  margin-bottom: 0.5rem;
+}
+
+.tab-subtitle {
+  font-size: 0.7rem;
+  font-style: italic;
+  margin-top: 0.25rem;
+}
+
+.tab-content {
+  padding: 1rem;
+}
