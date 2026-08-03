@@ -1,0 +1,22 @@
+export const generateToken = (size) => {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const randomValues = new Uint8Array(size);
+  window.crypto.getRandomValues(randomValues); // Populates array with secure random numbers
+    
+  let result = 'ps-api-';
+  for (let i = 0; i < size; i++) {
+    result += chars[randomValues[i] % chars.length];
+  }
+  return result;
+};
+
+export const hash = async (message) => {
+  const hash = async ()=> {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(message);
+    const hash = await window.crypto.subtle.digest("SHA-256", data);  
+    return hash;
+  }
+  
+  return await hash();
+};

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
-import { mdiLogout, mdiMenuDown } from '@mdi/js';
+import { mdiLogout, mdiMenuDown, mdiAccountKey } from '@mdi/js';
 
+import TokenFormModal from '../../app-pages/admin/users/TokenModal';
 import Dropdown from '@components/dropdown';
 import NavItem from './navItem';
 import RoleFilter from '@components/role-filter';
@@ -29,11 +30,12 @@ const utilityLinks = ['/error-log'];
 
 const NavBar = connect(
   'doAuthenticate',
+  'doModalOpen',
   'selectAuthLoggedIn',
   'selectUserRole',
   'selectPathname',
   'selectUsersData',
-  ({ doAuthenticate, authLoggedIn, userRole, pathname, usersData }) => {
+  ({ doAuthenticate, doModalOpen, authLoggedIn, userRole, pathname, usersData }) => {
     const [show, setShow] = useState(false);
     const isHome = pathname === '/';
     const user = userRole ? usersData.find((user) => userRole.id === user.id) : {};
@@ -109,6 +111,9 @@ const NavBar = connect(
                       </span>
                     }
                   >
+                    <Dropdown.Item onClick={() => doModalOpen(TokenFormModal)}>
+                      <Icon path={mdiAccountKey} /> Token
+                    </Dropdown.Item>
                     <Dropdown.Item href='/logout'>
                       <Icon path={mdiLogout} /> Logout
                     </Dropdown.Item>

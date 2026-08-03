@@ -12,9 +12,9 @@ services:
             dockerfile: Dockerfile
         develop:
             watch:
-            - action: rebuild
-            path: ./api
-            target: /go/src/app
+              - action: rebuild
+                path: ./api
+                target: /go/src/app
         env_file: ./envvars.list
         entrypoint: /go/bin/pallid_sturgeon_api
         ports:
