@@ -124,7 +124,8 @@ const createAuthBundle = (options) => ({
               token: accessToken,
               authData: {
                 fullName: authInfo ? authInfo.name : '',
-                userId: authInfo ? Number(authInfo.sub) : '',
+                userId: authInfo ? authInfo.sub : '',
+                email: authInfo ? authInfo.email : '',
                 name:
                   authInfo && authInfo.name ? authInfo.name.split('.')[0] : '',
                 exp: authInfo ? authInfo.exp : '',

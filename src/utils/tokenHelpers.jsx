@@ -10,13 +10,12 @@ export const generateToken = (size) => {
   return result;
 };
 
-export const hash = async (message) => {
-  const hash = async ()=> {
+export const hash = async (message, callback) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(message);
-    const hash = await window.crypto.subtle.digest("SHA-256", data);  
-    return hash;
-  }
-  
-  return await hash();
+    const hash = await window.crypto.subtle.digest("SHA-256", data);
+    const hashHex = new Uint8Array(hash).toHex()
+    console.log("hash");
+    console.log(hashHex);
+    callback(hashHex);
 };

@@ -26,6 +26,7 @@ const Button = ({
   isDisabled = false,
   isActive = false,
   isLoading = false,
+  usePaddingBottom = true,
   handleClick = () => {},
   className = '',
   ...customProps
@@ -36,7 +37,7 @@ const Button = ({
     `btn-${isOutline ? 'outline-' : ''}${variant}`,
     isActive && 'active',
     isDisabled && 'disabled not-allowed',
-    'pb-2',
+    usePaddingBottom && 'pb-2',
     className,
   ]);
 
