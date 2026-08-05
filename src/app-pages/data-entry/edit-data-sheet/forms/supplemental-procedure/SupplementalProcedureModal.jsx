@@ -170,6 +170,7 @@ const SupplementalProcedureModal = connect(
     const ercolor = watch('ercolor');
     const genetic = watch('genetic');
     const geneticsVialNumber = watch('geneticsVialNumber');
+    const purpose = watch('purpose');
 
     const geneticsVialPrefix = projectId === 1 ? 'STURG-' : '';
 
@@ -687,7 +688,13 @@ const SupplementalProcedureModal = connect(
                 </SelectInput>
               </Grid>
               <Grid tablet={{ col: 4 }}>
-                <SelectInput name='elhv' label='EL H/V/X' onChange={handleChange} readOnly={isElColorNone}>
+                <SelectInput
+                  name='elhv'
+                  label='EL H/V/X'
+                  onChange={handleChange}
+                  readOnly={isElColorNone}
+                  required={elcolor !== null && elcolor !== '' && elcolor !== 'N'}
+                >
                   {createDropdownOptions(elastomerHvxOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
@@ -707,7 +714,13 @@ const SupplementalProcedureModal = connect(
                 </SelectInput>
               </Grid>
               <Grid tablet={{ col: 4 }}>
-                <SelectInput name='erhv' label='ER H/V/X' onChange={handleChange} readOnly={isErColorNone}>
+                <SelectInput
+                  name='erhv'
+                  label='ER H/V/X'
+                  onChange={handleChange}
+                  readOnly={isErColorNone}
+                  required={ercolor !== null && ercolor !== '' && ercolor !== 'N'}
+                >
                   {createDropdownOptions(elastomerHvxOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
@@ -929,10 +942,21 @@ const SupplementalProcedureModal = connect(
               </Grid>
               <Grid row gap='md' className='padding-bottom-3'>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='oldRadioTagNum' label='Old Radio Tag #' type='text' onChange={handleChange} />
+                  <TextInput
+                    name='oldRadioTagNum'
+                    label='Old Radio Tag #'
+                    type='text'
+                    onChange={handleChange}
+                    required={Number(purpose) === 2 || Number(purpose) === 5}
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='oldFrequencyId' label='Old Frequency ID' onChange={handleChange}>
+                  <SelectInput
+                    name='oldFrequencyId'
+                    label='Old Frequency ID'
+                    onChange={handleChange}
+                    required={Number(purpose) === 2 || Number(purpose) === 5}
+                  >
                     {createDropdownOptions(frequencyId).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -970,10 +994,16 @@ const SupplementalProcedureModal = connect(
                     label='New/Current Radio Tag #'
                     type='text'
                     onChange={handleChange}
+                    required={Number(purpose) !== 5 || Number(purpose) !== 6}
                   />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='newFreqId' label='New/Current Frequency ID' onChange={handleChange}>
+                  <SelectInput
+                    name='newFreqId'
+                    label='New/Current Frequency ID'
+                    onChange={handleChange}
+                    required={Number(purpose) !== 5 || Number(purpose) !== 6}
+                  >
                     {createDropdownOptions(frequencyId).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -982,7 +1012,13 @@ const SupplementalProcedureModal = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='newRtSerial' label='New/Current RT Serial #' type='text' onChange={handleChange} />
+                  <TextInput
+                    name='newRtSerial'
+                    label='New/Current RT Serial #'
+                    type='text'
+                    onChange={handleChange}
+                    required={Number(purpose) !== 5 || Number(purpose) !== 6}
+                  />
                 </Grid>
               </Grid>
               <Grid row gap='md' className='padding-bottom-3'>
