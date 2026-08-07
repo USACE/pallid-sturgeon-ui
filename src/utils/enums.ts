@@ -10,6 +10,7 @@ export const projectTypes = {
 export const enum ValidationMessages {
   FieldRequired = 'Value is required',
   SelectRequired = 'Please select an option',
+  GenerateToken = 'Generate a new token before saving.',
 }
 
 export const enum ApiStatuses {

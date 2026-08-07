@@ -38,7 +38,7 @@ export default {
   doFetchToken:
     (email) =>
     ({ dispatch, store, apiGet }) => {
-      const toastId = ignoreToast ? toast.loading(`Fetching Token Info for ${email}`) : null;
+      // const toastId = ignoreToast ? toast.loading(`Fetching Token Info for ${email}`) : null;
 
       const url = `/psapi/user/token/${email}`;
 
@@ -47,14 +47,14 @@ export default {
 
           dispatch({
             type: 'SET_TOKEN',
-            payload: body?.data.token,
+            payload: body?.data,
           });
 
-          ignoreToast && tSuccess(toastId, 'Token Info found!');
+          // ignoreToast && tSuccess(toastId, 'Token Info found!');
           
         } else {
           dispatch({ type: 'TOKEN_FETCH_ERROR', payload: err });
-          tError(toastId, 'Error fetching Token Info. Please try again.');
+          // tError(toastId, 'Error fetching Token Info. Please try again.');
         }
       });
     },

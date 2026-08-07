@@ -16,6 +16,8 @@ import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.fo
 import Icon from '@components/icon/icon';
 import { generateToken, hash } from '@src/utils/tokenHelpers'
 
+import './token.scss';
+
 import { ValidationMessages } from '@src/utils/enums';
 
 const defaultValues = {
@@ -27,14 +29,14 @@ const defaultValues = {
 
 const schema = yup.object().shape({
   accessKey: yup.string(),
-  secretKey: yup.string(),
+  secretKey: yup.string().required(ValidationMessages.GenerateToken),
   expiration: yup.string(),
 });
 
 const TokenFormModal = connect(
   'doModalClose',
   'selectAuthData',
-  'selectTokenStoreToken',
+  'selectTokenStore',
   'doFetchToken',
   'doSaveToken',
   'doDeleteToken',
@@ -60,7 +62,6 @@ const TokenFormModal = connect(
       setValue,
     } = methods; 
 
-
     const createToken = () => {
       const ak = generateToken(8)
       setAccessKey(ak);
@@ -68,42 +69,65 @@ const TokenFormModal = connect(
       const sk = generateToken(24);
       setSecretKey(sk);
       setValue('secretKey',sk);
-      hash(sk,setSecretHash);
       let result = new Date();
       result.setDate(result.getDate() + 60)
       setValue('expiration',result.toLocaleString());
       setExpiration(result);
+      hash(user,ak,sk,result,saveToken);
+      trigger();
       // useEffect(()=>{
       //   setValue('expiration',expiration);
       // },[expiration]);
     };
 
     const deleteToken = () => {
-      doDeleteToken(user.email);
+      doDeleteToken(user);
       setAccessKey('');
       setSecretKey('');
       setExpiration('');
       setValue('accessKey','');
       setValue('secretKey','');
       setValue('expiration','');
+      doFetchToken(user);
       doModalClose();
     };
 
-    const saveToken = () => {
-      doSaveToken(user.email, { accessKey:accessKey, secretKey:secretHash, expiration:expiration })
+    const saveToken = (u,ak,hash,exp) => {
+        doSaveToken(u, { accessKey:ak, secretKey:hash, expiration:exp })
     }
 
     useEffect(() => {
-    //   doFetchToken(user.email);
-    //   if(accessKey === null){
-    //     console.log(selectTokenStoreToken);
-    //   }
       if(user4Token === undefined || user4Token === null ){
-        setUser(authData);
+        setUser(authData.email);
+        doFetchToken(authData.email);
       } else {
         setUser(user4Token);
+        doFetchToken(user4Token);
       }
-    }, [setUser]);
+      
+    }, []);
+
+    useEffect(() => {
+      if(accessKey == null || accessKey.length == 0 || (accessKey !== null && accessKey != tokenStore.token.accessKey)){
+        setValue('accessKey',tokenStore.token.accessKey);
+        setAccessKey(tokenStore.token.accessKey);
+      } else {
+
+      }
+      if(expiration == null || (expiration !== null && expiration != tokenStore.token.expiration)){
+        try{
+          if(tokenStore.token.expiration !== null && tokenStore.token.expiration.length > 0){
+            let result = new Date(tokenStore.token.expiration);
+            setValue('expiration',result.toLocaleString());
+          } else {
+            setValue('expiration','');
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      console.log(tokenStore);
+    }, [tokenStore]);
 
     useEffect(() => {
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
@@ -130,6 +154,7 @@ const TokenFormModal = connect(
               />
               <Button
                 isOutline
+                style={{ visibility: accessKey !== null && accessKey.length > 0 ? 'visible' : 'hidden' }}
                 size='small'
                 variant='info'
                 text='Delete Token'
@@ -146,14 +171,17 @@ const TokenFormModal = connect(
                   <TextInput name='expiration' label='Token Expires On' showOptionalText={false} readOnly={true} />
                 </Grid>
               </Grid>
-              <Grid row gap='md'>
+              <Grid row gap='md' style={{ visibility: isValid ? 'visible' : 'hidden' }}>
                 <Grid tablet={{ col: 6 }}>
                   <TextInputWClipboard name='secretKey' label='Token Secret Key' showOptionalText={false} readOnly={true} />
+                </Grid>
+                <Grid tablet={{ col: 6 }}>
+                  <div className='token-notice'> Copy the secret key, it will not be available after you close this window.</div>
                 </Grid>
               </Grid>
             </div>
           </section>
-          <ModalFooter cancelText="Close" showCancelButton saveIsDisabled={!isValid} onSave={() => saveToken()} />
+          <ModalFooter cancelText="Close" showSaveButton={false } showCancelButton saveIsDisabled={!isValid} onSave={() => saveToken()} />
         </FormProvider>
       </ModalContent>
     );
