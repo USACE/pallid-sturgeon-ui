@@ -154,11 +154,8 @@ export const suppProcValidationSchema = ({ projectId, species }) =>
       dstSerialNum: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .when('showProcedureSection', {
-          is: true,
-          then: (schema) => schema.required(ValidationMessages.FieldRequired),
-          otherwise: (schema) => schema.nullable().notRequired(),
-        }),
+        .nullable()
+        .notRequired(),
       dstStartDate: yup.string().when('showProcedureSection', {
         is: true,
         then: (schema) =>
