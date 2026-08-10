@@ -317,7 +317,7 @@ const SearchEffortDataEntryForm = connect(
       } catch (error) {
         console.error('Search submit failed, queueing offline:', error);
 
-        await updateData('search', payload);
+        await updateData('search', clientId, payload);
 
         setValue('clientId', clientId);
         setValue('status', 2);

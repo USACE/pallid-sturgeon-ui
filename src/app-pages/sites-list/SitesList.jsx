@@ -17,6 +17,7 @@ const breadcrumbLinks = [
 ];
 
 const SitesList = connect(
+  'doSitesLoadData',
   'doDomainBendsFetch',
   'doDataEntryLoadData',
   'doDomainFieldOfficesFetch',
@@ -25,6 +26,7 @@ const SitesList = connect(
   'doSetSitesPagination',
   'selectSitesTotalResults',
   ({
+    doSitesLoadData,
     doDomainBendsFetch,
     doDataEntryLoadData,
     doDomainFieldOfficesFetch,
@@ -37,11 +39,16 @@ const SitesList = connect(
   }) => {
     // Load data
     useEffect(() => {
+      doSitesLoadData();
       doDataEntryLoadData();
-      doDomainFieldOfficesFetch();
-      doDomainSegmentsFetch({ office, project });
-      doDomainSeasonsFetch();
-      doDomainBendsFetch();
+
+      if (navigator.onLine) {
+        doDataEntryLoadData();
+        doDomainFieldOfficesFetch();
+        doDomainSegmentsFetch({ office, project });
+        doDomainSeasonsFetch();
+        doDomainBendsFetch();
+      }
     }, []);
 
     return (

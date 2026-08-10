@@ -14,17 +14,31 @@ const telemetryCellStyle = (params) => ({
 });
 
 const SearchDsTable = connect(
+  'doResetFormData',
+  'doResetTelemetryDataEntries',
+  'doUpdateCurrentTab',
   'doUpdateUrl',
   'doUpdateComplexStateField',
   'selectSearchEffortSitesDatasheetData',
   'selectRouteParams',
-  ({ doUpdateUrl, doUpdateComplexStateField, searchEffortSitesDatasheetData, routeParams }) => {
+  ({
+    doResetFormData,
+    doResetTelemetryDataEntries,
+    doUpdateCurrentTab,
+    doUpdateUrl,
+    doUpdateComplexStateField,
+    searchEffortSitesDatasheetData,
+    routeParams,
+  }) => {
     const siteId = routeParams?.siteId;
 
     const handleAddButtonClick = () => {
       const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
       sessionStorage.removeItem(searchDraftKey);
-
+      // reset form
+      doResetFormData();
+      doResetTelemetryDataEntries();
+      doUpdateCurrentTab(0);
       doUpdateComplexStateField({ name: 'isEditForm', value: false });
       doUpdateUrl(`/sites-list/${siteId}/search-effort`);
     };

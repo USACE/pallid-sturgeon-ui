@@ -25,17 +25,21 @@ const procCellStyle = (params) => ({
 
 const MissouriDsTable = connect(
   'doResetFormData',
+  'doResetMoRiverDataEntryData',
   'doUpdateUrl',
   'doUpdateComplexStateField',
   'selectMoriverSitesDatasheetData',
   'selectMoriverDraftSitesDatasheetData',
+  'doUpdateCurrentTab',
   'selectRouteParams',
   ({
     doResetFormData,
+    doResetMoRiverDataEntryData,
     doUpdateUrl,
     doUpdateComplexStateField,
     moriverDraftSitesDatasheetData,
     moriverSitesDatasheetData,
+    doUpdateCurrentTab,
     routeParams,
     isDraft,
   }) => {
@@ -43,10 +47,14 @@ const MissouriDsTable = connect(
     const data = isDraft ? moriverDraftSitesDatasheetData : moriverSitesDatasheetData;
 
     const handleAddButtonClick = () => {
-      doUpdateComplexStateField({ name: 'isEditForm', value: false });
-      doUpdateUrl(`/sites-list/${siteId}/missouri-river`);
+      const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
+      sessionStorage.removeItem(moriverDraftKey);
       // Reset form data
       doResetFormData();
+      doResetMoRiverDataEntryData();
+      doUpdateCurrentTab(0);
+      doUpdateComplexStateField({ name: 'isEditForm', value: false });
+      doUpdateUrl(`/sites-list/${siteId}/missouri-river`);
     };
 
     return (
