@@ -4,7 +4,6 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
 import { Button } from '@trussworks/react-uswds';
-import classNames from 'classnames';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 
@@ -20,8 +19,6 @@ import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 import Icon from '@src/app-components/icon/icon';
 import { mdiContentCopy } from '@mdi/js';
-
-const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
 // Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
 // localRows never seems to return anything(?) - feel free to change if there is an issue.
