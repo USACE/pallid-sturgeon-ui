@@ -39,6 +39,12 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
     type === 'combobox' ? formatSelectValue(initialValue, columnMeta?.options) : initialValue
   );
 
+  useEffect(() => {
+    const nextValue = type === 'combobox' ? formatSelectValue(initialValue, columnMeta?.options) : initialValue;
+    setValue(nextValue);
+    previousValueRef.current = nextValue;
+  }, [initialValue, type, columnMeta?.options]);
+
   const debouncedUpdateRef = useRef();
 
   useEffect(() => {

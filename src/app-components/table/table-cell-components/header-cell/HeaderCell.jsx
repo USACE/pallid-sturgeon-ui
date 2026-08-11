@@ -3,7 +3,7 @@ import Icon from '@components/icon/icon';
 import { mdiCloseOctagon, mdiPlus } from '@mdi/js';
 import './headerCell.scss';
 
-const HeaderCell = ({ table }) => {
+const HeaderCell = ({ table, showAddRowButton = true }) => {
   const meta = table.options.meta;
   const selectedRows = table.getSelectedRowModel().rows;
   const rowCount = table.getRowModel().rows.length;
@@ -16,7 +16,7 @@ const HeaderCell = ({ table }) => {
   return (
     <div className='d-flex justify-content-start margin-top-1'>
       <div className='d-flex width-full justify-content-end'>
-        {rowCount > 0 && (
+        {rowCount > 0 && showAddRowButton && (
           <div style={{ whiteSpace: 'nowrap' }}>
             <Button className='primary-btn' onClick={meta?.addRow} size='small' title='Add New Row'>
               <Icon focusable={false} className='margin-right-1' path={mdiPlus} size={'16px'} />
