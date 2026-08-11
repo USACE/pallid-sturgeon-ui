@@ -165,7 +165,12 @@ const DataEntryTable = ({
       <div
         style={{ minWidth: '600px', maxWidth: `${table.getTotalSize() > 1500 ? 'auto' : table.getTotalSize() + 'px'}` }}
       >
-        <HeaderCell table={table} hideDrag={hideDrag} ignoredHeaders={ignoredHeaders} showAddRowButton={showAddRowButton} />
+        <HeaderCell
+          table={table}
+          hideDrag={hideDrag}
+          ignoredHeaders={ignoredHeaders}
+          showAddRowButton={showAddRowButton}
+        />
       </div>
       <div style={{ width: '100%', overflowX: 'auto' }}>
         <div

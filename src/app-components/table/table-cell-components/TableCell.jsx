@@ -69,7 +69,7 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
       // Clear field if value is 0 or is a negative number
       if (
         String(blurValue) === '0' ||
-        (String(blurValue)[0] === '-' && column.id !== 'longitude' && column.id !== 'latitude')
+        (String(blurValue)[0] === '-' && column.id !== 'captureLatitude' && column.id !== 'captureLongitude')
       ) {
         setValue('');
         updateValue('');

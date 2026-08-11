@@ -30,7 +30,7 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
   };
 
   const handleChange = (e) => {
-    const val = e?.target?.value ?? '';
+    const val = (e?.target?.value ?? '').toUpperCase();
     setValue(val === '' ? null : val);
     updateValue(val === '' ? null : val);
   };

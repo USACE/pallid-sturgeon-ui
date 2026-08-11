@@ -1,6 +1,6 @@
 import { Button } from '@trussworks/react-uswds';
 import Icon from '@components/icon/icon';
-import { mdiCloseOctagon, mdiPlusBox } from '@mdi/js';
+import { mdiCloseOctagon, mdiPlus } from '@mdi/js';
 import './headerCell.scss';
 
 const HeaderCell = ({ table, showAddRowButton = true }) => {
@@ -18,14 +18,8 @@ const HeaderCell = ({ table, showAddRowButton = true }) => {
       <div className='d-flex width-full justify-content-end'>
         {rowCount > 0 && showAddRowButton && (
           <div style={{ whiteSpace: 'nowrap' }}>
-            <Button
-              className='add-row-button'
-              onClick={meta?.addRow}
-              size='small'
-              title='Add New Row'
-              // disabled={isReadOnly}
-            >
-              <Icon focusable={false} className='margin-right-1' path={mdiPlusBox} size={'16px'} />
+            <Button className='primary-btn' onClick={meta?.addRow} size='small' title='Add New Row'>
+              <Icon focusable={false} className='margin-right-1' path={mdiPlus} size={'16px'} />
               Add New Row
             </Button>
           </div>

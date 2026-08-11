@@ -8,10 +8,13 @@ import FloyTagPrefixTableCell from '@src/app-components/table/table-cell-compone
 import GeneticVialNumTableCell from '@src/app-components/table/table-cell-components/fish/GeneticVialNumTableCell';
 import LengthTableCell from '@src/app-components/table/table-cell-components/fish/LengthTableCell';
 import PanelHookTableCell from '@src/app-components/table/table-cell-components/fish/PanelHookTableCell';
+import TagnumberTableCell from '@src/app-components/table/table-cell-components/fish/TagnumberTableCell';
 import WeightTableCell from '@src/app-components/table/table-cell-components/fish/WeightTableCell';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
 import { CreateComboboxOptions, createDropdownOptions } from '@src/app-pages/data-entry/dataEntryHelper';
 import { createColumnHelper } from '@tanstack/react-table';
+
+const getRowIndex = (val) => val?.split('-')?.at('-1');
 
 export const getFishColumns = ({
   gear,
@@ -21,6 +24,7 @@ export const getFishColumns = ({
   markRecaptureOptions,
   yesNoOptions,
   fishStructures,
+  online,
 }) => {
   const columnHelper = createColumnHelper();
 
@@ -32,7 +36,7 @@ export const getFishColumns = ({
     }),
     columnHelper.accessor('fFid', {
       header: 'Field ID',
-      cell: ({ cell }) => <span>{cell.getValue()}</span>,
+      cell: ({ cell }) => <span>{getRowIndex(cell.getValue())}</span>,
       size: 150,
     }),
     columnHelper.accessor('supplementalData', {
@@ -139,7 +143,7 @@ export const getFishColumns = ({
     }),
     columnHelper.accessor('tagnumber', {
       header: 'Tag Number',
-      cell: TableCell,
+      cell: TagnumberTableCell,
       size: 150,
       minSize: 150,
       maxSize: 180,

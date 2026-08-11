@@ -1,14 +1,15 @@
 @use '@styles/_variables' as *;
+@use '@styles/_theme' as theme;
 
 .navbar-brand {
   > * {
     font-weight: 600;
-    color: $color-gray !important;
+    color: var(--color-navbar-item) !important;
 
     &:hover,
     &:focus {
       text-decoration: none !important;
-      color: $color-primary-dark !important;
+      color: var(--color-navbar-link) !important;
     }
   }
 }
@@ -51,7 +52,7 @@
     max-height: 62px;
 
     .nav-link {
-      color: $color-gray !important;
+      color: var(--color-navbar-item) !important;
 
       &.user {
         margin: 0;
@@ -62,16 +63,16 @@
       border-bottom: 3px solid $color-primary-dark;
 
       .nav-link {
-        color: $color-primary-dark !important;
+        color: var(--color-navbar-link) !important;
       }
     }
 
     &:hover,
     &:focus {
-      border-bottom: 3px solid $color-primary;
+      border-bottom: 3px solid var(--color-navbar-link);
 
       .nav-link {
-        color: $color-primary-dark !important;
+        color: var(--color-navbar-link) !important;
       }
     }
   }
@@ -83,7 +84,6 @@
 
 .navbar.seperator {
   border-bottom: 1px solid $color-gray-light;
-  margin-bottom: 15px;
 }
 
 @media screen and (max-width: $medium-screen-width) {

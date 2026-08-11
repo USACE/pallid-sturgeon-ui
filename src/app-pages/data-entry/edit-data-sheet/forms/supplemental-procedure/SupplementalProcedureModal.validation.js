@@ -2,7 +2,7 @@ import { ValidationMessages } from '@src/utils/enums';
 import { formatDate } from '@src/utils/helpers';
 import * as yup from 'yup';
 
-export const supplementalValidationSchema = ({ projectId, species }) =>
+export const suppProcValidationSchema = ({ projectId, species }) =>
   yup
     .object()
     .shape({
@@ -154,11 +154,8 @@ export const supplementalValidationSchema = ({ projectId, species }) =>
       dstSerialNum: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .when('showProcedureSection', {
-          is: true,
-          then: (schema) => schema.required(ValidationMessages.FieldRequired),
-          otherwise: (schema) => schema.nullable().notRequired(),
-        }),
+        .nullable()
+        .notRequired(),
       dstStartDate: yup.string().when('showProcedureSection', {
         is: true,
         then: (schema) =>

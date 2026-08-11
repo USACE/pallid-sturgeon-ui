@@ -1,0 +1,10 @@
+@use '@styles/_theme' as theme;
+@use '@styles/_mixins' as m;
+
+.test-approval {
+  background-color: var(--color-dataheader);
+}
+
+.test-approval-inputs {
+  @include m.input-styles;
+}

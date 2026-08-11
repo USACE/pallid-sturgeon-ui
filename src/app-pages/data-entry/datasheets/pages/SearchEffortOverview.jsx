@@ -1,6 +1,6 @@
 import { connect } from 'redux-bundler-react';
 import Card from '@src/app-components/card';
-import DataHeader from '../components/dataHeader';
+import DataHeader from '../components/data-header/dataHeader';
 import TabContainer from '@src/app-components/tab';
 import TelemetryDataEntry from '../tables/telemetry/TelemetryDataEntry';
 import Breadcrumb from '@src/app-components/breadcrumb';

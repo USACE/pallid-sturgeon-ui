@@ -1,17 +1,15 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
 import { Button } from '@trussworks/react-uswds';
-import classNames from 'classnames';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 
-import { db } from '@src/app-pages/data-entry/offline/db';
 import { OfflineStatuses } from '@src/utils/enums';
 import { isOnline } from '@src/app-pages/data-entry/offline/sync';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
@@ -19,8 +17,8 @@ import { getFishColumns } from './helpers.fish';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
-
-const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
+import Icon from '@src/app-components/icon/icon';
+import { mdiContentCopy } from '@mdi/js';
 
 const createBlankFishRow = () => ({
   _isPlaceholderRow: true,
@@ -43,7 +41,6 @@ const ensureTrailingBlankFishRow = (rows) => {
 
   return [...normalizedRows, createBlankFishRow()];
 };
-
 
 // Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
 // localRows never seems to return anything(?) - feel free to change if there is an issue.
@@ -130,7 +127,7 @@ const FishDataEntry = connect(
       onlineMarkRecaptureOptions?.length > 0 ? onlineMarkRecaptureOptions : offlineLookups.markRecaptureOptions;
 
     const dataForValidation = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
-    const schema = FishDataEntrySchema({ gear, data: dataForValidation });
+    const schema = useMemo(() => FishDataEntrySchema({ gear, data: dataForValidation }), [gear, dataForValidation]);
     const tableValidationSchema = {
       validate: (row, options) => {
         if (isUntouchedPlaceholderFishRow(row)) {
@@ -160,10 +157,30 @@ const FishDataEntry = connect(
       markRecaptureOptions,
       yesNoOptions,
       fishStructures,
+      online,
     });
 
     const handleAddRow = async () => {
       setData((prev) => ensureTrailingBlankFishRow(prev));
+
+      // Add default values here
+      // const base = getBaseDefaultValues({ baseData });
+      // const fishFid = getNextFishFid(data ?? [], parentMrFid);
+
+      // const newRowData = {
+      //   ...base,
+      //   ...getFishRiverDefaultValues({ dataEntryData }),
+      //   mrId: parentMrId,
+      //   mr_id: parentMrId,
+      //   mrFid: parentMrFid,
+      //   mr_fid: parentMrFid,
+      //   fFid: fishFid,
+      //   f_fid: fishFid,
+      //   _status: OfflineStatuses.New,
+      // };
+
+      // setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
+      // setData((prev) => ensureTrailingBlankFishRow(prev));
     };
 
     const handleCopyLastRowBtn = () => {
@@ -174,7 +191,10 @@ const FishDataEntry = connect(
       }
       const fishFid = getNextFishFid(data ?? [], parentMrFid);
       // Grab last object from data array
-      const lastRowData = (data ?? []).slice().reverse().find((row) => !isUntouchedPlaceholderFishRow(row));
+      const lastRowData = (data ?? [])
+        .slice()
+        .reverse()
+        .find((row) => !isUntouchedPlaceholderFishRow(row));
       if (!lastRowData) {
         window.alert('No existing Fish row found to copy.');
         return;
@@ -357,32 +377,6 @@ const FishDataEntry = connect(
       setData(ensureTrailingBlankFishRow(rowData));
     }, [baseData?.bendRiverMile, items]);
 
-    // useEffect(() => {
-    //   const loadOfflineLookups = async () => {
-    //     try {
-    //       const [fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions] = await Promise.all([
-    //         getLookupOptions('fishCodes'),
-    //         getLookupOptions('fishStructures'),
-    //         getLookupOptions('floyTagPrefixes'),
-    //         getLookupOptions('lengthTypes'),
-    //         getLookupOptions('markRecaptureOptions'),
-    //       ]);
-
-    //       setOfflineLookups({
-    //         fishCodes,
-    //         fishStructures,
-    //         floyTagPrefixes,
-    //         lengthTypes,
-    //         markRecaptureOptions,
-    //       });
-    //     } catch (err) {
-    //       console.error('Failed to load Fish offline lookups:', err);
-    //     }
-    //   };
-
-    //   void loadOfflineLookups();
-    // }, []);
-
     return (
       <FormProvider {...methods}>
         <DataEntryTable
@@ -403,10 +397,11 @@ const FishDataEntry = connect(
           updateSourceData={handleUpdateData}
           validationSchema={tableValidationSchema}
         />
-        <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
+        <Button className='margin-top-2 secondary-btn' onClick={() => handleCopyLastRowBtn()} type='button'>
+          <Icon focusable={false} className='margin-right-1' path={mdiContentCopy} />
           Copy Last Row
         </Button>
-        <Button className={saveBtnClasses} onClick={() => handleSubmitAll()} type='button'>
+        <Button className='margin-top-2 add-btn' onClick={() => handleSubmitAll()} type='button'>
           Submit
         </Button>
         {validationErrorRowCount > 0 && (
