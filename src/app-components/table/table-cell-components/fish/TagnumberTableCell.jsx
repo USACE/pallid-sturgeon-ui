@@ -1,26 +1,19 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { decimalNumberRegex } from '@src/utils/regex';
-import { mdiAlert } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
+import { mdiAlert } from '@mdi/js';
 
-const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
+const TagnumberTableCell = connect(({ getValue, row, column, table, cell }) => {
+  console.warn('row: ', row);
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
-  const [species, setSpecies] = useState();
-  const [count, setCount] = useState();
   const [showWarning, setShowWarning] = useState(false);
 
-  const rowSpecies = useMemo(() => row.getValue('species'), [row]);
-  const rowCount = useMemo(() => row.getValue('countF'), [row]);
-
   const debouncedUpdateRef = useRef();
-
-  const isRequired = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
-  const isDisabled = Number(count) > 1;
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
@@ -50,41 +43,30 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
     }
   };
 
-  // Get latest species and countF values
+  // Set warning flag
   useEffect(() => {
-    setSpecies(rowSpecies);
-    setCount(rowCount);
-  }, [rowSpecies, rowCount]);
-
-  // Reset cell value if the field is disabled
-  useEffect(() => {
-    // Avoid clearing during transient mount states before dependent fields are loaded.
-    if (species === undefined || count === undefined) return;
-
-    if (isDisabled) {
-      setValue(null);
-      updateValue(null);
-    }
-  }, [isDisabled]);
-
-  useEffect(() => {
-    if (Number(value) >= 1600) {
-      setShowWarning(true);
+    const hasDecimal = String(value)?.includes('.');
+    // not enough values
+    if (hasDecimal) {
+      const parseVal = String(value)?.replace('.', '');
+      setShowWarning(
+        parseVal?.length < 14 && parseVal !== '' ? 'Value cannot be less than or greater than 14 digits' : null
+      );
     } else {
-      setShowWarning(false);
+      setShowWarning(
+        value && String(value)?.length < 10 ? 'Value cannot be less than or greater than 10 digits' : null
+      );
     }
-  }, [value, setShowWarning]);
+  }, [value]);
 
   return (
     <div>
       <input
-        aria-label='Length'
-        disabled={columnMeta?.readOnly || isDisabled}
+        aria-label='Floy Tag'
+        disabled={columnMeta?.readOnly}
         id={cell.id}
-        maxLength={4000}
-        onBlur={handleBlur}
         onChange={handleChange}
-        required={isRequired}
+        onBlur={handleBlur}
         style={{
           width: '100%',
           borderColor: 'hsl(0, 0%, 80%)',
@@ -92,15 +74,17 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
         }}
         type='text'
         value={value ?? ''}
+        maxLength={String(value)?.includes('.') ? 15 : 10}
+        minLength={10}
       />
       {showWarning && (
         <p>
           <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
-          {'Length entered is > 1600'}
+          {showWarning}
         </p>
       )}
     </div>
   );
 });
 
-export default LengthTableCell;
+export default TagnumberTableCell;

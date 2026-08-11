@@ -34,8 +34,8 @@ table select:disabled {
   border: 1px solid variables.$color-primary;
 }
 
-table select:invalid,
-table input:invalid {
+.show-validation-errors table select:invalid,
+.show-validation-errors table input:invalid {
   background-color: #fa9595;
 }
 

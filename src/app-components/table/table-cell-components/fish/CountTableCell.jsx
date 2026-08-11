@@ -57,6 +57,9 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
     } else if (['NDNF', 'CNA', 'CNFH'].includes(species)) {
       setValue(null);
       updateValue(null);
+    } else if (value === null || value === undefined || value === 0) {
+      setValue(1);
+      updateValue(1);
     }
   }, [species]);
 
@@ -73,7 +76,7 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
         borderColor: 'hsl(0, 0%, 80%)',
         cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
       }}
-      type='number'
+      type='text'
       value={value ?? ''}
     />
   );

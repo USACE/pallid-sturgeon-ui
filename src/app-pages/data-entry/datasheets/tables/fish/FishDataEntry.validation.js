@@ -1,7 +1,7 @@
 import { ValidationMessages } from '@src/utils/enums';
 import * as yup from 'yup';
 
-export const notRequiredSpeciesArr = ['NFSH', 'NDNF', 'CAN', 'CNFH'];
+export const notRequiredSpeciesArr = ['NFSH', 'NDNF', 'CNA', 'CNFH'];
 export const gearMbArr = ['LDN500', 'LDN750', 'LDN1000'];
 
 export const FishDataEntrySchema = ({ gear, data }) =>
@@ -69,7 +69,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
           },
           message: 'Cannot have more than one record for the species NDNF',
         })
-        // If Gear = LDN490, LDN749 or LDN1000, then NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'
+        // If Gear = LDN500, LDN750, or LDN1000, then NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'
         .test({
           test: (species, { parent: { panelHook } }) => {
             // If no species value selected OR one or less fish rows, do not validate
@@ -82,7 +82,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             if (gearMbArr.includes(gear) && species === 'NFSH') {
               // If only one NSFH, do not validate
               if (data?.filter((row) => row.species === 'NFSH')?.length === 1) return true;
-              // Cannot have more than 2 NFSH species if Gear = LDN490, LDN749 or LDN1000, throw error
+              // Cannot have more than 2 NFSH species if Gear = LDN500, LDN750 or LDN1000, throw error
               if (data?.filter((row) => row.species === 'NFSH')?.length > 2) return false;
               if (panelHook === 'M') {
                 return data?.filter((row) => row.species === 'NFSH' && row.panelHook === 'M')?.length === 1;
@@ -95,15 +95,18 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             return true;
           },
           message:
-            "Gear = LDN490, LDN749 or LDN1000, NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'",
+            "Gear = LDN500, LDN750, or LDN1000, NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'",
         })
-        .nullable()
-        .notRequired(),
-      lengthType: yup.string().required(ValidationMessages.FieldRequired),
+        .required(ValidationMessages.FieldRequired),
+      lengthType: yup.string().when('length', {
+        is: (length) => length !== null && length !== undefined && length !== '' && Number(length) !== 0,
+        then: (schema) => schema.required(ValidationMessages.FieldRequired),
+        otherwise: (schema) => schema.nullable().notRequired(),
+      }),
       length: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .typeError(ValidationMessages.FieldRequired)
+        .typeError(ValidationMessages.FieldMustBeNumber)
         .min(0, 'Value cannot be negative')
         .max(9999, 'Value cannot exceed 9999')
         .when(['species', 'countF'], {
@@ -114,14 +117,15 @@ export const FishDataEntrySchema = ({ gear, data }) =>
       weight: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .typeError()
+        .typeError(ValidationMessages.FieldMustBeNumber)
         .min(0, 'Value cannot be negative')
         .nullable()
         .notRequired(),
       countF: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .typeError()
+        .typeError(ValidationMessages.FieldMustBeNumber)
+        .min(0, 'Value cannot be negative')
         .when('species', {
           is: (species) => !['NDNF', 'CNA', 'CNFH', 'NFSH'].includes(species),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
@@ -178,11 +182,11 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             if (hasDecimal) {
               return !(tagnumber?.length > 14);
             } else {
-              return !(tagnumber?.length > 10);
+              return true;
             }
           },
           message:
-            'Tag Number is no more than 10 digits when there is no decimal and no more than 14 digits when there is a decimal.',
+            'Tag Number may be no more than 14 digits when there is a decimal.',
         })
         .test({
           test: (tagnumber) => {
