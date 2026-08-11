@@ -8,6 +8,7 @@ import FloyTagPrefixTableCell from '@src/app-components/table/table-cell-compone
 import GeneticVialNumTableCell from '@src/app-components/table/table-cell-components/fish/GeneticVialNumTableCell';
 import LengthTableCell from '@src/app-components/table/table-cell-components/fish/LengthTableCell';
 import PanelHookTableCell from '@src/app-components/table/table-cell-components/fish/PanelHookTableCell';
+import TagnumberTableCell from '@src/app-components/table/table-cell-components/fish/TagnumberTableCell';
 import WeightTableCell from '@src/app-components/table/table-cell-components/fish/WeightTableCell';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
 import { CreateComboboxOptions, createDropdownOptions } from '@src/app-pages/data-entry/dataEntryHelper';
@@ -23,6 +24,7 @@ export const getFishColumns = ({
   markRecaptureOptions,
   yesNoOptions,
   fishStructures,
+  online,
 }) => {
   const columnHelper = createColumnHelper();
 
@@ -141,7 +143,7 @@ export const getFishColumns = ({
     }),
     columnHelper.accessor('tagnumber', {
       header: 'Tag Number',
-      cell: TableCell,
+      cell: TagnumberTableCell,
       size: 150,
       minSize: 150,
       maxSize: 180,

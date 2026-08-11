@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
@@ -104,7 +104,7 @@ const FishDataEntry = connect(
     const markRecaptureOptions =
       onlineMarkRecaptureOptions?.length > 0 ? onlineMarkRecaptureOptions : offlineLookups.markRecaptureOptions;
 
-    const schema = FishDataEntrySchema({ gear, data });
+    const schema = useMemo(() => FishDataEntrySchema({ gear, data }), [gear, data]);
 
     const speciesOptions =
       fishCodes?.map((item) => ({
@@ -125,6 +125,7 @@ const FishDataEntry = connect(
       markRecaptureOptions,
       yesNoOptions,
       fishStructures,
+      online,
     });
 
     const handleAddRow = async () => {
@@ -314,7 +315,7 @@ const FishDataEntry = connect(
           showValidationErrors={isSubmitAttempted}
           tableVersion='FishTable'
           updateSourceData={handleUpdateData}
-          validationSchema={FishDataEntrySchema({ gear, data })}
+          validationSchema={schema}
         />
         <Button className='margin-top-2 secondary-btn' onClick={() => handleCopyLastRowBtn()} type='button'>
           <Icon focusable={false} className='margin-right-1' path={mdiContentCopy} />
