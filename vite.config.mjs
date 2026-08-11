@@ -3,6 +3,7 @@ import svgrPlugin from 'vite-plugin-svgr';
 import { checker } from 'vite-plugin-checker';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
+import { VitePWA } from 'vite-plugin-pwa';
 
 // https://vitejs.dev/config/
 export default ({ mode }) => {
@@ -13,6 +14,27 @@ export default ({ mode }) => {
     base: basePath === '' ? '/' : basePath,
     plugins: [
       react({ include: ['**/*.jsx'] }),
+      VitePWA({
+        registerType: 'prompt',
+        injectRegister: 'auto',
+        manifest: {
+          name: 'Pallid Sturgeon Population Assessment',
+          short_name: 'Pallid Sturgeon',
+          description: 'Pallid Sturgeon Population Assessment Application',
+          display: 'standalone',
+          background_color: '#ffffff',
+          theme_color: '#ffffff',
+          start_url: basePath === '' ? '/' : basePath,
+          scope: basePath === '' ? '/' : basePath,
+        },
+        workbox: {
+          cleanupOutdatedCaches: true,
+          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+        },
+        devOptions: {
+          enabled: true,
+        },
+      }),
       svgrPlugin(),
       visualizer({
         filename: 'rollup-analyze.json',
