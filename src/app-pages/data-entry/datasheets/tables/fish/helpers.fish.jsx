@@ -13,6 +13,8 @@ import { TableCell } from '@src/app-components/table/table-cell-components/Table
 import { CreateComboboxOptions, createDropdownOptions } from '@src/app-pages/data-entry/dataEntryHelper';
 import { createColumnHelper } from '@tanstack/react-table';
 
+const getRowIndex = (val) => val?.split('-')?.at('-1');
+
 export const getFishColumns = ({
   gear,
   speciesOptions,
@@ -32,7 +34,7 @@ export const getFishColumns = ({
     }),
     columnHelper.accessor('fFid', {
       header: 'Field ID',
-      cell: ({ cell }) => <span>{cell.getValue()}</span>,
+      cell: ({ cell }) => <span>{getRowIndex(cell.getValue())}</span>,
       size: 150,
     }),
     columnHelper.accessor('supplementalData', {

@@ -26,7 +26,7 @@ const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, getValue, row }
   return (
     <div className='button-container'>
       <Button
-        className='button-small text-normal'
+        className='primary-btn'
         title='Add Supplemental & Procedure Data Entry'
         onClick={() => handleButtonClick()}
         type='button'

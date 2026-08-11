@@ -1,4 +1,12 @@
-// Colors
+// General Colors
+$color-gray: #5e5e5e;
+$color-gray-light: #a7a7a7;
+$color-gray-dark: #454545;
+
+$color-white: #ffffff;
+$color-black: #000000;
+
+// Primary/Light-Mode Colors
 $color-primary: #4d96aa;
 $color-primary-light: #e3eef1;
 $color-primary-dark: #2c3e50;
@@ -9,13 +17,7 @@ $color-form-light: #d1d2d4;
 $color-form-xlight: #f9f9f9;
 $color-form-red: #de1e2e;
 
-$color-gray: #5e5e5e;
-$color-gray-light: #a7a7a7;
-$color-gray-dark: #454545;
-
-$color-white: #ffffff;
-$color-black: #000000;
-
+// Statuses
 $color-success: #68a072;
 $color-success-hover: #578b60;
 
@@ -31,7 +33,7 @@ $color-error-light: #f4e3db;
 
 // Inputs
 $input-border: #ccc;
-$input-disabled: hsl(0, 0%, 95%);
+$input-disabled: #f2f2f2;
 $input-error-border: #d54309;
 
 // Tables

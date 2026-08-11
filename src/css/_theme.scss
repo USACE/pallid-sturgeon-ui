@@ -1,0 +1,39 @@
+// Setting Light/Dark Mode
+
+/* Default Light Mode Colors */
+:root {
+  --background-color: #ffffff;
+  --text-color: #121212;
+  // FORM
+  --color-form-input-border: #000000;
+  // @TODO: section border
+  --color-form-input-disabled: #ccc9c9;
+  --color-form-btn: #219bbd;
+  // --color-form-btn-text: #ffffff;
+  --color-form-btn-border: #000000;
+}
+
+/* Automatically switches when Chrome/OS dark mode is active */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #202124; /* Chrome Dark Background */
+    --text-color: #e8eaed;
+    // COMMON COMPONENTS
+    --color-navbar-item: #e8eaed;
+    --color-navbar-link: #41c6eb;
+    --color-breadcrumbs-text: #e4e5e7;
+    --color-breadcrumbs-link: #219bbd;
+    --color-breadcrumbs-link-visited: #219bbd;
+    --color-accordion-border: 3px solid #e8eaed;
+    // modal
+    --color-modal: #202124;
+    --color-modal-text: #e8eaed;
+    // FORM
+    --color-form-input-border: #000000;
+    --color-form-input-disabled: #979797;
+    --color-form-btn: #419db6;
+    --color-form-btn-text: #ffffff;
+    --color-form-btn-border: #ffffff;
+    // TABLE
+  }
+}

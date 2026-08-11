@@ -1,14 +1,15 @@
 import { connect } from 'redux-bundler-react';
 
 import Card from '@components/card';
-import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
-import Approval from '@pages/data-entry/datasheets/components/approval';
+import DataHeader from '@src/app-pages/data-entry/datasheets/components/data-header/dataHeader';
+import Approval from '@src/app-pages/data-entry/datasheets/components/approval/approval';
 import TabContainer from '@components/tab';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import MissouriRiverDataEntryForm from '../../edit-data-sheet/forms/missouri-river/MissouriRiverDataEntryForm';
 import FishDataEntry from '../tables/fish/FishDataEntry';
 
 import '../../../data-summaries/data-summary.scss';
+import '../../dataentry.scss';
 
 const MissouriRiverOverview = connect(
   'doUpdateCurrentTab',

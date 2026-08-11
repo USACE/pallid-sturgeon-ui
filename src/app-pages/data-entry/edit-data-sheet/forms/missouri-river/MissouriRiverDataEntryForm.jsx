@@ -33,6 +33,8 @@ import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offl
 import { db } from '@src/app-pages/data-entry/offline/db';
 
 import '../../../dataentry.scss';
+import { mdiCrosshairsGps } from '@mdi/js';
+import Icon from '@src/app-components/icon/icon';
 
 const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -346,6 +348,8 @@ const MissouriRiverDataEntryForm = connect(
         startLongitude: formatCoordFlt(values.startLongitude) ?? '',
         stopLatitude: formatCoordFlt(values.stopLatitude) ?? '',
         stopLongitude: formatCoordFlt(values.stopLongitude) ?? '',
+        subsample: parseFloat(values?.subsample),
+        subsamplepass: parseFloat(values?.subsample),
         temp: parseFloat(values?.temp),
         u2: String(values?.u2),
         velocitybot1: parseFloat(values?.velocitybot1),
@@ -365,11 +369,10 @@ const MissouriRiverDataEntryForm = connect(
         const draft = JSON.parse(savedDraft);
         if (!draft?.mrFid) return null;
 
-        if (
-          String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey)
-        ) {
-          return null;
-        }
+        const checkSiteId =
+          String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey);
+        if (checkSiteId) return null;
+
         return draft;
       } catch (err) {
         console.error('Failed to parse offline Missouri River draft:', err);
@@ -808,7 +811,7 @@ const MissouriRiverDataEntryForm = connect(
             </div>
           </div>
         )}
-        <div className='container-fluid margin-top-1'>
+        <div className='container-fluid test-moriver margin-top-1'>
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>
               <TextInput name='mrFid' label='MR Field ID (Date-Time-MR#)' readOnly />
@@ -818,13 +821,13 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
             {!hasFishRecords ? (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={handleSubmit(doSaveDraft)} type='button'>
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
                 </Button>
               </Grid>
             ) : (
               <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={doSubmit} type='button'>
+                <Button className='add-btn save-btn' onClick={doSubmit} type='button'>
                   Submit
                 </Button>
               </Grid>
@@ -844,10 +847,6 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <TextInput name='subsample' label='Subsample' type='number' onChange={handleChange} required />
-              {/* @TODO: "Next Subsample" button counts up by 1 */}
-              <Button className={saveBtnClasses} onClick={() => {}} type='button'>
-                Next Subsample
-              </Button>
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <TextInput
@@ -858,10 +857,6 @@ const MissouriRiverDataEntryForm = connect(
                 onChange={handleChange}
                 required
               />
-              {/* @TODO: "Next Pass" button counts up by 1 */}
-              <Button className={saveBtnClasses} onClick={() => {}} type='button'>
-                Next Pass
-              </Button>
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <SelectInput name='subsamplen' label='Subsample R/N' onChange={handleChange} required>
@@ -1093,7 +1088,12 @@ const MissouriRiverDataEntryForm = connect(
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>
-                  <Button onClick={() => handleCapture('start')} type='button'>
+                  <Button
+                    onClick={() => handleCapture('start')}
+                    type='button'
+                    className='primary-btn margin-left-1 margin-top-1'
+                  >
+                    <Icon path={mdiCrosshairsGps} className='margin-right-1' />
                     Capture Start GPS
                   </Button>
                 </Grid>
@@ -1174,7 +1174,12 @@ const MissouriRiverDataEntryForm = connect(
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>
-                  <Button onClick={() => handleCapture('stop')} type='button'>
+                  <Button
+                    onClick={() => handleCapture('stop')}
+                    type='button'
+                    className='primary-btn margin-left-1 margin-top-1'
+                  >
+                    <Icon path={mdiCrosshairsGps} className='margin-right-1' />
                     Capture Stop GPS
                   </Button>
                 </Grid>

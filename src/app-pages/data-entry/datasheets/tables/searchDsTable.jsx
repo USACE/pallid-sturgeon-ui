@@ -2,12 +2,12 @@ import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { mdiDownload, mdiPlus } from '@mdi/js';
 
-import Button from '@components/button';
 import Icon from '@components/icon/icon';
 
 import SearchIdCellRenderer from '@common/gridCellRenderers/searchIdCellRenderer';
 
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { Button } from '@trussworks/react-uswds';
 
 const telemetryCellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
@@ -32,28 +32,19 @@ const SearchDsTable = connect(
     return (
       <>
         <Row>
-          <div className='col-md-9 col-xs-12'>
-            <Button
-              isOutline
-              size='small'
-              variant='success'
-              text='Add Search Effort Datasheet'
-              title='Add Search Effort Datasheet'
-              icon={<Icon path={mdiPlus} />}
-              className='btn-width'
-              handleClick={handleAddButtonClick}
-            />
-          </div>
-          <div className='col-md-3 col-xs-12'>
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              text='Export as CSV'
-              icon={<Icon path={mdiDownload} />}
-              className='float-right btn-width'
-              // handleClick={() => doFetchAllDatasheet('search-datasheet')}
-            />
+          <div className='col-md-12 col-xs-12' style={{ justifyContent: 'space-between' }}>
+            <Button onClick={handleAddButtonClick} className='add-btn' title='Add Search Effort Datasheet'>
+              <span>
+                <Icon path={mdiPlus} />
+              </span>
+              Add Search Effort Datasheet
+            </Button>
+            <Button onClick={() => {}} className='clear-btn' title='Export as CSV' disabled>
+              <span>
+                <Icon path={mdiDownload} />
+              </span>
+              Export as CSV
+            </Button>
           </div>
         </Row>
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>

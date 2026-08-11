@@ -13,13 +13,9 @@ import Map from '@pages/map/map';
 import UserList from '@pages/admin/userList';
 import NotFound from '@pages/404';
 import SearchReports from '@pages/data-summaries/search-reports';
-import PriorityFish from '@pages/data-summaries/priorityFish';
-import LastLocation from '@pages/data-summaries/lastLocation';
-import TagReplacement from '@pages/data-summaries/tagReplacement';
 import MultipleRecordApproval from '@pages/admin/multipleRecordApproval';
 import SiteDatasheet from '@pages/data-entry/datasheets/pages/site-datasheet';
 import Users from '@pages/admin/users/Users';
-// import SearchEffortForm from '@src/app-pages/data-entry/edit-data-sheet/forms/searchEffortForm';
 import MissouriRiverOverview from '@src/app-pages/data-entry/datasheets/pages/MissouriRiverOverview';
 import SearchEffortOverview from '@src/app-pages/data-entry/datasheets/pages/SearchEffortOverview';
 
@@ -33,11 +29,9 @@ export default createRouteBundle({
   '/error-log': ErrorLog,
   '/find-data-sheet': DataEntry,
   '/genetics-card-summary': GeneticCard,
-  '/last-location': LastLocation,
   '/logout': Logout,
   '/map': Map,
   '/multiple-record-approval': MultipleRecordApproval,
-  '/priority-fish': PriorityFish,
   '/search-reports': SearchReports,
   '/sites-list': SitesList,
   '/sites-list/:siteId': SiteDatasheet,
@@ -45,7 +39,6 @@ export default createRouteBundle({
   '/sites-list/:siteId/search-effort': SearchEffortOverview,
   '/sites-list/:siteId/missouri-river/:mrId': MissouriRiverOverview,
   '/sites-list/:siteId/search-effort/:seId': SearchEffortOverview,
-  '/tag-replacement': TagReplacement,
   '/user-access-requests': UserList,
   '*': NotFound,
 });

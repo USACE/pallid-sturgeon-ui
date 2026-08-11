@@ -1,9 +1,13 @@
 @use '@styles/_variables' as *;
+@use '@styles/_theme' as theme;
 
 .nav-tabs {
   border-bottom: 1px solid #c8cacb !important;
+  background-color: var(--color-tab-items);
 
   .nav-link.active {
-    border-color: #c8cacb #c8cacb $color-white !important;
+    border-color: black black var(--color-tab-items) !important;
+    background-color: var(--color-tab-items);
+    color: #c8cacb;
   }
 }
