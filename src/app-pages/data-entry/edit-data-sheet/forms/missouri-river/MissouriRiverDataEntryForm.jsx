@@ -482,7 +482,6 @@ const MissouriRiverDataEntryForm = connect(
 
     const doSubmit = async () => {
       setValue('status', DataEntryStatuses.Submitted);
-      if (!isValid) return;
 
       const dataObj = formatDataObj();
       const draft = getOfflineDraft();
@@ -832,7 +831,7 @@ const MissouriRiverDataEntryForm = connect(
               </Grid>
             ) : (
               <Grid tablet={{ col: 2 }}>
-                <Button className='add-btn save-btn' onClick={doSubmit} type='button'>
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSubmit)} type='button'>
                   Submit
                 </Button>
               </Grid>
