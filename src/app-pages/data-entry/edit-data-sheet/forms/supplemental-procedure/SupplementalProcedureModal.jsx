@@ -627,6 +627,18 @@ const SupplementalProcedureModal = connect(
       description: val,
     }));
 
+    const getTagnumberWarning = () => {
+      const hasDecimal = String(tagnumber)?.includes('.');
+      if (hasDecimal) {
+        const parseVal = String(tagnumber)?.replace('.', '');
+        return parseVal?.length < 14 && parseVal !== '' ? 'Value cannot be less than or greater than 14 digits' : null;
+      } else {
+        return tagnumber && String(tagnumber)?.length < 10
+          ? 'Value cannot be less than or greater than 10 digits'
+          : null;
+      }
+    };
+
     return (
       <ModalContent size='lg' title='Supplemental & Procedure Data Entry'>
         {isShowErrorSummary && (
@@ -664,7 +676,12 @@ const SupplementalProcedureModal = connect(
                 </SelectInput>
               </Grid>
               <Grid tablet={{ col: 3 }}>
-                <TextInput name='tagnumber' label='Tag Number' onChange={handleChange} />
+                <TextInput
+                  name='tagnumber'
+                  label='Tag Number'
+                  onChange={handleChange}
+                  warning={getTagnumberWarning()}
+                />
               </Grid>
               <Grid tablet={{ col: 2 }}>
                 <Button className={saveBtnClasses} onClick={handleGetPallidIdByTagNumber} type='button'>

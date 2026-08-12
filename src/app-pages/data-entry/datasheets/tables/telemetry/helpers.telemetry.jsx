@@ -51,7 +51,7 @@ export const getTelemetryColumns = ({
       meta: { type: 'number' },
     }),
     columnHelper.accessor('bendRiverMile', {
-      header: 'Bend River Mile',
+      header: 'River Mile',
       cell: ({ cell }) => <span>{cell.getValue()}</span>,
       size: 190,
     }),
