@@ -26,7 +26,6 @@ const OfflineSetupButton = connect('selectAuth', 'selectUserRole', ({ auth, user
       const lookupResult = await downloadLookupsForOffline(auth?.token);
       const siteResult = await downloadSitesForOffline(auth?.token, userRole?.id);
       const datasheetResult = await downloadDatasheetsForOffline(auth?.token, userRole?.id);
-      console.log('Offline datasheet download:', datasheetResult);
 
       setLookupDownloadStatus({
         type: 'success',

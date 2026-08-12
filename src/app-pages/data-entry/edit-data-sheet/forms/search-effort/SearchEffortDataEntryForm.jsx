@@ -62,8 +62,6 @@ const SearchEffortDataEntryForm = connect(
     const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
     const isOfflineSite = String(siteId).startsWith('SITE-');
 
-    console.log('Check these codes!', searchTypeCodes);
-
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
       [dataEntryData?.siteId, dataEntryTelemetryTotalCount]

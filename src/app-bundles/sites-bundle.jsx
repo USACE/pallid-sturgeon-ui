@@ -4,7 +4,7 @@ import { db } from '@src/app-pages/data-entry/offline/db';
 import { toast } from 'react-toastify';
 import { tSuccess, tError } from '@common/toast/toastHelper';
 import { ApiStatuses } from '@src/utils/enums';
-import { valuesIn } from 'lodash';
+import { getCurrentFieldStudyYear } from '@src/app-pages/data-entry/offline/lookup-cache';
 
 const rootUrl = '/psapi/Sites/';
 
@@ -61,8 +61,8 @@ export default {
         return;
       }
 
-      const currentYear = new Date().getFullYear();
-      const localSites = await db.sites.filter((site) => Number(site.year) === currentYear).toArray();
+      const fieldStudyYear = getCurrentFieldStudyYear();
+      const localSites = await db.sites.filter((site) => Number(site.year) === fieldStudyYear).toArray();
       const moriverData = await db.moriver.toArray();
       const searchData = await db.search.toArray();
       const siteHasForms = (site) => {
@@ -100,7 +100,7 @@ export default {
           bendRiverMile: site?.bendRiverMile ?? site?.bend_river_mile ?? site?.brm_id,
           editInitials: site?.editInitials ?? site?.edit_initials,
           uploadedBy: site?.uploadedBy ?? site?.uploaded_by,
-          bkgColor: siteHasForms(site) ? '#daf2ea' : null,
+          bkgColor: siteHasForms(site) ? '#daf2ea' : (site?.bkgColor ?? null),
         };
       });
 

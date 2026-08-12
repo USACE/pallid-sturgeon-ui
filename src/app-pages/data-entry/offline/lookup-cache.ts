@@ -2,6 +2,14 @@ import { db, type LookupItem } from './db';
 
 const API_BASE = import.meta.env.VITE_API_URL ?? import.meta.env.VITE_API_BASE_URL ?? '';
 
+export function getCurrentFieldStudyYear() {
+  const today = new Date();
+  const calendarYear = today.getFullYear();
+  const month = today.getMonth();
+
+  return month >= 9 ? calendarYear + 1 : calendarYear;
+}
+
 function getAuthHeaders(token?: string): HeadersInit {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -105,7 +113,7 @@ export async function downloadSitesForOffline(token?: string, userRoleId?: numbe
   if (!userRoleId) {
     throw new Error('Cannot download offline Sites because the user role ID is missing');
   }
-  const currentYear = new Date().getFullYear();
+  const fieldStudyYear = getCurrentFieldStudyYear();
   const pageSize = 500;
 
   const existingSites = await db.sites.toArray();
@@ -113,12 +121,7 @@ export async function downloadSitesForOffline(token?: string, userRoleId?: numbe
     .filter((site) => {
       const siteId = site?.siteId ?? site?.site_id ?? site?.serverId;
 
-      return (
-        Number(site?.year) === currentYear &&
-        Number(siteId) > 0 &&
-        site?._status !== 'queued' &&
-        site?._status !== 'draft'
-      );
+      return Number(siteId) > 0 && site?._status !== 'queued' && site?._status !== 'draft';
     })
     .map((site) => site.clientId)
     .filter(Boolean);
@@ -135,7 +138,7 @@ export async function downloadSitesForOffline(token?: string, userRoleId?: numbe
   while (keepLoading) {
     const query = new URLSearchParams({
       id: String(userRoleId),
-      year: String(currentYear),
+      year: String(fieldStudyYear),
       size: String(pageSize),
       page: String(page),
     });
@@ -223,29 +226,28 @@ export async function downloadSitesForOffline(token?: string, userRoleId?: numbe
 
   await db.meta.put({
     key: 'sitesDownloadedYear',
-    value: String(currentYear),
+    value: String(fieldStudyYear),
   });
 
   return {
     ok: true,
-    year: currentYear,
+    year: fieldStudyYear,
     count: downloadedCount,
     totalCount,
   };
 }
 
 export async function downloadDatasheetsForOffline(token?: string, userRoleId?: number | string) {
-  console.log('NEW DOWNLOAD DATASHEETS FUNCTION IS RUNNING');
   if (!userRoleId) {
     throw new Error('Cannot download offline datasheets because the user role ID is missing');
   }
   await clearOldDownloadedDatasheets();
 
   const sites = await db.sites.toArray();
-  const currentYear = new Date().getFullYear();
-  const currentYearSites = sites.filter((site) => {
+  const fieldStudyYear = getCurrentFieldStudyYear();
+  const fieldStudySites = sites.filter((site) => {
     const siteId = site?.siteId ?? site?.site_id ?? site?.serverId;
-    return Number(site.year) === currentYear && Number(siteId) > 0;
+    return Number(site.year) === fieldStudyYear && Number(siteId) > 0;
   });
 
   let moriverCount = 0;
@@ -255,7 +257,10 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
   let procCount = 0;
   let telemetryCount = 0;
 
-  for (const site of currentYearSites) {
+  const draftMrId = new Set<number>();
+  const draftSeId = new Set<number>();
+
+  for (const site of fieldStudySites) {
     const siteId = Number(site?.site_id ?? site?.siteId ?? site?.serverId);
     const moriverQuery = new URLSearchParams({
       id: String(userRoleId),
@@ -294,8 +299,8 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
 
     const moriverJson = await moriverResponse.json();
     const searchJson = await searchResponse.json();
-    const moriverRows = moriverJson?.data?.items ?? [];
-    const searchRows = searchJson?.data?.items ?? [];
+    const moriverRows = (moriverJson?.data?.items ?? []).filter((row: any) => Number(row?.status) === 1);
+    const searchRows = (searchJson?.data?.items ?? []).filter((row: any) => Number(row?.status) === 1);
 
     // missouri river datasheets
     for (const moriverRow of moriverRows) {
@@ -306,7 +311,9 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
         continue;
       }
 
+      draftMrId.add(mrId);
       const moriverDetailQuery = new URLSearchParams({ tableId: String(mrId) });
+
       const moriverDetailResponse = await fetch(
         `${API_BASE}/psapi/DataEntry/getMoriverDataEntry?${moriverDetailQuery.toString()}`,
         {
@@ -346,7 +353,7 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
         siteFid: site?.siteFid ?? site?.site_fid,
         site_fid: site?.site_fid ?? site?.siteFid,
         siteRouteKey: String(siteId),
-        status: Number(fullMoriverRow?.status ?? moriverRow?.status),
+        status: 1,
         version: existingMoriver?.version ?? fullMoriverRow?.version ?? 0,
         updatedAt:
           fullMoriverRow?.updatedAt ??
@@ -367,6 +374,8 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
         continue;
       }
 
+      draftSeId.add(seId);
+
       const seFid = searchRow?.seFid ?? searchRow?.se_fid;
       const existingSearch = await db.search.where('se_id').equals(seId).first();
 
@@ -384,7 +393,7 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
         siteFid: site?.siteFid ?? site?.site_fid,
         site_fid: site?.site_fid ?? site?.siteFid,
         siteRouteKey: String(siteId),
-        status: Number(searchRow?.status),
+        status: 1,
         version: existingSearch?.version ?? searchRow?.version ?? 0,
         _status: existingSearch?._status === 'queued' ? 'queued' : 'synced',
       });
@@ -392,138 +401,106 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
     }
   }
 
-  // child datasheets: fish, procedure, supplemental, telemetry
-  const userQuery = new URLSearchParams({ id: String(userRoleId) });
+  const getRows = async (url: string, label: string) => {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: getAuthHeaders(token),
+    });
 
-  const [fishResponse, suppResponse, procResponse, telemetryResponse] = await Promise.all([
-    fetch(`${API_BASE}/psapi/fishDataEntry?${userQuery.toString()}`, {
-      method: 'GET',
-      headers: getAuthHeaders(token),
-    }),
-    fetch(`${API_BASE}/psapi/supplementalDataEntry?${userQuery.toString()}`, {
-      method: 'GET',
-      headers: getAuthHeaders(token),
-    }),
-    fetch(`${API_BASE}/psapi/procedureDataEntry?${userQuery.toString()}`, {
-      method: 'GET',
-      headers: getAuthHeaders(token),
-    }),
-    fetch(`${API_BASE}/psapi/telemetryDataEntry?${userQuery.toString()}`, {
-      method: 'GET',
-      headers: getAuthHeaders(token),
-    }),
-  ]);
+    if (response.status === 401) {
+      throw new Error(`Offline setup authorization expired while downloading ${label}`);
+    }
+    if (!response.ok) {
+      throw new Error(`Failed to download ${label}: ${response.status}`);
+    }
 
-  console.log('Child download responses:', {
-    fish: fishResponse.status,
-    supplemental: suppResponse.status,
-    procedure: procResponse.status,
-    telemetry: telemetryResponse.status,
+    const json = await response.json();
+
+    return json?.data?.items ?? [];
+  };
+
+  const draftMrIdList = Array.from(draftMrId);
+  const draftSeIdList = Array.from(draftSeId);
+
+  const fishResults = await Promise.all(
+    draftMrIdList.map((mrId) => {
+      const query = new URLSearchParams({
+        id: String(userRoleId),
+        mrId: String(mrId),
+      });
+
+      return getRows(`${API_BASE}/psapi/fishDataEntry?${query.toString()}`, `Fish for MR ${mrId}`);
+    })
+  );
+
+  const suppResults = await Promise.all(
+    draftMrIdList.map((mrId) => {
+      const query = new URLSearchParams({
+        id: String(userRoleId),
+        mrId: String(mrId),
+      });
+
+      return getRows(`${API_BASE}/psapi/supplementalDataEntry?${query.toString()}`, `Supplemental for MR ${mrId}`);
+    })
+  );
+
+  const procResults = await Promise.all(
+    draftMrIdList.map((mrId) => {
+      const query = new URLSearchParams({
+        id: String(userRoleId),
+        mrId: String(mrId),
+      });
+
+      return getRows(`${API_BASE}/psapi/procedureDataEntry?${query.toString()}`, `Procedure for MR ${mrId}`);
+    })
+  );
+
+  const telemetryResults = await Promise.all(
+    draftSeIdList.map((seId) => {
+      const query = new URLSearchParams({
+        id: String(userRoleId),
+        seId: String(seId),
+      });
+
+      return getRows(`${API_BASE}/psapi/telemetryDataEntry?${query.toString()}`, `Telemetry for Search Effort ${seId}`);
+    })
+  );
+
+  const allFishRows = fishResults.flat();
+  const allSuppRows = suppResults.flat();
+  const allProcRows = procResults.flat();
+  const allTelemetryRows = telemetryResults.flat();
+
+  const fishRows = allFishRows.filter((fish: any) => {
+    const mrId = fish?.mrId ?? fish?.mr_id;
+
+    return mrId != null && draftMrId.has(Number(mrId));
   });
 
-  if (!fishResponse.ok) {
-    throw new Error(`Failed to download Fish: ${fishResponse.status}`);
-  }
-  if (!suppResponse.ok) {
-    throw new Error(`Failed to download Supplemental: ${suppResponse.status}`);
-  }
-  // if (!procResponse.ok) {
-  //   throw new Error(`Failed to download Procedure: ${procResponse.status}`);
-  // }
-  if (!telemetryResponse.ok) {
-    throw new Error(`Failed to download Telemetry: ${telemetryResponse.status}`);
-  }
-
-  const childResponses = [fishResponse, suppResponse, telemetryResponse];
-
-  if (childResponses.some((response) => response.status === 401)) {
-    throw new Error('Offline setup authorization expired while downloading child datasheets');
-  }
-  if (!fishResponse.ok) {
-    throw new Error(`Failed to download Fish: ${fishResponse.status}`);
-  }
-  if (!suppResponse.ok) {
-    throw new Error(`Failed to download Supplemental: ${suppResponse.status}`);
-  }
-  // if (!procResponse.ok) {
-  //   throw new Error(`Failed to download Procedure: ${procResponse.status}`);
-  // }
-  if (!telemetryResponse.ok) {
-    throw new Error(`Failed to download Telemetry: ${telemetryResponse.status}`);
-  }
-
-  const fishJson = await fishResponse.json();
-  const suppJson = await suppResponse.json();
-  const telemetryJson = await telemetryResponse.json();
-
-  const allFishRows = fishJson?.data?.items ?? [];
-  const allSuppRows = suppJson?.data?.items ?? [];
-  const allTelemetryRows = telemetryJson?.data?.items ?? [];
-
-  console.log('raw supplemental count:', allSuppRows.length);
-
-  let allProcRows: any[] = [];
-
-  if (procResponse.ok) {
-    const procJson = await procResponse.json();
-    allProcRows = procJson?.data?.items ?? [];
-  } else {
-    const procErrorText = await procResponse.text().catch(() => '');
-    console.error('Procedure bulk download failed:', {
-      status: procResponse.status,
-      response: procErrorText,
-    });
-    allProcRows = [];
-  }
-
-  // if (!procResponse.ok) {
-  //   const downloadedMoriver = await db.moriver.toArray();
-  //   const mrIds = [
-  //     ...new Set(
-  //       downloadedMoriver.map((row: any) => Number(row?.mrId ?? row?.mr_id ?? row?.serverId)).filter((mrId) => mrId > 0)
-  //     ),
-  //   ];
-  //   for (const mrId of mrIds) {
-  //     const procQuery = new URLSearchParams({ id: String(userRoleId), mrId: String(mrId) });
-  //     const response = await fetch(`${API_BASE}/psapi/procedureDataEntry?${procQuery.toString()}`, {
-  //       method: 'GET',
-  //       headers: getAuthHeaders(token),
-  //     });
-  //     if (response.status === 401) {
-  //       throw new Error('Offline setup authorization expired while downloading Procedure data');
-  //     }
-  //     if (!response.ok) {
-  //       console.warn(`Could not download Procedure records for MR ${mrId}: ${response.status}`);
-  //       continue;
-  //     }
-  //     const json = await response.json();
-  //     const rows = json?.data?.items ?? [];
-  //     allProcRows.push(...rows);
-  //   }
-  // }
-
-  const currentSiteIds = new Set(
-    currentYearSites
-      .map((site) => Number(site?.siteId ?? site?.site_id ?? site?.serverId))
-      .filter((siteId) => siteId > 0)
-  );
-  const fishRows = allFishRows.filter((row: any) => currentSiteIds.has(Number(row?.siteId ?? row?.site_id)));
-  const procRows = allProcRows.filter((row: any) => currentSiteIds.has(Number(row?.siteId ?? row?.site_id)));
-  const telemetryRows = allTelemetryRows.filter((row: any) => currentSiteIds.has(Number(row?.siteId ?? row?.site_id)));
-
-  const downloadedFishId = new Set(
+  const draftFishId = new Set(
     fishRows
       .map((fish: any) => fish?.fid ?? fish?.fId ?? fish?.f_id)
       .filter((id: any) => id !== undefined && id !== null)
       .map(String)
   );
 
-  const suppRows = allSuppRows.filter((row: any) => {
-    const fId = row?.fid ?? row?.fId ?? row?.f_id;
-    return fId !== undefined && fId !== null && downloadedFishId.has(String(fId));
+  const suppRows = allSuppRows.filter((supp: any) => {
+    const fId = supp?.fid ?? supp?.fId ?? supp?.f_id;
+
+    return fId != null && draftFishId.has(String(fId));
   });
 
-  console.log('filtered supplemental count:', suppRows.length);
+  const procRows = allProcRows.filter((proc: any) => {
+    const fId = proc?.fid ?? proc?.fId ?? proc?.f_id;
+
+    return fId != null && draftFishId.has(String(fId));
+  });
+
+  const telemetryRows = allTelemetryRows.filter((telemetry: any) => {
+    const seId = telemetry?.seId ?? telemetry?.se_id;
+
+    return seId != null && draftSeId.has(Number(seId));
+  });
 
   for (let index = 0; index < fishRows.length; index += 1) {
     const fish = fishRows[index];
@@ -552,8 +529,8 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
       mr_fid: fish?.mr_fid ?? fish?.mrFid,
       siteId: fish?.siteId ?? fish?.site_id,
       site_id: fish?.site_id ?? fish?.siteId,
-      lengthType: fish?.lengthType ?? fish?.length_type,
-      length_type: fish?.length_type ?? fish?.lengthType,
+      // lengthType: fish?.lengthType ?? fish?.length_type,
+      // length_type: fish?.length_type ?? fish?.lengthType,
       version: existingFish?.version ?? fish?.version ?? 0,
       updatedAt: fish?.updatedAt ?? fish?.lastUpdated ?? fish?.last_updated ?? new Date().toISOString(),
       _status: existingFish?._status === 'queued' ? 'queued' : 'synced',

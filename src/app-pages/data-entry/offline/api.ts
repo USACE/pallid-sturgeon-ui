@@ -1,3 +1,4 @@
+import { number } from 'yup';
 import { db } from './db';
 import type { DataEntry, OutboxItem } from './db';
 
@@ -134,11 +135,44 @@ function toSiteServerPayload(entry: any) {
   };
 }
 
+function getNumberValue(value: any) {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+  const numberValue = Number(value);
+
+  return Number.isNaN(numberValue) ? null : numberValue;
+}
+
+function toFishServerPayload(entry: any) {
+  return {
+    ...entry,
+    project: getNumberValue(entry?.project ?? entry?.projectId ?? entry?.project_id),
+    segment: getNumberValue(entry?.segment ?? entry?.segmentId ?? entry?.segment_id),
+    siteId: getNumberValue(entry?.siteId ?? entry?.site_id),
+    mrId: getNumberValue(entry?.mrId ?? entry?.mr_id),
+  };
+}
+
+function toTelemetryServerPayload(entry: any) {
+  return {
+    ...entry,
+    siteId: getNumberValue(entry?.siteId ?? entry?.site_id),
+    seId: getNumberValue(entry?.seId ?? entry?.se_id),
+  };
+}
+
 function formatPayloadForApi(entry: Partial<DataEntry>, tableName?: OutboxTable): Record<string, any> {
   const { clientId, serverId, version, updatedAt, _status, ...serverPayload } = entry;
 
   if (tableName === 'ds_sites') {
     return toSiteServerPayload(serverPayload);
+  }
+  if (tableName === 'ds_fish') {
+    return toFishServerPayload(serverPayload);
+  }
+  if (tableName === 'ds_telemetry_fish') {
+    return toTelemetryServerPayload(serverPayload);
   }
 
   return serverPayload;

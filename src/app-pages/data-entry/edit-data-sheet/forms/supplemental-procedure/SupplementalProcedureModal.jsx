@@ -119,13 +119,6 @@ const SupplementalProcedureModal = connect(
         return matchesSupp || matchesFish(row);
       }) ?? null;
 
-    console.log('Procedure modal match:', {
-      fishFid: fid,
-      fishFFid: fFid,
-      procedureCount: dataEntryProcedure?.items.length ?? 0,
-      initialProcData,
-    });
-
     const supplementalDataExists = Boolean(initialSuppData);
     const procedureDataExists = Boolean(initialProcData);
 
