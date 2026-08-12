@@ -9,8 +9,8 @@ const conditionFormula = (weight, length, x, y) => weight / Math.pow(10, x + y *
 const calculateCondition = (length, segment, species, weight) => {
   if (!length && !weight) return;
 
-  if (species === 'SNSG' && length > 170 && weight > 0) {
-    return conditionFormula(weight, length, -6.287, 3.33) * 100;
+  if (species === 'SNSG' && length > 119 && weight > 0) {
+    return conditionFormula(weight, length, -6.287, 3.33);
   }
 
   if (segment <= 6 && weight > 0 && ((species === 'PDSG' && length > 0) || (species === 'USG' && length > 170))) {

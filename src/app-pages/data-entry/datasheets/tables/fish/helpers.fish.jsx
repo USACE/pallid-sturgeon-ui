@@ -8,6 +8,7 @@ import FloyTagPrefixTableCell from '@src/app-components/table/table-cell-compone
 import GeneticVialNumTableCell from '@src/app-components/table/table-cell-components/fish/GeneticVialNumTableCell';
 import LengthTableCell from '@src/app-components/table/table-cell-components/fish/LengthTableCell';
 import PanelHookTableCell from '@src/app-components/table/table-cell-components/fish/PanelHookTableCell';
+import TagnumberTableCell from '@src/app-components/table/table-cell-components/fish/TagnumberTableCell';
 import WeightTableCell from '@src/app-components/table/table-cell-components/fish/WeightTableCell';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
 import { CreateComboboxOptions, createDropdownOptions } from '@src/app-pages/data-entry/dataEntryHelper';
@@ -23,6 +24,7 @@ export const getFishColumns = ({
   markRecaptureOptions,
   yesNoOptions,
   fishStructures,
+  online,
 }) => {
   const columnHelper = createColumnHelper();
 
@@ -50,7 +52,9 @@ export const getFishColumns = ({
     columnHelper.accessor('panelHook', {
       header: 'Panel/Hook',
       cell: PanelHookTableCell,
-      size: 190,
+      size: 80,
+      minSize: 80,
+      maxSize: 120,
       meta: {
         gear: gear,
       },
@@ -59,42 +63,53 @@ export const getFishColumns = ({
       header: 'Species',
       cell: TableCell,
       size: 200,
+      maxSize: 200,
       meta: {
         type: 'combobox',
-        options: CreateComboboxOptions(speciesOptions),
-      },
-    }),
-    columnHelper.accessor('lengthType', {
-      header: 'Length Type',
-      cell: TableCell,
-      size: 200,
-      meta: {
-        type: 'select',
         required: true,
-        options: createDropdownOptions(lengthTypes),
+        options: CreateComboboxOptions(speciesOptions),
       },
     }),
     columnHelper.accessor('length', {
       header: 'Length(mm)',
       cell: LengthTableCell,
-      size: 200,
+      size: 60,
+      minSize: 60,
+      maxSize: 100,
       meta: { type: 'number' },
+    }),
+    columnHelper.accessor('lengthType', {
+      header: 'Length Type',
+      cell: TableCell,
+      size: 150,
+      minSize: 150,
+      maxSize: 180,
+      meta: {
+        type: 'select',
+        options: createDropdownOptions(lengthTypes),
+      },
     }),
     columnHelper.accessor('weight', {
       header: 'Weight(grams)',
       cell: WeightTableCell,
-      size: 200,
+      size: 150,
+      minSize: 150,
+      maxSize: 180,
       meta: { type: 'number' },
     }),
     columnHelper.accessor('countF', {
       header: 'Count',
       cell: CountTableCell,
-      size: 200,
+      size: 100,
+      minSize: 100,
+      maxSize: 120,
     }),
     columnHelper.accessor('ftPrefix', {
       header: 'Floy Tag Prefix',
       cell: FloyTagPrefixTableCell,
-      size: 200,
+      size: 150,
+      minSize: 150,
+      maxSize: 180,
       meta: {
         options: createDropdownOptions(floyTagPrefixes),
       },
@@ -102,12 +117,16 @@ export const getFishColumns = ({
     columnHelper.accessor('floyTag', {
       header: 'Floy Tag',
       cell: FloyTagTableCell,
-      size: 200,
+      size: 150,
+      minSize: 150,
+      maxSize: 180,
     }),
     columnHelper.accessor('mR', {
       header: 'Floy Tag M/R',
       cell: FloyTagMrTableCell,
-      size: 200,
+      size: 150,
+      minSize: 150,
+      maxSize: 180,
       meta: {
         options: createDropdownOptions(markRecaptureOptions),
       },
@@ -124,13 +143,17 @@ export const getFishColumns = ({
     }),
     columnHelper.accessor('tagnumber', {
       header: 'Tag Number',
-      cell: TableCell,
-      size: 200,
+      cell: TagnumberTableCell,
+      size: 150,
+      minSize: 150,
+      maxSize: 180,
     }),
     columnHelper.accessor('finCurl', {
       header: 'Fin Curl',
       cell: FinCurlTableCell,
-      size: 200,
+      size: 150,
+      minSize: 150,
+      maxSize: 180,
       meta: {
         type: 'select',
         options: yesNoOptions,
