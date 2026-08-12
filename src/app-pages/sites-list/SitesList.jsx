@@ -6,6 +6,7 @@ import SitesListTable from './sites-list-table/SitesListTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import Pagination from '@components/pagination';
 import Card from '@src/app-components/card';
+import { usePwaMode } from '../data-entry/offline/pwa-mode';
 
 import './sitesList.scss';
 

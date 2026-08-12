@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
-import { Alert } from '@trussworks/react-uswds';
+import { Alert, Button } from '@trussworks/react-uswds';
 import { mdiCellphoneCog, mdiDownload, mdiEarth } from '@mdi/js';
 
 import LoaderButton from '@src/app-components/loader/LoaderButton';
@@ -8,7 +8,7 @@ import Icon from '@src/app-components/icon/icon';
 import { downloadLookupsForOffline } from '../lookup-cache';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 
-const OfflineSetupButton = connect('selectAuth', ({ auth }) => {
+const OfflineSetupButton = connect('selectAuth', 'doUpdateUrl', ({ auth, doUpdateUrl }) => {
   const ubloxGps = useUbloxSerialGps();
 
   const [lookupDownloadStatus, setLookupDownloadStatus] = useState(null);
@@ -67,6 +67,13 @@ const OfflineSetupButton = connect('selectAuth', ({ auth }) => {
             {ubloxGps?.latestFix && <span> - Satellites: {ubloxGps?.latestFix?.satellites ?? 'unknown'}</span>}
             {ubloxGps?.lastError && <span> - GPS Error: {ubloxGps?.lastError?.message}</span>}
           </Alert>
+        </div>
+      )}
+      {lookupDownloadStatus?.type === 'success' && (
+        <div className='margin-top-2'>
+          <Button type='button' className='primary-btn' onClick={() => doUpdateUrl('/sites-list')}>
+            Go to Sites List
+          </Button>
         </div>
       )}
     </>
