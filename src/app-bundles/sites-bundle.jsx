@@ -100,7 +100,7 @@ export default {
           bendRiverMile: site?.bendRiverMile ?? site?.bend_river_mile ?? site?.brm_id,
           editInitials: site?.editInitials ?? site?.edit_initials,
           uploadedBy: site?.uploadedBy ?? site?.uploaded_by,
-          bkgColor: siteHasForms(site) ? '#daf2ea' : site.bkgColor,
+          bkgColor: siteHasForms(site) ? '#daf2ea' : null,
         };
       });
 
@@ -231,7 +231,9 @@ export default {
         type: 'SET_SITES_PAGINATION',
         payload: { pageSize, pageNumber },
       });
-      store.doFetchSites();
+      if (navigator.onLine) {
+        store.doFetchSites();
+      }
     },
 
   doUpdateSiteParams:
@@ -245,6 +247,7 @@ export default {
         type: 'UPDATE_SITE_PARAMS',
         payload: { ...searchParams, ...paramObj },
       });
+      if (!navigator.onLine) return;
       store.doDomainSeasonsFetch(searchParams?.year);
       store.doFetchSites();
       store.doFetchExportsSites({ ...searchParams, ...paramObj });

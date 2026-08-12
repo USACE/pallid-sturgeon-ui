@@ -87,12 +87,16 @@ const SitesListFilter = connect(
 
     // Update data based on filters
     useEffect(() => {
+      if (!navigator.onLine) return;
+
       const searchParams = getValues();
       doUpdateSiteParams(searchParams);
     }, [year, bend, seasonCode, segmentCode, office]);
 
     // Load data
     useEffect(() => {
+      if (!navigator.onLine) return;
+
       doDataEntryLoadData();
       doDomainFieldOfficesFetch();
       doDomainSegmentsFetch({ office, project });

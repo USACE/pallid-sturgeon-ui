@@ -24,7 +24,7 @@ const OfflineSetupButton = connect('selectAuth', 'selectUserRole', ({ auth, user
     // Download Offline lookups
     try {
       const lookupResult = await downloadLookupsForOffline(auth?.token);
-      const siteResult = await downloadSitesForOffline(auth?.token);
+      const siteResult = await downloadSitesForOffline(auth?.token, userRole?.id);
       const datasheetResult = await downloadDatasheetsForOffline(auth?.token, userRole?.id);
       console.log('Offline datasheet download:', datasheetResult);
 
@@ -53,16 +53,16 @@ const OfflineSetupButton = connect('selectAuth', 'selectUserRole', ({ auth, user
         onClick={handleOnClick}
         type='button'
       >
-        {lookupDownloading && (
-          <Alert type='info' headingLevel='h4' slim>
-            This may take a few minutes...
-          </Alert>
-        )}
         <span>
           <Icon path={mdiCellphoneCog} focusable={false} />
         </span>
         <span className='text-bold'>Initiate Offline Setup</span>
       </LoaderButton>
+      {lookupDownloading && (
+        <Alert type='info' headingLevel='h4' slim>
+          This may take a few minutes...
+        </Alert>
+      )}
       {lookupDownloadStatus && (
         <div className='margin-top-1'>
           <Alert type='info' headingLevel='h4' slim noIcon>

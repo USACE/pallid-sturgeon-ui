@@ -101,9 +101,31 @@ export async function downloadLookupsForOffline(token?: string) {
   return { ok: true, count: rowsToSave.length };
 }
 
-export async function downloadSitesForOffline(token?: string) {
+export async function downloadSitesForOffline(token?: string, userRoleId?: number | string) {
+  if (!userRoleId) {
+    throw new Error('Cannot download offline Sites because the user role ID is missing');
+  }
   const currentYear = new Date().getFullYear();
   const pageSize = 500;
+
+  const existingSites = await db.sites.toArray();
+  const oldDownloadedSiteIds = existingSites
+    .filter((site) => {
+      const siteId = site?.siteId ?? site?.site_id ?? site?.serverId;
+
+      return (
+        Number(site?.year) === currentYear &&
+        Number(siteId) > 0 &&
+        site?._status !== 'queued' &&
+        site?._status !== 'draft'
+      );
+    })
+    .map((site) => site.clientId)
+    .filter(Boolean);
+
+  if (oldDownloadedSiteIds.length > 0) {
+    await db.sites.bulkDelete(oldDownloadedSiteIds);
+  }
 
   let page = 0;
   let totalCount = 0;
@@ -112,6 +134,7 @@ export async function downloadSitesForOffline(token?: string) {
 
   while (keepLoading) {
     const query = new URLSearchParams({
+      id: String(userRoleId),
       year: String(currentYear),
       size: String(pageSize),
       page: String(page),
@@ -216,6 +239,8 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
   if (!userRoleId) {
     throw new Error('Cannot download offline datasheets because the user role ID is missing');
   }
+  await clearOldDownloadedDatasheets();
+
   const sites = await db.sites.toArray();
   const currentYear = new Date().getFullYear();
   const currentYearSites = sites.filter((site) => {
@@ -232,13 +257,24 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
 
   for (const site of currentYearSites) {
     const siteId = Number(site?.site_id ?? site?.siteId ?? site?.serverId);
+    const moriverQuery = new URLSearchParams({
+      id: String(userRoleId),
+      siteId: String(siteId),
+      size: '500',
+      number: '0',
+    });
+    const searchQuery = new URLSearchParams({
+      siteId: String(siteId),
+      size: '500',
+      number: '0',
+    });
 
     const [moriverResponse, searchResponse] = await Promise.all([
-      fetch(`${API_BASE}/psapi/missouriDatasheets?siteId=${siteId}&size=500&number=0`, {
+      fetch(`${API_BASE}/psapi/missouriDatasheets?${moriverQuery.toString()}`, {
         method: 'GET',
         headers: getAuthHeaders(token),
       }),
-      fetch(`${API_BASE}/psapi/searchDatasheets?siteId=${siteId}&size=500&number=0`, {
+      fetch(`${API_BASE}/psapi/searchDatasheets?${searchQuery.toString()}`, {
         method: 'GET',
         headers: getAuthHeaders(token),
       }),
@@ -424,6 +460,8 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
   const allSuppRows = suppJson?.data?.items ?? [];
   const allTelemetryRows = telemetryJson?.data?.items ?? [];
 
+  console.log('raw supplemental count:', allSuppRows.length);
+
   let allProcRows: any[] = [];
 
   if (procResponse.ok) {
@@ -470,9 +508,22 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
       .filter((siteId) => siteId > 0)
   );
   const fishRows = allFishRows.filter((row: any) => currentSiteIds.has(Number(row?.siteId ?? row?.site_id)));
-  const suppRows = allSuppRows.filter((row: any) => currentSiteIds.has(Number(row?.siteId ?? row?.site_id)));
   const procRows = allProcRows.filter((row: any) => currentSiteIds.has(Number(row?.siteId ?? row?.site_id)));
   const telemetryRows = allTelemetryRows.filter((row: any) => currentSiteIds.has(Number(row?.siteId ?? row?.site_id)));
+
+  const downloadedFishId = new Set(
+    fishRows
+      .map((fish: any) => fish?.fid ?? fish?.fId ?? fish?.f_id)
+      .filter((id: any) => id !== undefined && id !== null)
+      .map(String)
+  );
+
+  const suppRows = allSuppRows.filter((row: any) => {
+    const fId = row?.fid ?? row?.fId ?? row?.f_id;
+    return fId !== undefined && fId !== null && downloadedFishId.has(String(fId));
+  });
+
+  console.log('filtered supplemental count:', suppRows.length);
 
   for (let index = 0; index < fishRows.length; index += 1) {
     const fish = fishRows[index];
@@ -501,6 +552,8 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
       mr_fid: fish?.mr_fid ?? fish?.mrFid,
       siteId: fish?.siteId ?? fish?.site_id,
       site_id: fish?.site_id ?? fish?.siteId,
+      lengthType: fish?.lengthType ?? fish?.length_type,
+      length_type: fish?.length_type ?? fish?.lengthType,
       version: existingFish?.version ?? fish?.version ?? 0,
       updatedAt: fish?.updatedAt ?? fish?.lastUpdated ?? fish?.last_updated ?? new Date().toISOString(),
       _status: existingFish?._status === 'queued' ? 'queued' : 'synced',
@@ -615,6 +668,26 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
     procCount,
     telemetryCount,
   };
+}
+
+async function clearOldDownloadedDatasheets() {
+  const clearSyncedRows = async (table: any) => {
+    const rows = await table.toArray();
+    const clientIds = rows
+      .filter((row: any) => row?._status !== 'queued' && row?._status !== 'draft')
+      .map((row: any) => row.clientId)
+      .filter(Boolean);
+
+    if (clientIds.length > 0) {
+      await table.bulkDelete(clientIds);
+    }
+  };
+  await clearSyncedRows(db.moriver);
+  await clearSyncedRows(db.search);
+  await clearSyncedRows(db.telemetry);
+  await clearSyncedRows(db.fish);
+  await clearSyncedRows(db.supplemental);
+  await clearSyncedRows(db.procedure);
 }
 
 export async function getLookupOptions(lookupName: string) {

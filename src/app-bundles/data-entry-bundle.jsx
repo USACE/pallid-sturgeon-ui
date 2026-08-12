@@ -188,7 +188,28 @@ export default {
       const procData = await db.procedure.toArray();
       const fishRecords = fishData.filter(matchMr);
       const suppRecords = suppData.filter(matchMr);
-      const procRecords = procData.filter(matchMr);
+      // const procRecords = procData.filter(matchMr);
+      const fishIdForMr = new Set(
+        fishRecords
+          .map((fish) => fish?.fid ?? fish?.fId ?? fish?.f_id)
+          .filter((fishId) => fishId !== undefined && fishId !== null)
+          .map(String)
+      );
+      const fishFidForMr = new Set(
+        fishRecords
+          .map((fish) => fish?.fFid ?? fish?.f_fid ?? fish?.ffid)
+          .filter(Boolean)
+          .map(String)
+      );
+      const procRecords = procData.filter((proc) => {
+        const procFishId = proc?.fid ?? proc?.fId ?? proc?.f_id;
+        const procFishFid = proc?.fFid ?? proc?.f_fid ?? proc?.ffid;
+
+        return (
+          (procFishId !== undefined && procFishId !== null && fishIdForMr.has(String(procFishId))) ||
+          (procFishFid && fishFidForMr.has(String(procFishFid)))
+        );
+      });
 
       dispatch({
         type: 'DATA_ENTRY_UPDATE_FISH_DATA',
@@ -455,7 +476,7 @@ export default {
           const mrId = body?.data?.items?.[0]?.mrId;
           const mrFid = body?.data?.items?.[0]?.mrFid;
           const siteId = body?.data?.items?.[0]?.siteId;
-          store.doFetchSites({ sitedId: siteId });
+          store.doFetchSites({ siteId: siteId });
 
           dispatch({
             type: 'DATA_ENTRY_UPDATE_PROCEDURE_DATA',

@@ -40,7 +40,7 @@ const SitesList = connect(
     // Load data
     useEffect(() => {
       doSitesLoadData();
-      doDataEntryLoadData();
+      // doDataEntryLoadData();
 
       if (navigator.onLine) {
         doDataEntryLoadData();
