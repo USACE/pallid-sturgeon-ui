@@ -7,15 +7,17 @@ const SearchIdCellRenderer = connect(
   'doUpdateCurrentTab',
   'doUpdateComplexStateField',
   ({ doFetchSearchDataEntry, doUpdateCurrentTab, doUpdateComplexStateField, data, type, tab }) => {
-    const params = { tableId: data.seId };
+    const searchEffortId = data?.seId ?? data?.se_id ?? data?.seFid ?? data?.se_fid;
+    const searchEffortLinkId = data?.seId ?? data?.se_id ?? String(data?.seFid ?? data?.se_fid ?? '').slice(-3);
+    const params = { tableId: searchEffortId };
 
     const typeText = {
-      searchEffort: data.seId,
+      searchEffort: searchEffortLinkId,
       telemetry: data.telemetryCount,
     };
 
     const handleChange = () => {
-      doUpdateCurrentTab(tab);
+      doUpdateCurrentTab(tab ?? 0);
       doUpdateComplexStateField({ name: 'isEditForm', value: true });
       doFetchSearchDataEntry(params, false, true, true);
     };

@@ -61,7 +61,7 @@ const SitesListTable = connect(
             }}
           >
             <AgGridColumn
-              field='siteId'
+              field='siteDisplayId'
               headerName='Site ID'
               cellRenderer='siteIdCellRenderer'
               cellRendererParams={{ edit: true }}
