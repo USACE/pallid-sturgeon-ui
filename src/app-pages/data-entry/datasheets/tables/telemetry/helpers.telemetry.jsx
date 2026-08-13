@@ -3,9 +3,6 @@ import Icon from '@src/app-components/icon/icon';
 import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
 import { createColumnHelper } from '@tanstack/react-table';
 import { Button } from '@trussworks/react-uswds';
-import classNames from 'classnames';
-
-const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
 const createDropdownOptions = (data) => {
   if (!data) return [];
@@ -52,7 +49,7 @@ export const getTelemetryColumns = ({
     }),
     columnHelper.accessor('bendRiverMile', {
       header: 'River Mile',
-      cell: ({ cell }) => <span>{cell.getValue()}</span>,
+      cell: TableCell,
       size: 190,
     }),
     columnHelper.accessor('radioTagNum', {

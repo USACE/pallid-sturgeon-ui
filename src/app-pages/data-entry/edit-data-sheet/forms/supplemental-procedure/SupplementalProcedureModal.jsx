@@ -667,6 +667,15 @@ const SupplementalProcedureModal = connect(
       }
     };
 
+    const tagNumberMaxLength = () => {
+      const hasDecimal = String(tagnumber)?.includes('.');
+      if (hasDecimal) {
+        return 15;
+      } else {
+        return 10;
+      }
+    };
+
     return (
       <ModalContent size='lg' title='Supplemental & Procedure Data Entry'>
         {isShowErrorSummary && (
@@ -709,6 +718,7 @@ const SupplementalProcedureModal = connect(
                   label='Tag Number'
                   onChange={handleChange}
                   warning={getTagnumberWarning()}
+                  maxLength={tagNumberMaxLength()}
                 />
               </Grid>
               <Grid tablet={{ col: 2 }}>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
-import { decimalNumberRegex } from '@src/utils/regex';
 import Icon from '@src/app-components/icon/icon';
 import { mdiAlert } from '@mdi/js';
 
@@ -17,7 +16,7 @@ const TagnumberTableCell = connect(({ getValue, row, column, table, cell }) => {
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
       if (tableMeta?.updateData) {
-        tableMeta?.updateData(row.index, column.id, newValue ? Number(newValue) : '');
+        tableMeta?.updateData(row.index, column.id, newValue);
       }
     }, 500);
   }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
@@ -35,25 +34,26 @@ const TagnumberTableCell = connect(({ getValue, row, column, table, cell }) => {
   };
 
   const handleChange = (e) => {
-    const val = e?.target?.value ?? '';
-    if (decimalNumberRegex.test(val) || val === '') {
-      setValue(val === '' ? null : val);
-      updateValue(val === '' ? null : val);
-    }
+    const val = (e?.target?.value ?? '').toUpperCase();
+    setValue(val === '' ? null : val);
+    updateValue(val === '' ? null : val);
   };
 
-  // Set warning flag
+  // Set warning flag for tagnumber length
   useEffect(() => {
     const hasDecimal = String(value)?.includes('.');
-    // not enough values
     if (hasDecimal) {
       const parseVal = String(value)?.replace('.', '');
       setShowWarning(
-        parseVal?.length < 14 && parseVal !== '' ? 'Value cannot be less than or greater than 14 digits' : null
+        (parseVal?.length < 14 || parseVal?.length > 14) && parseVal !== ''
+          ? 'Value cannot be less than or greater than 14 digits'
+          : null
       );
     } else {
       setShowWarning(
-        value && String(value)?.length < 10 ? 'Value cannot be less than or greater than 10 digits' : null
+        value && (String(value)?.length < 10 || String(value)?.length > 10)
+          ? 'Value cannot be less than or greater than 10 digits'
+          : null
       );
     }
   }, [value]);
@@ -61,7 +61,7 @@ const TagnumberTableCell = connect(({ getValue, row, column, table, cell }) => {
   return (
     <div>
       <input
-        aria-label='Floy Tag'
+        aria-label='Tagnumber'
         disabled={columnMeta?.readOnly}
         id={cell.id}
         onChange={handleChange}
