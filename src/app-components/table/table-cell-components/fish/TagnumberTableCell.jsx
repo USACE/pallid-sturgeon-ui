@@ -6,7 +6,6 @@ import Icon from '@src/app-components/icon/icon';
 import { mdiAlert } from '@mdi/js';
 
 const TagnumberTableCell = connect(({ getValue, row, column, table, cell }) => {
-  console.warn('row: ', row);
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
   const initialValue = getValue();

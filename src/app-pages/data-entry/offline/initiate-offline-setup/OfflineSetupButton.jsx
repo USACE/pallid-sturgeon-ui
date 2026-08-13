@@ -5,10 +5,10 @@ import { mdiCellphoneCog, mdiDownload, mdiEarth } from '@mdi/js';
 
 import LoaderButton from '@src/app-components/loader/LoaderButton';
 import Icon from '@src/app-components/icon/icon';
-import { downloadLookupsForOffline } from '../lookup-cache';
+import { downloadLookupsForOffline, downloadSitesForOffline, downloadDatasheetsForOffline } from '../lookup-cache';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 
-const OfflineSetupButton = connect('selectAuth', ({ auth }) => {
+const OfflineSetupButton = connect('selectAuth', 'selectUserRole', ({ auth, userRole }) => {
   const ubloxGps = useUbloxSerialGps();
 
   const [lookupDownloadStatus, setLookupDownloadStatus] = useState(null);
@@ -23,11 +23,13 @@ const OfflineSetupButton = connect('selectAuth', ({ auth }) => {
 
     // Download Offline lookups
     try {
-      const result = await downloadLookupsForOffline(auth?.token);
+      const lookupResult = await downloadLookupsForOffline(auth?.token);
+      const siteResult = await downloadSitesForOffline(auth?.token, userRole?.id);
+      const datasheetResult = await downloadDatasheetsForOffline(auth?.token, userRole?.id);
 
       setLookupDownloadStatus({
         type: 'success',
-        message: `Offline lookups downloaded successfully. Saved ${result.count ?? 0} lookup rows.`,
+        message: `Offline sites & lookups downloaded successfully. Saved ${siteResult.count ?? 0} sites for ${siteResult.year}, ${datasheetResult.count} datasheets, & ${lookupResult.count ?? 0} lookup rows.`,
       });
     } catch (error) {
       console.error('Lookup download failed:', error);
@@ -55,6 +57,11 @@ const OfflineSetupButton = connect('selectAuth', ({ auth }) => {
         </span>
         <span className='text-bold'>Initiate Offline Setup</span>
       </LoaderButton>
+      {lookupDownloading && (
+        <Alert type='info' headingLevel='h4' slim>
+          This may take a few minutes...
+        </Alert>
+      )}
       {lookupDownloadStatus && (
         <div className='margin-top-1'>
           <Alert type='info' headingLevel='h4' slim noIcon>

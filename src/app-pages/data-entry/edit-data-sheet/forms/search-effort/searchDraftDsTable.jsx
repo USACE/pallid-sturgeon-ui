@@ -12,15 +12,33 @@ const telemetryCellStyle = (params) => ({
 });
 
 const SearchDraftDsTable = connect(
+  'doResetFormData',
+  'doResetTelemetryDataEntries',
+  'doUpdateCurrentTab',
   'doUpdateUrl',
-  'selectSearchEffortDraftSitesDatasheetData',
+  'doUpdateComplexStateField',
+  'selectSearchEffortSitesDraftDatasheetData',
   'selectRouteParams',
-  ({ doUpdateUrl, searchEffortDraftSitesDatasheetData, routeParams }) => {
+  ({
+    doResetFormData,
+    doResetTelemetryDataEntries,
+    doUpdateCurrentTab,
+    doUpdateUrl,
+    doUpdateComplexStateField,
+    searchEffortSitesDraftDatasheetData,
+    routeParams,
+  }) => {
     const siteId = routeParams?.siteId;
 
-    const draftRows = searchEffortDraftSitesDatasheetData?.filter((row) => row.status === 1) ?? [];
+    const draftRows = searchEffortSitesDraftDatasheetData ?? [];
 
     const handleAddButtonClick = () => {
+      const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
+      sessionStorage.removeItem(searchDraftKey);
+      // reset form
+      doResetFormData();
+      doResetTelemetryDataEntries();
+      doUpdateCurrentTab(0);
       doUpdateComplexStateField({ name: 'isEditForm', value: false });
       doUpdateUrl(`/sites-list/${siteId}/search-effort`);
     };
@@ -58,6 +76,7 @@ const SearchDraftDsTable = connect(
               cellRenderer='searchIdCellRenderer'
               cellRendererParams={{
                 type: 'searchEffort',
+                tab: 0,
               }}
               sortable
               unSortIcon

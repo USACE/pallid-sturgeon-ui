@@ -9,16 +9,25 @@ const SuppLinkCellRenderer = connect(
   'doUpdateCurrentTab',
   'selectDataEntrySupplemental',
   ({ doUpdateBaseData, doUpdateCurrentTab, dataEntrySupplemental, data, setIsAddRow, setRowId }) => {
-    const fId = data.fid;
-    const hasSuppData = !!dataEntrySupplemental?.items?.filter((data) => data.fid === fId)?.length;
+    const fId = data?.fid ?? data?.fId ?? data?.f_id;
+    const fFid = data?.fFid ?? data?.f_fid ?? data?.ffid;
+    const hasSuppData =
+      dataEntrySupplemental?.items?.some((data) => {
+        const rowFId = row?.fid ?? row?.fId ?? row?.f_id;
+        const rowFFid = row?.fFid ?? row?.f_fid ?? row?.ffid;
+
+        return (
+          (fId != null && rowFId && String(rowFId) === String(fId)) ||
+          (fFid && rowFFid && String(rowFFid) === String(fFid))
+        );
+      }) ?? false;
     const isNewRow = Object.keys(data).length === 0;
 
     const handleAddRow = (add) => {
       doUpdateCurrentTab(2);
-      if (add) {
-        setIsAddRow(true);
-        setRowId(fId);
-      }
+
+      setIsAddRow(add);
+      setRowId(fId ?? fFid);
     };
 
     const handleClick = (e) => {
@@ -27,10 +36,10 @@ const SuppLinkCellRenderer = connect(
       doUpdateBaseData('length', data?.length);
       doUpdateBaseData('weight', data?.weight);
       doUpdateBaseData('species', data?.species);
-      doUpdateBaseData('fid', data?.fid);
-      doUpdateBaseData('ffid', data?.ffid);
+      doUpdateBaseData('fid', fId);
+      doUpdateBaseData('ffid', fFid);
       // Add row in Supplemental tab
-      handleAddRow(true);
+      handleAddRow(!hasSuppData);
     };
 
     const isButtonDisabled = () => {

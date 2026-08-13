@@ -1,4 +1,5 @@
 import Dexie, { Table } from 'dexie';
+import { NumberLiteralType } from 'typescript';
 
 export interface DataEntry {
   clientId: string;
@@ -10,24 +11,33 @@ export interface DataEntry {
 
 export interface SiteEntry extends DataEntry {
   site_id?: number;
+  siteId?: number;
   year?: number;
   fieldoffice?: string;
   project_id?: number;
+  projectId?: number;
   segment_id?: number;
+  segmentId?: number;
   season?: string;
   bend?: number;
   bendrn?: string;
   site_fid?: string;
+  siteFid?: string;
   last_updated?: string;
   uploaded_by?: string;
+  uploadedBy?: string;
   last_edit_comment?: string;
   edit_initials?: string;
+  editInitials?: string;
   complete?: number;
   approved?: number;
   upload_filename?: string;
   upload_session_id?: number;
   sample_unit_type?: string;
+  sampleUnitType?: string;
   brm_id?: number;
+  bendRiverMile?: number;
+  bend_river_mile?: number;
 }
 
 export interface MoriverEntry extends DataEntry {
@@ -104,6 +114,7 @@ export interface MoriverEntry extends DataEntry {
   comments?: string;
   mappingbox?: string;
   mr_id?: number;
+  mrId?: number;
   site_id?: number;
   siteId?: number;
   site_fid?: string;
@@ -120,6 +131,7 @@ export interface MoriverEntry extends DataEntry {
   uploaded_by?: string;
   approved?: number;
   mr_fid?: string;
+  mrFid?: string;
   last_edit_comment?: string;
   edit_initials?: string;
   complete?: number;
@@ -137,6 +149,7 @@ export interface MoriverEntry extends DataEntry {
 
 export interface SearchEffortEntry extends DataEntry {
   se_id?: number;
+  seId?: number;
   search_date?: string;
   recorder?: string;
   search_type_code?: string;
@@ -147,6 +160,7 @@ export interface SearchEffortEntry extends DataEntry {
   stop_latitude?: number;
   stop_longitude?: number;
   se_fid?: string;
+  seFid?: string;
   ds_id?: number;
   site_id?: number;
   siteId?: number;
@@ -224,8 +238,10 @@ export interface FishEntry extends DataEntry {
 
 export interface TelemetryEntry extends DataEntry {
   t_id?: number;
+  tId?: number;
   t_fid?: string;
   se_id?: number;
+  seId?: number;
   bend?: number;
   radio_tag_num?: number;
   frequency_id_code?: number;
@@ -249,6 +265,7 @@ export interface TelemetryEntry extends DataEntry {
   upload_filename?: string;
   checkby?: string;
   se_fid?: string;
+  seFid?: string;
   edit_initials?: string;
   last_edit_comment?: string;
   suspected_spawning_activity?: number;
@@ -290,6 +307,7 @@ export interface SupplementalEntry extends DataEntry {
   r_ob?: number;
   anal?: number;
   dorsal?: number;
+  sid?: number;
   s_id?: number;
   sId?: number;
   f_id?: number;
@@ -342,6 +360,8 @@ export interface SupplementalEntry extends DataEntry {
 
 export interface ProcedureEntry extends DataEntry {
   id?: number;
+  p_id?: number;
+  pId?: number;
   f_id?: number;
   fId?: number;
   fid?: number;

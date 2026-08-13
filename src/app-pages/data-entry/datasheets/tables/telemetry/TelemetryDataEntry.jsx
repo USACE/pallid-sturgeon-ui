@@ -350,7 +350,7 @@ const TelemetryDataEntry = connect(
             baseData?.seId ??
             baseData?.se_id;
 
-          if (!parentSeId & isOnline()) {
+          if (!parentSeId && isOnline()) {
             throw new Error('Search Effort ID is missing.');
           }
 

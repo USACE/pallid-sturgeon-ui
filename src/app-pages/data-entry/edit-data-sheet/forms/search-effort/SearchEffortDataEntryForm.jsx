@@ -16,6 +16,7 @@ import { generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
+import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 import { mdiCrosshairsGps } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
 
@@ -33,6 +34,7 @@ const SearchEffortDataEntryForm = connect(
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'doResetTelemetryDataEntries',
+  'doUpdateUrl',
   'selectDataEntryData',
   'selectDataEntryTelemetryTotalCount',
   'selectRouteParams',
@@ -43,6 +45,7 @@ const SearchEffortDataEntryForm = connect(
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     doResetTelemetryDataEntries,
+    doUpdateUrl,
     dataEntryData,
     dataEntryTelemetryTotalCount,
     routeParams,
@@ -58,8 +61,6 @@ const SearchEffortDataEntryForm = connect(
     const [submitMessage, setSubmitMessage] = useState(null);
     const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
     const isOfflineSite = String(siteId).startsWith('SITE-');
-
-    console.log('Check these codes!', searchTypeCodes);
 
     const defaultValues = useMemo(
       () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
@@ -291,9 +292,9 @@ const SearchEffortDataEntryForm = connect(
       try {
         if (isOnline()) {
           if (isEditForm || payload.seId || payload.se_id) {
-            doUpdateSearchDataEntry(payload);
+            await doUpdateSearchDataEntry(payload);
           } else {
-            doSaveSearchDataEntry(payload);
+            await doSaveSearchDataEntry(payload);
           }
         } else {
           await createData('search', payload);
@@ -302,7 +303,8 @@ const SearchEffortDataEntryForm = connect(
         setValue('clientId', clientId);
         setValue('status', 2);
 
-        sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
+        sessionStorage.removeItem(searchDraftKey);
+        doUpdateUrl(`/sites-list/${siteRouteKey}`);
 
         setSubmitMessage({
           type: 'success',
@@ -313,7 +315,7 @@ const SearchEffortDataEntryForm = connect(
       } catch (error) {
         console.error('Search submit failed, queueing offline:', error);
 
-        await updateData('search', payload);
+        await updateData('search', clientId, payload);
 
         setValue('clientId', clientId);
         setValue('status', 2);

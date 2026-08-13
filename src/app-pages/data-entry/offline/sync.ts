@@ -386,8 +386,6 @@ async function patchSupplementalChildrenAfterCreate(supplementalItem: OutboxItem
     return;
   }
 
-  console.log('Supplemental sync result:', supplementalResult);
-
   const serverSupplementalId =
     supplementalResult.serverId ??
     supplementalResult.json?.sid ??
