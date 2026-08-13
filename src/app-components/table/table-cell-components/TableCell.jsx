@@ -63,13 +63,15 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
     const blurValue = e?.target?.value;
     const valueBeforeBlur = previousValueRef.current?.toString();
 
+    const latLonArr = ['startLatitude', 'stopLatitude', 'captureLatitude', 'captureLongitude'];
+
     // Check to see if field value has changed
     if (hasValueChanged(valueBeforeBlur, blurValue)) {
       // @TODO: handle any data formatting
       // Clear field if value is 0 or is a negative number
       if (
-        String(blurValue) === '0' ||
-        (String(blurValue)[0] === '-' && column.id !== 'captureLatitude' && column.id !== 'captureLongitude')
+        (String(blurValue) === '0' && latLonArr.includes(column.id)) ||
+        (String(blurValue)[0] === '-' && latLonArr.includes(column.id))
       ) {
         setValue('');
         updateValue('');
