@@ -5,13 +5,6 @@ import { decimalNumberRegex } from '@src/utils/regex';
 import { mdiAlert } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
 
-const warningText = (
-  <p>
-    <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
-    {'Length entered is > 1600'}
-  </p>
-);
-
 const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
@@ -27,7 +20,7 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
   const debouncedUpdateRef = useRef();
 
   const isRequired = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
-  const isDisabled = !isRequired;
+  const isDisabled = Number(count) > 1;
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
@@ -65,12 +58,14 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   // Reset cell value if the field is disabled
   useEffect(() => {
-    const isDisabled = !isRequired;
+    // Avoid clearing during transient mount states before dependent fields are loaded.
+    if (species === undefined || count === undefined) return;
+
     if (isDisabled) {
       setValue(null);
       updateValue(null);
     }
-  }, [isRequired]);
+  }, [isDisabled]);
 
   useEffect(() => {
     if (Number(value) >= 1600) {
@@ -95,10 +90,15 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
           borderColor: 'hsl(0, 0%, 80%)',
           cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
         }}
-        type='number'
+        type='text'
         value={value ?? ''}
       />
-      {showWarning && warningText}
+      {showWarning && (
+        <p>
+          <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
+          {'Length entered is > 1600'}
+        </p>
+      )}
     </div>
   );
 });

@@ -1,3 +1,4 @@
+import { isOnline } from '@src/app-pages/data-entry/offline/sync';
 import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 
@@ -27,23 +28,14 @@ export default connect(
   'doFetchUsers',
   'selectUserRole',
   'selectUsersData',
-  ({
-    doFetchUsers,
-    userRole,
-    usersData,
-    allowRoles = [],
-    alt = null,
-    children,
-  }) => {
-    const user =
-      usersData && userRole
-        ? usersData.find((user) => userRole.id === user.id)
-        : {};
+  ({ doFetchUsers, userRole, usersData, allowRoles = [], alt = null, children }) => {
+    const online = isOnline();
+    const user = usersData && userRole ? usersData.find((user) => userRole.id === user.id) : {};
     const showChildren = isUserAllowed(user, allowRoles);
 
     useEffect(() => {
-      doFetchUsers();
-    }, []);
+      online && doFetchUsers();
+    }, [online]);
 
     if (showChildren) {
       return <>{children}</>;

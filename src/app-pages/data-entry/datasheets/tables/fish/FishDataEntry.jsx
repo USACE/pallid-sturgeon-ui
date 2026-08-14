@@ -1,17 +1,15 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
 import { Button } from '@trussworks/react-uswds';
-import classNames from 'classnames';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
 
-import { db } from '@src/app-pages/data-entry/offline/db';
 import { OfflineStatuses } from '@src/utils/enums';
 import { isOnline } from '@src/app-pages/data-entry/offline/sync';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
@@ -19,12 +17,56 @@ import { getFishColumns } from './helpers.fish';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
+import Icon from '@src/app-components/icon/icon';
+import { mdiContentCopy } from '@mdi/js';
 
-const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
+const createBlankFishRow = () => ({
+  _isPlaceholderRow: true,
+  _isTouched: false,
+});
 
-const getNextSequence = (data, mrFid) => {
-  const existing = data.filter((item) => item.mrFid === mrFid);
-  return existing.length + 1;
+const isUntouchedPlaceholderFishRow = (row) => row?._isPlaceholderRow === true && row?._isTouched !== true;
+
+const ensureTrailingBlankFishRow = (rows) => {
+  const normalizedRows = rows ?? [];
+
+  if (normalizedRows.length === 0) {
+    return [createBlankFishRow()];
+  }
+
+  const lastRow = normalizedRows[normalizedRows.length - 1];
+  if (isUntouchedPlaceholderFishRow(lastRow)) {
+    return normalizedRows;
+  }
+
+  return [...normalizedRows, createBlankFishRow()];
+};
+
+// Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
+// localRows never seems to return anything(?) - feel free to change if there is an issue.
+// const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
+// const dbRows = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
+// const sequence = localRows.length + dbRows.length + 1;
+const getNextFishFid = (data, parentMrFid) => {
+  const existing = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
+
+  const maxSequence = existing.reduce((currentMax, row) => {
+    const fieldId = row?.fFid ?? '';
+    const sequencePart = String(fieldId).split('-').pop();
+    const sequenceNumber = Number(sequencePart);
+
+    if (Number.isFinite(sequenceNumber) && sequenceNumber > currentMax) {
+      return sequenceNumber;
+    }
+
+    return currentMax;
+  }, 0);
+
+  const nextSequence = maxSequence + 1;
+  const sequenceText = String(nextSequence).padStart(3, '0');
+  const fishFid = `${parentMrFid}-${sequenceText}`;
+
+  return fishFid;
 };
 
 const FishDataEntry = connect(
@@ -65,7 +107,9 @@ const FishDataEntry = connect(
     });
     const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
-    const [data, setData] = useState(rowData);
+    const [data, setData] = useState(ensureTrailingBlankFishRow(rowData));
+    const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
+    const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
 
     // Get Missouri River Draft Data
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
@@ -82,7 +126,17 @@ const FishDataEntry = connect(
     const markRecaptureOptions =
       onlineMarkRecaptureOptions?.length > 0 ? onlineMarkRecaptureOptions : offlineLookups.markRecaptureOptions;
 
-    const schema = FishDataEntrySchema({ gear, data });
+    const dataForValidation = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+    const schema = useMemo(() => FishDataEntrySchema({ gear, data: dataForValidation }), [gear, dataForValidation]);
+    const tableValidationSchema = {
+      validate: (row, options) => {
+        if (isUntouchedPlaceholderFishRow(row)) {
+          return Promise.resolve(row);
+        }
+
+        return schema.validate(row, options);
+      },
+    };
 
     const speciesOptions =
       fishCodes?.map((item) => ({
@@ -103,32 +157,30 @@ const FishDataEntry = connect(
       markRecaptureOptions,
       yesNoOptions,
       fishStructures,
+      online,
     });
 
     const handleAddRow = async () => {
+      setData((prev) => ensureTrailingBlankFishRow(prev));
+
       // Add default values here
-      const base = getBaseDefaultValues({ baseData });
+      // const base = getBaseDefaultValues({ baseData });
+      // const fishFid = getNextFishFid(data ?? [], parentMrFid);
 
-      const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
+      // const newRowData = {
+      //   ...base,
+      //   ...getFishRiverDefaultValues({ dataEntryData }),
+      //   mrId: parentMrId,
+      //   mr_id: parentMrId,
+      //   mrFid: parentMrFid,
+      //   mr_fid: parentMrFid,
+      //   fFid: fishFid,
+      //   f_fid: fishFid,
+      //   _status: OfflineStatuses.New,
+      // };
 
-      const dbRows = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
-      const sequence = localRows.length + dbRows.length + 1;
-      const sequenceText = String(sequence).padStart(3, '0');
-      const fishFid = `${parentMrFid}-${sequenceText}`;
-
-      const newRowData = {
-        ...base,
-        ...getFishRiverDefaultValues({ dataEntryData }),
-        mrId: parentMrId,
-        mr_id: parentMrId,
-        mrFid: parentMrFid,
-        mr_fid: parentMrFid,
-        fFid: fishFid,
-        f_fid: fishFid,
-        _status: OfflineStatuses.New,
-      };
-
-      setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
+      // setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
+      // setData((prev) => ensureTrailingBlankFishRow(prev));
     };
 
     const handleCopyLastRowBtn = () => {
@@ -137,14 +189,20 @@ const FishDataEntry = connect(
         window.alert('Save the Missouri River draft first before copying Fish.');
         return;
       }
-      const sequence = getNextSequence(data ?? [], parentMrFid);
-      const sequenceText = String(sequence).padStart(3, '0');
-      const fishFid = `${parentMrFid}-${sequenceText}`;
+      const fishFid = getNextFishFid(data ?? [], parentMrFid);
       // Grab last object from data array
-      const lastRowData = data?.slice(-1)[0];
+      const lastRowData = (data ?? [])
+        .slice()
+        .reverse()
+        .find((row) => !isUntouchedPlaceholderFishRow(row));
+      if (!lastRowData) {
+        window.alert('No existing Fish row found to copy.');
+        return;
+      }
+
       // Format new row data
       const newRowData = {
-        ...lastRowData,
+        // ...lastRowData,
         fid: null, // Reset fid if copying a save data object
         fFid: fishFid,
         mrId: parentMrId,
@@ -152,75 +210,136 @@ const FishDataEntry = connect(
         mrFid: parentMrFid,
         species: lastRowData?.species,
         lengthType: lastRowData?.lengthType,
+        countF: 1,
         _status: OfflineStatuses.New,
       };
-      setData((prev) => (prev ? [...prev, newRowData] : []));
+      setData((prev) => {
+        const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+        return ensureTrailingBlankFishRow([...existingRows, newRowData]);
+      });
     };
 
     const handleAddMultipleRows = (rows) => {
       // Handle any data mapping or formatting here
-      setData((oldData) => [...Button(oldData ?? []), ...rows]);
+      setData((oldData) => {
+        const existingRows = (oldData ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+        return ensureTrailingBlankFishRow([...existingRows, ...rows]);
+      });
     };
 
     const handleRemoveMultipleRows = useCallback((indicesToRemove) => {
-      setData((oldData) => oldData.filter((_, index) => !indicesToRemove.includes(index)));
+      setData((oldData) => {
+        const remainingRows = oldData.filter((_, index) => !indicesToRemove.includes(index));
+        return ensureTrailingBlankFishRow(remainingRows);
+      });
       setTableKey((old) => old + 1);
     }, []);
 
     const handleUpdateData = useCallback(
       (rowIndex, columnId, updatedValue) => {
         setData((oldData) => {
-          const newData = oldData ? [...oldData] : null;
-          if (newData && newData[rowIndex]) {
-            // Update properties
+          const newData = oldData ? [...oldData] : [];
+          if (newData[rowIndex]) {
+            const currentRow = newData[rowIndex];
+            const isPlaceholderRow = isUntouchedPlaceholderFishRow(currentRow);
+
+            let nextRow = currentRow;
+            if (isPlaceholderRow) {
+              const fishFid = parentMrFid ? getNextFishFid(newData, parentMrFid) : undefined;
+
+              nextRow = {
+                ...getBaseDefaultValues({ baseData }),
+                ...getFishRiverDefaultValues({ dataEntryData }),
+                ...(parentMrId != null ? { mrId: parentMrId, mr_id: parentMrId } : {}),
+                ...(parentMrFid
+                  ? {
+                      mrFid: parentMrFid,
+                      mr_fid: parentMrFid,
+                      fFid: fishFid,
+                      f_fid: fishFid,
+                    }
+                  : {}),
+                _status: OfflineStatuses.New,
+                _isPlaceholderRow: false,
+                _isTouched: true,
+              };
+            }
+
             newData[rowIndex] = {
-              ...newData[rowIndex],
+              ...nextRow,
               ...(columnId === null && typeof updatedValue === 'object' ? updatedValue : { [columnId]: updatedValue }),
+              _isTouched: true,
             };
-            if (newData[rowIndex]._status !== OfflineStatuses.New) {
+
+            if (!isPlaceholderRow && newData[rowIndex]._status !== OfflineStatuses.New) {
               newData[rowIndex]._status = OfflineStatuses.Edited;
             }
-            return newData;
+
+            return ensureTrailingBlankFishRow(newData);
           }
           return oldData;
         });
       },
-      [setData]
+      [baseData, dataEntryData, parentMrFid, parentMrId]
     );
 
     const handleSubmitAll = async () => {
+      setIsSubmitAttempted(true);
+      setValidationErrorRowCount(0);
+
       const rowsToProcess = data?.filter(
         (row) => row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited
       );
 
       try {
-        rowsToProcess?.forEach(async (item) => {
-          const isNew = !item.fid;
-          const clientId = item.clientId ?? crypto.randomUUID();
-          const parentRowMrId = item.mrId ?? item.mr_id;
-          const parentRowMrFid = item.mrFid ?? item.mr_fid;
-          const fishFid = item.fFid ?? item.f_fid;
+        const rowPayloads =
+          rowsToProcess?.map((item) => {
+            const isNew = !item.fid;
+            const clientId = item.clientId ?? crypto.randomUUID();
+            const parentRowMrId = item.mrId ?? item.mr_id;
+            const parentRowMrFid = item.mrFid ?? item.mr_fid;
+            const fishFid = item.fFid ?? item.f_fid;
 
-          const payload = {
-            ...item,
-            clientId: clientId,
-            mr_id: parentRowMrId,
-            mrId: parentRowMrId,
-            mr_fid: parentRowMrFid,
-            mrFid: parentRowMrFid,
-            fFid: fishFid,
-            _status: OfflineStatuses.Queued,
-            version: item.version ?? 0,
-            updatedAt: new Date().toISOString(),
-            // Format values
-            countF: item?.countF !== null && item?.countF !== '' ? Number(item?.countF) : null,
-            length: item?.['length'] !== null && item?.['length'] !== '' ? Number(item?.['length']) : null,
-            condition: item?.condition !== null && item?.condition !== '' ? Number(item?.condition) : null,
-            weight: item?.weight !== null && item?.weight !== '' ? Number(item?.weight) : null,
-          };
+            const payload = {
+              ...item,
+              clientId: clientId,
+              mr_id: parentRowMrId,
+              mrId: parentRowMrId,
+              mr_fid: parentRowMrFid,
+              mrFid: parentRowMrFid,
+              fFid: fishFid,
+              _status: OfflineStatuses.Queued,
+              version: item.version ?? 0,
+              updatedAt: new Date().toISOString(),
+              // Format values
+              countF: item?.countF == null || item?.countF === '' ? null : Number(item?.countF),
+              length: item?.['length'] == null || item?.['length'] === '' ? null : Number(item?.['length']),
+              condition: item?.condition == null || item?.condition === '' ? null : Number(item?.condition),
+              weight: item?.weight == null || item?.weight === '' ? null : Number(item?.weight),
+            };
 
-          await schema.validate(payload, { abortEarly: false });
+            return { item, payload, isNew };
+          }) ?? [];
 
+        // Validate all rows first; if any fail, stay on Fish and do not submit any rows.
+        const validationResults = await Promise.all(
+          rowPayloads.map(async ({ payload }) => {
+            try {
+              await schema.validate(payload, { abortEarly: false });
+              return true;
+            } catch {
+              return false;
+            }
+          })
+        );
+        const invalidRowCount = validationResults.filter((isValid) => !isValid).length;
+
+        if (invalidRowCount > 0) {
+          setValidationErrorRowCount(invalidRowCount);
+          return;
+        }
+
+        for (const { item, payload, isNew } of rowPayloads) {
           try {
             if (online) {
               if (isNew) {
@@ -235,7 +354,7 @@ const FishDataEntry = connect(
             console.error('Fish API failed, queuing offline:', error);
             isNew ? await createData('fish', payload) : await updateData('fish', payload);
           }
-        });
+        }
 
         setData((prev) =>
           prev.map((row) =>
@@ -255,44 +374,16 @@ const FishDataEntry = connect(
 
     useEffect(() => {
       const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
-      setData(rowData);
-    }, [items]);
-
-    // useEffect(() => {
-    //   const loadOfflineLookups = async () => {
-    //     try {
-    //       const [fishCodes, fishStructures, floyTagPrefixes, lengthTypes, markRecaptureOptions] = await Promise.all([
-    //         getLookupOptions('fishCodes'),
-    //         getLookupOptions('fishStructures'),
-    //         getLookupOptions('floyTagPrefixes'),
-    //         getLookupOptions('lengthTypes'),
-    //         getLookupOptions('markRecaptureOptions'),
-    //       ]);
-
-    //       setOfflineLookups({
-    //         fishCodes,
-    //         fishStructures,
-    //         floyTagPrefixes,
-    //         lengthTypes,
-    //         markRecaptureOptions,
-    //       });
-    //     } catch (err) {
-    //       console.error('Failed to load Fish offline lookups:', err);
-    //     }
-    //   };
-
-    //   void loadOfflineLookups();
-    // }, []);
+      setData(ensureTrailingBlankFishRow(rowData));
+    }, [baseData?.bendRiverMile, items]);
 
     return (
       <FormProvider {...methods}>
-        <Button className={saveBtnClasses} onClick={() => handleCopyLastRowBtn()} type='button'>
-          Copy Last Row
-        </Button>
         <DataEntryTable
           addRow={handleAddRow}
           columns={tableColumns}
           data={data}
+          enablePagination={false}
           initialTableState={{}}
           key={tableKey}
           placeholderClick={handleAddRow}
@@ -300,13 +391,26 @@ const FishDataEntry = connect(
           removeMultipleRows={handleRemoveMultipleRows}
           addMultipleRows={handleAddMultipleRows}
           rowErrorCallback={() => {}}
+          showAddRowButton={false}
+          showValidationErrors={isSubmitAttempted}
           tableVersion='FishTable'
           updateSourceData={handleUpdateData}
-          validationSchema={FishDataEntrySchema({ gear, data })}
+          validationSchema={tableValidationSchema}
         />
-        <Button className={saveBtnClasses} onClick={() => handleSubmitAll()} type='button'>
+        <Button className='margin-top-2 secondary-btn' onClick={() => handleCopyLastRowBtn()} type='button'>
+          <Icon focusable={false} className='margin-right-1' path={mdiContentCopy} />
+          Copy Last Row
+        </Button>
+        <Button className='margin-top-2 add-btn' onClick={() => handleSubmitAll()} type='button'>
           Submit
         </Button>
+        {validationErrorRowCount > 0 && (
+          <p aria-live='polite' className='margin-y-1 text-secondary-dark'>
+            {validationErrorRowCount} row{validationErrorRowCount === 1 ? '' : 's'}
+            {validationErrorRowCount === 1 ? ' has ' : ' have '}validation errors that must be corrected before data can
+            be submitted.
+          </p>
+        )}
       </FormProvider>
     );
   }

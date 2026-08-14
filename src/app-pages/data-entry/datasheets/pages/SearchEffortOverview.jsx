@@ -1,11 +1,14 @@
 import { connect } from 'redux-bundler-react';
 import Card from '@src/app-components/card';
-import DataHeader from '../components/dataHeader';
+import DataHeader from '../components/data-header/dataHeader';
 import TabContainer from '@src/app-components/tab';
 import TelemetryDataEntry from '../tables/telemetry/TelemetryDataEntry';
 import Breadcrumb from '@src/app-components/breadcrumb';
 
 import SearchEffortDataEntryForm from '../../edit-data-sheet/forms/search-effort/SearchEffortDataEntryForm';
+import Approval from '../components/approval/approval';
+import { isOnline } from '../../offline/sync';
+
 import '../../../data-summaries/data-summary.scss';
 
 const SearchEffortOverview = connect(
@@ -19,6 +22,7 @@ const SearchEffortOverview = connect(
   ({ doUpdateCurrentTab, dataEntryData, dataEntryTelemetryTotalCount, currentTab, routeParams, isEditForm, auth }) => {
     const siteId = routeParams?.siteId;
     const seId = routeParams?.seId;
+    const online = isOnline();
 
     const breadcrumbLinks = [
       { text: 'Sites List', href: '/sites-list', current: false },
@@ -38,6 +42,9 @@ const SearchEffortOverview = connect(
 
         {/* Top Level Info */}
         <DataHeader type='search-effort' />
+
+        {/* Approval Fields */}
+        {online && <Approval />}
 
         {/* Form */}
         <Card className='mt-3'>

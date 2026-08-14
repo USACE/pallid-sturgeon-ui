@@ -1,3 +1,4 @@
+import { number } from 'yup';
 import { db } from './db';
 import type { DataEntry, OutboxItem } from './db';
 
@@ -134,11 +135,44 @@ function toSiteServerPayload(entry: any) {
   };
 }
 
+function getNumberValue(value: any) {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+  const numberValue = Number(value);
+
+  return Number.isNaN(numberValue) ? null : numberValue;
+}
+
+function toFishServerPayload(entry: any) {
+  return {
+    ...entry,
+    project: getNumberValue(entry?.project ?? entry?.projectId ?? entry?.project_id),
+    segment: getNumberValue(entry?.segment ?? entry?.segmentId ?? entry?.segment_id),
+    siteId: getNumberValue(entry?.siteId ?? entry?.site_id),
+    mrId: getNumberValue(entry?.mrId ?? entry?.mr_id),
+  };
+}
+
+function toTelemetryServerPayload(entry: any) {
+  return {
+    ...entry,
+    siteId: getNumberValue(entry?.siteId ?? entry?.site_id),
+    seId: getNumberValue(entry?.seId ?? entry?.se_id),
+  };
+}
+
 function formatPayloadForApi(entry: Partial<DataEntry>, tableName?: OutboxTable): Record<string, any> {
   const { clientId, serverId, version, updatedAt, _status, ...serverPayload } = entry;
 
   if (tableName === 'ds_sites') {
     return toSiteServerPayload(serverPayload);
+  }
+  if (tableName === 'ds_fish') {
+    return toFishServerPayload(serverPayload);
+  }
+  if (tableName === 'ds_telemetry_fish') {
+    return toTelemetryServerPayload(serverPayload);
   }
 
   return serverPayload;
@@ -154,6 +188,28 @@ async function saveLocalData(table: any, entry: Partial<DataEntry> & { clientId:
   await table.put(merged);
 }
 
+function getOfflineRecordKey(tableName: OutboxTable, payload: any): string | undefined {
+  if (!payload) return undefined;
+  switch (tableName) {
+    case 'ds_sites':
+      return payload.siteFid ?? payload.site_fid;
+    case 'ds_moriver':
+      return payload.mrFid ?? payload.mr_fid;
+    case 'ds_search':
+      return payload.seFid ?? payload.se_fid;
+    case 'ds_fish':
+      return payload.fFid ?? payload.f_fid;
+    case 'ds_telemetry_fish':
+      return payload.tFid ?? payload.t_fid ?? payload.clientId;
+    case 'ds_supplemental':
+      return payload.fFid ?? payload.f_fid;
+    case 'ds_procedure':
+      return payload.fFid ?? payload.f_fid;
+    default:
+      return undefined;
+  }
+}
+
 async function addToSyncQueue(
   entityKey: EntityKey,
   op: OutboxItem['op'],
@@ -161,12 +217,56 @@ async function addToSyncQueue(
   payload?: Partial<DataEntry>
 ) {
   const config = API_CONFIG[entityKey];
+  const nextPayload = payload ?? entry;
+
+  const nextOfflineKey = getOfflineRecordKey(config.tableName, nextPayload);
+
+  const outboxItems = await db.outbox.toArray();
+
+  const existingItem = outboxItems.find((item) => {
+    if (item.tableName !== config.tableName) {
+      return false;
+    }
+    if (item.clientId === entry.clientId) {
+      return true;
+    }
+
+    const existingOfflineKey = getOfflineRecordKey(item.tableName, item.payload);
+
+    return (
+      nextOfflineKey != null && existingOfflineKey != null && String(existingOfflineKey) === String(nextOfflineKey)
+    );
+  });
+
+  if (existingItem?._id != null) {
+    const finalOp = existingItem.op === 'create' ? 'create' : op;
+
+    console.warn('Updating existing outbox item instead of adding another:', {
+      tableName: config.tableName,
+      previousClientId: existingItem.clientId,
+      nextClientId: entry.clientId,
+      offlineKey: nextOfflineKey,
+      previousOp: existingItem.op,
+      requestedOp: op,
+      finalOp,
+    });
+
+    await db.outbox.update(existingItem._id, {
+      clientId: entry.clientId,
+      op: finalOp,
+      serverId: entry.serverId,
+      payload: nextPayload,
+      clientVersion: entry.version ?? 0,
+      ts: Date.now(),
+    });
+    return;
+  }
   await db.outbox.add({
     tableName: config.tableName,
     op,
     clientId: entry.clientId,
     serverId: entry.serverId,
-    payload: payload ?? entry,
+    payload: nextPayload,
     clientVersion: entry.version ?? 0,
     ts: Date.now(),
   });
@@ -312,16 +412,37 @@ export async function pushOutboxItem(
     const json = await res.json().catch(() => ({}));
 
     const returnedServerId =
+      (typeof json === 'number' ? json : undefined) ??
       json?.[config.idField] ??
       json?.siteId ??
       json?.site_id ??
       json?.data?.[config.idField] ??
+      json?.mrId ??
+      json?.mr_id ??
+      json?.seId ??
+      json?.se_id ??
+      json?.tId ??
+      json?.t_id ??
+      json?.fId ??
+      json?.f_id ??
+      json?.fid ??
+      json?.sId ??
+      json?.s_id ??
+      json?.sid ??
       json?.data?.siteId ??
       json?.data?.site_id ??
+      json?.data?.mrId ??
+      json?.data?.mr_id ??
       json?.data?.seId ??
       json?.data?.se_id ??
       json?.data?.tId ??
       json?.data?.t_id ??
+      json?.data?.fId ??
+      json?.data?.fid ??
+      json?.data?.f_id ??
+      json?.data?.sId ??
+      json?.data?.s_id ??
+      json?.data?.sid ??
       (typeof json?.data === 'number' ? json.data : undefined);
 
     return {

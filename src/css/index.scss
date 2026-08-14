@@ -1,10 +1,18 @@
 @use '@styles/_variables' as *;
 @use '@styles/_mixins' as mixin;
+@use '@styles/_theme' as theme;
 
-$inactive-color: grey;
-$success-color: #43ac6a;
-$warning-color: #d08002;
-$error-color: #f04124;
+body,
+html,
+#root {
+  height: 100%;
+  margin: 0;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
 
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
@@ -16,35 +24,9 @@ $error-color: #f04124;
                                   supported by Chrome, Edge, Opera and Firefox */
 }
 
-.clamp-2 {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-}
-
-.overflow-ellipsis {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.page-margin {
-  margin-top: 98px;
-
-  &.banner {
-    margin-top: 130px;
-  }
-}
-
 footer.modal-footer {
   display: flex;
   align-items: center;
-}
-
-.alert-container.unread {
-  border-left: 4px solid #0a59a3;
 }
 
 th {
@@ -97,17 +79,6 @@ input[disabled] {
 
 .ag-theme-balham .ag-cell-inline-editing {
   height: 100% !important;
-}
-
-.cui-banner {
-  background-color: $color-black;
-  color: $color-white;
-  justify-content: center !important;
-  height: 20px;
-
-  .cui-banner-dropdown {
-    z-index: 8888;
-  }
 }
 
 .asterisk-color {

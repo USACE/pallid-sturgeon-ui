@@ -1,24 +1,19 @@
-import Button from '@components/button';
 import Card from '@components/card';
-import {
-  Input,
-  Row,
-} from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { Button, Label, TextInput } from '@trussworks/react-uswds';
 
-import '@pages/data-summaries/data-summary.scss';
-import '../../dataentry.scss';
+import './approval.scss';
 
 const Approval = ({ checkby, complete, qc }) => (
-  <Card>
+  <Card className='test-approval'>
     <Card.Body>
       <Row>
         <div className='col-md-1'>
-          <Input label='Checked By' name='checkby' value={checkby} isDisabled />
+          <Label>Checked By</Label>
+          <TextInput name='checkby' className='test-approval-inputs' disabled />
         </div>
         <div className='col-md-1 text-center col-sm-2'>
-          <label>
-            <small>Approved?</small>
-          </label>
+          <Label>Approved</Label>
           <input
             type='checkbox'
             title='complete'
@@ -32,25 +27,22 @@ const Approval = ({ checkby, complete, qc }) => (
           />
         </div>
         <div className='col-md-1 col-sm-6'>
-          <Input
-            label='QC'
-            name='qc'
-            value={qc}
-            // onChange={e => dispatch({ type: 'update', field: 'qc', value: e.target.value })}
-            // disabled={!formComplete}
-            isDisabled
-          />
+          <Label>QC</Label>
+          <TextInput name='qc' className='test-approval-inputs' disabled />
         </div>
         <div className='col-md-2 offset-6'>
           <div className='float-right pt-4'>
-            <Button
+            {/* <Button
               size='small'
               variant='success'
               text='Save'
               className='btn-width'
               // handleClick={() => doUpdateMoRiverDataEntry(formData)}
               isDisabled
-            />
+            /> */}
+            <Button type='button' className='add-btn'>
+              Save
+            </Button>
           </div>
         </div>
       </Row>

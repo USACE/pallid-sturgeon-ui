@@ -9,7 +9,7 @@ const DownloadAsCSV = ({ content = [], className = '', filePrefix = '', headers 
 
   return (
     <CSVLink
-      className={classes}
+      className='usa-button secondary-btn'
       filename={`${filePrefix}-${new Date().toISOString()}.csv`}
       data={content}
       headers={headers}

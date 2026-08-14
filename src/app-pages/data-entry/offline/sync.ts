@@ -45,6 +45,16 @@ function getTable(tableName: string) {
   }
 }
 
+const enum TableName {
+  Moriver = 'ds_moriver',
+  Search = 'ds_search',
+  Telemetry = 'ds_telemetry_fish',
+  Fish = 'ds_fish',
+  Sites = 'ds_sites',
+  Supplemental = 'ds_supplemental',
+  Procedure = 'ds_procedure',
+}
+
 async function patchSiteChildrenAfterCreate(siteItem: OutboxItem, siteResult: any) {
   if (siteItem.tableName !== 'ds_sites') return;
   if (siteItem.op !== 'create') return;
@@ -201,6 +211,246 @@ async function patchSearchChildrenAfterCreate(searchItem: OutboxItem, searchResu
   }
 }
 
+async function patchMoriverChildrenAfterCreate(outboxItem: OutboxItem, dataResult: any) {
+  if (outboxItem.tableName !== TableName.Moriver) return;
+  if (outboxItem.op !== 'create') return;
+
+  const serverMrId = dataResult.serverId ?? dataResult.json?.data ?? dataResult.json?.mrId ?? dataResult.json?.mr_id;
+
+  if (!serverMrId) {
+    console.warn('Search create synced but no mr_id returned:', dataResult);
+    return;
+  }
+
+  const moriverPayload = outboxItem.payload ?? {};
+  const mrFid = moriverPayload.mrFid ?? moriverPayload.mr_fid;
+
+  if (!mrFid) {
+    console.warn('Search create synced but no mrFid found:', outboxItem);
+    return;
+  }
+
+  const pendingItems = await db.outbox.toArray();
+
+  console.log('Pending outbox items before patch:', pendingItems);
+
+  for (const pending of pendingItems) {
+    if (pending._id == null) continue;
+
+    const payload = pending.payload ?? {};
+    const payloadMrFid = payload.mrFid ?? payload.mr_fid;
+
+    const isMoriverUpdate =
+      pending.tableName === TableName.Moriver &&
+      pending.op === 'update' &&
+      (pending.clientId === outboxItem.clientId || payloadMrFid === mrFid);
+
+    const isRelatedFish = pending.tableName === TableName.Fish && payloadMrFid === mrFid;
+
+    if (!isMoriverUpdate && !isRelatedFish) continue;
+
+    const updates: Partial<OutboxItem> = {
+      payload: {
+        ...payload,
+        mr_id: serverMrId,
+        mrId: serverMrId,
+      },
+    };
+
+    if (isMoriverUpdate) {
+      updates.serverId = undefined;
+
+      updates.payload = {
+        ...updates.payload,
+        f_id: undefined,
+        fid: undefined,
+      };
+    }
+
+    await db.outbox.update(pending._id, updates);
+
+    // Inject MrId to Fish Data
+    const fishRows = await db.fish.where('mrFid').equals(mrFid).toArray();
+
+    for (const row of fishRows) {
+      await db.fish.put({
+        ...row,
+        mr_id: serverMrId,
+        mrId: serverMrId,
+      });
+    }
+  }
+}
+
+async function patchFishChildrenAfterCreate(fishItem: OutboxItem, fishResult: any) {
+  if (fishItem.tableName !== TableName.Fish) return;
+  if (fishItem.op !== 'create') return;
+
+  const serverFishId =
+    fishResult.serverId ??
+    (typeof fishResult.json === 'number' ? fishResult.json : undefined) ??
+    fishResult.json?.f_id ??
+    fishResult.json?.fId ??
+    fishResult.json?.fid ??
+    fishResult.json?.data?.f_id ??
+    fishResult.json?.data?.fId ??
+    fishResult.json?.data?.fid ??
+    fishResult.json?.data(typeof fishResult?.json?.data === 'number' ? fishResult?.data : undefined);
+
+  if (!serverFishId) {
+    console.warn('Fish create synced but no fish ID was returned:', fishResult);
+    return;
+  }
+
+  const fishPayload = fishItem.payload ?? {};
+
+  const fishFid = fishPayload.fFid ?? fishPayload.f_fid;
+
+  if (!fishFid) {
+    console.warn('Fish create synced but no fFid was found:', fishItem);
+    return;
+  }
+
+  const pendingItems = await db.outbox.toArray();
+
+  for (const pending of pendingItems) {
+    if (pending._id == null) continue;
+
+    const isSupplemental = pending.tableName === TableName.Supplemental;
+    const isProcedure = pending.tableName === TableName.Procedure;
+
+    if (!isSupplemental && !isProcedure) {
+      continue;
+    }
+
+    const payload = pending.payload ?? {};
+    const payloadFishFid = payload.fFid ?? payload.f_fid;
+
+    if (String(payloadFishFid) !== String(fishFid)) {
+      continue;
+    }
+
+    await db.outbox.update(pending._id, {
+      payload: {
+        ...payload,
+        fid: Number(serverFishId),
+        fId: Number(serverFishId),
+        f_id: Number(serverFishId),
+        fFid: fishFid,
+        f_fid: fishFid,
+      },
+    });
+  }
+  const supplementalRows = await db.supplemental.toArray();
+
+  for (const row of supplementalRows) {
+    const rowFishFid = row.fFid ?? row.f_fid;
+
+    if (String(rowFishFid) !== String(fishFid)) {
+      continue;
+    }
+    await db.supplemental.put({
+      ...row,
+      fid: Number(serverFishId),
+      fId: Number(serverFishId),
+      f_id: Number(serverFishId),
+      fFid: fishFid,
+      f_fid: fishFid,
+    });
+  }
+  const procedureRows = await db.procedure.toArray();
+
+  for (const row of procedureRows) {
+    const rowFishFid = row.fFid ?? row.f_fid;
+
+    if (String(rowFishFid) !== String(fishFid)) {
+      continue;
+    }
+
+    await db.procedure.put({
+      ...row,
+      fid: Number(serverFishId),
+      fId: Number(serverFishId),
+      fFid: fishFid,
+      f_fid: fishFid,
+    });
+  }
+}
+
+async function patchSupplementalChildrenAfterCreate(supplementalItem: OutboxItem, supplementalResult: any) {
+  if (supplementalItem.tableName !== TableName.Supplemental) {
+    return;
+  }
+
+  if (supplementalItem.op !== 'create') {
+    return;
+  }
+
+  const serverSupplementalId =
+    supplementalResult.serverId ??
+    supplementalResult.json?.sid ??
+    supplementalResult.json?.s_id ??
+    supplementalResult.json?.sId ??
+    supplementalResult.json?.id ??
+    supplementalResult.json?.data?.sid ??
+    supplementalResult.json?.data?.s_id ??
+    supplementalResult.json?.data?.sId ??
+    supplementalResult.json?.data?.id ??
+    supplementalResult.json?.data;
+
+  if (!serverSupplementalId) {
+    console.warn('Supplemental create synced but no sid was returned:', supplementalResult);
+    return;
+  }
+
+  const supplementalPayload = supplementalItem.payload ?? {};
+  const fishFid = supplementalPayload.fFid ?? supplementalPayload.f_fid;
+
+  if (!fishFid) {
+    console.warn('Supplemental create synced but no fFid was found:', supplementalItem);
+    return;
+  }
+
+  const pendingItems = await db.outbox.toArray();
+
+  for (const pending of pendingItems) {
+    if (pending._id == null) continue;
+
+    if (pending.tableName !== TableName.Procedure) {
+      continue;
+    }
+
+    const payload = pending.payload ?? {};
+    const payloadFishFid = payload.fFid ?? payload.f_fid;
+
+    if (String(payloadFishFid) !== String(fishFid)) {
+      continue;
+    }
+
+    await db.outbox.update(pending._id, {
+      payload: {
+        ...payload,
+        sid: Number(serverSupplementalId),
+        s_id: Number(serverSupplementalId),
+      },
+    });
+  }
+  const procedureRows = await db.procedure.toArray();
+
+  for (const row of procedureRows) {
+    const rowFishFid = row.fFid ?? row.f_fid;
+
+    if (String(rowFishFid) !== String(fishFid)) {
+      continue;
+    }
+    await db.procedure.put({
+      ...row,
+      sid: Number(serverSupplementalId),
+      s_id: Number(serverSupplementalId),
+    });
+  }
+}
+
 export async function syncNow(token?: string): Promise<SyncResult> {
   if (!isOnline()) {
     return { tried: 0, ok: 0, errors: 0, conflicts: 0, draftSkip: 0 };
@@ -250,6 +500,41 @@ export async function syncNow(token?: string): Promise<SyncResult> {
       const table: any = getTable(item.tableName);
       const localRow: any = await table.get(item.clientId);
 
+      if (item.tableName === TableName.Supplemental && item.op === 'create') {
+        const payload = item.payload ?? {};
+        const fishId = Number(payload.f_id ?? payload.fid ?? payload.fId ?? 0);
+
+        if (!Number.isFinite(fishId) || fishId <= 0) {
+          console.warn('Skipping Supplemental because Fish has not synced yet:', {
+            outboxId: item._id,
+            clientId: item.clientId,
+            f_id: payload.f_id,
+            fid: payload.fid,
+            fId: payload.fId,
+            fFid: payload.fFid ?? payload.f_fid,
+          });
+          draftSkip++;
+          continue;
+        }
+      }
+
+      if (item.tableName === TableName.Procedure && item.op === 'create') {
+        const payload = item.payload ?? {};
+        const supplementalId = Number(payload.s_id ?? payload.sid ?? 0);
+
+        if (!Number.isFinite(supplementalId) || supplementalId <= 0) {
+          console.warn('Skipping Procedure because Supplemental has not synced yet:', {
+            outboxId: item._id,
+            clientId: item.clientId,
+            s_id: payload.s_id,
+            sid: payload.sid,
+            fFid: payload.fFid ?? payload.f_fid,
+          });
+          draftSkip++;
+          continue;
+        }
+      }
+
       const res: any = await pushOutboxItem(item, token);
 
       console.log('Sync result:', res);
@@ -279,6 +564,9 @@ export async function syncNow(token?: string): Promise<SyncResult> {
 
         await patchSiteChildrenAfterCreate(item, res);
         await patchSearchChildrenAfterCreate(item, res);
+        await patchMoriverChildrenAfterCreate(item, res);
+        await patchFishChildrenAfterCreate(item, res);
+        await patchSupplementalChildrenAfterCreate(item, res);
       } else if (res.status === 'conflict') {
         conflicts++;
 

@@ -9,7 +9,6 @@ import { Button, Grid } from '@trussworks/react-uswds';
 import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 
 import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEffortDataEntryForm.validation';
-import classNames from 'classnames';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
@@ -17,10 +16,11 @@ import { generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
+import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
+import { mdiCrosshairsGps } from '@mdi/js';
+import Icon from '@src/app-components/icon/icon';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
-
-const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
 const isEmpty = (obj) => Object.keys(obj).length === 0;
 
@@ -34,6 +34,7 @@ const SearchEffortDataEntryForm = connect(
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'doResetTelemetryDataEntries',
+  'doUpdateUrl',
   'selectDataEntryData',
   'selectDataEntryTelemetryTotalCount',
   'selectRouteParams',
@@ -44,6 +45,7 @@ const SearchEffortDataEntryForm = connect(
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     doResetTelemetryDataEntries,
+    doUpdateUrl,
     dataEntryData,
     dataEntryTelemetryTotalCount,
     routeParams,
@@ -86,7 +88,6 @@ const SearchEffortDataEntryForm = connect(
       trigger,
       reset,
       handleSubmit,
-      clearErrors,
     } = methods;
 
     const browserGps = useGpsCapture(GPS_OPTIONS);
@@ -236,7 +237,13 @@ const SearchEffortDataEntryForm = connect(
           if (isEditForm) {
             doUpdateSearchDataEntry(payload);
           } else {
-            doSaveSearchDataEntry(payload);
+            const response = await doSaveSearchDataEntry(payload);
+            const savedSeId = response?.data;
+            if (savedSeId) {
+              payload.seId = savedSeId;
+              payload.se_id = savedSeId;
+              setValue('seId', savedSeId);
+            }
           }
         } else {
           await db.search.put(payload);
@@ -261,8 +268,6 @@ const SearchEffortDataEntryForm = connect(
 
     const doSubmit = async () => {
       setValue('status', 2);
-      const valid = await trigger();
-      if (!valid) return;
 
       const values = getCastedValues();
       const draft = getOfflineSearchEffortDraft();
@@ -287,9 +292,9 @@ const SearchEffortDataEntryForm = connect(
       try {
         if (isOnline()) {
           if (isEditForm || payload.seId || payload.se_id) {
-            doUpdateSearchDataEntry(payload);
+            await doUpdateSearchDataEntry(payload);
           } else {
-            doSaveSearchDataEntry(payload);
+            await doSaveSearchDataEntry(payload);
           }
         } else {
           await createData('search', payload);
@@ -298,7 +303,8 @@ const SearchEffortDataEntryForm = connect(
         setValue('clientId', clientId);
         setValue('status', 2);
 
-        sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
+        sessionStorage.removeItem(searchDraftKey);
+        doUpdateUrl(`/sites-list/${siteRouteKey}`);
 
         setSubmitMessage({
           type: 'success',
@@ -309,7 +315,7 @@ const SearchEffortDataEntryForm = connect(
       } catch (error) {
         console.error('Search submit failed, queueing offline:', error);
 
-        await updateData('search', payload);
+        await updateData('search', clientId, payload);
 
         setValue('clientId', clientId);
         setValue('status', 2);
@@ -380,8 +386,7 @@ const SearchEffortDataEntryForm = connect(
       const count = Number(dataEntryTelemetryTotalCount || 0);
 
       setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
-      clearErrors(['stopTime', 'stopLatitude', 'stopLongitude']);
-    }, [dataEntryTelemetryTotalCount, setValue, trigger, clearErrors]);
+    }, [dataEntryTelemetryTotalCount, setValue]);
 
     useEffect(() => {
       const draft = getOfflineSearchEffortDraft();
@@ -476,19 +481,17 @@ const SearchEffortDataEntryForm = connect(
             <Grid tablet={{ col: 3 }}>
               <TextInput name='seFid' label='SE Field ID (Date-Time-SE#)' readOnly />
             </Grid>
-            {!hasTelemetry ? (
-              <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={handleSubmit(doSaveDraft)} type='button'>
+            <Grid tablet={{ col: 6 }}>
+              {!hasTelemetry ? (
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
                 </Button>
-              </Grid>
-            ) : (
-              <Grid tablet={{ col: 2 }}>
-                <Button className={saveBtnClasses} onClick={doSubmit} type='button'>
+              ) : (
+                <Button className='add-btn save-btn' onClick={handleSubmit(doSubmit)} type='button'>
                   Submit
                 </Button>
-              </Grid>
-            )}
+              )}
+            </Grid>
           </Grid>
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>
@@ -510,15 +513,16 @@ const SearchEffortDataEntryForm = connect(
               <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
                 {searchTypeCodes.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
-                    {opt.code}
+                    {`${opt.code} - ${opt.description}`}
                   </option>
                 ))}
               </SelectInput>
-              {searchTypeCode === 'RS' && (
-                <Grid tablet={{ col: 12 }}>
-                  <TextInput name='searchDay' label='Search Day' type='date' required />
-                </Grid>
-              )}
+            </Grid>
+
+            <Grid tablet={{ col: 2 }}>
+              <Grid tablet={{ col: 12 }}>
+                <TextInput name='searchDay' label='Search Day' type='number' required={searchTypeCode === 'RS'} />
+              </Grid>
             </Grid>
 
             <Grid tablet={{ col: 2 }}>
@@ -533,6 +537,17 @@ const SearchEffortDataEntryForm = connect(
           <Grid row gap='md' className='padding-bottom-3'>
             <Grid tablet={{ col: 2 }}>
               <TextInput name='startTime' label='Start Time (hh:mm:ss)' required />
+              <Button
+                onClick={handleCaptureStart}
+                type='button'
+                disabled={USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix}
+                className='primary-btn margin-top-1'
+              >
+                <Icon path={mdiCrosshairsGps} className='margin-right-1' />
+                {USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix
+                  ? 'Waiting for Satellite Fix...'
+                  : 'Capture Start GPS'}
+              </Button>
             </Grid>
 
             <Grid tablet={{ col: 2 }}>
@@ -551,6 +566,12 @@ const SearchEffortDataEntryForm = connect(
                 disabled={!hasTelemetry}
                 warning={!hasTelemetry ? getTelemetryWarning() : ''}
               />
+              {hasTelemetry && (
+                <Button onClick={handleCaptureStop} type='button' className='primary-btn margin-top-1'>
+                  <Icon path={mdiCrosshairsGps} className='margin-right-1' />
+                  Capture Stop GPS
+                </Button>
+              )}
             </Grid>
 
             <Grid tablet={{ col: 2 }}>
@@ -573,33 +594,6 @@ const SearchEffortDataEntryForm = connect(
                 disabled={!hasTelemetry}
                 warning={!hasTelemetry ? getTelemetryWarning() : ''}
               />
-            </Grid>
-            {USE_UBLOX_POC && (
-              <Grid row gap='sm'>
-                <Button type='button' onClick={ubloxGps.connect}>
-                  Connect u-blox Satellite GPS
-                </Button>
-                <div>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</div>
-                {ubloxGps.latestFix && <div>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</div>}
-                {ubloxGps.lastError && <div>GPS Error: {ubloxGps.lastError.message}</div>}
-              </Grid>
-            )}
-
-            <Grid row gap='sm' table={{ col: 3 }}>
-              <Button
-                onClick={handleCaptureStart}
-                type='button'
-                disabled={USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix}
-              >
-                {USE_UBLOX_POC && ubloxGps.isConnected && !ubloxGps.latestFix
-                  ? 'Waiting for Satellite Fix...'
-                  : 'Capture Start GPS'}
-              </Button>
-            </Grid>
-            <Grid row gap='md' table={{ col: 3 }}>
-              <Button onClick={handleCaptureStop} type='button'>
-                Capture Stop GPS
-              </Button>
             </Grid>
           </Grid>
         </>

@@ -1,28 +1,22 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
-import { decimalNumberRegex } from '@src/utils/regex';
-import { mdiAlert } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
+import { mdiAlert } from '@mdi/js';
 
-const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, column, table, cell }) => {
+const TagnumberTableCell = connect(({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
-  const [species, setSpecies] = useState();
   const [showWarning, setShowWarning] = useState(false);
-
-  const project = Number(baseData?.projectId);
-
-  const rowSpecies = useMemo(() => row.getValue('species'), [row]);
 
   const debouncedUpdateRef = useRef();
 
   useEffect(() => {
     debouncedUpdateRef.current = debounce((newValue) => {
       if (tableMeta?.updateData) {
-        tableMeta?.updateData(row.index, column.id, newValue ? Number(newValue) : '');
+        tableMeta?.updateData(row.index, column.id, newValue);
       }
     }, 500);
   }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
@@ -40,38 +34,38 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
   };
 
   const handleChange = (e) => {
-    const val = e?.target?.value ?? '';
-    if (decimalNumberRegex.test(val) || val === '') {
-      setValue(val === '' ? null : val);
-      updateValue(val === '' ? null : val);
-    }
+    const val = (e?.target?.value ?? '').toUpperCase();
+    setValue(val === '' ? null : val);
+    updateValue(val === '' ? null : val);
   };
 
-  // Get latest species values
+  // Set warning flag for tagnumber length
   useEffect(() => {
-    setSpecies(rowSpecies);
-  }, [rowSpecies]);
-
-  // Set warning flag
-  useEffect(() => {
-    // The system shall warn the user if species = PDSG and project = 1 and weight field is null
-    if ((value === null || value === undefined) && species === 'PDSG' && Number(project) === 1) {
-      setShowWarning(true);
+    const hasDecimal = String(value)?.includes('.');
+    if (hasDecimal) {
+      const parseVal = String(value)?.replace('.', '');
+      setShowWarning(
+        (parseVal?.length < 14 || parseVal?.length > 14) && parseVal !== ''
+          ? 'Value cannot be less than or greater than 14 digits'
+          : null
+      );
     } else {
-      setShowWarning(false);
+      setShowWarning(
+        value && (String(value)?.length < 10 || String(value)?.length > 10)
+          ? 'Value cannot be less than or greater than 10 digits'
+          : null
+      );
     }
-  }, [value, species, project]);
+  }, [value]);
 
   return (
     <div>
       <input
-        aria-label='Weight'
+        aria-label='Tagnumber'
         disabled={columnMeta?.readOnly}
         id={cell.id}
-        maxLength={4000}
-        onBlur={handleBlur}
         onChange={handleChange}
-        required={() => {}}
+        onBlur={handleBlur}
         style={{
           width: '100%',
           borderColor: 'hsl(0, 0%, 80%)',
@@ -79,15 +73,17 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
         }}
         type='text'
         value={value ?? ''}
+        maxLength={String(value)?.includes('.') ? 15 : 10}
+        minLength={10}
       />
       {showWarning && (
         <p>
           <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
-          Weight is required for a Pallid Sturgeon
+          {showWarning}
         </p>
       )}
     </div>
   );
 });
 
-export default WeightTableCell;
+export default TagnumberTableCell;

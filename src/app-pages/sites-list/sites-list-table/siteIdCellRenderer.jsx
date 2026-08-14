@@ -25,21 +25,23 @@ const SiteIdCellRenderer = connect(
     data,
     value,
   }) => {
-    const handleCallback = () => {
-      doUpdateUrl(`/sites-list/${data?.siteId}`);
-    };
+    const siteId = data?.siteId ?? data?.site_id ?? data?.serverId;
+    const siteFid = data?.siteFid ?? data?.site_fid;
+    const siteRouteKey = Number(siteId) > 0 ? String(siteId) : (data?.siteRouteKey ?? siteFid);
 
     const handleClick = () => {
       if (edit) {
-        doDomainFieldOfficesFetch();
-        doDomainBendRnFetch();
-        doFetchUsers();
-        doDomainSeasonsFetch();
-        doDomainSegmentsFetch({ office: data?.fieldoffice, project: data?.projectId });
+        if (navigator.onLine) {
+          doDomainFieldOfficesFetch();
+          doDomainBendRnFetch();
+          doFetchUsers();
+          doDomainSeasonsFetch();
+          doDomainSegmentsFetch({ office: data?.fieldoffice, project: data?.projectId });
+        }
         doModalOpen(SitesFormModal, { edit: true, data: data });
-      } else {
-        doFetchSites({ siteId: data?.siteId }, handleCallback());
+        return;
       }
+      doUpdateUrl(`/sites-list/${siteRouteKey}`);
     };
 
     return <Button size='small' variant='link' className='p-0 mb-1' text={value} handleClick={() => handleClick()} />;

@@ -3,7 +3,7 @@ import { Grid } from '@trussworks/react-uswds';
 
 import Card from '@components/card';
 
-import '../../dataentry.scss';
+import './dataHeader.scss';
 
 const DataHeader = connect(
   'selectBaseData',
@@ -33,7 +33,7 @@ const DataHeader = connect(
     const secondIdValue = type === 'supp-proc' ? dataEntryFishData?.items?.[0]?.fFid : metadata?.[type]?.fid;
 
     return (
-      <Card className='mb-3'>
+      <Card className='test mb-3'>
         <Card.Body>
           {!isEmpty && (
             <Grid row gap='md' className='padding-bottom-1 border-bottom'>

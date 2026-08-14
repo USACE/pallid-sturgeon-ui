@@ -31,8 +31,10 @@ export default connect(
   'selectUserAccessRequests',
   'selectRoles',
   'selectDomains',
-  ({ doFetchUserAccessRequests, doFetchRoles, doRoleOfficeUpdate, userAccessRequests, roles, domains }) => {
-    const { projects, fieldOffices } = domains;
+  'selectLookupData',
+  ({ doFetchUserAccessRequests, doFetchRoles, doRoleOfficeUpdate, userAccessRequests, roles, domains, lookupData }) => {
+    const { fieldOffices } = domains;
+    const { projects } = lookupData;
     const [roleUpdated, setRoleUpdated] = useState([]);
     const [officeUpdated, setOfficeUpdated] = useState([]);
     const [projectUpdated, setProjectUpdated] = useState([]);

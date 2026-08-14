@@ -1,5 +1,6 @@
 @use '@styles/_mixins.scss' as mixin;
 @use '@styles/_variables.scss' as *;
+@use '@styles/_theme' as theme;
 
 // USWDS Style Overrides
 
@@ -150,3 +151,9 @@ div.usa-alert {
     }
   }
 }
+
+// .usa-button {
+//   // background-color: var(--color-form-btn) !important;
+//   // border: 2px solid var(--color-form-btn-border) !important;
+//   // color: var(--color-form-btn-text) !important;
+// }

@@ -1,6 +1,6 @@
 import { connect } from 'redux-bundler-react';
 import { Button, Grid, Label, GridContainer, Fieldset } from '@trussworks/react-uswds';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import classNames from 'classnames';
 import { mdiMinus, mdiPlus } from '@mdi/js';
@@ -8,7 +8,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 
 import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
 import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
-import DataHeader from '@pages/data-entry/datasheets/components/dataHeader';
+import DataHeader from '@src/app-pages/data-entry/datasheets/components/data-header/dataHeader';
 import TextInput from '@components/new-inputs/text-input/TextInput';
 import TextArea from '@components/new-inputs/text-area/TextArea';
 import Checkbox from '@components/check-box/Checkbox';
@@ -17,8 +17,16 @@ import PallidIdOverview from './pallid-id-overview/pallidIdOverview';
 import ErrorSummary from '@components/error-summary/ErrorSummary';
 import Icon from '@components/icon/icon';
 
-import { getSuppProcDefaultValues, supplementalValidationSchema } from './SupplementalProcedureModal.validation';
+import { getSuppProcDefaultValues, suppProcValidationSchema } from './SupplementalProcedureModal.validation';
 import { createDropdownOptions, isEmpty } from '@pages/data-entry/dataEntryHelper';
+
+// import {
+//   getOfflineDraft,
+//   reloadOfflineDraft,
+// } from '@src/app-pages/data-entry/offline/offlineHelper';
+import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
+import { isOnline } from '@src/app-pages/data-entry/offline/sync';
+import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 
 const geneticNeedsCheckboxes = [
   {
@@ -45,7 +53,6 @@ const geneticNeedsCheckboxes = [
 
 const SupplementalProcedureModal = connect(
   'doGetPallidIdData',
-  'selectDataEntryData',
   'selectIsEditForm',
   'selectBaseData',
   'selectLookupData',
@@ -60,7 +67,6 @@ const SupplementalProcedureModal = connect(
   'selectUserRole',
   ({
     doGetPallidIdData,
-    dataEntryData,
     isEditForm,
     baseData,
     lookupData,
@@ -75,18 +81,49 @@ const SupplementalProcedureModal = connect(
     userRole,
     row: fishData,
   }) => {
-    const { bend, fieldoffice, season, projectId, segmentId } = baseData;
-    const { fid, mrFid, fFid, species } = fishData;
+    const { projectId } = baseData;
+    // const { fid, mrFid, fFid, species } = fishData;
 
-    const supplementalDataExists = !!dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)?.length;
-    const procedureDataExists = !!dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)?.length;
+    // const supplementalDataExists = !!dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)?.length;
+    // const procedureDataExists = !!dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)?.length;
 
-    const initialSuppData = supplementalDataExists
-      ? dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)[0]
-      : null;
-    const initialProcData = procedureDataExists
-      ? dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)[0]
-      : null;
+    // const initialSuppData = supplementalDataExists
+    //   ? dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)[0]
+    //   : null;
+    // const initialProcData = procedureDataExists
+    //   ? dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)[0]
+    //   : null;
+    const fid = fishData?.fid ?? fishData?.fId ?? fishData?.f_id;
+    const fFid = fishData?.fFid ?? fishData?.f_fid ?? fishData?.ffid;
+    const mrFid = fishData?.mrFid ?? fishData?.mr_fid;
+    const species = fishData?.species;
+
+    const matchesFish = (row) => {
+      const rowFid = row?.fid ?? row?.fId ?? row?.f_id;
+      const rowFFid = row?.fFid ?? row?.f_fid ?? row?.ffid;
+
+      return (
+        (fid != null && rowFid != null && String(rowFid) === String(fid)) ||
+        (fFid && rowFFid && String(rowFFid) === String(fFid))
+      );
+    };
+
+    const initialSuppData = dataEntrySupplemental?.items?.find(matchesFish) ?? null;
+
+    const suppId = initialSuppData?.sid ?? initialSuppData?.sId ?? initialSuppData?.s_id;
+    const initialProcData =
+      dataEntryProcedure?.items?.find((row) => {
+        const procSuppId = row?.sid ?? row?.sId ?? row?.s_id;
+        const matchesSupp = suppId != null && procSuppId != null && String(procSuppId) === String(suppId);
+
+        return matchesSupp || matchesFish(row);
+      }) ?? null;
+
+    const supplementalDataExists = Boolean(initialSuppData);
+    const procedureDataExists = Boolean(initialProcData);
+
+    const suppDraftKey = `currentSupplementalDraft:${fFid}`;
+    const procDraftKey = `currentProcedureDraft:${fFid}`;
 
     const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
@@ -106,22 +143,26 @@ const SupplementalProcedureModal = connect(
     } = lookupData;
 
     const [showProcedureSection, setShowProcedureSection] = useState(procedureDataExists);
+    const [isSaving, setIsSaving] = useState(false);
+    const saveInProgressRef = useRef(false);
+
+    const schema = suppProcValidationSchema({
+      projectId: projectId,
+      species: species,
+    });
+
+    const defaultValues = {
+      ...getSuppProcDefaultValues({
+        edit: true,
+        suppData: initialSuppData ?? {},
+        procData: initialProcData ?? {},
+        showProcedureSection: showProcedureSection,
+      }),
+    };
 
     const methods = useForm({
-      defaultValues: {
-        ...getSuppProcDefaultValues({
-          edit: true,
-          suppData: initialSuppData ?? {},
-          procData: initialProcData ?? {},
-          showProcedureSection: showProcedureSection,
-        }),
-      },
-      resolver: yupResolver(
-        supplementalValidationSchema({
-          projectId: projectId,
-          species: species,
-        })
-      ),
+      defaultValues: defaultValues,
+      resolver: yupResolver(schema),
       mode: 'onSubmit',
       reValidateMode: 'onChange',
       stateOptions: [],
@@ -130,14 +171,13 @@ const SupplementalProcedureModal = connect(
 
     const {
       formState: { errors, isValid, touchedFields, submitCount, isDirty },
-      setFocus,
       watch,
       getValues,
       setValue,
       trigger,
       reset,
-      handleSubmit,
       clearErrors,
+      handleSubmit,
     } = methods;
 
     const toggleProcedureSection = () => {
@@ -158,6 +198,7 @@ const SupplementalProcedureModal = connect(
     const ercolor = watch('ercolor');
     const genetic = watch('genetic');
     const geneticsVialNumber = watch('geneticsVialNumber');
+    const purpose = watch('purpose');
 
     const geneticsVialPrefix = projectId === 1 ? 'STURG-' : '';
 
@@ -272,173 +313,327 @@ const SupplementalProcedureModal = connect(
     // The Hatchery Origin field shall be required where project is not equal to 2
     const isHatcheryOriginRequired = Number(projectId) !== 2;
 
-    const doSubmit = () => {
-      if (isValid) {
-        const values = getValues();
-        // Format any values need for final payload
-        const suppDataObj = {
-          tagnumber: values?.tagnumber,
-          pitrn: values?.pitrn,
-          elhv: values?.elhv,
-          elcolor: values?.elcolor,
-          erhv: values?.erhv,
-          ercolor: values?.ercolor,
-          lscute: parseFloat(values?.lscute),
-          rscute: parseFloat(values?.rscute),
-          dscute: parseFloat(values?.dscute),
-          cwtyn: values?.cwtyn,
-          dangler: values?.dangler,
-          genetic: values?.genetic,
-          geneticsVialNumber: values?.geneticsVialNumber,
-          status: values?.pallidFate,
-          hatcheryOrigin: values?.hatcheryOrigin,
-          otherTagInfo: values?.otherTagInfo,
-          comments: values?.suppComments,
-          // Checkbox fields
-          broodstock: values?.broodstock === true ? 1 : 0,
-          hatchWild: values?.hatchWild === true ? 1 : 0,
-          speciesId: values?.speciesId === true ? 1 : 0,
-          archive: values?.archive === true ? 1 : 0,
-          project37: values?.project37 === true ? 1 : 0,
-          // --- Other fields in database table, ignoring for now.
-          // sex: '',
-          // stage: '',
-          // recapture: '',
-          // photo: '',
-          // geneticNeeds: '',
-          // species: '',
-          // head: null,
-          // snouttomouth: null,
-          // inter: null,
-          // mouthwidth: null,
-          // mIb: null,
-          // lOb: null,
-          // lIb: null,
-          // rIb: null,
-          // rOb: null,
-          // anal: null,
-          // dorsal: null,
-        };
+    // if Supplemental draft exists in sessionStorage (offline mode), load it into the form
+    const getOfflineSupplementalDraft = () => {
+      const suppDraftJson = sessionStorage.getItem(suppDraftKey);
+      // console.warn('getOfflineSupplementalDraft - suppDraftJson:', suppDraftJson);
+      if (!suppDraftJson) return null;
+      // console.warn('getOfflineSupplementalDraft - supplemental data found in sessionStorage - parsing JSON');
+      try {
+        const suppDraft = JSON.parse(suppDraftJson);
+        if (!suppDraft?.fFid) return null;
+        if (String(suppDraft.fFid) !== String(fFid)) {
+          return null;
+        }
+        return suppDraft;
+      } catch (err) {
+        console.error('Failed to parse offline Supplemental draft for fFid:', fFid, err);
+        return null;
+      }
+    };
 
-        const procDataObj = {
-          procedureDate: values?.procedureDate,
-          procedureStartTime: values?.procedureStartTime,
-          procedureEndTime: values?.procedureEndTime,
-          purpose: values?.purpose,
-          procedureBy: values?.procedureBy,
-          antibioticInjection: values?.antibioticInjection === true ? 1 : 0,
-          pVentral: values?.pVentral === true ? 1 : 0,
-          pDorsal: values?.pDorsal === true ? 1 : 0,
-          pLeft: values?.pLeft === true ? 1 : 0,
-          fishHealthComment: values?.fishHealthComment,
-          oldRadioTagNum: parseFloat(values?.oldRadioTagNum),
-          oldFrequencyId: parseFloat(values?.oldFrequencyId),
-          oldRtSerial: parseFloat(values?.oldRtSerial),
-          oldDstSerial: parseFloat(values?.oldDstSerial),
-          dstSerialNum: parseFloat(values?.dstSerialNum),
-          dstStartDate: values?.dstStartDate,
-          dstStartTime: values?.dstStartTime,
-          dstReimplant: values?.dstReimplant === true ? 1 : 0,
-          newRadioTagNum: parseFloat(values?.newRadioTagNum),
-          newFreqId: parseFloat(values?.newFreqId),
-          newRtSerial: parseFloat(values?.newRtSerial),
-          sex: values?.sex,
-          pi: values?.pi === true ? 1 : 0,
-          bloodSample: values?.bloodSample === true ? 1 : 0,
-          eggSample: values?.eggSample === true ? 1 : 0,
-          spawnStatus: values?.spawnStatus,
-          evalLocation: values?.evalLocation,
-          visualReproStatus: values?.visualReproStatus,
-          ultrasoundReproStatus: values?.ultrasoundReproStatus,
-          expectedSpawnYear: parseFloat(values?.expectedSpawnYear),
-          ultrasoundGonadLength: parseFloat(values?.ultrasoundGonadLength),
-          gonadCondition: values?.gonadCondition,
-          comments: values?.procComments,
-        };
+    // if Procedure draft exists in sessionStorage (offline mode), load it into the form
+    const getOfflineProcedureDraft = () => {
+      const procDraftJson = sessionStorage.getItem(procDraftKey);
+      // console.warn('getOfflineProcedureDraft - procDraftJson:', procDraftJson);
+      if (!procDraftJson) return null;
+      // console.warn('getOfflineProcedureDraft - procedure data found in sessionStorage - parsing JSON');
+      try {
+        const procDraft = JSON.parse(procDraftJson);
+        if (!procDraft?.fFid) return null;
+        if (String(procDraft.fFid) !== String(fFid)) {
+          return null;
+        }
+        return procDraft;
+      } catch (err) {
+        console.error('Failed to parse offline Procedure draft for fFid:', fFid, err);
+        return null;
+      }
+    };
+
+    const reloadOfflineDrafts = () => {
+      // if (isEditForm) return false;
+
+      const suppDraft = getOfflineSupplementalDraft();
+      const procDraft = getOfflineProcedureDraft();
+
+      // console.warn('reloadOfflineDrafts - offline supplemental draft:', suppDraft, 'offline procedure draft:', procDraft);
+      if (!suppDraft) return false;
+
+      reset(
+        {
+          ...defaultValues,
+          ...suppDraft,
+          ...procDraft,
+          // manually set/convert fields that have different names/formats in the form vs the draft object
+          ...{
+            broodstock: suppDraft?.broodstock === 1 ? true : false,
+            hatchWild: suppDraft?.hatchWild === 1 ? true : false,
+            speciesId: suppDraft?.speciesId === 1 ? true : false,
+            archive: suppDraft?.archive === 1 ? true : false,
+            project37: suppDraft?.project37 === 1 ? true : false,
+            suppComments: suppDraft?.comments || null,
+            pallidFate: suppDraft?.status || null,
+            //proc data fields
+            procComments: procDraft?.comments || null,
+            antibioticInjection: procDraft?.antibioticInjection === 1 ? true : false,
+            pVentral: procDraft?.pVentral === 1 ? true : false,
+            pDorsal: procDraft?.pDorsal === 1 ? true : false,
+            pLeft: procDraft?.pLeft === 1 ? true : false,
+            dstReimplant: procDraft?.dstReimplant === 1 ? true : false,
+            pi: procDraft?.pi === 1 ? true : false,
+            bloodSample: procDraft?.bloodSample === 1 ? true : false,
+            eggSample: procDraft?.eggSample === 1 ? true : false,
+          },
+        },
+        {
+          keepDirty: false,
+          keepTouched: false,
+        }
+      );
+      setShowProcedureSection(procDraft?.showProcedureSection ?? false);
+      return true;
+    };
+
+    const formatSuppDataObj = () => {
+      const values = getValues();
+      // Format any values need for final payload
+      return {
+        sid: initialSuppData?.sid,
+        tagnumber: values?.tagnumber,
+        pitrn: values?.pitrn,
+        elhv: values?.elhv,
+        elcolor: values?.elcolor,
+        erhv: values?.erhv,
+        ercolor: values?.ercolor,
+        lscute: parseFloat(values?.lscute),
+        rscute: parseFloat(values?.rscute),
+        dscute: parseFloat(values?.dscute),
+        cwtyn: values?.cwtyn,
+        dangler: values?.dangler,
+        genetic: values?.genetic,
+        geneticsVialNumber: values?.geneticsVialNumber,
+        status: values?.pallidFate,
+        hatcheryOrigin: values?.hatcheryOrigin,
+        otherTagInfo: values?.otherTagInfo,
+        comments: values?.suppComments,
+        // Checkbox fields
+        broodstock: values?.broodstock === true ? 1 : 0,
+        hatchWild: values?.hatchWild === true ? 1 : 0,
+        speciesId: values?.speciesId === true ? 1 : 0,
+        archive: values?.archive === true ? 1 : 0,
+        project37: values?.project37 === true ? 1 : 0,
+      };
+    };
+
+    const formatProcDataObj = () => {
+      const values = getValues();
+      // Format any values need for final payload
+      return {
+        showProcedureSection: values?.showProcedureSection,
+        id: initialProcData?.id,
+        sid: initialSuppData?.sid,
+        procedureDate: values?.procedureDate,
+        procedureStartTime: values?.procedureStartTime,
+        procedureEndTime: values?.procedureEndTime,
+        purpose: values?.purpose,
+        procedureBy: values?.procedureBy,
+        antibioticInjection: values?.antibioticInjection === true ? 1 : 0,
+        pVentral: values?.pVentral === true ? 1 : 0,
+        pDorsal: values?.pDorsal === true ? 1 : 0,
+        pLeft: values?.pLeft === true ? 1 : 0,
+        fishHealthComment: values?.fishHealthComment,
+        oldRadioTagNum: parseFloat(values?.oldRadioTagNum),
+        oldFrequencyId: parseFloat(values?.oldFrequencyId),
+        oldRtSerial: parseFloat(values?.oldRtSerial),
+        oldDstSerial: parseFloat(values?.oldDstSerial),
+        dstSerialNum: parseFloat(values?.dstSerialNum),
+        dstStartDate: values?.dstStartDate,
+        dstStartTime: values?.dstStartTime,
+        dstReimplant: values?.dstReimplant === true ? 1 : 0,
+        newRadioTagNum: parseFloat(values?.newRadioTagNum),
+        newFreqId: parseFloat(values?.newFreqId),
+        newRtSerial: parseFloat(values?.newRtSerial),
+        sex: values?.sex,
+        pi: values?.pi === true ? 1 : 0,
+        bloodSample: values?.bloodSample === true ? 1 : 0,
+        eggSample: values?.eggSample === true ? 1 : 0,
+        spawnStatus: values?.spawnStatus,
+        evalLocation: values?.evalLocation,
+        visualReproStatus: values?.visualReproStatus,
+        ultrasoundReproStatus: values?.ultrasoundReproStatus,
+        expectedSpawnYear: parseFloat(values?.expectedSpawnYear),
+        ultrasoundGonadLength: parseFloat(values?.ultrasoundGonadLength),
+        gonadCondition: values?.gonadCondition,
+        comments: values?.procComments,
+      };
+    };
+
+    const getIdentifyingData = () => ({
+      fid: fishData?.fid,
+      fId: fishData?.fId,
+      f_id: fishData?.f_id,
+      fFid: fishData?.fFid,
+      f_fid: fishData?.f_fid,
+      mrFid: fishData?.mrFid,
+      mr_fid: fishData?.mr_fid,
+      mrId: fishData?.mrId ?? dataEntryLastParams?.mrId,
+      mr_id: fishData?.mr_id ?? dataEntryLastParams?.mr_id,
+    });
+
+    const doSubmit = async () => {
+      if (saveInProgressRef.current) {
+        console.warn('Supplemental/Procedure save is already in progress.');
+        return;
+      }
+      saveInProgressRef.current = true;
+      setIsSaving(true);
+
+      try {
+        const valid = await trigger();
+
+        if (!valid) {
+          console.warn('Supplemental/Procedure form validation failed:', errors);
+          return;
+        }
+        // Format any values need for final payload
+        const identifyingData = getIdentifyingData();
+        const suppDataObj = formatSuppDataObj();
+        const procDataObj = formatProcDataObj();
         // TODO: Maybe, unsure if necessary? Filter out any null/empty values for final payload
         // const suppPayload = filterNullEmptyObjects(suppDataObj);
         // const procPayload = filterNullEmptyObjects(procDataObj);
 
+        const suppDraft = getOfflineSupplementalDraft();
+        const suppClientId = suppDataObj.clientId ?? suppDraft?.clientId ?? crypto.randomUUID();
+
+        const procDraft = getOfflineProcedureDraft();
+        const procClientId = procDataObj.clientId ?? procDraft?.clientId ?? crypto.randomUUID();
+
         // TODO: the way we construct the payload in this block may be clunky; maybe refactor
-        if (initialSuppData) {
-          console.warn('Updating existing SUPP data: ', { suppDataObj });
-          doUpdateSupplementalDataEntry(
-            {
-              ...{
-                sid: initialSuppData.sid,
-                fid: fid,
-                siteId: null,
-                fFid: fFid,
-                mrFid: mrFid,
-                mrId: dataEntryLastParams.mrId,
-              },
-              ...suppDataObj,
-            },
-            {
-              mrId: dataEntryLastParams.mrId,
-              id: userRole.id,
-            }
-          );
-        } else {
-          console.warn('Creating SUPP data: ', { suppDataObj });
-          doSaveSupplementalDataEntry(
-            {
-              ...{
-                fid: fid,
-                siteId: null,
-                fFid: fFid,
-                mrFid: mrFid,
-                mrId: dataEntryLastParams.mrId,
-              },
-              ...suppDataObj,
-            },
-            { mrId: dataEntryLastParams.mrId, id: userRole.id }
-          );
+        let suppPayload = {
+          ...identifyingData,
+          ...suppDraft,
+          ...suppDataObj,
+          clientId: suppClientId,
+          f_id: identifyingData?.f_id,
+          fId: identifyingData?.fId,
+          fid: identifyingData?.fid,
+          f_fid: identifyingData?.f_fid,
+          fFid: identifyingData?.fFid,
+          // Offline values
+          _status: OfflineStatuses.Queued,
+          version: suppDataObj.version ?? suppDraft?.version ?? 0,
+          updatedAt: new Date().toISOString(),
+        };
+        // console.warn('suppPayload', suppPayload);
+
+        let procPayload = {
+          ...identifyingData,
+          ...procDraft,
+          ...procDataObj,
+          clientId: procClientId,
+          f_id: identifyingData?.f_id,
+          fId: identifyingData?.fId,
+          fid: identifyingData?.fid,
+          f_fid: identifyingData?.f_fid,
+          fFid: identifyingData?.fFid,
+          sid: procDataObj.sid ?? procDraft?.sid ?? initialSuppData?.sid,
+          s_id: procDataObj.s_id ?? procDraft?.s_id ?? initialSuppData?.s_id,
+          // Offline values
+          _status: OfflineStatuses.Queued,
+          version: procDataObj.version ?? procDraft?.version ?? 0,
+          updatedAt: new Date().toISOString(),
+        };
+        // console.warn('procPayload', procPayload);
+
+        const hasOfflineSuppDraft = Boolean(suppDraft?.clientId);
+        const hasOfflineProcDraft = Boolean(procDraft?.clientId);
+
+        // supp/proc is linked to the offline fFid
+        const supplementalFishFid = suppPayload?.fFid ?? suppPayload?.f_fid;
+        if (!supplementalFishFid) {
+          console.error('Missing fFid. Cannot save draft offline.');
+          return;
         }
-        if (showProcedureSection) {
-          if (initialProcData) {
-            console.warn('Updating existing PROC data: ', { procDataObj });
-            doUpdateProcedureDataEntry(
-              {
-                ...{
-                  id: initialProcData.id,
-                  sid: initialSuppData.sid,
-                  fid: fid,
-                  siteId: null, //TODO: not sure where to grab this from
-                  fFid: fFid,
-                  mrFid: mrFid,
-                  mrId: dataEntryLastParams.mrId,
-                },
-                ...procDataObj,
-              },
-              {
-                mrId: dataEntryLastParams.mrId,
-                id: userRole.id,
-              }
-            );
+
+        if (!isOnline()) {
+          if (initialSuppData || hasOfflineSuppDraft) {
+            await updateData('supplemental', suppClientId, suppPayload);
           } else {
-            console.warn('Creating new PROC data: ', { procDataObj });
-            doSaveProcedureDataEntry(
-              {
-                ...{
-                  sid: initialSuppData.sid,
-                  fid: fid,
-                  siteId: null, //TODO: not sure where to grab this from
-                  fFid: fFid,
-                  mrFid: mrFid,
-                  mrId: dataEntryLastParams.mrId,
-                },
-                ...procDataObj,
-              },
-              { mrId: dataEntryLastParams.mrId, id: userRole.id }
-            );
+            await createData('supplemental', suppPayload);
+          }
+          sessionStorage.setItem(suppDraftKey, JSON.stringify(suppPayload));
+
+          if (showProcedureSection) {
+            if (initialProcData || hasOfflineProcDraft) {
+              await updateData('procedure', procClientId, procPayload);
+            } else {
+              await createData('procedure', procPayload);
+            }
+            sessionStorage.setItem(procDraftKey, JSON.stringify(procPayload));
+          }
+          doModalClose();
+          return;
+        }
+
+        try {
+          if (initialSuppData) {
+            await doUpdateSupplementalDataEntry(suppPayload);
+          } else {
+            await doSaveSupplementalDataEntry(suppPayload);
+          }
+        } catch (error) {
+          if (initialSuppData || hasOfflineSuppDraft) {
+            // console.warn('Online - Updating existing SUPP data: ', { suppPayload });
+            await updateData('supplemental', suppClientId, suppPayload);
+          } else {
+            // console.warn('Online - Creating SUPP data: ', { suppPayload });
+            await createData('supplemental', suppPayload);
           }
         }
+        sessionStorage.setItem(suppDraftKey, JSON.stringify(suppPayload));
+
+        // save procedure data if the section is visible (user has added procedure data)
+        if (showProcedureSection) {
+          try {
+            if (initialProcData) {
+              // console.warn('Online - Updating existing PROC data: ', { procPayload });
+              await doUpdateProcedureDataEntry(procPayload);
+            } else {
+              // console.warn('Online - Creating PROC data: ', { procPayload });
+              await doSaveProcedureDataEntry(procPayload);
+            }
+          } catch (error) {
+            if (initialProcData || hasOfflineProcDraft) {
+              // console.warn('OFFLINE - Updating existing PROC data: ', { procPayload });
+              await updateData('procedure', procClientId, procPayload);
+            } else {
+              console.warn('OFFLINE - Creating PROC data: ', { procPayload });
+              await createData('procedure', procPayload);
+            }
+          }
+          // console.warn('done with PROC data save');
+          // console.warn('procClientId', procClientId);
+          // console.warn('procDraftKey', procDraftKey);
+
+          // setValue('suppClientId', suppClientId);
+          sessionStorage.setItem(procDraftKey, JSON.stringify(procPayload));
+        }
         doModalClose();
-      } else {
-        trigger();
+      } catch (error) {
+        console.error('Procedure submit failed, queueing offline:', error);
+        window.alert(`Supplemental/Procedure save failed: ${error?.message ?? error}`);
+      } finally {
+        saveInProgressRef.current = false;
+        setIsSaving(false);
       }
     };
+
+    useEffect(() => {
+      // console.warn('useEffect - isEditForm changed, reloading offline drafts');
+      reloadOfflineDrafts();
+    }, [isEditForm]);
 
     // TODO: this confirm dialog is a bit ugly
     const handleCancel = () => {
@@ -459,6 +654,27 @@ const SupplementalProcedureModal = connect(
       code: val,
       description: val,
     }));
+
+    const getTagnumberWarning = () => {
+      const hasDecimal = String(tagnumber)?.includes('.');
+      if (hasDecimal) {
+        const parseVal = String(tagnumber)?.replace('.', '');
+        return parseVal?.length < 14 && parseVal !== '' ? 'Value cannot be less than or greater than 14 digits' : null;
+      } else {
+        return tagnumber && String(tagnumber)?.length < 10
+          ? 'Value cannot be less than or greater than 10 digits'
+          : null;
+      }
+    };
+
+    const tagNumberMaxLength = () => {
+      const hasDecimal = String(tagnumber)?.includes('.');
+      if (hasDecimal) {
+        return 15;
+      } else {
+        return 10;
+      }
+    };
 
     return (
       <ModalContent size='lg' title='Supplemental & Procedure Data Entry'>
@@ -497,7 +713,13 @@ const SupplementalProcedureModal = connect(
                 </SelectInput>
               </Grid>
               <Grid tablet={{ col: 3 }}>
-                <TextInput name='tagnumber' label='Tag Number' onChange={handleChange} />
+                <TextInput
+                  name='tagnumber'
+                  label='Tag Number'
+                  onChange={handleChange}
+                  warning={getTagnumberWarning()}
+                  maxLength={tagNumberMaxLength()}
+                />
               </Grid>
               <Grid tablet={{ col: 2 }}>
                 <Button className={saveBtnClasses} onClick={handleGetPallidIdByTagNumber} type='button'>
@@ -521,7 +743,13 @@ const SupplementalProcedureModal = connect(
                 </SelectInput>
               </Grid>
               <Grid tablet={{ col: 4 }}>
-                <SelectInput name='elhv' label='EL H/V/X' onChange={handleChange} readOnly={isElColorNone}>
+                <SelectInput
+                  name='elhv'
+                  label='EL H/V/X'
+                  onChange={handleChange}
+                  readOnly={isElColorNone}
+                  required={elcolor !== null && elcolor !== '' && elcolor !== 'N'}
+                >
                   {createDropdownOptions(elastomerHvxOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
@@ -541,7 +769,13 @@ const SupplementalProcedureModal = connect(
                 </SelectInput>
               </Grid>
               <Grid tablet={{ col: 4 }}>
-                <SelectInput name='erhv' label='ER H/V/X' onChange={handleChange} readOnly={isErColorNone}>
+                <SelectInput
+                  name='erhv'
+                  label='ER H/V/X'
+                  onChange={handleChange}
+                  readOnly={isErColorNone}
+                  required={ercolor !== null && ercolor !== '' && ercolor !== 'N'}
+                >
                   {createDropdownOptions(elastomerHvxOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
@@ -763,10 +997,21 @@ const SupplementalProcedureModal = connect(
               </Grid>
               <Grid row gap='md' className='padding-bottom-3'>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='oldRadioTagNum' label='Old Radio Tag #' type='text' onChange={handleChange} />
+                  <TextInput
+                    name='oldRadioTagNum'
+                    label='Old Radio Tag #'
+                    type='text'
+                    onChange={handleChange}
+                    required={Number(purpose) === 2 || Number(purpose) === 5}
+                  />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='oldFrequencyId' label='Old Frequency ID' onChange={handleChange}>
+                  <SelectInput
+                    name='oldFrequencyId'
+                    label='Old Frequency ID'
+                    onChange={handleChange}
+                    required={Number(purpose) === 2 || Number(purpose) === 5}
+                  >
                     {createDropdownOptions(frequencyId).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -804,10 +1049,16 @@ const SupplementalProcedureModal = connect(
                     label='New/Current Radio Tag #'
                     type='text'
                     onChange={handleChange}
+                    required={Number(purpose) !== 5 || Number(purpose) !== 6}
                   />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <SelectInput name='newFreqId' label='New/Current Frequency ID' onChange={handleChange}>
+                  <SelectInput
+                    name='newFreqId'
+                    label='New/Current Frequency ID'
+                    onChange={handleChange}
+                    required={Number(purpose) !== 5 || Number(purpose) !== 6}
+                  >
                     {createDropdownOptions(frequencyId).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
@@ -816,7 +1067,13 @@ const SupplementalProcedureModal = connect(
                   </SelectInput>
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
-                  <TextInput name='newRtSerial' label='New/Current RT Serial #' type='text' onChange={handleChange} />
+                  <TextInput
+                    name='newRtSerial'
+                    label='New/Current RT Serial #'
+                    type='text'
+                    onChange={handleChange}
+                    required={Number(purpose) !== 5 || Number(purpose) !== 6}
+                  />
                 </Grid>
               </Grid>
               <Grid row gap='md' className='padding-bottom-3'>

@@ -2,7 +2,6 @@ import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { mdiDownload, mdiPlus } from '@mdi/js';
 
-import Button from '@components/button';
 import Icon from '@components/icon/icon';
 
 import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
@@ -10,6 +9,7 @@ import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
+import { Button } from '@trussworks/react-uswds';
 
 const fishCellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
@@ -25,17 +25,21 @@ const procCellStyle = (params) => ({
 
 const MissouriDsTable = connect(
   'doResetFormData',
+  'doResetMoRiverDataEntryData',
   'doUpdateUrl',
   'doUpdateComplexStateField',
   'selectMoriverSitesDatasheetData',
   'selectMoriverDraftSitesDatasheetData',
+  'doUpdateCurrentTab',
   'selectRouteParams',
   ({
     doResetFormData,
+    doResetMoRiverDataEntryData,
     doUpdateUrl,
     doUpdateComplexStateField,
     moriverDraftSitesDatasheetData,
     moriverSitesDatasheetData,
+    doUpdateCurrentTab,
     routeParams,
     isDraft,
   }) => {
@@ -43,37 +47,32 @@ const MissouriDsTable = connect(
     const data = isDraft ? moriverDraftSitesDatasheetData : moriverSitesDatasheetData;
 
     const handleAddButtonClick = () => {
-      doUpdateComplexStateField({ name: 'isEditForm', value: false });
-      doUpdateUrl(`/sites-list/${siteId}/missouri-river`);
+      const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
+      sessionStorage.removeItem(moriverDraftKey);
       // Reset form data
       doResetFormData();
+      doResetMoRiverDataEntryData();
+      doUpdateCurrentTab(0);
+      doUpdateComplexStateField({ name: 'isEditForm', value: false });
+      doUpdateUrl(`/sites-list/${siteId}/missouri-river`);
     };
 
     return (
       <>
         <Row>
-          <div className='col-md-9 col-xs-12'>
-            <Button
-              isOutline
-              size='small'
-              variant='success'
-              text='Add Missouri River Datasheet'
-              title='Add Missouri River Datasheet'
-              icon={<Icon path={mdiPlus} />}
-              className='btn-width'
-              handleClick={handleAddButtonClick}
-            />
-          </div>
-          <div className='col-md-3 col-xs-12'>
-            <Button
-              isOutline
-              size='small'
-              variant='info'
-              text='Export as CSV'
-              className='float-right btn-width'
-              icon={<Icon path={mdiDownload} />}
-              isDisabled
-            />
+          <div className='col-md-12 col-xs-12' style={{ justifyContent: 'space-between' }}>
+            <Button onClick={handleAddButtonClick} className='add-btn' title='Add Missouri River Datasheet'>
+              <span>
+                <Icon path={mdiPlus} />
+              </span>
+              Add Missouri River Datasheet
+            </Button>
+            <Button onClick={() => {}} className='clear-btn' title='Export as CSV' disabled>
+              <span>
+                <Icon path={mdiDownload} />
+              </span>
+              Export as CSV
+            </Button>
           </div>
         </Row>
         <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
@@ -95,6 +94,7 @@ const MissouriDsTable = connect(
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
                 type: 'missouriRiver',
+                tab: 0,
               }}
               sortable
               unSortIcon

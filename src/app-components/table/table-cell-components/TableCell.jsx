@@ -39,6 +39,12 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
     type === 'combobox' ? formatSelectValue(initialValue, columnMeta?.options) : initialValue
   );
 
+  useEffect(() => {
+    const nextValue = type === 'combobox' ? formatSelectValue(initialValue, columnMeta?.options) : initialValue;
+    setValue(nextValue);
+    previousValueRef.current = nextValue;
+  }, [initialValue, type, columnMeta?.options]);
+
   const debouncedUpdateRef = useRef();
 
   useEffect(() => {
@@ -57,13 +63,15 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
     const blurValue = e?.target?.value;
     const valueBeforeBlur = previousValueRef.current?.toString();
 
+    const latLonArr = ['startLatitude', 'stopLatitude', 'captureLatitude', 'captureLongitude'];
+
     // Check to see if field value has changed
     if (hasValueChanged(valueBeforeBlur, blurValue)) {
       // @TODO: handle any data formatting
       // Clear field if value is 0 or is a negative number
       if (
-        String(blurValue) === '0' ||
-        (String(blurValue)[0] === '-' && column.id !== 'longitude' && column.id !== 'latitude')
+        (String(blurValue) === '0' && latLonArr.includes(column.id)) ||
+        (String(blurValue)[0] === '-' && latLonArr.includes(column.id))
       ) {
         setValue('');
         updateValue('');
@@ -119,6 +127,8 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
     return null;
   };
 
+  const DROPDOWN_PLACEHOLDER_TEXT = '-- Select a value --';
+
   return type === 'combobox' ? (
     <Select
       value={value}
@@ -130,7 +140,7 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
       menuPortalTarget={document.body}
       menuPosition='fixed'
       menuPlacement='auto'
-      placeholder='Select...'
+      placeholder={DROPDOWN_PLACEHOLDER_TEXT}
       isDisabled={columnMeta?.readOnly}
       isRequired={columnMeta?.required}
       isClearable={!columnMeta?.required}
@@ -178,21 +188,19 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
           paddingLeft: 0,
           color: 'black',
         }),
-        clearIndicator: (provided) => {
-          return {
-            ...provided,
-            height: 30,
-            paddingTop: 5,
-            paddingLeft: 5,
-            paddingRight: 0,
-            margin: 0,
-            color: cellError ? 'hsl(0, 0%, 25%)' : 'hsl(0, 0%, 80%)',
-            ':hover': {
-              color: 'red',
-              cursor: 'pointer',
-            },
-          };
-        },
+        clearIndicator: (provided) => ({
+          ...provided,
+          height: 30,
+          paddingTop: 5,
+          paddingLeft: 5,
+          paddingRight: 0,
+          margin: 0,
+          color: cellError ? 'hsl(0, 0%, 25%)' : 'hsl(0, 0%, 80%)',
+          ':hover': {
+            color: 'red',
+            cursor: 'pointer',
+          },
+        }),
         dropdownIndicator: (provided) => ({
           ...provided,
           height: 30,
@@ -234,7 +242,7 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
       value={value ?? ''}
     >
       <option key={0} value='' className='none' style={{ display: 'none' }}>
-        -- Select a value --
+        {DROPDOWN_PLACEHOLDER_TEXT}
       </option>
       {columnMeta?.options?.map((option) => (
         <option key={option.value} value={option.value}>

@@ -9,23 +9,15 @@ import Icon from '@components/icon/icon';
 
 import { classArray } from '@src/utils';
 import { projectMap } from '@pages/data-entry/helpers';
+import { isOnline } from '@src/app-pages/data-entry/offline/sync';
 
 import './navigation.scss';
 
-const dataSummaryLinks = [
-  '/data-sheet',
-  '/genetics-card-summary',
-  '/search-reports',
-  '/priority-fish',
-  '/last-location',
-  '/tag-replacement',
-];
+const dataSummaryLinks = ['/data-sheet', '/genetics-card-summary', '/search-reports'];
 
 const administrationLinks = ['/data-query', '/multiple-record-approval', '/user-access-requests', '/users'];
 
 const dataEntryLinks = ['/sites-list', '/find-data-sheet'];
-
-const utilityLinks = ['/error-log'];
 
 const NavBar = connect(
   'doAuthenticate',
@@ -37,13 +29,13 @@ const NavBar = connect(
     const [show, setShow] = useState(false);
     const isHome = pathname === '/';
     const user = userRole ? usersData.find((user) => userRole.id === user.id) : {};
+    const online = isOnline();
 
     const navClasses = classArray([
       'navbar',
       'navbar-expand-xl',
       'navbar-light',
       'fixed-top-banner',
-      'bg-white',
       !isHome && 'seperator',
     ]);
 
@@ -79,14 +71,14 @@ const NavBar = connect(
                     Data Entry
                   </NavItem>
                 </RoleFilter>
-                <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
-                  <NavItem href={['/data-upload']}>Data Upload</NavItem>
-                </RoleFilter>
-                <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
+                {/* <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
+                    <NavItem href={['/data-upload']}>Data Upload</NavItem>
+                  </RoleFilter> */}
+                {/* <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
                   <NavItem href={utilityLinks} asDropdown>
                     Utilities
                   </NavItem>
-                </RoleFilter>
+                </RoleFilter> */}
                 <RoleFilter allowRoles={['ADMINISTRATOR']}>
                   <NavItem href={administrationLinks}>Admin</NavItem>
                 </RoleFilter>

@@ -3,38 +3,49 @@ import { connect } from 'redux-bundler-react';
 
 import Card from '@components/card';
 import TabContainer from '@components/tab/tabContainer';
-import DataHeader from '../components/dataHeader';
+import DataHeader from '../components/data-header/dataHeader';
 
 import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
 import SearchDraftDsTable from '../../edit-data-sheet/forms/search-effort/searchDraftDsTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import { getSiteRouteParams, isOfflineSiteRouteKey } from '../../offline/site-route-key';
+import { siteDatasheetUpdated } from '../../offline/datasheet-refresh';
 import { db } from '../../offline/db';
+
+import '../../dataentry.scss';
 
 const SiteDatasheet = connect(
   'doSitesDatasheetLoadData',
   'doUpdateSitesDatasheetParams',
   'selectBaseData',
   'doUpdateBaseData',
-  'selectMoriverSitesDatasheetTotalResults',
-  'selectSearchEffortSitesDatasheetTotalResults',
-  'selectSearchEffortSitesDraftDatasheetTotalResults',
-  'selectMoriverSitesDraftDatasheetTotalResults',
+  'selectMoriverSitesDatasheetData',
+  'selectMoriverDraftSitesDatasheetData',
+  'selectSearchEffortSitesDatasheetData',
+  'selectSearchEffortSitesDraftDatasheetData',
   'selectRouteParams',
   ({
     doSitesDatasheetLoadData,
     doUpdateSitesDatasheetParams,
     doUpdateBaseData,
-    moriverSitesDatasheetTotalResults,
-    searchEffortSitesDatasheetTotalResults,
-    searchEffortSitesDraftDatasheetTotalResults,
-    moriverSitesDraftDatasheetTotalResults,
+    moriverSitesDatasheetData,
+    moriverDraftSitesDatasheetData,
+    searchEffortSitesDatasheetData,
+    searchEffortSitesDraftDatasheetData,
     routeParams,
   }) => {
     const [currentTab, setCurrentTab] = useState(0);
     const siteRouteKey = routeParams?.siteId ?? null;
     const isOfflineSite = isOfflineSiteRouteKey(siteRouteKey);
+    const moriverCompletedCount = Array.isArray(moriverSitesDatasheetData) ? moriverSitesDatasheetData.length : 0;
+    const moriverDraftCount = Array.isArray(moriverDraftSitesDatasheetData) ? moriverDraftSitesDatasheetData.length : 0;
+    const searchEffortCompletedCount = Array.isArray(searchEffortSitesDatasheetData)
+      ? searchEffortSitesDatasheetData.length
+      : 0;
+    const searchEffortDraftCount = Array.isArray(searchEffortSitesDraftDatasheetData)
+      ? searchEffortSitesDraftDatasheetData.length
+      : 0;
 
     const breadcrumbLinks = [
       {
@@ -49,18 +60,59 @@ const SiteDatasheet = connect(
       },
     ];
 
-    useEffect(() => {
-      const params = getSiteRouteParams(siteRouteKey);
-      doUpdateSitesDatasheetParams(params);
-    }, [siteRouteKey, currentTab, doUpdateSitesDatasheetParams]);
+    // useEffect(() => {
+    //   const params = getSiteRouteParams(siteRouteKey);
+    //   doUpdateSitesDatasheetParams(params);
+    // }, [siteRouteKey, currentTab, doUpdateSitesDatasheetParams]);
+
+    // useEffect(() => {
+    //   if (!navigator.onLine && isOfflineSite) {
+    //     return;
+    //   }
+
+    //   doSitesDatasheetLoadData();
+    // }, [siteRouteKey, currentTab]);
 
     useEffect(() => {
-      if (!navigator.onLine && isOfflineSite) {
+      if (!siteRouteKey) {
         return;
       }
+      const loadSiteDatasheet = async () => {
+        const params = getSiteRouteParams(siteRouteKey);
+        doUpdateSitesDatasheetParams(params);
 
-      doSitesDatasheetLoadData();
-    }, [siteRouteKey, currentTab]);
+        try {
+          await doSitesDatasheetLoadData(siteRouteKey);
+        } catch (error) {
+          console.error('Unable to load Site Datasheet data:', error);
+        }
+      };
+      loadSiteDatasheet();
+
+      const handleSiteDatasheetUpdated = () => {
+        loadSiteDatasheet();
+      };
+
+      const handleBackOnline = () => {
+        loadSiteDatasheet();
+      };
+
+      const handleWindowFocus = () => {
+        loadSiteDatasheet();
+      };
+      window.addEventListener(siteDatasheetUpdated, handleSiteDatasheetUpdated);
+
+      window.addEventListener('online', handleBackOnline);
+      window.addEventListener('focus', handleWindowFocus);
+      window.addEventListener('pageshow', handleWindowFocus);
+
+      return () => {
+        window.removeEventListener(siteDatasheetUpdated, handleSiteDatasheetUpdated);
+        window.removeEventListener('online', handleBackOnline);
+        window.removeEventListener('focus', handleWindowFocus);
+        window.removeEventListener('pageshow', handleWindowFocus);
+      };
+    }, [siteRouteKey, doUpdateSitesDatasheetParams, doSitesDatasheetLoadData]);
 
     useEffect(() => {
       async function loadOfflineSiteBaseData() {
@@ -115,19 +167,19 @@ const SiteDatasheet = connect(
             <TabContainer
               tabs={[
                 {
-                  title: `Missouri River (${moriverSitesDatasheetTotalResults})`,
+                  title: `Missouri River (${moriverCompletedCount})`,
                   content: <MissouriDsTable />,
                 },
                 {
-                  title: `Missouri River Drafts (${moriverSitesDraftDatasheetTotalResults})`,
+                  title: `Missouri River Drafts (${moriverDraftCount})`,
                   content: <MissouriDsTable isDraft />,
                 },
                 {
-                  title: `Search Effort (${searchEffortSitesDatasheetTotalResults})`,
+                  title: `Search Effort (${searchEffortCompletedCount})`,
                   content: <SearchDsTable />,
                 },
                 {
-                  title: `Search Effort Drafts (${searchEffortSitesDraftDatasheetTotalResults})`,
+                  title: `Search Effort Drafts (${searchEffortDraftCount})`,
                   content: <SearchDraftDsTable />,
                 },
               ]}
