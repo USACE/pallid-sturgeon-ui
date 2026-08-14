@@ -14,7 +14,8 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
 
   const debouncedUpdateRef = useRef();
 
-  const isRequired = !['NDNF', 'CNA', 'CNFH', 'NFSH'].includes(species);
+  const hasSpecies = species != null && species !== '';
+  const isRequired = hasSpecies && !['NDNF', 'CNA', 'CNFH', 'NFSH'].includes(species);
   const isDisabled = !isRequired;
 
   useEffect(() => {
@@ -51,12 +52,21 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
   }, [rowSpecies]);
 
   useEffect(() => {
+    // Do not auto-populate count for untouched placeholder rows.
+    // Wait until species is actually selected.
+    if (species == null || species === '') {
+      return;
+    }
+
     if (species === 'NFSH') {
       setValue(0);
       updateValue(0);
     } else if (['NDNF', 'CNA', 'CNFH'].includes(species)) {
       setValue(null);
       updateValue(null);
+    } else if (value === null || value === undefined || value === 0) {
+      setValue(1);
+      updateValue(1);
     }
   }, [species]);
 
@@ -73,7 +83,7 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
         borderColor: 'hsl(0, 0%, 80%)',
         cursor: columnMeta?.readOnly ? 'not-allowed' : 'auto',
       }}
-      type='number'
+      type='text'
       value={value ?? ''}
     />
   );

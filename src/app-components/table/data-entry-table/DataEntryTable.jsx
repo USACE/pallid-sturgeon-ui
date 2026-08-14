@@ -35,6 +35,9 @@ const DataEntryTable = ({
   placeholderText,
   placeholderClick,
   ignoredHeaders,
+  showValidationErrors = true,
+  enablePagination = true,
+  showAddRowButton = true,
 }) => {
   const [rowErrors, setRowErrors] = useState();
 
@@ -114,20 +117,23 @@ const DataEntryTable = ({
     data: data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(enablePagination ? { getPaginationRowModel: getPaginationRowModel() } : {}),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    manualPagination: false,
+    ...(enablePagination ? { manualPagination: false, autoResetPageIndex: false } : {}),
     enableRowSelection: true,
     enableColumnResizing: true,
     columnResizeMode: 'onChange',
-    autoResetPageIndex: false,
     initialState: {
       ...initialTableState,
-      pagination: {
-        pageIndex: 0,
-        pageSize: 10,
-      },
+      ...(enablePagination
+        ? {
+            pagination: {
+              pageIndex: 0,
+              pageSize: 10,
+            },
+          }
+        : {}),
       sorting,
     },
     meta: {
@@ -155,11 +161,16 @@ const DataEntryTable = ({
     },
   });
   return (
-    <>
+    <div className={showValidationErrors ? 'show-validation-errors' : ''}>
       <div
         style={{ minWidth: '600px', maxWidth: `${table.getTotalSize() > 1500 ? 'auto' : table.getTotalSize() + 'px'}` }}
       >
-        <HeaderCell table={table} hideDrag={hideDrag} ignoredHeaders={ignoredHeaders} />
+        <HeaderCell
+          table={table}
+          hideDrag={hideDrag}
+          ignoredHeaders={ignoredHeaders}
+          showAddRowButton={showAddRowButton}
+        />
       </div>
       <div style={{ width: '100%', overflowX: 'auto' }}>
         <div
@@ -254,16 +265,16 @@ const DataEntryTable = ({
               {table.getRowModel()?.rows?.map((row) => (
                 <tr
                   key={row.id}
-                  className={`${row.getIsSelected() ? 'selected-row' : ''} ${rowErrors && rowErrors?.[row.id] && Object.keys(rowErrors[row.id])?.length !== 0 ? 'row-error' : ''}`}
+                  className={`${row.getIsSelected() ? 'selected-row' : ''} ${showValidationErrors && rowErrors && rowErrors?.[row.id] && Object.keys(rowErrors[row.id])?.length !== 0 ? 'row-error' : ''}`}
                 >
                   {row.getVisibleCells().map((cell) => {
                     const cellError = rowErrors?.[row.id]?.[cell.column.id];
-                    const isCellError = cellError !== undefined;
+                    const isCellError = showValidationErrors && cellError !== undefined;
                     const cellClasses = isCellError ? 'cell-error' : '';
                     return (
                       <td className={cellClasses} key={cell.id} style={{ width: cell.column.getSize() + 'px' }}>
                         <div className='d-flex align-items-center'>
-                          {cellError && (
+                          {showValidationErrors && cellError && (
                             <Tooltip
                               iconSize='large'
                               place='bottom'
@@ -286,7 +297,7 @@ const DataEntryTable = ({
           </Table>
         </div>
       </div>
-      {table.getCoreRowModel().rows.length >= 11 && (
+      {enablePagination && table.getCoreRowModel().rows.length >= 11 && (
         <div className='pn-table-container'>
           <div className='pagination-container'>
             <div className='d-flex justify-content-center usa-prose'>
@@ -333,7 +344,7 @@ const DataEntryTable = ({
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
 
