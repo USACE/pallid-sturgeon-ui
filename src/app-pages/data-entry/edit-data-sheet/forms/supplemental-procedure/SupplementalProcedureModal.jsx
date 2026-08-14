@@ -82,17 +82,45 @@ const SupplementalProcedureModal = connect(
     row: fishData,
   }) => {
     const { projectId } = baseData;
-    const { fid, mrFid, fFid, species } = fishData;
+    // const { fid, mrFid, fFid, species } = fishData;
 
-    const supplementalDataExists = !!dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)?.length;
-    const procedureDataExists = !!dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)?.length;
+    // const supplementalDataExists = !!dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)?.length;
+    // const procedureDataExists = !!dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)?.length;
 
-    const initialSuppData = supplementalDataExists
-      ? dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)[0]
-      : null;
-    const initialProcData = procedureDataExists
-      ? dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)[0]
-      : null;
+    // const initialSuppData = supplementalDataExists
+    //   ? dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)[0]
+    //   : null;
+    // const initialProcData = procedureDataExists
+    //   ? dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)[0]
+    //   : null;
+    const fid = fishData?.fid ?? fishData?.fId ?? fishData?.f_id;
+    const fFid = fishData?.fFid ?? fishData?.f_fid ?? fishData?.ffid;
+    const mrFid = fishData?.mrFid ?? fishData?.mr_fid;
+    const species = fishData?.species;
+
+    const matchesFish = (row) => {
+      const rowFid = row?.fid ?? row?.fId ?? row?.f_id;
+      const rowFFid = row?.fFid ?? row?.f_fid ?? row?.ffid;
+
+      return (
+        (fid != null && rowFid != null && String(rowFid) === String(fid)) ||
+        (fFid && rowFFid && String(rowFFid) === String(fFid))
+      );
+    };
+
+    const initialSuppData = dataEntrySupplemental?.items?.find(matchesFish) ?? null;
+
+    const suppId = initialSuppData?.sid ?? initialSuppData?.sId ?? initialSuppData?.s_id;
+    const initialProcData =
+      dataEntryProcedure?.items?.find((row) => {
+        const procSuppId = row?.sid ?? row?.sId ?? row?.s_id;
+        const matchesSupp = suppId != null && procSuppId != null && String(procSuppId) === String(suppId);
+
+        return matchesSupp || matchesFish(row);
+      }) ?? null;
+
+    const supplementalDataExists = Boolean(initialSuppData);
+    const procedureDataExists = Boolean(initialProcData);
 
     const suppDraftKey = `currentSupplementalDraft:${fFid}`;
     const procDraftKey = `currentProcedureDraft:${fFid}`;
@@ -627,6 +655,27 @@ const SupplementalProcedureModal = connect(
       description: val,
     }));
 
+    const getTagnumberWarning = () => {
+      const hasDecimal = String(tagnumber)?.includes('.');
+      if (hasDecimal) {
+        const parseVal = String(tagnumber)?.replace('.', '');
+        return parseVal?.length < 14 && parseVal !== '' ? 'Value cannot be less than or greater than 14 digits' : null;
+      } else {
+        return tagnumber && String(tagnumber)?.length < 10
+          ? 'Value cannot be less than or greater than 10 digits'
+          : null;
+      }
+    };
+
+    const tagNumberMaxLength = () => {
+      const hasDecimal = String(tagnumber)?.includes('.');
+      if (hasDecimal) {
+        return 15;
+      } else {
+        return 10;
+      }
+    };
+
     return (
       <ModalContent size='lg' title='Supplemental & Procedure Data Entry'>
         {isShowErrorSummary && (
@@ -664,7 +713,13 @@ const SupplementalProcedureModal = connect(
                 </SelectInput>
               </Grid>
               <Grid tablet={{ col: 3 }}>
-                <TextInput name='tagnumber' label='Tag Number' onChange={handleChange} />
+                <TextInput
+                  name='tagnumber'
+                  label='Tag Number'
+                  onChange={handleChange}
+                  warning={getTagnumberWarning()}
+                  maxLength={tagNumberMaxLength()}
+                />
               </Grid>
               <Grid tablet={{ col: 2 }}>
                 <Button className={saveBtnClasses} onClick={handleGetPallidIdByTagNumber} type='button'>

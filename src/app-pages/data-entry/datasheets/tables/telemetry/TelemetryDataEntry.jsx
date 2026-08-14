@@ -1,55 +1,37 @@
-import React, { useRef, useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useRef, useCallback, useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
-import { createColumnHelper } from '@tanstack/react-table';
 import _isEqual from 'lodash/isEqual';
+import { mdiContentCopy } from '@mdi/js';
+import { Button } from '@trussworks/react-uswds';
+
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import { db } from '@src/app-pages/data-entry/offline/db';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
+import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
-import { TableCell } from '@src/app-components/table/table-cell-components/TableCell';
-import { Button, Grid } from '@trussworks/react-uswds';
-import classNames from 'classnames';
+import Icon from '@src/app-components/icon/icon';
 
 import {
   telemetryDataEntrySchema,
   getBaseDefaultValues,
   getTelemetryDefaultValues,
 } from './TelemetryDataEntry.validation';
+import { getTelemetryColumns } from './helpers.telemetry';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
-import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
-import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
-import { db } from '@src/app-pages/data-entry/offline/db';
-import { getTelemetryColumns } from './helpers.telemetry';
-import Icon from '@src/app-components/icon/icon';
-import { mdiContentCopy } from '@mdi/js';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
-
 console.log('GPS POC flag', import.meta.env.VITE_USE_UBLOX_POC, USE_UBLOX_POC);
-
-const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
 
 const GPS_OPTIONS = {
   enableHighAccuracy: true,
   timeout: 15000,
   maximumAge: 0,
-};
-
-const createDropdownOptions = (data) => {
-  if (!data) return [];
-
-  return data.map((item) => {
-    const { code, description } = item;
-
-    return {
-      value: code,
-      text: description,
-    };
-  });
 };
 
 const getNextSequence = (data, seFid) => {
@@ -83,7 +65,6 @@ const TelemetryDataEntry = connect(
 
     const rowData = items?.map((item) => ({
       ...item,
-      bendRiverMile: baseData?.bendRiverMile,
       captureTime: item.captureDate ?? '',
       spawnBehavior: item.suspectedSpawningActivity ?? '',
     }));
@@ -93,7 +74,6 @@ const TelemetryDataEntry = connect(
     const [tableIsDirty, setTableIsDirty] = useState(false);
     const [online, setOnline] = useState(isOnline());
     const prevTableDataRef = useRef([]);
-    const columnHelper = createColumnHelper();
     const siteId = routeParams?.siteId;
     const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
     const savedDraft = sessionStorage.getItem(searchDraftKey);
@@ -109,13 +89,6 @@ const TelemetryDataEntry = connect(
     });
 
     const defaultValues = { seId: dataEntryLastParams?.seId };
-
-    const frequencyIdOptions = frequencyId?.length > 0 ? frequencyId : offlineLookups.frequencyId;
-    const spawnBehaviorOptions = spawnBehavior?.length > 0 ? spawnBehavior : offlineLookups.spawnBehavior;
-    const macroOptions = macros?.length > 0 ? macros : offlineLookups.macros;
-    const mesoOptions = mesos?.length > 0 ? mesos : offlineLookups.mesos;
-    const positionConfidenceOptions =
-      positionConfidence?.length > 0 ? positionConfidence : offlineLookups.positionConfidence;
 
     useEffect(() => {
       async function loadOfflineLookups() {
@@ -309,6 +282,7 @@ const TelemetryDataEntry = connect(
     const formatRow = (row) => {
       return {
         ...row,
+        bendRiverMile: parseFloat(row.bendRiverMile) ?? null,
         frequencyIdCode:
           row.frequencyIdCode !== null
             ? Number(typeof row.frequencyIdCode === 'object' ? row.frequencyIdCode.value : row.frequencyIdCode)
@@ -350,7 +324,7 @@ const TelemetryDataEntry = connect(
             baseData?.seId ??
             baseData?.se_id;
 
-          if (!parentSeId & isOnline()) {
+          if (!parentSeId && isOnline()) {
             throw new Error('Search Effort ID is missing.');
           }
 
@@ -427,17 +401,6 @@ const TelemetryDataEntry = connect(
 
     return (
       <FormProvider {...methods}>
-        {/* @TODO: Check if we still need this button here, if already in Search Effort */}
-        {/* {USE_UBLOX_POC && (
-          <Grid row gap='sm' className='margin-y-2'>
-            <Button type='button' onClick={ubloxGps.connect}>
-              Connect u-blox Satellite GPS
-            </Button>
-            <div>GPS Source: {ubloxGps.isConnected ? 'u-blox serial connected' : 'browser fallback'}</div>
-            {ubloxGps.latestFix && <div>Satellites: {ubloxGps.latestFix.satellites ?? 'unknown'}</div>}
-            {ubloxGps.lastError && <div>GPS Error: {ubloxGps.lastError.message}</div>}
-          </Grid>
-        )} */}
         <DataEntryTable
           addRow={handleAddRow}
           columns={tableColumns}

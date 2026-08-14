@@ -9,6 +9,7 @@ import Icon from '@components/icon/icon';
 
 import { classArray } from '@src/utils';
 import { projectMap } from '@pages/data-entry/helpers';
+import { isOnline } from '@src/app-pages/data-entry/offline/sync';
 
 import './navigation.scss';
 
@@ -28,6 +29,7 @@ const NavBar = connect(
     const [show, setShow] = useState(false);
     const isHome = pathname === '/';
     const user = userRole ? usersData.find((user) => userRole.id === user.id) : {};
+    const online = isOnline();
 
     const navClasses = classArray([
       'navbar',
@@ -69,9 +71,9 @@ const NavBar = connect(
                     Data Entry
                   </NavItem>
                 </RoleFilter>
-                <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
-                  <NavItem href={['/data-upload']}>Data Upload</NavItem>
-                </RoleFilter>
+                {/* <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
+                    <NavItem href={['/data-upload']}>Data Upload</NavItem>
+                  </RoleFilter> */}
                 {/* <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
                   <NavItem href={utilityLinks} asDropdown>
                     Utilities

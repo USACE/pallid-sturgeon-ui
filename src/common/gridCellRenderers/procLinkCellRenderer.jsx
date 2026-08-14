@@ -8,29 +8,30 @@ const ProcLinkCellRenderer = connect(
   'doUpdateCurrentTab',
   'selectDataEntryProcedure',
   ({ doUpdateCurrentTab, dataEntryProcedure, data, setIsAddRow, setRowId }) => {
-    const fId = data.fid;
-    const sId = data.sid;
-    const hasProcData = !!dataEntryProcedure.items.filter((data) => data.sid === sId).length;
+    const fId = data?.fid ?? data?.fId ?? data?.f_id;
+    const fFid = data?.fFid ?? data?.f_fid ?? data?.ffid;
+    const hasProcData =
+      dataEntryProcedure.items.some((data) => {
+        const rowFId = data?.fid ?? data?.fId ?? data?.f_id;
+        const rowFFid = data?.fFid ?? data?.f_fid ?? data?.ffid;
+
+        return (
+          (fId != null && rowFId != null && String(rowFId) === String(fId)) ||
+          (fFid && rowFFid && String(rowFFid) === String(fFid))
+        );
+      }) ?? false;
+
     const isNewRow = Object.keys(data).length === 0;
 
     const handleAddRow = (add) => {
       doUpdateCurrentTab(3);
-      if (add) {
-        setIsAddRow(true);
-        setRowId({ fid: fId, sid: sId });
-      }
+
+      setIsAddRow(add);
+      setRowId({ fid: fId, fFid: fFid });
     };
 
     const isButtonDisabled = () => {
-      if (isNewRow || !data.sid) {
-        return true;
-      } else {
-        if (data.proclink === null || data.proclink === undefined || data.proclink === false) {
-          return false;
-        } else {
-          return true;
-        }
-      }
+      return isNewRow || fId == null;
     };
 
     return (
