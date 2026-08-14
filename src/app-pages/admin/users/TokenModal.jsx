@@ -14,9 +14,7 @@ import ErrorSummary from '@components/error-summary/ErrorSummary';
 import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
 import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
 import Icon from '@components/icon/icon';
-import { generateToken, hash } from '@src/utils/tokenHelpers'
-
-import './token.scss';
+import { generateToken, hash } from '@src/utils/tokenHelpers';
 
 import { ValidationMessages } from '@src/utils/enums';
 
@@ -60,20 +58,20 @@ const TokenFormModal = connect(
       getValues,
       trigger,
       setValue,
-    } = methods; 
+    } = methods;
 
     const createToken = () => {
-      const ak = generateToken(8)
+      const ak = generateToken(8);
       setAccessKey(ak);
-      setValue('accessKey',ak);
+      setValue('accessKey', ak);
       const sk = generateToken(24);
       setSecretKey(sk);
-      setValue('secretKey',sk);
+      setValue('secretKey', sk);
       let result = new Date();
-      result.setDate(result.getDate() + 60)
-      setValue('expiration',result.toLocaleString());
+      result.setDate(result.getDate() + 60);
+      setValue('expiration', result.toLocaleString());
       setExpiration(result);
-      hash(user,ak,sk,result,saveToken);
+      hash(user, ak, sk, result, saveToken);
       trigger();
       // useEffect(()=>{
       //   setValue('expiration',expiration);
@@ -85,42 +83,44 @@ const TokenFormModal = connect(
       setAccessKey('');
       setSecretKey('');
       setExpiration('');
-      setValue('accessKey','');
-      setValue('secretKey','');
-      setValue('expiration','');
+      setValue('accessKey', '');
+      setValue('secretKey', '');
+      setValue('expiration', '');
       doFetchToken(user);
       doModalClose();
     };
 
-    const saveToken = (u,ak,hash,exp) => {
-        doSaveToken(u, { accessKey:ak, secretKey:hash, expiration:exp })
-    }
+    const saveToken = (u, ak, hash, exp) => {
+      doSaveToken(u, { accessKey: ak, secretKey: hash, expiration: exp });
+    };
 
     useEffect(() => {
-      if(user4Token === undefined || user4Token === null ){
+      if (user4Token === undefined || user4Token === null) {
         setUser(authData.email);
         doFetchToken(authData.email);
       } else {
         setUser(user4Token);
         doFetchToken(user4Token);
       }
-      
     }, []);
 
     useEffect(() => {
-      if(accessKey == null || accessKey.length == 0 || (accessKey !== null && accessKey != tokenStore.token.accessKey)){
-        setValue('accessKey',tokenStore.token.accessKey);
+      if (
+        accessKey == null ||
+        accessKey.length == 0 ||
+        (accessKey !== null && accessKey != tokenStore.token.accessKey)
+      ) {
+        setValue('accessKey', tokenStore.token.accessKey);
         setAccessKey(tokenStore.token.accessKey);
       } else {
-
       }
-      if(expiration == null || (expiration !== null && expiration != tokenStore.token.expiration)){
-        try{
-          if(tokenStore.token.expiration !== null && tokenStore.token.expiration.length > 0){
+      if (expiration == null || (expiration !== null && expiration != tokenStore.token.expiration)) {
+        try {
+          if (tokenStore.token.expiration !== null && tokenStore.token.expiration.length > 0) {
             let result = new Date(tokenStore.token.expiration);
-            setValue('expiration',result.toLocaleString());
+            setValue('expiration', result.toLocaleString());
           } else {
-            setValue('expiration','');
+            setValue('expiration', '');
           }
         } catch (e) {
           console.error(e);
@@ -140,7 +140,7 @@ const TokenFormModal = connect(
           <section className='modal-body margin-bottom-2' id='addUsersFormModal'>
             <div className='container-fluid margin-top-1'>
               <Alert noIcon slim className='callout'>
-                Tokens will need to be refreshed every 60 days. 
+                Tokens will need to be refreshed every 60 days.
               </Alert>
             </div>
             <div className='container-fluid margin-top-1'>
@@ -173,15 +173,29 @@ const TokenFormModal = connect(
               </Grid>
               <Grid row gap='md' style={{ visibility: isValid ? 'visible' : 'hidden' }}>
                 <Grid tablet={{ col: 6 }}>
-                  <TextInputWClipboard name='secretKey' label='Token Secret Key' showOptionalText={false} readOnly={true} />
+                  <TextInputWClipboard
+                    name='secretKey'
+                    label='Token Secret Key'
+                    showOptionalText={false}
+                    readOnly={true}
+                  />
                 </Grid>
                 <Grid tablet={{ col: 6 }}>
-                  <div className='token-notice'> Copy the secret key, it will not be available after you close this window.</div>
+                  <div className='token-notice'>
+                    {' '}
+                    Copy the secret key, it will not be available after you close this window.
+                  </div>
                 </Grid>
               </Grid>
             </div>
           </section>
-          <ModalFooter cancelText="Close" showSaveButton={false } showCancelButton saveIsDisabled={!isValid} onSave={() => saveToken()} />
+          <ModalFooter
+            cancelText='Close'
+            showSaveButton={false}
+            showCancelButton
+            saveIsDisabled={!isValid}
+            onSave={() => saveToken()}
+          />
         </FormProvider>
       </ModalContent>
     );
