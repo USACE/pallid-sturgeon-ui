@@ -159,6 +159,7 @@ function toTelemetryServerPayload(entry: any) {
     ...entry,
     siteId: getNumberValue(entry?.siteId ?? entry?.site_id),
     seId: getNumberValue(entry?.seId ?? entry?.se_id),
+    bendRiverMile: getNumberValue(entry?.bendRiverMile ?? entry?.bend_river_mile ?? entry?.bendrivermile),
   };
 }
 

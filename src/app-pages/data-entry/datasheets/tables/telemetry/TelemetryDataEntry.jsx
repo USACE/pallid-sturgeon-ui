@@ -42,6 +42,7 @@ const getNextSequence = (data, seFid) => {
 const TelemetryDataEntry = connect(
   'doSaveTelemetryDataEntry',
   'doUpdateTelemetryDataEntry',
+  'doSearchEffortDatasheetLoadData',
   'selectDataEntryTelemetryData',
   'selectDataEntryLastParams',
   'selectBaseData',
@@ -52,6 +53,7 @@ const TelemetryDataEntry = connect(
   ({
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
+    doSearchEffortDatasheetLoadData,
     dataEntryTelemetryData,
     dataEntryLastParams,
     baseData,
@@ -78,7 +80,13 @@ const TelemetryDataEntry = connect(
     const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
     const savedDraft = sessionStorage.getItem(searchDraftKey);
     const searchEffortDraft = savedDraft ? JSON.parse(savedDraft) : null;
-    const seFid = dataEntryData?.seFid || baseData?.seFid || searchEffortDraft?.seFid;
+    const seFid =
+      dataEntryData?.seFid ??
+      dataEntryData?.se_fid ??
+      baseData?.seFid ??
+      baseData?.se_fid ??
+      searchEffortDraft?.seFid ??
+      searchEffortDraft?.se_fid;
 
     const [offlineLookups, setOfflineLookups] = useState({
       frequencyId: [],
@@ -187,33 +195,56 @@ const TelemetryDataEntry = connect(
     console.warn('Check errors:', errors);
 
     const handleAddRow = async () => {
-      // Add default values here
-      const base = getBaseDefaultValues({ baseData });
+      try {
+        if (!seFid) {
+          console.error('Cannot add Telemetry row: missing Search Effort Field ID.', {
+            dataEntryData,
+            baseData,
+            searchEffortDraft,
+          });
+          window.alert('Save the Search Effort draft before adding Telemetry.');
+          return;
+        }
+        // Add default values here
+        const base = getBaseDefaultValues({ baseData });
 
-      const localRows = await db.telemetry.where('seFid').equals(seFid).toArray();
+        const localRows = await db.telemetry
+          .filter((row) => {
+            const rowSeFid = row?.seFid ?? row?.se_fid;
+            return String(rowSeFid) === String(seFid);
+          })
+          .toArray();
 
-      const dbRows = data?.filter((row) => row.seFid === seFid) ?? [];
-      const sequence = localRows.length + dbRows.length + 1;
-      const sequenceText = String(sequence).padStart(3, '0');
+        const dbRows =
+          data?.filter((row) => {
+            const rowSeFid = row?.seFid ?? row?.se_fid;
+            return String(rowSeFid) === String(seFid);
+          }) ?? [];
 
-      const parentSeId =
-        dataEntryData?.seId ??
-        dataEntryData?.se_id ??
-        dataEntryLastParams?.seId ??
-        dataEntryLastParams?.se_id ??
-        searchEffortDraft?.seId ??
-        searchEffortDraft?.se_id;
+        const sequence = localRows.length + dbRows.length + 1;
+        const sequenceText = String(sequence).padStart(3, '0');
 
-      const newRowData = {
-        ...base,
-        seId: parentSeId,
-        se_id: parentSeId,
-        tFid: `${seFid}-${sequenceText}`,
-        seFid: seFid,
-        ...defaultValues,
-        _status: 'new',
-      };
-      setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
+        const parentSeId =
+          dataEntryData?.seId ??
+          dataEntryData?.se_id ??
+          dataEntryLastParams?.seId ??
+          dataEntryLastParams?.se_id ??
+          searchEffortDraft?.seId ??
+          searchEffortDraft?.se_id;
+
+        const newRowData = {
+          ...base,
+          seId: parentSeId,
+          se_id: parentSeId,
+          tFid: `${seFid}-${sequenceText}`,
+          seFid: seFid,
+          ...defaultValues,
+          _status: 'new',
+        };
+        setData((prev) => [...(prev ?? []), newRowData]);
+      } catch (err) {
+        console.error('Unable to add Telemetry row:', err);
+      }
     };
 
     const handleAddMultipleRows = (rows) => {
@@ -251,12 +282,19 @@ const TelemetryDataEntry = connect(
       [setData, setTableKey]
     );
 
+    const frequencyIdOptions = frequencyId?.length > 0 ? frequencyId : offlineLookups.frequencyId;
+    const positionConfidenceOptions =
+      positionConfidence?.length > 0 ? positionConfidence : offlineLookups.positionConfidence;
+    const spawnBehaviorOptions = spawnBehavior?.length > 0 ? spawnBehavior : offlineLookups.spawnBehavior;
+    const mesoOptions = mesos?.length > 0 ? mesos : offlineLookups.mesos;
+    const macroOptions = macros?.length > 0 ? macros : offlineLookups.macros;
+
     const tableColumns = getTelemetryColumns({
-      frequencyId,
-      positionConfidence,
-      spawnBehavior,
-      mesos,
-      macros,
+      frequencyId: frequencyIdOptions,
+      positionConfidence: positionConfidenceOptions,
+      spawnBehavior: spawnBehaviorOptions,
+      mesos: mesoOptions,
+      macros: macroOptions,
       handleCaptureRow,
       online,
     });
@@ -388,6 +426,8 @@ const TelemetryDataEntry = connect(
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
 
         sessionStorage.setItem(draftKey, JSON.stringify({ ...draft, telemetryCount: 1 }));
+        const telemetryParentId = dataEntryData?.seId ?? dataEntryData?.se_id ?? seFid;
+        await doSearchEffortDatasheetLoadData(telemetryParentId);
         doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
@@ -398,6 +438,16 @@ const TelemetryDataEntry = connect(
       const tableDataChanged = !_isEqual(data, prevTableDataRef.current);
       tableDataChanged && setTableIsDirty(true);
     }, [data]);
+
+    useEffect(() => {
+      const refreshRows =
+        items?.map((item) => ({
+          ...item,
+          captureTime: item?.captureTime ?? item?.captureDate ?? '',
+          spawnBehavior: item?.spawnBehavior ?? item?.suspectedSpawningActivity ?? '',
+        })) ?? [];
+      setData(refreshRows);
+    }, [items]);
 
     return (
       <FormProvider {...methods}>

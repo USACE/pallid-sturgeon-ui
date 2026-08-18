@@ -42,6 +42,27 @@ const ensureTrailingBlankFishRow = (rows) => {
   return [...normalizedRows, createBlankFishRow()];
 };
 
+const normalizeFishRow = (row = {}) => ({
+  ...row,
+  fid: row?.fid ?? row?.fId ?? row?.f_id,
+  fFid: row?.fFid ?? row?.f_fid,
+  mrId: row?.mrId ?? row?.mr_id,
+  mrFid: row?.mrFid ?? row?.mr_fid,
+  panelHook: row?.panelHook ?? row?.panelhook ?? '',
+  lengthType: row?.lengthType ?? row?.length_type ?? '',
+  countF: row?.countF ?? row?.fishCount ?? '',
+  ftPrefix: row?.ftPrefix ?? row?.ftprefix ?? '',
+  floyTag: row?.floyTag ?? row?.ftnum ?? '',
+  mR: row?.mR ?? row?.ftmr ?? '',
+  geneticsVialNumber: row?.geneticsVialNumber ?? row?.genetics_vial_number ?? '',
+  finCurl: row?.finCurl ?? row?.fin_curl ?? '',
+  raySpine: row?.raySpine ?? row?.rayspine ?? '',
+  KN: row?.KN ?? row?.kn ?? '',
+  RSD: row?.RSD ?? row?.rsd ?? '',
+  editInitials: row?.editInitials ?? row?.edit_initials ?? row?.edit_initial ?? '',
+  uploadedBy: row?.uploadedBy ?? row?.uploaded_by8 ?? '',
+});
+
 // Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
 // localRows never seems to return anything(?) - feel free to change if there is an issue.
 // const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
@@ -73,6 +94,7 @@ const FishDataEntry = connect(
   'doSaveFishDataEntry',
   'doUpdateFishDataEntry',
   'doUpdateCurrentTab',
+  'doMoRiverDatasheetLoadData',
   'selectDataEntryData',
   'selectDataEntryFishData',
   'selectBaseData',
@@ -82,6 +104,7 @@ const FishDataEntry = connect(
     doSaveFishDataEntry,
     doUpdateFishDataEntry,
     doUpdateCurrentTab,
+    doMoRiverDatasheetLoadData,
     dataEntryData,
     dataEntryFishData,
     baseData,
@@ -105,7 +128,7 @@ const FishDataEntry = connect(
       lengthTypes: [],
       markRecaptureOptions: [],
     });
-    const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
+    const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
     const [data, setData] = useState(ensureTrailingBlankFishRow(rowData));
     const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
@@ -308,6 +331,7 @@ const FishDataEntry = connect(
               mr_fid: parentRowMrFid,
               mrFid: parentRowMrFid,
               fFid: fishFid,
+              f_fid: fishFid,
               _status: OfflineStatuses.Queued,
               version: item.version ?? 0,
               updatedAt: new Date().toISOString(),
@@ -318,7 +342,7 @@ const FishDataEntry = connect(
               weight: item?.weight == null || item?.weight === '' ? null : Number(item?.weight),
             };
 
-            return { item, payload, isNew };
+            return { item, payload, isNew, clientId };
           }) ?? [];
 
         // Validate all rows first; if any fail, stay on Fish and do not submit any rows.
@@ -339,7 +363,7 @@ const FishDataEntry = connect(
           return;
         }
 
-        for (const { item, payload, isNew } of rowPayloads) {
+        for (const { item, payload, isNew, clientId } of rowPayloads) {
           try {
             if (online) {
               if (isNew) {
@@ -348,24 +372,33 @@ const FishDataEntry = connect(
                 await doUpdateFishDataEntry(payload);
               }
             } else {
-              isNew ? await createData('fish', payload) : await updateData('fish', payload);
+              isNew ? await createData('fish', payload) : await updateData('fish', clientId, payload);
             }
           } catch (error) {
             console.error('Fish API failed, queuing offline:', error);
-            isNew ? await createData('fish', payload) : await updateData('fish', payload);
+            isNew ? await createData('fish', payload) : await updateData('fish', clientId, payload);
           }
         }
 
-        setData((prev) =>
-          prev.map((row) =>
-            row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited
-              ? { ...row, _status: OfflineStatuses.Queued, clientId: row.clientId ?? crypto.randomUUID() }
-              : row
-          )
-        );
+        setData((prev) => {
+          const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+          const updatedRows = existingRows.map((row) => {
+            const matchingPayloadEntry = rowPayloads.find(({ item }) => item === row);
+
+            if (!matchingPayloadEntry) {
+              return row;
+            }
+            return {
+              ...matchingPayloadEntry.payload,
+              _status: OfflineStatuses.Queued,
+            };
+          });
+          return ensureTrailingBlankFishRow(updatedRows);
+        });
 
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
         sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft, fishCount: 1 }));
+        await doMoRiverDatasheetLoadData(parentMrId ?? parentMrFid);
         doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
@@ -373,7 +406,7 @@ const FishDataEntry = connect(
     };
 
     useEffect(() => {
-      const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
+      const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
       setData(ensureTrailingBlankFishRow(rowData));
     }, [baseData?.bendRiverMile, items]);
 
