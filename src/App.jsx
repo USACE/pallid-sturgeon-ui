@@ -63,7 +63,7 @@ export default connect(
       <>
         {loadingState && <LoadingModal text={loadingMessage} />}
         <ToastContainer autoClose={3500} hideProgressBar={false} />
-        {!pwaMode && <NavBar />}
+        {(!pwaMode || !isAuthenticated) && <NavBar />}
         {auth.token && <SyncBanner />}
         <PageContent>{auth.token ? <Route /> : <Hero />}</PageContent>
         <Modal closeWithEscape />

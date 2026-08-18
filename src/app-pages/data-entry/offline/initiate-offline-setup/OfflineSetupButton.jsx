@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { Alert, Button } from '@trussworks/react-uswds';
 import { mdiCellphoneCog, mdiDownload, mdiEarth } from '@mdi/js';
@@ -7,12 +7,26 @@ import LoaderButton from '@src/app-components/loader/LoaderButton';
 import Icon from '@src/app-components/icon/icon';
 import { downloadLookupsForOffline, downloadSitesForOffline, downloadDatasheetsForOffline } from '../lookup-cache';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import { usePwaMode } from '../pwa-mode';
+
+const OFFLINE_SETUP_READY_KEY = 'offlineSetupReady';
 
 const OfflineSetupButton = connect('selectAuth', 'selectUserRole', 'doUpdateUrl', ({ auth, userRole, doUpdateUrl }) => {
   const ubloxGps = useUbloxSerialGps();
+  const pwaMode = usePwaMode();
 
   const [lookupDownloadStatus, setLookupDownloadStatus] = useState(null);
   const [lookupDownloading, setLookupDownloading] = useState(false);
+  const [offlineSetupReady, setOfflineSetupReady] = useState(
+    () => sessionStorage.getItem(OFFLINE_SETUP_READY_KEY) === 'true'
+  );
+
+  useEffect(() => {
+    if (!auth?.token) {
+      sessionStorage.removeItem(OFFLINE_SETUP_READY_KEY);
+      setOfflineSetupReady(false);
+    }
+  }, [auth?.token]);
 
   const handleOnClick = async () => {
     setLookupDownloading(true);
@@ -26,6 +40,9 @@ const OfflineSetupButton = connect('selectAuth', 'selectUserRole', 'doUpdateUrl'
       const lookupResult = await downloadLookupsForOffline(auth?.token);
       const siteResult = await downloadSitesForOffline(auth?.token, userRole?.id);
       const datasheetResult = await downloadDatasheetsForOffline(auth?.token, userRole?.id);
+
+      sessionStorage.setItem(OFFLINE_SETUP_READY_KEY, 'true');
+      setOfflineSetupReady(true);
 
       setLookupDownloadStatus({
         type: 'success',
@@ -76,9 +93,14 @@ const OfflineSetupButton = connect('selectAuth', 'selectUserRole', 'doUpdateUrl'
           </Alert>
         </div>
       )}
-      {lookupDownloadStatus?.type === 'success' && (
+      {pwaMode && offlineSetupReady && (
         <div className='margin-top-2'>
-          <Button type='button' className='primary-btn' onClick={() => doUpdateUrl('/sites-list')}>
+          <Button
+            type='button'
+            className='primary-btn'
+            onClick={() => doUpdateUrl('/sites-list')}
+            style={{ minWidth: '280px', minHeight: '64px', fontSize: '1.25rem', fontWeight: 'bold' }}
+          >
             Go to Sites List
           </Button>
         </div>

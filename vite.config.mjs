@@ -34,7 +34,7 @@ export default ({ mode }) => {
           navigateFallback: 'index.html',
         },
         devOptions: {
-          enabled: true,
+          enabled: false,
         },
       }),
       svgrPlugin(),
