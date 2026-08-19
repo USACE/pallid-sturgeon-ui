@@ -46,6 +46,7 @@ const SiteDatasheet = connect(
     const searchEffortDraftCount = Array.isArray(searchEffortSitesDraftDatasheetData)
       ? searchEffortSitesDraftDatasheetData.length
       : 0;
+    const isOnline = navigator.onLine;
 
     const breadcrumbLinks = [
       {
@@ -59,19 +60,6 @@ const SiteDatasheet = connect(
         current: false,
       },
     ];
-
-    // useEffect(() => {
-    //   const params = getSiteRouteParams(siteRouteKey);
-    //   doUpdateSitesDatasheetParams(params);
-    // }, [siteRouteKey, currentTab, doUpdateSitesDatasheetParams]);
-
-    // useEffect(() => {
-    //   if (!navigator.onLine && isOfflineSite) {
-    //     return;
-    //   }
-
-    //   doSitesDatasheetLoadData();
-    // }, [siteRouteKey, currentTab]);
 
     useEffect(() => {
       if (!siteRouteKey) {
@@ -115,33 +103,21 @@ const SiteDatasheet = connect(
     }, [siteRouteKey, doUpdateSitesDatasheetParams, doSitesDatasheetLoadData]);
 
     useEffect(() => {
-      async function loadOfflineSiteBaseData() {
-        if (!String(siteRouteKey).startsWith('SITE-')) return;
-
-        const localSite = await db.sites.where('site_fid').equals(siteRouteKey).first();
-
-        if (!localSite) {
-          console.warn('No offline site found for site_fid:', siteRouteKey);
-          return;
-        }
-
-        const normalizedSite = {
-          ...localSite,
-          siteId: localSite.siteId ?? localSite.site_id,
-          siteFid: localSite.siteFid ?? localSite.site_fid,
-          projectId: localSite.projectId ?? localSite.project_id,
-          segmentId: localSite.segmentId ?? localSite.segment_id,
-          sampleUnitType: localSite.sampleUnitType ?? localSite.sample_unit_type,
-          bendRiverMile: localSite.bendRiverMile ?? localSite.bend_river_mile ?? localSite.brm_id,
-        };
-
-        Object.entries(normalizedSite).forEach(([name, value]) => {
+      const populateOfflineSiteBaseData = async (id) => {
+        const cachedData = await db.sites.toArray();
+        // Determine whether to search via Table ID or Field ID
+        const keyString = Number(id) > 0 ? 'siteId' : 'siteFid';
+        // const filteredCachedData = await db.sites.where(keyString).equals(id).first();
+        const filteredCachedData = cachedData.filter((item) => String(item?.[keyString]) === String(id))?.[0];
+        if (filteredCachedData?.length < 1) return;
+        // Update Base Data
+        Object.entries(filteredCachedData).forEach(([name, value]) => {
           doUpdateBaseData(name, value);
         });
-      }
-
-      loadOfflineSiteBaseData();
-    }, [siteRouteKey, doUpdateBaseData]);
+      };
+      // Only run when offline in offline status
+      !isOnline && populateOfflineSiteBaseData(siteRouteKey);
+    }, [siteRouteKey, , isOnline]);
 
     return (
       <div className='container-fluid'>
