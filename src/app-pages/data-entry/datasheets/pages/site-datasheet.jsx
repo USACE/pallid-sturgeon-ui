@@ -103,7 +103,7 @@ const SiteDatasheet = connect(
     }, [siteRouteKey, doUpdateSitesDatasheetParams, doSitesDatasheetLoadData]);
 
     useEffect(() => {
-      const fetchOfflineSiteBaseData = async (id) => {
+      const populateOfflineSiteBaseData = async (id) => {
         const cachedData = await db.sites.toArray();
         // Determine whether to search via Table ID or Field ID
         const keyString = Number(id) > 0 ? 'siteId' : 'siteFid';
@@ -116,7 +116,7 @@ const SiteDatasheet = connect(
         });
       };
       // Only run when offline in offline status
-      !isOnline && fetchOfflineSiteBaseData(siteRouteKey);
+      !isOnline && populateOfflineSiteBaseData(siteRouteKey);
     }, [siteRouteKey, , isOnline]);
 
     return (
