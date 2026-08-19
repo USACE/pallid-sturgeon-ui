@@ -1,14 +1,12 @@
 import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
-import { mdiAccountPlus,mdiAccountKey } from '@mdi/js';
+import { mdiAccountPlus } from '@mdi/js';
 
-import TokenFormModal from './TokenModal';
 import AddUserFormModal from './AddUserModal';
 import Button from '@components/button';
 import Card from '@components/card';
 import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
-import TokenCellRenderer from '@common/gridCellRenderers/tokenCellRenderer';
 import FieldOfficeEditor from '@common/gridCellEditors/fieldOfficeEditor';
 import RolesEditor from '@common/gridCellEditors/rolesEditor';
 import ProjectEditor from '@common/gridCellEditors/projectEditor';
@@ -84,7 +82,6 @@ export default connect(
                   }}
                   frameworkComponents={{
                     editCellRenderer: EditCellRenderer,
-                    tokenCellRenderer: TokenCellRenderer,
                     fieldOfficeEditor: FieldOfficeEditor,
                     rolesEditor: RolesEditor,
                     projectEditor: ProjectEditor,
@@ -127,21 +124,7 @@ export default connect(
                     cellEditorParams={{ projects }}
                     cellRenderer={(params) => projectCodeList[params.value]}
                   />
-                  <AgGridColumn
-                    field='expiration'
-                    headerName='Token Status'
-                    width={100}
-                  />
-                  <AgGridColumn
-                    field='accessKey'
-                    headerName='Token'
-                    width={90}
-                    cellRenderer='tokenCellRenderer'
-                    cellRendererParams={{
-                      type: 'user',
-                    }}
-                    editable={false}
-                  />
+                  <AgGridColumn field='expiration' headerName='Token Status' width={100} />
                 </AgGridReact>
               </div>
             </Card.Body>
