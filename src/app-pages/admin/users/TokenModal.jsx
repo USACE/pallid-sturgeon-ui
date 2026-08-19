@@ -15,7 +15,7 @@ import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.c
 import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
 import Icon from '@components/icon/icon';
 import { generateToken, hash } from '@src/utils/tokenHelpers';
-
+import './token.scss';
 import { ValidationMessages } from '@src/utils/enums';
 
 const defaultValues = {
