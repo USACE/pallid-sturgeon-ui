@@ -511,7 +511,7 @@ const SearchEffortDataEntryForm = connect(
 
             <Grid tablet={{ col: 2 }}>
               <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
-                {searchTypeCodes.map((opt, idx) => (
+                {searchTypeOptions.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
                     {`${opt.code} - ${opt.description}`}
                   </option>

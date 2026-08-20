@@ -254,8 +254,10 @@ export default {
       }
       const telemetryRecords = await db.telemetry
         .filter((row) => {
-          const rowSearchId = row?.seId ?? row?.se_id ?? row?.seFid ?? row?.se_fid;
-          return String(rowSearchId) === String(id);
+          const rowSearchId = [row?.seId, row?.se_id, row?.seFid, row?.se_fid];
+          return rowSearchId.some(
+            (value) => value !== undefined && value !== null && value !== '' && String(value) === String(id)
+          );
         })
         .toArray();
 

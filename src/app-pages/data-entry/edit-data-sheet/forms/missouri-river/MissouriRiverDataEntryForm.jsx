@@ -370,7 +370,9 @@ const MissouriRiverDataEntryForm = connect(
 
       try {
         const draft = JSON.parse(savedDraft);
-        if (!draft?.mrFid) return null;
+        const draftMrId = draft?.mrId ?? draft?.mr_id;
+        const draftMrFid = draft?.mrFid ?? draft?.mr_fid;
+        if (!draftMrId && !draftMrFid) return null;
 
         const checkSiteId =
           String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey);
@@ -449,7 +451,10 @@ const MissouriRiverDataEntryForm = connect(
         updatedAt: new Date().toISOString(),
       });
 
-      if (!payload.mrFid) {
+      const finalMrId = payload?.mrId ?? payload?.mr_id;
+      const finalMrFid = payload?.mrFid ?? payload?.mr_fid;
+
+      if (!finalMrId && !finalMrFid) {
         console.error('Missing mrFid. Cannot save Missouri River draft.');
         return;
       }
@@ -506,7 +511,10 @@ const MissouriRiverDataEntryForm = connect(
 
       const payload = filterNullEmptyObjects(formattedValues);
 
-      if (!payload.mrFid && !payload.mr_fid) {
+      const finalMrId = payload?.mrId ?? payload?.mr_id;
+      const finalMrFid = payload?.mrFid ?? payload?.mr_fid;
+
+      if (!finalMrId && !finalMrFid) {
         console.error('Missing mrFid. Cannot submit Missouri River form.');
         return;
       }

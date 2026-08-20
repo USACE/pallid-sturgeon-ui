@@ -60,7 +60,7 @@ const normalizeFishRow = (row = {}) => ({
   KN: row?.KN ?? row?.kn ?? '',
   RSD: row?.RSD ?? row?.rsd ?? '',
   editInitials: row?.editInitials ?? row?.edit_initials ?? row?.edit_initial ?? '',
-  uploadedBy: row?.uploadedBy ?? row?.uploaded_by8 ?? '',
+  uploadedBy: row?.uploadedBy ?? row?.uploaded_by ?? '',
 });
 
 // Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
@@ -68,26 +68,37 @@ const normalizeFishRow = (row = {}) => ({
 // const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
 // const dbRows = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
 // const sequence = localRows.length + dbRows.length + 1;
-const getNextFishFid = (data, parentMrFid) => {
-  const existing = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
+const getNextFishId = (data, parentMrId, parentMrFid) => {
+  const existing = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+  const parentRows = existing.filter((row) => {
+    if (parentMrFid) {
+      const rowMrFid = row?.mrFid ?? row?.mr_fid;
 
-  const maxSequence = existing.reduce((currentMax, row) => {
-    const fieldId = row?.fFid ?? '';
-    const sequencePart = String(fieldId).split('-').pop();
+      return rowMrFid && String(rowMrFid) === String(parentMrFid);
+    }
+    const rowMrId = row?.mrId ?? row?.mr_id;
+
+    return parentMrId != null && rowMrId != null && String(rowMrId) === String(parentMrId);
+  });
+
+  let maxSequence = 0;
+
+  parentRows.forEach((row) => {
+    const id = row?.fFid ?? row?.f_fid ?? row?.localDisplayId ?? '';
+    const sequencePart = String(id).split('-').pop();
     const sequenceNumber = Number(sequencePart);
 
-    if (Number.isFinite(sequenceNumber) && sequenceNumber > currentMax) {
-      return sequenceNumber;
+    if (Number.isFinite(sequenceNumber) && sequenceNumber > maxSequence) {
+      maxSequence = sequenceNumber;
     }
+  });
 
-    return currentMax;
-  }, 0);
-
-  const nextSequence = maxSequence + 1;
   const sequenceText = String(nextSequence).padStart(3, '0');
-  const fishFid = `${parentMrFid}-${sequenceText}`;
 
-  return fishFid;
+  return {
+    fishFid: parentMrFid ? `${parentMrFid}-${sequenceText}` : undefined,
+    localDisplayId: !parentMrFid && parentMrId ? `MR-${parentMrId}-${sequenceText}` : undefined,
+  };
 };
 
 const FishDataEntry = connect(
@@ -268,18 +279,24 @@ const FishDataEntry = connect(
 
             let nextRow = currentRow;
             if (isPlaceholderRow) {
-              const fishFid = parentMrFid ? getNextFishFid(newData, parentMrFid) : undefined;
+              const { fishFid, localDisplayId } = getNextFishId(newData, parentMrId, parentMrFid);
 
               nextRow = {
                 ...getBaseDefaultValues({ baseData }),
                 ...getFishRiverDefaultValues({ dataEntryData }),
-                ...(parentMrId != null ? { mrId: parentMrId, mr_id: parentMrId } : {}),
+                clientId: crypto.randomUUID(),
+                ...(parentMrId != null ? { mrId: Number(parentMrId), mr_id: Number(parentMrId) } : {}),
                 ...(parentMrFid
                   ? {
                       mrFid: parentMrFid,
                       mr_fid: parentMrFid,
                       fFid: fishFid,
                       f_fid: fishFid,
+                    }
+                  : {}),
+                ...(localDisplayId
+                  ? {
+                      localDisplayId,
                     }
                   : {}),
                 _status: OfflineStatuses.New,

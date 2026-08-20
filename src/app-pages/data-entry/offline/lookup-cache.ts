@@ -423,13 +423,16 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
   const draftSeIdList = Array.from(draftSeId);
 
   const fishResults = await Promise.all(
-    draftMrIdList.map((mrId) => {
+    draftMrIdList.map(async (mrId) => {
       const query = new URLSearchParams({
         id: String(userRoleId),
         mrId: String(mrId),
       });
+      const rows = await getRows(`${API_BASE}/psapi/fishDataEntry?${query.toString()}`, `Fish for MR ${mrId}`);
 
-      return getRows(`${API_BASE}/psapi/fishDataEntry?${query.toString()}`, `Fish for MR ${mrId}`);
+      console.log('Offline Download Fish', { mrId, count: rows.length, rows });
+
+      return rows;
     })
   );
 
@@ -456,13 +459,19 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
   );
 
   const telemetryResults = await Promise.all(
-    draftSeIdList.map((seId) => {
+    draftSeIdList.map(async (seId) => {
       const query = new URLSearchParams({
         id: String(userRoleId),
         seId: String(seId),
       });
+      const rows = await getRows(
+        `${API_BASE}/psapi/telemetryDataEntry?${query.toString()}`,
+        `Telemetry for Search Effort ${seId}`
+      );
 
-      return getRows(`${API_BASE}/psapi/telemetryDataEntry?${query.toString()}`, `Telemetry for Search Effort ${seId}`);
+      console.log('Offline Download Telemetry', { seId, count: rows.length, rows });
+
+      return rows;
     })
   );
 

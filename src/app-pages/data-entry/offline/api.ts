@@ -155,8 +155,18 @@ function toFishServerPayload(entry: any) {
 }
 
 function toTelemetryServerPayload(entry: any) {
-  return {
+  const payload = {
     ...entry,
+  };
+
+  // remove local aliases
+  delete payload.site_id;
+  delete payload.se_id;
+  delete payload.bendrivermile;
+  delete payload.bend_river_mile;
+
+  return {
+    ...payload,
     siteId: getNumberValue(entry?.siteId ?? entry?.site_id),
     seId: getNumberValue(entry?.seId ?? entry?.se_id),
     bendRiverMile: getNumberValue(entry?.bendRiverMile ?? entry?.bend_river_mile ?? entry?.bendrivermile),
@@ -164,7 +174,19 @@ function toTelemetryServerPayload(entry: any) {
 }
 
 function formatPayloadForApi(entry: Partial<DataEntry>, tableName?: OutboxTable): Record<string, any> {
-  const { clientId, serverId, version, updatedAt, _status, ...serverPayload } = entry;
+  const {
+    clientId,
+    serverId,
+    version,
+    updatedAt,
+    _status,
+    localDisplayId,
+    fishClientId,
+    suppClientId,
+    _isPlaceholderRows,
+    _isTouched,
+    ...serverPayload
+  } = entry as any;
 
   if (tableName === 'ds_sites') {
     return toSiteServerPayload(serverPayload);
@@ -377,6 +399,33 @@ export async function pushOutboxItem(
 
   const payload = item.payload ? formatPayloadForApi(item.payload, item.tableName) : {};
 
+  if (item.tableName === 'ds_telemetry_fish') {
+    const rawPayload = item.payload as any;
+
+    delete payload.bendrivermile;
+    delete payload.bend_river_mile;
+
+    payload.bendRiverMile = getNumberValue(
+      rawPayload?.bendRiverMile ?? rawPayload?.bend_river_mile ?? rawPayload?.bendrivermile
+    );
+
+    delete payload.site_id;
+    delete payload.se_id;
+
+    payload.siteId = getNumberValue(rawPayload?.siteId ?? rawPayload?.site_id);
+    payload.seId = getNumberValue(rawPayload?.seId ?? rawPayload?.se_id);
+  }
+
+  if (item.tableName === 'ds_telemetry_fish') {
+    console.log('Final Telemetry Sync Payload', payload);
+    console.log('Telemetry Bend River Mile Check', {
+      value: payload.bendRiverMile,
+      type: typeof payload.bendRiverMile,
+      bendrivermile: payload.bendrivermile,
+      bend_river_mile: payload.bend_river_mile,
+    });
+  }
+
   if (item.tableName === 'ds_telemetry_fish' && item.op === 'create') {
     delete payload.t_id;
     delete payload.tId;
@@ -395,7 +444,16 @@ export async function pushOutboxItem(
     };
 
     if (method !== 'DELETE') {
-      requestOptions.body = JSON.stringify(payload);
+      requestOptions.body = JSON.stringify(payload, (key, value) => {
+        if (item.tableName === 'ds_telemetry_fish' && (key === 'bendrivermile' || key === 'bend_river_mile')) {
+          return undefined;
+        }
+        return value;
+      });
+    }
+
+    if (item.tableName === 'ds_telemetry_fish') {
+      console.error('Telemetry Body Request', requestOptions.body);
     }
 
     const res = await fetch(`${API_BASE}${endpoint}`, requestOptions);

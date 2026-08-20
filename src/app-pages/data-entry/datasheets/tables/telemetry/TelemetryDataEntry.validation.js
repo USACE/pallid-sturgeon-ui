@@ -54,14 +54,14 @@ export const getBaseDefaultValues = ({ baseData }) => ({
   season: baseData?.season ?? '',
   sampleUnitType: baseData?.sampleUnitType ?? '',
   bendrn: baseData?.bendrn ?? '',
-  bendrivermile: baseData?.bendRiverMile ?? '',
+  bendRiverMile: baseData?.bendRiverMile ?? '',
   siteFid: baseData?.siteFid ?? '',
   siteId: baseData?.siteId ?? '',
 });
 
 export const getTelemetryDefaultValues = ({ dataEntryData }) => ({
   seFid: dataEntryData?.seFid ?? '',
-  tFid: dataEntryData?.fFid ?? '',
+  tFid: dataEntryData?.tFid ?? '',
   bend: dataEntryData?.bend ?? '',
   radioTagNum: dataEntryData?.radioTagNum ?? '',
   frequencyIdCode: dataEntryData?.frequencyIdCode ?? '',
