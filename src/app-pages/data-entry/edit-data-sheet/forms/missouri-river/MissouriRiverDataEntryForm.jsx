@@ -29,7 +29,7 @@ import {
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
-import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
 import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 
@@ -96,7 +96,7 @@ const MissouriRiverDataEntryForm = connect(
     const siteRouteKey = routeParams?.siteId;
     const siteId = siteRouteKey;
     const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
-    const online = !!isOnline();
+    const isOnline = navigator.onLine;
 
     const [gearCodeOptions, setGearCodeOptions] = useState(onlineGearCodes);
     const [mesoOptions, setMesoOptions] = useState(onlineMesos);
@@ -261,7 +261,12 @@ const MissouriRiverDataEntryForm = connect(
       fishCount: dataEntryFishTotalCount,
     });
     const hasPDSG =
-      dataEntryFishData?.items?.some((item) => String(item?.species || '').trim().toUpperCase() === 'PDSG') ?? false;
+      dataEntryFishData?.items?.some(
+        (item) =>
+          String(item?.species || '')
+            .trim()
+            .toUpperCase() === 'PDSG'
+      ) ?? false;
 
     const schema = getMissouriRiverSchema({
       riverMile: getUpperLowerRiverMile(bend, segmentId),
@@ -313,6 +318,8 @@ const MissouriRiverDataEntryForm = connect(
     const velocitybot1 = watch('velocitybot1');
     const velocity081 = watch('velocity081');
     const u7 = watch('u7');
+    const mrFid = watch('mrFid');
+    const seFid = watch('seFid');
 
     const fishCount = Number(watch('fishCount') || 0);
     const hasFishRecords = fishCount >= 1;
@@ -463,10 +470,9 @@ const MissouriRiverDataEntryForm = connect(
       }
 
       try {
-        if (online) {
+        if (isOnline) {
           newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
-          // newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
           await db.moriver.put(payload);
         }
         sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
@@ -479,12 +485,11 @@ const MissouriRiverDataEntryForm = connect(
       } catch (error) {
         console.error('Save draft failed:', error);
 
-        if (!online) {
+        if (!isOnline) {
           await db.moriver.put(payload);
           sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
           doUpdateCurrentTab(1);
         }
-        // newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
       }
     };
 
@@ -520,7 +525,7 @@ const MissouriRiverDataEntryForm = connect(
       }
 
       try {
-        if (online) {
+        if (isOnline) {
           newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
           newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
@@ -539,7 +544,7 @@ const MissouriRiverDataEntryForm = connect(
 
       setSubmitMessage({
         type: ApiStatuses.Success,
-        text: online
+        text: isOnline
           ? 'Missouri River form submitted successfully.'
           : 'Missouri River form saved offline successfully. It will sync when you are back online.',
       });
@@ -548,65 +553,6 @@ const MissouriRiverDataEntryForm = connect(
     useEffect(() => {
       reloadOfflineDraft();
     }, [newForm, dataEntryFishTotalCount]);
-
-    // load offline lookup
-    // useEffect(() => {
-    //   const loadOfflineLookups = async () => {
-    //     try {
-    //       const names = [
-    //         'bendRiverMile',
-    //         'bendSelections',
-    //         'gearCodes',
-    //         'filteredGearCodes',
-    //         'gearTypes',
-    //         'macros',
-    //         'mesos',
-    //         'macroMesos',
-    //         'microHabitats',
-    //         'microStructures',
-    //         'u6Options',
-    //         'u7Options',
-    //         'microSetSite',
-    //         'setSite1Options',
-    //         'setSite2Options',
-    //         'setSite3Options',
-    //         'structureFlows',
-    //         'structureMods',
-    //         'subsampleTypes',
-    //       ];
-
-    //       const entries = await Promise.all(names.map(async (name) => [name, await getLookupOptions(name)]));
-    //       setOfflineLookups(Object.fromEntries(entries));
-    //     } catch (err) {
-    //       console.error('Failed to load Missouri River offline lookups:', error);
-    //     }
-    //   };
-    //   void loadOfflineLookups();
-    // });
-
-    // useEffect(() => {
-    //   loadCachedLookups();
-    // }, [loadCachedLookups]);
-
-    // useEffect(() => {
-    //   const draft = getOfflineDraft();
-
-    //   if (newForm && draft) {
-    //     reset(
-    //       {
-    //         ...defaultValues,
-    //         ...draft,
-    //         fishCount: Number(draft.fishCount || dataEntryFishTotalCount || 0),
-    //       },
-    //       {
-    //         keepDirty: false,
-    //         keepTouched: false,
-    //       }
-    //     );
-    //     return;
-    //   }
-    //   reset(defaultValues);
-    // }, [reset, defaultValues, newForm, dataEntryFishTotalCount]);
 
     // Set R/N value
     useEffect(() => {
@@ -824,12 +770,18 @@ const MissouriRiverDataEntryForm = connect(
           </div>
         )}
         <div className='container-fluid test-moriver margin-top-1'>
-          <Grid row gap='md' className='padding-bottom-3'>
+          <Grid row gap='md'>
             <Grid tablet={{ col: 2 }}>
-              <TextInput name='mrFid' label='MR Field ID (Date-Time-MR#)' readOnly />
+              <p>
+                MR Field ID (Date-Time-SE#):<br></br>
+                <span className='text-bold'>{mrFid}</span>
+              </p>
             </Grid>
             <Grid tablet={{ col: 2 }}>
-              <TextInput name='seFid' label='SE Field ID (Date-Time-SE#)' readOnly />
+              <p>
+                SE Field ID (Date-Time-SE#):<br></br>
+                <span className='text-bold'>{seFid !== '' ? seFid : '--'}</span>
+              </p>
             </Grid>
             {!hasFishRecords ? (
               <Grid tablet={{ col: 2 }}>
@@ -957,7 +909,7 @@ const MissouriRiverDataEntryForm = connect(
                     label='Width'
                     type='number'
                     onChange={handleChange}
-                    readOnly={gearType === 'S'}
+                    isMuted={gearType === 'S'}
                   />
                 </Grid>
               </Grid>
@@ -1117,8 +1069,8 @@ const MissouriRiverDataEntryForm = connect(
                     label='Distance'
                     type='number'
                     onChange={handleChange}
-                    required={gearReqFields.distance.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.distance.includes(gearCode)}
+                    required={gearType === 'S' && gearReqFields.distance.includes(gearCode) ? true : false}
+                    isMuted={gearType === 'S' && gearReqFields.distance.includes(gearCode) ? false : true}
                   />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
@@ -1126,8 +1078,8 @@ const MissouriRiverDataEntryForm = connect(
                     name='depth1'
                     label='1-Depth'
                     onChange={handleChange}
-                    required={gearReqFields.depth1.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.depth1.includes(gearCode)}
+                    required={gearType === 'S' && gearReqFields.depth1.includes(gearCode) ? true : false}
+                    isMuted={gearType === 'S' && gearReqFields.depth1.includes(gearCode) ? false : true}
                     type='number'
                     warning={getDepthWarning(depth1)}
                   />
@@ -1137,8 +1089,8 @@ const MissouriRiverDataEntryForm = connect(
                     name='depth2'
                     label='2-Depth'
                     onChange={handleChange}
-                    required={gearReqFields.depth2.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.depth2.includes(gearCode)}
+                    required={gearType === 'S' && gearReqFields.depth2.includes(gearCode) ? true : false}
+                    isMuted={gearType === 'S' && gearReqFields.depth2.includes(gearCode) ? false : true}
                     type='number'
                     warning={getDepthWarning(depth2)}
                   />
@@ -1148,8 +1100,8 @@ const MissouriRiverDataEntryForm = connect(
                     name='depth3'
                     label='3-Depth'
                     onChange={handleChange}
-                    required={gearReqFields.depth3.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.depth3.includes(gearCode)}
+                    required={gearType === 'S' && gearReqFields.depth3.includes(gearCode) ? true : false}
+                    isMuted={gearType === 'S' && gearReqFields.depth3.includes(gearCode) ? false : true}
                     type='number'
                     warning={getDepthWarning(depth3)}
                   />
@@ -1258,21 +1210,22 @@ const MissouriRiverDataEntryForm = connect(
                   <TextInput name='dissolvedOxygen' label='Dissolved Oxygen (D.O.)' onChange={handleChange} />
                 </Grid>
               </Grid>
-              {/* @TODO: Hide USGS, River Stage, Discharge, and Habitat R/N fields in Offline Mode */}
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='usgs' label='USGS' readOnly />
+              {isOnline && (
+                <Grid row gap='md'>
+                  <Grid tablet={{ col: 3 }}>
+                    <TextInput name='usgs' label='USGS' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 3 }}>
+                    <TextInput name='riverstage' label='River Stage' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 3 }}>
+                    <TextInput name='discharge' label='Discharge' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 3 }}>
+                    <TextInput name='habitatrn' label='Habitat R/N' isMuted />
+                  </Grid>
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='riverstage' label='River Stage' readOnly />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='discharge' label='Discharge' readOnly />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='habitatrn' label='Habitat R/N' readOnly />
-                </Grid>
-              </Grid>
+              )}
             </Grid>
           </Grid>
 
@@ -1284,8 +1237,12 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocitybot1'
                     label='1-Velocity (bot)'
                     onChange={handleChange}
-                    required={hasPDSG && gearReqFields.velocitybot1.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.velocitybot1.includes(gearCode)}
+                    required={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocitybot1.includes(gearCode) ? true : false
+                    }
+                    isMuted={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocitybot1.includes(gearCode) ? false : true
+                    }
                     type='number'
                   />
                 </Grid>
@@ -1294,11 +1251,21 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity081'
                     label='1-Velocity (0.8 or 0.5)'
                     onChange={handleChange}
-                    required={hasPDSG && (gearReqFields.velocity081.includes(gearCode) || depth2 >= 1.2)}
-                    readOnly={
+                    required={
+                      hasPDSG &&
                       gearType === 'S' &&
-                      !gearReqFields.velocity081.includes(gearCode) &&
-                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
+                      gearReqFields.velocity081.includes(gearCode) &&
+                      Number(depth2) >= 1.2
+                        ? true
+                        : false
+                    }
+                    isMuted={
+                      hasPDSG &&
+                      gearType === 'S' &&
+                      gearReqFields.velocity081.includes(gearCode) &&
+                      Number(depth2) >= 1.2
+                        ? false
+                        : true
                     }
                     type='number'
                   />
@@ -1309,7 +1276,8 @@ const MissouriRiverDataEntryForm = connect(
                     label='1-Velocity (0.2 or 0.6)'
                     type='number'
                     onChange={handleChange}
-                    readOnly={gearType === 'S'}
+                    required={hasPDSG && gearType === 'S' ? true : false}
+                    isMuted={hasPDSG && gearType === 'S' ? false : true}
                   />
                 </Grid>
               </Grid>
@@ -1319,8 +1287,12 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocitybot2'
                     label='2-Velocity (bot)'
                     onChange={handleChange}
-                    required={hasPDSG && gearReqFields.velocitybot2.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.velocitybot2.includes(gearCode)}
+                    required={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocitybot2.includes(gearCode) ? true : false
+                    }
+                    isMuted={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocitybot2.includes(gearCode) ? false : true
+                    }
                     type='number'
                   />
                 </Grid>
@@ -1329,11 +1301,21 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity082'
                     label='2-Velocity (0.8 or 0.5)'
                     onChange={handleChange}
-                    required={hasPDSG && (gearReqFields.velocity082.includes(gearCode) || depth2 >= 1.2)}
-                    readOnly={
+                    required={
+                      hasPDSG &&
                       gearType === 'S' &&
-                      !gearReqFields.velocity082.includes(gearCode) &&
-                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
+                      gearReqFields.velocity082.includes(gearCode) &&
+                      Number(depth2) >= 1.2
+                        ? true
+                        : false
+                    }
+                    isMuted={
+                      hasPDSG &&
+                      gearType === 'S' &&
+                      gearReqFields.velocity082.includes(gearCode) &&
+                      Number(depth2) >= 1.2
+                        ? false
+                        : true
                     }
                     type='number'
                   />
@@ -1343,36 +1325,42 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity02or062'
                     label='2-Velocity (0.2 or 0.6)'
                     onChange={handleChange}
-                    required={hasPDSG && gearReqFields.velocity02or062.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.velocity02or062.includes(gearCode)}
+                    required={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocity02or062.includes(gearCode) ? true : false
+                    }
+                    isMuted={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocity02or062.includes(gearCode) ? false : true
+                    }
                     type='number'
                   />
                 </Grid>
               </Grid>
             </Grid>
-            <Grid tablet={{ col: 4 }}>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='cobble' label='Cobble' readOnly />
+            {isOnline && (
+              <Grid tablet={{ col: 4 }}>
+                <Grid row gap='md'>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='cobble' label='Cobble' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='silt' label='Silt' isMuted />
+                  </Grid>
                 </Grid>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='silt' label='Silt' readOnly />
+                <Grid row gap='md'>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='organic' label='Organic' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='sand' label='Sand' isMuted />
+                  </Grid>
+                </Grid>
+                <Grid row gap='md'>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='gravel' label='Gravel' isMuted />
+                  </Grid>
                 </Grid>
               </Grid>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='organic' label='Organic' readOnly />
-                </Grid>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='sand' label='Sand' readOnly />
-                </Grid>
-              </Grid>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='gravel' label='Gravel' readOnly />
-                </Grid>
-              </Grid>
-            </Grid>
+            )}
             <Grid tablet={{ col: 2 }}>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 6 }}>
