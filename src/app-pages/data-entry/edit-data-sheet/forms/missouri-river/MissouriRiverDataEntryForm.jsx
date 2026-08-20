@@ -333,7 +333,7 @@ const MissouriRiverDataEntryForm = connect(
     const seFid = watch('seFid');
 
     const fishCount = Number(watch('fishCount') || 0);
-    const hasFishRecords = fishCount >= 1;
+    const hasFishRecords = fishCount >= 1 || fishData?.length >= 1;
 
     const isStartTimeDisabled =
       gearCode.startsWith('LDN') &&
