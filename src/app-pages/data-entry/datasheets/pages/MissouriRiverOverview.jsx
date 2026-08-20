@@ -7,7 +7,6 @@ import TabContainer from '@components/tab';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import MissouriRiverDataEntryForm from '../../edit-data-sheet/forms/missouri-river/MissouriRiverDataEntryForm';
 import FishDataEntry from '../tables/fish/FishDataEntry';
-import { isOnline } from '../../offline/sync';
 
 import '../../../data-summaries/data-summary.scss';
 import '../../dataentry.scss';
@@ -22,7 +21,7 @@ const MissouriRiverOverview = connect(
   ({ doUpdateCurrentTab, dataEntryData, dataEntryFishTotalCount, currentTab, routeParams, isEditForm }) => {
     const siteId = routeParams?.siteId;
     const mrId = routeParams.mrId;
-    const online = isOnline();
+    const isOnline = navigator.onLine;
 
     const breadcrumbLinks = [
       {
@@ -52,7 +51,7 @@ const MissouriRiverOverview = connect(
         {/* Top Level Info */}
         <DataHeader type='missouri-river' />
         {/* Approval Fields */}
-        {online && <Approval />}
+        {isOnline && <Approval />}
         {/* Form Fields */}
         <Card className='mt-3'>
           <Card.Header text='Missouri River and Related Data' />
@@ -70,7 +69,7 @@ const MissouriRiverOverview = connect(
                 {
                   title: `Fish (${dataEntryFishTotalCount})`,
                   content: <FishDataEntry />,
-                  // isDisabled: online ? !!!dataEntryData?.mrId : !!!moriverDraft?.mrFid, // Disable tab when no Missouri River data exists yet
+                  isDisabled: isOnline ? !!!dataEntryData?.mrId : !!!dataEntryData?.mrFid, // Disable tab when no Missouri River data exists yet
                 },
               ]}
               onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}
