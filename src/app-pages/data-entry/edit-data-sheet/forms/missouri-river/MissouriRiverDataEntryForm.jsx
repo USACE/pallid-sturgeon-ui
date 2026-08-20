@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
-import classNames from 'classnames';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button, Grid } from '@trussworks/react-uswds';
+import { mdiCrosshairsGps } from '@mdi/js';
 
 import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 import SelectInput from '@src/app-components/new-inputs/select-input/SelectInput';
 import TextInput from '@src/app-components/new-inputs/text-input/TextInput';
 import TextArea from '@src/app-components/new-inputs/text-area/TextArea';
+import Icon from '@src/app-components/icon/icon';
 
 import {
   getMissouriRiverDefaultValues,
@@ -21,9 +22,11 @@ import Checkbox from '@src/app-components/check-box/Checkbox';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import {
   createDropdownOptions,
+  currentDate,
   fmtTimeHHMMSS,
   generateFieldId,
   isEmpty,
+  normalize,
   removeDuplicates,
 } from '@src/app-pages/data-entry/dataEntryHelper';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
@@ -34,14 +37,6 @@ import { db } from '@src/app-pages/data-entry/offline/db';
 import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 
 import '../../../dataentry.scss';
-import { mdiCrosshairsGps } from '@mdi/js';
-import Icon from '@src/app-components/icon/icon';
-
-const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
-
-const currentDate = new Date().toISOString().split('T')[0];
-
-const normalize = (val) => (val ? String(val) : '');
 
 const MissouriRiverDataEntryForm = connect(
   'doUpdateBaseData',
@@ -55,6 +50,8 @@ const MissouriRiverDataEntryForm = connect(
   'selectRouteParams',
   'selectDataEntryFishData',
   'selectDataEntryFishTotalCount',
+  'selectCurrentTab',
+  'selectDataEntryTotalCount',
   ({
     doUpdateBaseData,
     doAddMoRiverDataEntry,
@@ -67,6 +64,8 @@ const MissouriRiverDataEntryForm = connect(
     routeParams,
     dataEntryFishData,
     dataEntryFishTotalCount,
+    currentTab,
+    dataEntryTotalCount,
   }) => {
     // Initialize GPS
     const { browserGps } = useGpsCapture(GPS_OPTIONS);
@@ -94,7 +93,6 @@ const MissouriRiverDataEntryForm = connect(
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
     const siteRouteKey = routeParams?.siteId;
-    const siteId = siteRouteKey;
     const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
     const isOnline = navigator.onLine;
 
@@ -126,9 +124,22 @@ const MissouriRiverDataEntryForm = connect(
       subsampleTypes: [],
     });
     const [submitMessage, setSubmitMessage] = useState(null);
+    const [fishData, setFishData] = useState(dataEntryFishData?.items ?? []);
 
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
-    const newForm = !(dataEntryData?.mrId || dataEntryData?.mr_id || dataEntryData?.serverId);
+    const savedDraft = sessionStorage.getItem(moriverDraftKey);
+    const draft = JSON.parse(savedDraft);
+    const draftSiteRouteKey = draft?.siteRouteKey ?? draft?.siteFid ?? draft?.siteId;
+    const belongsToCurrentSite = draft && String(draftSiteRouteKey) === String(siteRouteKey);
+
+    const newForm = () => {
+      if (isOnline) {
+        return dataEntryData?.mrId ? false : true;
+      } else {
+        // check draft/submitted state
+        return draft?.mrFid || dataEntryData?.mrFid ? false : true;
+      }
+    };
 
     const resolveLookup = (onlineRows, offlineRows) =>
       Array.isArray(onlineRows) && onlineRows.length > 0 ? onlineRows : (offlineRows ?? []);
@@ -261,7 +272,7 @@ const MissouriRiverDataEntryForm = connect(
       fishCount: dataEntryFishTotalCount,
     });
     const hasPDSG =
-      dataEntryFishData?.items?.some(
+      fishData.some(
         (item) =>
           String(item?.species || '')
             .trim()
@@ -399,7 +410,7 @@ const MissouriRiverDataEntryForm = connect(
     };
 
     const reloadOfflineDraft = () => {
-      if (!newForm) return false;
+      if (!newForm()) return false;
       const draft = getOfflineDraft();
       if (!draft) return false;
       reset(
@@ -471,7 +482,7 @@ const MissouriRiverDataEntryForm = connect(
 
       try {
         if (isOnline) {
-          newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+          newForm() ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
           await db.moriver.put(payload);
         }
@@ -526,13 +537,13 @@ const MissouriRiverDataEntryForm = connect(
 
       try {
         if (isOnline) {
-          newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+          newForm() ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
-          newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+          newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
         }
       } catch (error) {
         console.error('Submit failed, queueing offline:', error);
-        newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+        newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
       }
 
       setValue('clientId', clientId);
@@ -552,7 +563,7 @@ const MissouriRiverDataEntryForm = connect(
 
     useEffect(() => {
       reloadOfflineDraft();
-    }, [newForm, dataEntryFishTotalCount]);
+    }, [newForm(), dataEntryFishTotalCount]);
 
     // Set R/N value
     useEffect(() => {
@@ -645,7 +656,7 @@ const MissouriRiverDataEntryForm = connect(
     useEffect(() => {
       if (gearCode) {
         setValue('deploymentType', gearCodes.filter((gear) => gear.code === gearCode)?.[0]?.deploymentType);
-        if (newForm) {
+        if (newForm()) {
           if (gearCode === 'TLC1') {
             setValue('u2', 20);
           }
@@ -723,41 +734,52 @@ const MissouriRiverDataEntryForm = connect(
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
     }, [errors, setFocus]);
 
-    // Set Missouri River IDs
+    // Generate/Set Missouri River Field ID
     useEffect(() => {
       const setFieldId = async () => {
-        if (newForm) {
-          const savedDraft = sessionStorage.getItem(moriverDraftKey);
-          const draft = JSON.parse(savedDraft);
-          const draftSiteRouteKey =
-            draft?.siteRouteKey ?? draft?.siteFid ?? draft?.site_fid ?? draft?.siteId ?? draft?.site_id;
-
-          const belongsToCurrentSite = draft && String(draftSiteRouteKey) === String(siteRouteKey);
-          if (belongsToCurrentSite && (draft?.mrFid || draft?.mr_fid)) {
-            reset(
-              {
-                ...defaultValues,
-                ...draft,
-                mrFid: draft.mrFid ?? draft.mr_fid,
-              },
-              {
-                keepDirty: false,
-                keepTouched: false,
-              }
-            );
+        if (isOnline) {
+          if (newForm()) {
+            const moriverCountForSite = dataEntryTotalCount;
+            const fieldId = generateFieldId(moriverCountForSite);
+            setValue('mrFid', fieldId);
+          } // Otherwise will pull IDs in defaultValues
+        } else {
+          if (newForm()) {
+            if (belongsToCurrentSite && draft?.mrFid) {
+              reset(
+                {
+                  ...defaultValues,
+                  ...draft,
+                  mrFid: draft.mrFid,
+                },
+                {
+                  keepDirty: false,
+                  keepTouched: false,
+                }
+              );
+              return;
+            }
+            const moriverCountForSite = await db.moriver.count();
+            const fieldId = generateFieldId(moriverCountForSite);
+            setValue('mrFid', fieldId);
             return;
-          }
-          const localMrCount = await db.moriver.count();
-          const fieldId = generateFieldId(localMrCount);
-          setValue('mrFid', fieldId);
-          return;
-        } else if (!newForm && dataEntryData) {
-          setValue('mrId', dataEntryData?.mrId ?? dataEntryData?.mr_id);
-          setValue('mrFid', dataEntryData?.mrFid ?? dataEntryData?.mr_fid);
+          } // Otherwise will pull IDs in defaultValues
         }
       };
       setFieldId();
-    }, [newForm, dataEntryData, setValue]);
+    }, [newForm(), dataEntryData, setValue]);
+
+    // Get Offline Fish Data
+    useEffect(() => {
+      const populateOfflineFishData = async (id) => {
+        const cachedData = await db.fish.toArray();
+        // Determine whether to search via Table ID or Field ID
+        const filteredCachedData = cachedData.filter((item) => String(item?.mrFid) === String(id));
+        setFishData(filteredCachedData);
+      };
+      // Only run when offline in offline status and mrFid exists
+      !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
+    }, [mrFid, , isOnline, currentTab, setFishData]);
 
     return (
       <FormProvider {...methods}>
@@ -813,14 +835,7 @@ const MissouriRiverDataEntryForm = connect(
               <TextInput name='subsample' label='Subsample' type='number' onChange={handleChange} required />
             </Grid>
             <Grid tablet={{ col: 1 }}>
-              <TextInput
-                className={saveBtnClasses}
-                name='subsamplepass'
-                label='Pass'
-                type='number'
-                onChange={handleChange}
-                required
-              />
+              <TextInput name='subsamplepass' label='Pass' type='number' onChange={handleChange} required />
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <SelectInput name='subsamplen' label='Subsample R/N' onChange={handleChange} required>
