@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import { ValidationMessages } from '@src/utils/enums';
 import { formatDate } from '@src/utils/helpers';
+import { generateFieldId } from '@src/app-pages/data-entry/dataEntryHelper';
 
 export const microSegmentRequired = [8, 9, 10, 11, 13, 14];
 
@@ -148,11 +149,22 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false }) =>
         })
         .nullable()
         .notRequired(),
-      stopTime: yup.string().when('deploymentType', {
-        is: (deploymentType) => deploymentType === 'p',
-        then: (schema) => schema.required(ValidationMessages.FieldRequired),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
+      stopTime: yup
+        .string()
+        .when('deploymentType', {
+          is: (deploymentType) => deploymentType === 'p',
+          then: (schema) => schema.required(ValidationMessages.FieldRequired),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        })
+        .test('stop-after-start', 'Stop Time must be after Start Time', function (stopTime) {
+          const { startTime } = this.parent;
+          if (!startTime || !stopTime) return true;
+          const toSeconds = (time) => {
+            const [hours, minutes, seconds] = time.split(':').map(Number);
+            return hours * 3600 + minutes * 60 + seconds;
+          };
+          return toSeconds(stopTime) > toSeconds(startTime);
+        }),
       stopLatitude: yup
         .string()
         .when(['deploymentType', 'gear'], {
@@ -451,9 +463,9 @@ const getBaseDefaultValues = ({ baseData }) => ({
   siteId: baseData?.siteId ?? '',
 });
 
-export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData, fishCount = 0 }) => ({
+export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData, moriverCount = 0, fishCount = 0 }) => ({
   ...getBaseDefaultValues({ baseData }),
-  mrFid: dataEntryData?.mrFid ?? '',
+  mrFid: dataEntryData?.mrFid ?? generateFieldId(moriverCount),
   seFid: dataEntryData?.seFid ?? '',
   mrId: dataEntryData?.mrId ?? '',
   seId: dataEntryData?.SeId ?? '',
