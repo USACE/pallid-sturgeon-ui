@@ -1,14 +1,15 @@
 import { useCallback, useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
-import classNames from 'classnames';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button, Grid } from '@trussworks/react-uswds';
+import { mdiCrosshairsGps } from '@mdi/js';
 
 import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 import SelectInput from '@src/app-components/new-inputs/select-input/SelectInput';
 import TextInput from '@src/app-components/new-inputs/text-input/TextInput';
 import TextArea from '@src/app-components/new-inputs/text-area/TextArea';
+import Icon from '@src/app-components/icon/icon';
 
 import {
   getMissouriRiverDefaultValues,
@@ -21,27 +22,21 @@ import Checkbox from '@src/app-components/check-box/Checkbox';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import {
   createDropdownOptions,
+  currentDate,
   fmtTimeHHMMSS,
   generateFieldId,
   isEmpty,
+  normalize,
   removeDuplicates,
 } from '@src/app-pages/data-entry/dataEntryHelper';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
-import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
 import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 
 import '../../../dataentry.scss';
-import { mdiCrosshairsGps } from '@mdi/js';
-import Icon from '@src/app-components/icon/icon';
-
-const saveBtnClasses = classNames('button-small', 'text-normal', 'save-btn');
-
-const currentDate = new Date().toISOString().split('T')[0];
-
-const normalize = (val) => (val ? String(val) : '');
 
 const MissouriRiverDataEntryForm = connect(
   'doUpdateBaseData',
@@ -53,7 +48,10 @@ const MissouriRiverDataEntryForm = connect(
   'selectDataEntryData',
   'selectLookupData',
   'selectRouteParams',
+  'selectDataEntryFishData',
   'selectDataEntryFishTotalCount',
+  'selectCurrentTab',
+  'selectMoriverSitesDraftDatasheetTotalResults',
   ({
     doUpdateBaseData,
     doAddMoRiverDataEntry,
@@ -64,7 +62,10 @@ const MissouriRiverDataEntryForm = connect(
     dataEntryData,
     lookupData,
     routeParams,
+    dataEntryFishData,
     dataEntryFishTotalCount,
+    currentTab,
+    moriverSitesDraftDatasheetTotalResults,
   }) => {
     // Initialize GPS
     const { browserGps } = useGpsCapture(GPS_OPTIONS);
@@ -92,9 +93,8 @@ const MissouriRiverDataEntryForm = connect(
     } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
     const siteRouteKey = routeParams?.siteId;
-    const siteId = siteRouteKey;
     const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
-    const online = !!isOnline();
+    const isOnline = navigator.onLine;
 
     const [gearCodeOptions, setGearCodeOptions] = useState(onlineGearCodes);
     const [mesoOptions, setMesoOptions] = useState(onlineMesos);
@@ -124,9 +124,38 @@ const MissouriRiverDataEntryForm = connect(
       subsampleTypes: [],
     });
     const [submitMessage, setSubmitMessage] = useState(null);
+    const [fishData, setFishData] = useState(dataEntryFishData?.items ?? []);
 
+    // Fetch Offline Draft Data
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
-    const newForm = !(dataEntryData?.mrId || dataEntryData?.mr_id || dataEntryData?.serverId);
+    const getOfflineDraft = () => {
+      const savedDraft = sessionStorage.getItem(moriverDraftKey);
+      if (!savedDraft) return null;
+
+      try {
+        const draft = JSON.parse(savedDraft);
+        if (!draft?.mrFid) return null;
+
+        const checkSiteId =
+          String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey);
+        if (checkSiteId) return null;
+
+        return draft;
+      } catch (err) {
+        console.error('Failed to parse offline Missouri River draft:', err);
+        return null;
+      }
+    };
+    const draft = getOfflineDraft();
+
+    const newForm = () => {
+      if (isOnline) {
+        return dataEntryData?.mrId ? false : true;
+      } else {
+        // check draft/submitted state
+        return draft?.mrFid || dataEntryData?.mrFid ? false : true;
+      }
+    };
 
     const resolveLookup = (onlineRows, offlineRows) =>
       Array.isArray(onlineRows) && onlineRows.length > 0 ? onlineRows : (offlineRows ?? []);
@@ -257,9 +286,19 @@ const MissouriRiverDataEntryForm = connect(
       baseData,
       dataEntryData,
       fishCount: dataEntryFishTotalCount,
+      moriverCount: moriverSitesDraftDatasheetTotalResults,
     });
+    const hasPDSG =
+      fishData.some(
+        (item) =>
+          String(item?.species || '')
+            .trim()
+            .toUpperCase() === 'PDSG'
+      ) ?? false;
+
     const schema = getMissouriRiverSchema({
       riverMile: getUpperLowerRiverMile(bend, segmentId),
+      hasPDSG,
     });
 
     // RHF Methods Config
@@ -279,6 +318,8 @@ const MissouriRiverDataEntryForm = connect(
       handleSubmit,
       reset,
     } = methods;
+
+    const shouldAutoValidate = submitCount > 0;
 
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
@@ -305,9 +346,10 @@ const MissouriRiverDataEntryForm = connect(
     const velocitybot1 = watch('velocitybot1');
     const velocity081 = watch('velocity081');
     const u7 = watch('u7');
+    const mrFid = watch('mrFid');
+    const seFid = watch('seFid');
 
-    const fishCount = Number(watch('fishCount') || 0);
-    const hasFishRecords = fishCount >= 1;
+    const hasFishRecords = isOnline ? dataEntryFishTotalCount > 0 : fishData?.length > 0;
 
     const isStartTimeDisabled =
       gearCode.startsWith('LDN') &&
@@ -364,51 +406,14 @@ const MissouriRiverDataEntryForm = connect(
       };
     };
 
-    const getOfflineDraft = () => {
-      const savedDraft = sessionStorage.getItem(moriverDraftKey);
-      if (!savedDraft) return null;
-
-      try {
-        const draft = JSON.parse(savedDraft);
-        if (!draft?.mrFid) return null;
-
-        const checkSiteId =
-          String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey);
-        if (checkSiteId) return null;
-
-        return draft;
-      } catch (err) {
-        console.error('Failed to parse offline Missouri River draft:', err);
-        return null;
-      }
-    };
-
-    const reloadOfflineDraft = () => {
-      if (!newForm) return false;
-      const draft = getOfflineDraft();
-      if (!draft) return false;
-      reset(
-        {
-          ...defaultValues,
-          ...draft,
-          fishCount: Number(draft.fishCount || dataEntryFishTotalCount || 0),
-        },
-        {
-          keepDirty: false,
-          keepTouched: false,
-        }
-      );
-      return true;
-    };
-
     // Capture Start and Stop Lat, Long, Time
     const handleCapture = async (type) => {
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
 
-        setValue(`${type}Latitude`, best.lat, { shouldValidate: true });
-        setValue(`${type}Longitude`, best.lng, { shouldValidate: true });
-        setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: true });
+        setValue(`${type}Latitude`, best.lat, { shouldValidate: shouldAutoValidate });
+        setValue(`${type}Longitude`, best.lng, { shouldValidate: shouldAutoValidate });
+        setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: shouldAutoValidate });
 
         window.alert(
           `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
@@ -455,10 +460,9 @@ const MissouriRiverDataEntryForm = connect(
       }
 
       try {
-        if (online) {
-          newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+        if (isOnline) {
+          newForm() ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
-          // newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
           await db.moriver.put(payload);
         }
         sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
@@ -471,134 +475,89 @@ const MissouriRiverDataEntryForm = connect(
       } catch (error) {
         console.error('Save draft failed:', error);
 
-        if (!online) {
+        if (!isOnline) {
           await db.moriver.put(payload);
           sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
           doUpdateCurrentTab(1);
         }
-        // newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
       }
     };
 
     const doSubmit = async () => {
       setValue('status', DataEntryStatuses.Submitted);
-
       const dataObj = formatDataObj();
-      const draft = getOfflineDraft();
-      const clientId = dataObj.clientId ?? draft?.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();
-
-      const formattedValues = {
-        ...draft,
-        ...dataObj,
-        clientId,
-        siteId: isOfflineSite ? undefined : Number(dataObj.siteId ?? draft?.siteId ?? siteRouteKey),
-        site_id: isOfflineSite
-          ? undefined
-          : Number(dataObj.site_id ?? dataObj.siteId ?? draft?.site_id ?? draft?.siteId ?? siteRouteKey),
-        siteFid: isOfflineSite ? siteRouteKey : (dataObj.siteFid ?? draft?.siteFid ?? baseData?.siteFid),
-        site_fid: isOfflineSite ? siteRouteKey : (dataObj.site_fid ?? draft?.site_fid ?? baseData?.site_fid),
-        siteRouteKey,
-        status: DataEntryStatuses.Submitted,
-        _status: OfflineStatuses.Queued,
-        version: dataObj.version ?? draft?.version ?? 0,
-        updatedAt: new Date().toISOString(),
-      };
-
-      const payload = filterNullEmptyObjects(formattedValues);
-
-      if (!payload.mrFid && !payload.mr_fid) {
-        console.error('Missing mrFid. Cannot submit Missouri River form.');
-        return;
-      }
-
-      try {
-        if (online) {
-          newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
-        } else {
-          newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+      if (isOnline) {
+        // Submit online
+        const payload = filterNullEmptyObjects(dataObj);
+        if (!payload.mrFid) {
+          console.error('Missing mrFid. Cannot submit Missouri River form.');
+          return;
         }
-      } catch (error) {
-        console.error('Submit failed, queueing offline:', error);
-        newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+        newForm() ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+      } else {
+        // Submit offline
+        const clientId = dataObj.clientId ?? draft?.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();
+        const formattedValues = {
+          ...draft,
+          ...dataObj,
+          clientId,
+          siteId: isOfflineSite ? undefined : Number(dataObj.siteId ?? draft?.siteId ?? siteRouteKey),
+          site_id: isOfflineSite
+            ? undefined
+            : Number(dataObj.site_id ?? dataObj.siteId ?? draft?.site_id ?? draft?.siteId ?? siteRouteKey),
+          siteFid: isOfflineSite ? siteRouteKey : (dataObj.siteFid ?? draft?.siteFid ?? baseData?.siteFid),
+          site_fid: isOfflineSite ? siteRouteKey : (dataObj.site_fid ?? draft?.site_fid ?? baseData?.site_fid),
+          siteRouteKey,
+          status: DataEntryStatuses.Submitted,
+          _status: OfflineStatuses.Queued,
+          version: dataObj.version ?? draft?.version ?? 0,
+          updatedAt: new Date().toISOString(),
+        };
+        const payload = filterNullEmptyObjects(formattedValues);
+        if (!payload.mrFid && !payload.mr_fid) {
+          console.error('Missing mrFid. Cannot submit Missouri River form.');
+          return;
+        }
+        try {
+          newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+        } catch (error) {
+          console.error('Submit failed, queueing offline:', error);
+          newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+        }
+        setValue('clientId', clientId);
+        setValue('status', DataEntryStatuses.Submitted);
+        setValue('mrFid', payload.mrFid ?? payload.mr_fid);
+        sessionStorage.removeItem(moriverDraftKey);
       }
-
-      setValue('clientId', clientId);
-      setValue('status', DataEntryStatuses.Submitted);
-      setValue('mrFid', payload.mrFid ?? payload.mr_fid);
-      sessionStorage.removeItem(moriverDraftKey);
       refreshSiteDatasheet();
       doUpdateUrl(`/sites-list/${siteRouteKey}`);
-
       setSubmitMessage({
         type: ApiStatuses.Success,
-        text: online
+        text: isOnline
           ? 'Missouri River form submitted successfully.'
           : 'Missouri River form saved offline successfully. It will sync when you are back online.',
       });
     };
 
+    const reloadOfflineDraft = () => {
+      if (!draft) return false;
+      reset(
+        {
+          ...defaultValues,
+          ...draft,
+          fishCount: Number(draft.fishCount || dataEntryFishTotalCount || fishData?.length || 0),
+        },
+        {
+          keepDirty: false,
+          keepTouched: false,
+        }
+      );
+      return true;
+    };
+
     useEffect(() => {
       reloadOfflineDraft();
-    }, [newForm, dataEntryFishTotalCount]);
-
-    // load offline lookup
-    // useEffect(() => {
-    //   const loadOfflineLookups = async () => {
-    //     try {
-    //       const names = [
-    //         'bendRiverMile',
-    //         'bendSelections',
-    //         'gearCodes',
-    //         'filteredGearCodes',
-    //         'gearTypes',
-    //         'macros',
-    //         'mesos',
-    //         'macroMesos',
-    //         'microHabitats',
-    //         'microStructures',
-    //         'u6Options',
-    //         'u7Options',
-    //         'microSetSite',
-    //         'setSite1Options',
-    //         'setSite2Options',
-    //         'setSite3Options',
-    //         'structureFlows',
-    //         'structureMods',
-    //         'subsampleTypes',
-    //       ];
-
-    //       const entries = await Promise.all(names.map(async (name) => [name, await getLookupOptions(name)]));
-    //       setOfflineLookups(Object.fromEntries(entries));
-    //     } catch (err) {
-    //       console.error('Failed to load Missouri River offline lookups:', error);
-    //     }
-    //   };
-    //   void loadOfflineLookups();
-    // });
-
-    // useEffect(() => {
-    //   loadCachedLookups();
-    // }, [loadCachedLookups]);
-
-    // useEffect(() => {
-    //   const draft = getOfflineDraft();
-
-    //   if (newForm && draft) {
-    //     reset(
-    //       {
-    //         ...defaultValues,
-    //         ...draft,
-    //         fishCount: Number(draft.fishCount || dataEntryFishTotalCount || 0),
-    //       },
-    //       {
-    //         keepDirty: false,
-    //         keepTouched: false,
-    //       }
-    //     );
-    //     return;
-    //   }
-    //   reset(defaultValues);
-    // }, [reset, defaultValues, newForm, dataEntryFishTotalCount]);
+    }, [dataEntryFishTotalCount, currentTab]);
 
     // Set R/N value
     useEffect(() => {
@@ -630,14 +589,14 @@ const MissouriRiverDataEntryForm = connect(
         normalize(setSite3),
       ];
       if (split.join('') !== currentDigits.join('')) {
-        setValue('microStructure', split[0] || '', { shouldValidate: true });
-        setValue('structureFlow', split[1] || '', { shouldValidate: true });
-        setValue('structureMod', split[2] || '', { shouldValidate: true });
-        setValue('setSite1', split[3] || '', { shouldValidate: true });
-        setValue('setSite2', split[4] || '', { shouldValidate: true });
-        setValue('setSite3', split[5] || '', { shouldValidate: true });
+        setValue('microStructure', split[0] || '', { shouldValidate: shouldAutoValidate });
+        setValue('structureFlow', split[1] || '', { shouldValidate: shouldAutoValidate });
+        setValue('structureMod', split[2] || '', { shouldValidate: shouldAutoValidate });
+        setValue('setSite1', split[3] || '', { shouldValidate: shouldAutoValidate });
+        setValue('setSite2', split[4] || '', { shouldValidate: shouldAutoValidate });
+        setValue('setSite3', split[5] || '', { shouldValidate: shouldAutoValidate });
       }
-    }, [micro]);
+    }, [micro, shouldAutoValidate]);
 
     // Sync Digits (Micro Structure, Structure Flow, Structure Mod, Set Site 1, Set Site 2, Set Site 3) -> Micro code
     useEffect(() => {
@@ -654,44 +613,44 @@ const MissouriRiverDataEntryForm = connect(
       const joined = digits.join('');
       if (joined !== micro) {
         setValue('micro', joined, {
-          shouldValidate: true,
+          shouldValidate: shouldAutoValidate,
           shouldDirty: false,
         });
       }
-    }, [microStructure, structureFlow, structureMod, setSite1, setSite2, setSite3]);
+    }, [microStructure, structureFlow, structureMod, setSite1, setSite2, setSite3, shouldAutoValidate]);
 
     // Set Structure Flow and SetSite1 options and reset values when necessary
     useEffect(() => {
-      setValue('setSite1', '', { shouldValidate: true });
-      setValue('structureFlow', '', { shouldValidate: true });
+      setValue('setSite1', '', { shouldValidate: shouldAutoValidate });
+      setValue('structureFlow', '', { shouldValidate: shouldAutoValidate });
       setSs1Options(getSs1Options(microStructure));
       setStructureFlowOptions(getStructureFlowOptions(microStructure));
-    }, [microStructure]);
+    }, [microStructure, shouldAutoValidate]);
 
     // Set Structure Mod options and reset Structure Mod value when necessary
     useEffect(() => {
-      setValue('structureMod', '', { shouldValidate: true });
+      setValue('structureMod', '', { shouldValidate: shouldAutoValidate });
       setStructureModOptions(getStructureModOptions(structureFlow));
-    }, [structureFlow]);
+    }, [structureFlow, shouldAutoValidate]);
 
     // Set SetSite1 options and reset SetSite1 value when necessary
     useEffect(() => {
-      setValue('setSite2', '', { shouldValidate: true });
+      setValue('setSite2', '', { shouldValidate: shouldAutoValidate });
       setSs2Options(getSs2Options(setSite1));
-    }, [setSite1]);
+    }, [setSite1, shouldAutoValidate]);
 
     // Both Velocity (bot) 1 and Velocity (0.8 or 0.5) 1 must be filled out before setting the start time when using a Larval Drift Net gear.
     useEffect(() => {
       if (gearCode.startsWith('LDN') && velocitybot1 === null && velocity081 === null) {
         // Reset start time under these conditions
-        setValue('startTime', '', { shouldValidate: true });
+        setValue('startTime', '', { shouldValidate: shouldAutoValidate });
       }
-    }, [gearCode, velocitybot1, velocity081]);
+    }, [gearCode, velocitybot1, velocity081, shouldAutoValidate]);
 
     useEffect(() => {
       if (gearCode) {
         setValue('deploymentType', gearCodes.filter((gear) => gear.code === gearCode)?.[0]?.deploymentType);
-        if (newForm) {
+        if (newForm()) {
           if (gearCode === 'TLC1') {
             setValue('u2', 20);
           }
@@ -725,40 +684,40 @@ const MissouriRiverDataEntryForm = connect(
       if (structureFlowOptions.length > 0) {
         if (dataEntryData?.structureFlow) {
           setValue('structureFlow', dataEntryData?.structureFlow);
-          trigger('structureFlow');
+          shouldAutoValidate && trigger('structureFlow');
         }
       }
-    }, [dataEntryData, structureFlowOptions]);
+    }, [dataEntryData, structureFlowOptions, shouldAutoValidate, trigger]);
 
     // Populate Structure Mod Dropdown Value from Existing API Data
     useEffect(() => {
       if (structureModOptions.length > 0) {
         if (dataEntryData?.structureMod) {
           setValue('structureMod', dataEntryData?.structureMod);
-          trigger('structureMod');
+          shouldAutoValidate && trigger('structureMod');
         }
       }
-    }, [dataEntryData, structureModOptions]);
+    }, [dataEntryData, structureModOptions, shouldAutoValidate, trigger]);
 
     // Populate Set Site 1 Dropdown Value from Existing API Data
     useEffect(() => {
       if (ss1Options.length > 0) {
         if (dataEntryData?.setSite1) {
           setValue('setSite1', dataEntryData?.setSite1);
-          trigger('setSite1');
+          shouldAutoValidate && trigger('setSite1');
         }
       }
-    }, [dataEntryData, ss1Options]);
+    }, [dataEntryData, ss1Options, shouldAutoValidate, trigger]);
 
     // Populate Set Site 2 Dropdown Value from Existing API Data
     useEffect(() => {
       if (ss2Options.length > 0) {
         if (dataEntryData?.setSite2) {
           setValue('setSite2', dataEntryData?.setSite2);
-          trigger('setSite2');
+          shouldAutoValidate && trigger('setSite2');
         }
       }
-    }, [dataEntryData, ss2Options]);
+    }, [dataEntryData, ss2Options, shouldAutoValidate, trigger]);
 
     // netrivermile in baseData
     useEffect(() => {
@@ -769,41 +728,29 @@ const MissouriRiverDataEntryForm = connect(
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
     }, [errors, setFocus]);
 
-    // Set Missouri River IDs
+    // Get Offline Fish Data
     useEffect(() => {
-      const setFieldId = async () => {
-        if (newForm) {
-          const savedDraft = sessionStorage.getItem(moriverDraftKey);
-          const draft = JSON.parse(savedDraft);
-          const draftSiteRouteKey =
-            draft?.siteRouteKey ?? draft?.siteFid ?? draft?.site_fid ?? draft?.siteId ?? draft?.site_id;
-
-          const belongsToCurrentSite = draft && String(draftSiteRouteKey) === String(siteRouteKey);
-          if (belongsToCurrentSite && (draft?.mrFid || draft?.mr_fid)) {
-            reset(
-              {
-                ...defaultValues,
-                ...draft,
-                mrFid: draft.mrFid ?? draft.mr_fid,
-              },
-              {
-                keepDirty: false,
-                keepTouched: false,
-              }
-            );
-            return;
-          }
-          const localMrCount = await db.moriver.count();
-          const fieldId = generateFieldId(localMrCount);
-          setValue('mrFid', fieldId);
-          return;
-        } else if (!newForm && dataEntryData) {
-          setValue('mrId', dataEntryData?.mrId ?? dataEntryData?.mr_id);
-          setValue('mrFid', dataEntryData?.mrFid ?? dataEntryData?.mr_fid);
-        }
+      const populateOfflineFishData = async (id) => {
+        const cachedData = await db.fish.toArray();
+        // Determine whether to search via Table ID or Field ID
+        const filteredCachedData = cachedData.filter((item) => String(item?.mrFid) === String(id));
+        setFishData(filteredCachedData);
       };
-      setFieldId();
-    }, [newForm, dataEntryData, setValue]);
+      // Only run when offline in offline status and mrFid exists
+      !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
+    }, [mrFid, , isOnline, currentTab, setFishData]);
+
+    // Get Offline Fish Data
+    useEffect(() => {
+      const populateOfflineFishData = async (id) => {
+        const cachedData = await db.fish.toArray();
+        // Determine whether to search via Table ID or Field ID
+        const filteredCachedData = cachedData.filter((item) => String(item?.mrFid) === String(id));
+        setFishData(filteredCachedData);
+      };
+      // Only run when offline in offline status and mrFid exists
+      !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
+    }, [mrFid, , isOnline, currentTab, setFishData]);
 
     return (
       <FormProvider {...methods}>
@@ -816,12 +763,18 @@ const MissouriRiverDataEntryForm = connect(
           </div>
         )}
         <div className='container-fluid test-moriver margin-top-1'>
-          <Grid row gap='md' className='padding-bottom-3'>
+          <Grid row gap='md'>
             <Grid tablet={{ col: 2 }}>
-              <TextInput name='mrFid' label='MR Field ID (Date-Time-MR#)' readOnly />
+              <p>
+                MR Field ID (Date-Time-SE#):<br></br>
+                <span className='text-bold'>{mrFid}</span>
+              </p>
             </Grid>
             <Grid tablet={{ col: 2 }}>
-              <TextInput name='seFid' label='SE Field ID (Date-Time-SE#)' readOnly />
+              <p>
+                SE Field ID (Date-Time-SE#):<br></br>
+                <span className='text-bold'>{seFid !== '' ? seFid : '--'}</span>
+              </p>
             </Grid>
             {!hasFishRecords ? (
               <Grid tablet={{ col: 2 }}>
@@ -853,14 +806,7 @@ const MissouriRiverDataEntryForm = connect(
               <TextInput name='subsample' label='Subsample' type='number' onChange={handleChange} required />
             </Grid>
             <Grid tablet={{ col: 1 }}>
-              <TextInput
-                className={saveBtnClasses}
-                name='subsamplepass'
-                label='Pass'
-                type='number'
-                onChange={handleChange}
-                required
-              />
+              <TextInput name='subsamplepass' label='Pass' type='number' onChange={handleChange} required />
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <SelectInput name='subsamplen' label='Subsample R/N' onChange={handleChange} required>
@@ -949,7 +895,7 @@ const MissouriRiverDataEntryForm = connect(
                     label='Width'
                     type='number'
                     onChange={handleChange}
-                    readOnly={gearType === 'S'}
+                    isMuted={gearType === 'S'}
                   />
                 </Grid>
               </Grid>
@@ -1109,8 +1055,8 @@ const MissouriRiverDataEntryForm = connect(
                     label='Distance'
                     type='number'
                     onChange={handleChange}
-                    required={gearReqFields.distance.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.distance.includes(gearCode)}
+                    required={gearType === 'S' && gearReqFields.distance.includes(gearCode) ? true : false}
+                    isMuted={gearType === 'S' && gearReqFields.distance.includes(gearCode) ? false : true}
                   />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
@@ -1118,8 +1064,8 @@ const MissouriRiverDataEntryForm = connect(
                     name='depth1'
                     label='1-Depth'
                     onChange={handleChange}
-                    required={gearReqFields.depth1.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.depth1.includes(gearCode)}
+                    required={gearType === 'S' && gearReqFields.depth1.includes(gearCode) ? true : false}
+                    isMuted={gearType === 'S' && gearReqFields.depth1.includes(gearCode) ? false : true}
                     type='number'
                     warning={getDepthWarning(depth1)}
                   />
@@ -1129,8 +1075,8 @@ const MissouriRiverDataEntryForm = connect(
                     name='depth2'
                     label='2-Depth'
                     onChange={handleChange}
-                    required={gearReqFields.depth2.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.depth2.includes(gearCode)}
+                    required={gearType === 'S' && gearReqFields.depth2.includes(gearCode) ? true : false}
+                    isMuted={gearType === 'S' && gearReqFields.depth2.includes(gearCode) ? false : true}
                     type='number'
                     warning={getDepthWarning(depth2)}
                   />
@@ -1140,8 +1086,8 @@ const MissouriRiverDataEntryForm = connect(
                     name='depth3'
                     label='3-Depth'
                     onChange={handleChange}
-                    required={gearReqFields.depth3.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.depth3.includes(gearCode)}
+                    required={gearType === 'S' && gearReqFields.depth3.includes(gearCode) ? true : false}
+                    isMuted={gearType === 'S' && gearReqFields.depth3.includes(gearCode) ? false : true}
                     type='number'
                     warning={getDepthWarning(depth3)}
                   />
@@ -1250,21 +1196,22 @@ const MissouriRiverDataEntryForm = connect(
                   <TextInput name='dissolvedOxygen' label='Dissolved Oxygen (D.O.)' onChange={handleChange} />
                 </Grid>
               </Grid>
-              {/* @TODO: Hide USGS, River Stage, Discharge, and Habitat R/N fields in Offline Mode */}
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='usgs' label='USGS' readOnly />
+              {isOnline && (
+                <Grid row gap='md'>
+                  <Grid tablet={{ col: 3 }}>
+                    <TextInput name='usgs' label='USGS' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 3 }}>
+                    <TextInput name='riverstage' label='River Stage' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 3 }}>
+                    <TextInput name='discharge' label='Discharge' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 3 }}>
+                    <TextInput name='habitatrn' label='Habitat R/N' isMuted />
+                  </Grid>
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='riverstage' label='River Stage' readOnly />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='discharge' label='Discharge' readOnly />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput name='habitatrn' label='Habitat R/N' readOnly />
-                </Grid>
-              </Grid>
+              )}
             </Grid>
           </Grid>
 
@@ -1276,8 +1223,12 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocitybot1'
                     label='1-Velocity (bot)'
                     onChange={handleChange}
-                    required={gearReqFields.velocitybot1.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.velocitybot1.includes(gearCode)}
+                    required={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocitybot1.includes(gearCode) ? true : false
+                    }
+                    isMuted={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocitybot1.includes(gearCode) ? false : true
+                    }
                     type='number'
                   />
                 </Grid>
@@ -1286,11 +1237,21 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity081'
                     label='1-Velocity (0.8 or 0.5)'
                     onChange={handleChange}
-                    required={gearReqFields.velocity081.includes(gearCode) || depth2 >= 1.2}
-                    readOnly={
+                    required={
+                      hasPDSG &&
                       gearType === 'S' &&
-                      !gearReqFields.velocity081.includes(gearCode) &&
-                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
+                      gearReqFields.velocity081.includes(gearCode) &&
+                      Number(depth2) >= 1.2
+                        ? true
+                        : false
+                    }
+                    isMuted={
+                      hasPDSG &&
+                      gearType === 'S' &&
+                      gearReqFields.velocity081.includes(gearCode) &&
+                      Number(depth2) >= 1.2
+                        ? false
+                        : true
                     }
                     type='number'
                   />
@@ -1301,7 +1262,8 @@ const MissouriRiverDataEntryForm = connect(
                     label='1-Velocity (0.2 or 0.6)'
                     type='number'
                     onChange={handleChange}
-                    readOnly={gearType === 'S'}
+                    required={hasPDSG && gearType === 'S' ? true : false}
+                    isMuted={hasPDSG && gearType === 'S' ? false : true}
                   />
                 </Grid>
               </Grid>
@@ -1311,8 +1273,12 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocitybot2'
                     label='2-Velocity (bot)'
                     onChange={handleChange}
-                    required={gearReqFields.velocitybot2.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.velocitybot2.includes(gearCode)}
+                    required={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocitybot2.includes(gearCode) ? true : false
+                    }
+                    isMuted={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocitybot2.includes(gearCode) ? false : true
+                    }
                     type='number'
                   />
                 </Grid>
@@ -1321,11 +1287,21 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity082'
                     label='2-Velocity (0.8 or 0.5)'
                     onChange={handleChange}
-                    required={gearReqFields.velocity082.includes(gearCode) || depth2 >= 1.2}
-                    readOnly={
+                    required={
+                      hasPDSG &&
                       gearType === 'S' &&
-                      !gearReqFields.velocity082.includes(gearCode) &&
-                      (depth2 !== null || depth2 !== '' || depth2 < 1.2)
+                      gearReqFields.velocity082.includes(gearCode) &&
+                      Number(depth2) >= 1.2
+                        ? true
+                        : false
+                    }
+                    isMuted={
+                      hasPDSG &&
+                      gearType === 'S' &&
+                      gearReqFields.velocity082.includes(gearCode) &&
+                      Number(depth2) >= 1.2
+                        ? false
+                        : true
                     }
                     type='number'
                   />
@@ -1335,36 +1311,42 @@ const MissouriRiverDataEntryForm = connect(
                     name='velocity02or062'
                     label='2-Velocity (0.2 or 0.6)'
                     onChange={handleChange}
-                    required={gearReqFields.velocity02or062.includes(gearCode)}
-                    readOnly={gearType === 'S' && !gearReqFields.velocity02or062.includes(gearCode)}
+                    required={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocity02or062.includes(gearCode) ? true : false
+                    }
+                    isMuted={
+                      hasPDSG && gearType === 'S' && gearReqFields.velocity02or062.includes(gearCode) ? false : true
+                    }
                     type='number'
                   />
                 </Grid>
               </Grid>
             </Grid>
-            <Grid tablet={{ col: 4 }}>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='cobble' label='Cobble' readOnly />
+            {isOnline && (
+              <Grid tablet={{ col: 4 }}>
+                <Grid row gap='md'>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='cobble' label='Cobble' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='silt' label='Silt' isMuted />
+                  </Grid>
                 </Grid>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='silt' label='Silt' readOnly />
+                <Grid row gap='md'>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='organic' label='Organic' isMuted />
+                  </Grid>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='sand' label='Sand' isMuted />
+                  </Grid>
+                </Grid>
+                <Grid row gap='md'>
+                  <Grid tablet={{ col: 5 }}>
+                    <TextInput name='gravel' label='Gravel' isMuted />
+                  </Grid>
                 </Grid>
               </Grid>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='organic' label='Organic' readOnly />
-                </Grid>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='sand' label='Sand' readOnly />
-                </Grid>
-              </Grid>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 5 }}>
-                  <TextInput name='gravel' label='Gravel' readOnly />
-                </Grid>
-              </Grid>
-            </Grid>
+            )}
             <Grid tablet={{ col: 2 }}>
               <Grid row gap='md'>
                 <Grid tablet={{ col: 6 }}>

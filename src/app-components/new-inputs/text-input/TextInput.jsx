@@ -26,9 +26,10 @@ const TextInput = ({
   warning,
   tooltip,
   tooltipClickable,
+  isMuted,
   ...customProps
 }) => {
-  const classes = classNames(className, { 'text-uppercase': uppercase });
+  const classes = classNames(className, { 'text-uppercase': uppercase, 'muted-styles': isMuted });
 
   const {
     register,
