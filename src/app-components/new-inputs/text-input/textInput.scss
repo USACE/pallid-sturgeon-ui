@@ -8,6 +8,10 @@ input.usa-input {
   text-overflow: ellipsis !important;
 }
 
+.muted-styles {
+  background-color: #bdbdbd;
+}
+
 div.usa-hint {
   &.warning-message {
     font-style: italic;
