@@ -24,7 +24,6 @@ import {
   createDropdownOptions,
   currentDate,
   fmtTimeHHMMSS,
-  generateFieldId,
   isEmpty,
   normalize,
   removeDuplicates,
@@ -919,7 +918,7 @@ const MissouriRiverDataEntryForm = connect(
                     label='Micro'
                     onChange={handleChange}
                     required={Number(projectId) === 1 && microSegmentRequired.includes(segmentId)}
-                    type='number'
+                    maxLength={6}
                   />
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
