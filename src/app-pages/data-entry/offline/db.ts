@@ -42,6 +42,7 @@ export interface SiteEntry extends DataEntry {
 
 export interface MoriverEntry extends DataEntry {
   // --- form fields ---
+  fishCount?: number;
   fieldoffice?: string;
   project?: number;
   segment?: number;
@@ -150,6 +151,7 @@ export interface MoriverEntry extends DataEntry {
 export interface SearchEffortEntry extends DataEntry {
   se_id?: number;
   seId?: number;
+  telemetryCount?: number;
   search_date?: string;
   recorder?: string;
   search_type_code?: string;

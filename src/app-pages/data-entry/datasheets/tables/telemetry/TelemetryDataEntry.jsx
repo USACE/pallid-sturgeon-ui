@@ -8,7 +8,6 @@ import { Button } from '@trussworks/react-uswds';
 
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
-import { db } from '@src/app-pages/data-entry/offline/db';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
 
@@ -24,7 +23,7 @@ import { getTelemetryColumns } from './helpers.telemetry';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
-import { validate } from 'uuid';
+import { server } from 'typescript';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
 console.log('GPS POC flag', import.meta.env.VITE_USE_UBLOX_POC, USE_UBLOX_POC);
@@ -35,10 +34,10 @@ const GPS_OPTIONS = {
   maximumAge: 0,
 };
 
-const getNextSequence = (data, seFid) => {
-  const existing = data.filter((item) => item.seFid === seFid);
-  return existing.length + 1;
-};
+// const getNextSequence = (data, seFid) => {
+//   const existing = data.filter((item) => item.seFid === seFid);
+//   return existing.length + 1;
+// };
 
 const createBlankTelemetryRow = () => ({
   _isPlaceholderRow: true,
@@ -64,21 +63,9 @@ const ensureTrailingBlankTelemetryRow = (rows) => {
 
 const getNextTelemetryId = (rows, parentSeId, parentSeFid) => {
   const telRows = (rows ?? []).filter((row) => !isUntouchedPlaceholderTelemetryRow(row));
-  const parentRows = telRows.filter((row) => {
-    if (parentSeFid) {
-      const rowSeFid = row?.seFid ?? row?.se_fid;
-
-      return rowSeFid && String(rowSeFid) === String(parentSeFid);
-    }
-    const rowSeId = row?.seId ?? row?.se_id;
-
-    return parentSeId != null && rowSeId != null && String(rowSeId) === String(parentSeId);
-  });
-
   let maxSequence = 0;
-
-  parentRows.forEach((row) => {
-    const id = row?.fFid ?? row?.f_fid ?? row?.localDisplayId ?? '';
+  telRows.forEach((row) => {
+    const id = row?.tFid ?? row?.t_fid ?? row?.localDisplayId ?? '';
     const sequencePart = String(id).split('-').pop();
     const sequenceNumber = Number(sequencePart);
 
@@ -87,11 +74,11 @@ const getNextTelemetryId = (rows, parentSeId, parentSeFid) => {
     }
   });
 
-  const sequenceText = String(nextSequence).padStart(3, '0');
+  const sequenceText = String(maxSequence + 1).padStart(3, '0');
 
   return {
     telemetryFid: parentSeFid ? `${parentSeFid}-${sequenceText}` : undefined,
-    localDisplayId: !parentSeFid && parentSeId ? `MR-${parentSeId}-${sequenceText}` : undefined,
+    localDisplayId: !parentSeFid && parentSeId ? `SE-${parentSeId}-${sequenceText}` : undefined,
   };
 };
 
@@ -128,6 +115,7 @@ const TelemetryDataEntry = connect(
     }));
     const [tableKey, setTableKey] = useState(0);
     const [tableErrors, setTableErrors] = useState();
+    const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
     const [data, setData] = useState(ensureTrailingBlankTelemetryRow(rowData));
     const [tableIsDirty, setTableIsDirty] = useState(false);
     const [online, setOnline] = useState(isOnline());
@@ -261,7 +249,7 @@ const TelemetryDataEntry = connect(
 
     console.warn('Check errors:', errors);
 
-    const handleAddRow = async () => {
+    const handleAddRow = () => {
       setData((prev) => ensureTrailingBlankTelemetryRow(prev));
       // try {
       //   const parentSeId =
@@ -350,19 +338,59 @@ const TelemetryDataEntry = connect(
     };
 
     const handleCopyLastRowBtn = () => {
-      const sequence = getNextSequence(data, seFid);
-      const sequenceText = String(sequence).padStart(3, '0');
+      if (!seFid && !seId) {
+        console.error('Cannot copy Telemetry row: missing parent ID.');
+        window.alert('Save the Search Effort draft first before copying Telemetry.');
+        return;
+      }
+      const rows = (data ?? []).filter((row) => !isUntouchedPlaceholderTelemetryRow(row));
+
+      if (rows.length === 0) {
+        window.alert('No existing Telemetry row found to copy.');
+        return;
+      }
       // Grab last object from data array
-      const lastRowData = data.slice(-1)[0];
+      const lastRowData = rows[rows.length - 1];
+      const { telemetryFid, localDisplayId } = getNextTelemetryId(rows, seId, seFid);
+
       // Format new row data
       const newRowData = {
-        ...lastRowData,
-        tId: null, // Reset fid if copying a save data object
-        tFid: `${seFid}-${sequenceText}`,
+        ...getBaseDefaultValues({ baseData }),
+        tId: null, // Reset tId if copying a save data object
+        t_id: null,
+        clientId: crypto.randomUUID(),
+        ...(seId != null
+          ? {
+              seId: Number(seId),
+              se_id: Number(seId),
+            }
+          : {}),
+        ...(seFid
+          ? {
+              seFid,
+              se_fid: seFid,
+              tFid: telemetryFid,
+              t_fid: telemetryFid,
+            }
+          : {}),
+        ...(localDisplayId
+          ? {
+              localDisplayId,
+            }
+          : {}),
+        radioTagNum: lastRowData?.radioTagNum ?? '',
+        frequencyIdCode: lastRowData?.frequencyIdCode ?? '',
         _status: 'new',
-        seFid: seFid,
+        serverId: undefined,
+        version: 0,
+        updatedAt: undefined,
+        _isPlaceholderRow: false,
+        _isTouched: true,
       };
-      setData((prev) => (prev ? [...prev, newRowData] : []));
+      setData((prev) => {
+        const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderTelemetryRow(row));
+        return ensureTrailingBlankTelemetryRow([...existingRows, newRowData]);
+      });
     };
 
     const handleRemoveMultipleRows = useCallback(
@@ -407,7 +435,6 @@ const TelemetryDataEntry = connect(
 
             nextRow = {
               ...getBaseDefaultValues({ baseData }),
-              ...getTelemetryDefaultValues({ dataEntryData }),
               clientId: crypto.randomUUID(),
               ...(seId != null ? { seId: Number(seId), se_id: Number(seId) } : {}),
               ...(seFid
@@ -440,13 +467,16 @@ const TelemetryDataEntry = connect(
           return ensureTrailingBlankTelemetryRow(newData);
         });
       },
-      [baseData, getTelemetryDefaultValues, seId, seFid]
+      [baseData, dataEntryData, seId, seFid]
     );
 
     const formatRow = (row) => {
       return {
         ...row,
-        bendRiverMile: parseFloat(row.bendRiverMile) ?? null,
+        bendRiverMile:
+          row?.bendRiverMile === null || row?.bendRiverMile === undefined || row?.bendRiverMile === ''
+            ? null
+            : Number(row.bendRiverMile),
         frequencyIdCode:
           row.frequencyIdCode !== null
             ? Number(typeof row.frequencyIdCode === 'object' ? row.frequencyIdCode.value : row.frequencyIdCode)
@@ -463,17 +493,21 @@ const TelemetryDataEntry = connect(
       };
     };
 
+    const tableValidationSchema = {
+      validate: (row, options) => {
+        if (row?._isPlaceholderRow === true) {
+          return Promise.resolve(row);
+        }
+        return telemetryDataEntrySchema.validate(row, options);
+      },
+    };
+
     const handleSubmitAll = async () => {
-      const tableValidationSchema = {
-        validate: (row, options) => {
-          if (isUntouchedPlaceholderTelemetryRow(row)) {
-            return Promise.resolve(row);
-          }
-          return telemetryDataEntrySchema.validate(row, options);
-        },
-      };
+      setIsSubmitAttempted(true);
       try {
-        const rowsToProcess = data.filter((row) => row._status === 'new' || row._status === 'edited');
+        const rowsToProcess = (data ?? []).filter(
+          (row) => !isUntouchedPlaceholderTelemetryRow(row) && (row._status === 'new' || row._status === 'edited')
+        );
 
         for (let i = 0; i < rowsToProcess.length; i++) {
           const row = rowsToProcess[i];
@@ -562,17 +596,20 @@ const TelemetryDataEntry = connect(
         }
 
         setData((prev) =>
-          prev.map((row) =>
-            row._status === 'new' || row._status === 'edited'
-              ? { ...row, _status: 'queued', clientId: row.clientId ?? crypto.randomUUID() }
-              : row
+          ensureTrailingBlankTelemetryRow(
+            (prev ?? []).map((row) =>
+              row._status === 'new' || row._status === 'edited'
+                ? { ...row, _status: 'queued', clientId: row.clientId ?? crypto.randomUUID() }
+                : row
+            )
           )
         );
         const draftKey = `currentSearchEffortDraft:${siteId}`;
         const savedDraft = sessionStorage.getItem(draftKey);
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
 
-        sessionStorage.setItem(draftKey, JSON.stringify({ ...draft, telemetryCount: 1 }));
+        const telemetryCount = (data ?? []).filter((row) => !isUntouchedPlaceholderTelemetryRow(row)).length;
+        sessionStorage.setItem(draftKey, JSON.stringify({ ...draft, telemetryCount: telemetryCount }));
         const telemetryParentId = isOnline() ? seId || seFid : seFid || seId;
         await doSearchEffortDatasheetLoadData(telemetryParentId);
         doUpdateCurrentTab(0);
@@ -593,21 +630,11 @@ const TelemetryDataEntry = connect(
           captureTime: item?.captureTime ?? item?.captureDate ?? '',
           spawnBehavior: item?.spawnBehavior ?? item?.suspectedSpawningActivity ?? '',
         })) ?? [];
-      setData(refreshRows);
+      setData(ensureTrailingBlankTelemetryRow(refreshRows));
     }, [items]);
 
     return (
       <FormProvider {...methods}>
-        <Button
-          type='button'
-          className='primary-btn margin-bottom-2'
-          onClick={() => {
-            alert('Direct Telemetry Add Row clicked');
-            handleAddRow();
-          }}
-        >
-          TEST Add Telemetry Row
-        </Button>
         <DataEntryTable
           addRow={handleAddRow}
           columns={tableColumns}
@@ -623,6 +650,7 @@ const TelemetryDataEntry = connect(
           tableVersion='TelemetryTable'
           updateSourceData={handleUpdateData}
           validationSchema={tableValidationSchema}
+          showValidationErrors={isSubmitAttempted}
         />
         <div style={{ justifyContent: 'space-between', display: 'flex' }}>
           <Button

@@ -183,7 +183,7 @@ function formatPayloadForApi(entry: Partial<DataEntry>, tableName?: OutboxTable)
     localDisplayId,
     fishClientId,
     suppClientId,
-    _isPlaceholderRows,
+    _isPlaceholderRow,
     _isTouched,
     ...serverPayload
   } = entry as any;

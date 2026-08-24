@@ -638,6 +638,44 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
   }
   telemetryCount = telemetryRows.length;
 
+  for (const mrId of draftMrIdList) {
+    const mrRecord = await db.moriver.where('mr_id').equals(mrId).first();
+
+    if (!mrRecord) continue;
+
+    const mrFishCount = await db.fish
+      .filter((fish) => {
+        const fishMrId = fish?.mrId ?? fish?.mr_id;
+
+        return fishMrId != null && String(fishMrId) === String(mrId);
+      })
+      .count();
+
+    await db.moriver.put({
+      ...mrRecord,
+      fishCount: mrFishCount,
+    });
+  }
+
+  for (const seId of draftSeIdList) {
+    const searchRecord = await db.search.where('se_id').equals(seId).first();
+
+    if (!searchRecord) continue;
+
+    const seTelemetryCount = await db.telemetry
+      .filter((tel) => {
+        const telemetrySeId = tel?.seId ?? tel?.se_id;
+
+        return telemetrySeId != null && String(telemetrySeId) === String(seId);
+      })
+      .count();
+
+    await db.search.put({
+      ...searchRecord,
+      telemetryCount: seTelemetryCount,
+    });
+  }
+
   await db.meta.put({
     key: 'datasheetsLastDownloaded',
     value: new Date().toISOString(),

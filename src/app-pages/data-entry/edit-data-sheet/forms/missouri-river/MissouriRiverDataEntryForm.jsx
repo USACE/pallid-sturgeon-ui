@@ -134,7 +134,9 @@ const MissouriRiverDataEntryForm = connect(
 
       try {
         const draft = JSON.parse(savedDraft);
-        if (!draft?.mrFid) return null;
+        const draftMrId = draft?.mrId ?? draft?.mr_id;
+        const draftMrFid = draft?.mrFid ?? draft?.mr_fid;
+        if (!draftMrId && !draftMrFid) return null;
 
         const checkSiteId =
           String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey);
@@ -146,6 +148,7 @@ const MissouriRiverDataEntryForm = connect(
         return null;
       }
     };
+
     const draft = getOfflineDraft();
 
     const newForm = () => {
@@ -406,45 +409,6 @@ const MissouriRiverDataEntryForm = connect(
       };
     };
 
-    const getOfflineDraft = () => {
-      const savedDraft = sessionStorage.getItem(moriverDraftKey);
-      if (!savedDraft) return null;
-
-      try {
-        const draft = JSON.parse(savedDraft);
-        const draftMrId = draft?.mrId ?? draft?.mr_id;
-        const draftMrFid = draft?.mrFid ?? draft?.mr_fid;
-        if (!draftMrId && !draftMrFid) return null;
-
-        const checkSiteId =
-          String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey);
-        if (checkSiteId) return null;
-
-        return draft;
-      } catch (err) {
-        console.error('Failed to parse offline Missouri River draft:', err);
-        return null;
-      }
-    };
-
-    const reloadOfflineDraft = () => {
-      if (!newForm) return false;
-      const draft = getOfflineDraft();
-      if (!draft) return false;
-      reset(
-        {
-          ...defaultValues,
-          ...draft,
-          fishCount: Number(draft.fishCount || dataEntryFishTotalCount || 0),
-        },
-        {
-          keepDirty: false,
-          keepTouched: false,
-        }
-      );
-      return true;
-    };
-
     // Capture Start and Stop Lat, Long, Time
     const handleCapture = async (type) => {
       try {
@@ -559,14 +523,14 @@ const MissouriRiverDataEntryForm = connect(
       }
 
       try {
-        if (online) {
-          newForm ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+        if (isOnline) {
+          newForm() ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
-          newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+          newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
         }
       } catch (error) {
         console.error('Submit failed, queueing offline:', error);
-        newForm ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+        newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
       }
 
       setValue('clientId', clientId);
@@ -782,7 +746,7 @@ const MissouriRiverDataEntryForm = connect(
       };
       // Only run when offline in offline status and mrFid exists
       !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
-    }, [mrFid, , isOnline, currentTab, setFishData]);
+    }, [mrFid, isOnline, currentTab]);
 
     // Get Offline Fish Data
     useEffect(() => {

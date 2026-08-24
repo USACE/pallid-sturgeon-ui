@@ -93,7 +93,7 @@ const getNextFishId = (data, parentMrId, parentMrFid) => {
     }
   });
 
-  const sequenceText = String(nextSequence).padStart(3, '0');
+  const sequenceText = String(maxSequence + 1).padStart(3, '0');
 
   return {
     fishFid: parentMrFid ? `${parentMrFid}-${sequenceText}` : undefined,
@@ -218,34 +218,51 @@ const FishDataEntry = connect(
     };
 
     const handleCopyLastRowBtn = () => {
-      if (!parentMrFid) {
-        console.error('Cannot copy Fish row: missing parent mrFid.');
+      if (!parentMrFid && !parentMrId) {
+        console.error('Cannot copy Fish row: missing parent ID.');
         window.alert('Save the Missouri River draft first before copying Fish.');
         return;
       }
-      const fishFid = getNextFishFid(data ?? [], parentMrFid);
-      // Grab last object from data array
-      const lastRowData = (data ?? [])
-        .slice()
-        .reverse()
-        .find((row) => !isUntouchedPlaceholderFishRow(row));
-      if (!lastRowData) {
+      const rows = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+
+      if (rows.length === 0) {
         window.alert('No existing Fish row found to copy.');
         return;
       }
+      // Grab last object from data array
+      const lastRowData = rows[rows.length - 1];
+      const { fishFid, localDisplayId } = getNextFishId(rows, parentMrId, parentMrFid);
 
       // Format new row data
       const newRowData = {
         // ...lastRowData,
         fid: null, // Reset fid if copying a save data object
-        fFid: fishFid,
-        mrId: parentMrId,
-        mr_id: parentMrId,
-        mrFid: parentMrFid,
+        clientId: crypto.randomUUID(),
+        ...(parentMrId != null
+          ? {
+              mrId: Number(parentMrId),
+              mr_id: Number(parentMrId),
+            }
+          : {}),
+        ...(parentMrFid
+          ? {
+              mrFid: parentMrFid,
+              mr_fid: parentMrFid,
+              fFid: fishFid,
+              f_fid: fishFid,
+            }
+          : {}),
+        ...(localDisplayId
+          ? {
+              localDisplayId,
+            }
+          : {}),
         species: lastRowData?.species,
         lengthType: lastRowData?.lengthType,
         countF: 1,
         _status: OfflineStatuses.New,
+        _isPlaceholderRow: false,
+        _isTouched: true,
       };
       setData((prev) => {
         const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
@@ -327,8 +344,10 @@ const FishDataEntry = connect(
       setIsSubmitAttempted(true);
       setValidationErrorRowCount(0);
 
-      const rowsToProcess = data?.filter(
-        (row) => row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited
+      const rowsToProcess = (data ?? []).filter(
+        (row) =>
+          !isUntouchedPlaceholderFishRow(row) &&
+          (row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited)
       );
 
       try {
@@ -414,7 +433,8 @@ const FishDataEntry = connect(
         });
 
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
-        sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft, fishCount: 1 }));
+        const fishCount = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row)).length;
+        sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft, fishCount: fishCount }));
         await doMoRiverDatasheetLoadData(parentMrId ?? parentMrFid);
         doUpdateCurrentTab(0);
       } catch (err) {

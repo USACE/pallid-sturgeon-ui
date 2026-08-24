@@ -1,6 +1,17 @@
 import { ValidationMessages } from '@src/utils/enums';
 import * as yup from 'yup';
 
+const optionalField = () =>
+  yup
+    .number()
+    .transform((value, originalValue) => {
+      if (originalValue === '' || originalValue === null || originalValue === undefined) {
+        return null;
+      }
+      return value;
+    })
+    .nullable();
+
 export const telemetryDataEntrySchema = yup.object().shape({
   seFid: yup.string().nullable(),
   tFid: yup.string().nullable(),
@@ -9,7 +20,7 @@ export const telemetryDataEntrySchema = yup.object().shape({
     then: (schema) => schema.required(ValidationMessages.FieldRequired),
     otherwise: (schema) => schema.nullable(),
   }),
-  bendRiverMile: yup.number().nullable(),
+  bendRiverMile: optionalField(),
   radioTagNum: yup.number().required(ValidationMessages.FieldRequired),
   frequencyIdCode: yup.number().required(ValidationMessages.SelectRequired),
   captureTime: yup.string().required(ValidationMessages.FieldRequired),
@@ -32,14 +43,14 @@ export const telemetryDataEntrySchema = yup.object().shape({
   spawnBehavior: yup.string().nullable(),
   positionConfidence: yup.number().required(ValidationMessages.FieldRequired),
   mesoId: yup.string().nullable(),
-  depth: yup.number().nullable(),
+  depth: optionalField(),
   macroId: yup.string().nullable(),
-  temp: yup.number().nullable(),
-  conductivity: yup.number().nullable(),
-  turbidity: yup.number().nullable(),
-  silt: yup.number().nullable(),
-  sand: yup.number().nullable(),
-  gravel: yup.number().nullable(),
+  temp: optionalField(),
+  conductivity: optionalField(),
+  turbidity: optionalField(),
+  silt: optionalField(),
+  sand: optionalField(),
+  gravel: optionalField(),
   comments: yup.string().nullable(),
   editInitials: yup.string().nullable(),
   lastEditComment: yup.string().nullable(),
