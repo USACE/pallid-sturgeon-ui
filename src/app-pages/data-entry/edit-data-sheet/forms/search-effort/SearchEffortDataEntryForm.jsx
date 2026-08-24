@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -53,7 +53,6 @@ const SearchEffortDataEntryForm = connect(
     lookupData,
     doUpdateCurrentTab,
   }) => {
-    // const prevIsEditFormRef = useRef(isEditForm);
     const siteRouteKey = routeParams?.siteId;
     const siteId = siteRouteKey;
     const { searchTypeCodes } = lookupData;
@@ -426,17 +425,6 @@ const SearchEffortDataEntryForm = connect(
       }
       reset(defaultValues);
     }, [reset, defaultValues, isEditForm, dataEntryTelemetryTotalCount]);
-
-    // Reset form
-    // useEffect(() => {
-    //   const prevIsEditForm = prevIsEditFormRef.current;
-
-    //   if (!isEditForm && prevIsEditForm !== false) {
-    //     doResetTelemetryDataEntries();
-    //   }
-
-    //   prevIsEditFormRef.current = isEditForm;
-    // }, [isEditForm, doResetTelemetryDataEntries]);
 
     // Set IDs
     useEffect(() => {
