@@ -42,6 +42,7 @@ export interface SiteEntry extends DataEntry {
 
 export interface MoriverEntry extends DataEntry {
   // --- form fields ---
+  fishCount?: number;
   fieldoffice?: string;
   project?: number;
   segment?: number;
@@ -150,6 +151,7 @@ export interface MoriverEntry extends DataEntry {
 export interface SearchEffortEntry extends DataEntry {
   se_id?: number;
   seId?: number;
+  telemetryCount?: number;
   search_date?: string;
   recorder?: string;
   search_type_code?: string;
@@ -205,6 +207,7 @@ export interface FishEntry extends DataEntry {
   f_id?: number;
   mr_id?: number;
   mrId?: number;
+  localDisplayId?: string;
   last_updated?: string;
   uploaded_by?: string;
   approved?: number;
@@ -239,9 +242,11 @@ export interface FishEntry extends DataEntry {
 export interface TelemetryEntry extends DataEntry {
   t_id?: number;
   tId?: number;
+  tFid?: string;
   t_fid?: string;
   se_id?: number;
   seId?: number;
+  localDisplayId?: string;
   bend?: number;
   radio_tag_num?: number;
   frequency_id_code?: number;
@@ -313,6 +318,8 @@ export interface SupplementalEntry extends DataEntry {
   f_id?: number;
   fId?: number;
   fid?: number;
+  fishClientId?: string;
+  localDisplayId?: string;
   recapture?: string;
   other_tag_info?: string;
   genetics_vial_number?: string;
@@ -367,6 +374,9 @@ export interface ProcedureEntry extends DataEntry {
   fid?: number;
   fFid?: string;
   f_fid?: string;
+  fishClientId?: string;
+  suppClientId?: string;
+  localDisplayId?: string;
   purpose_code?: string;
   procedure_date?: string;
   procedure_start_time?: string;

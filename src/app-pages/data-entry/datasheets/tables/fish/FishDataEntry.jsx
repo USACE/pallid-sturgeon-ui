@@ -42,37 +42,70 @@ const ensureTrailingBlankFishRow = (rows) => {
   return [...normalizedRows, createBlankFishRow()];
 };
 
+const normalizeFishRow = (row = {}) => ({
+  ...row,
+  fid: row?.fid ?? row?.fId ?? row?.f_id,
+  fFid: row?.fFid ?? row?.f_fid,
+  mrId: row?.mrId ?? row?.mr_id,
+  mrFid: row?.mrFid ?? row?.mr_fid,
+  panelHook: row?.panelHook ?? row?.panelhook ?? '',
+  lengthType: row?.lengthType ?? row?.length_type ?? '',
+  countF: row?.countF ?? row?.fishCount ?? '',
+  ftPrefix: row?.ftPrefix ?? row?.ftprefix ?? '',
+  floyTag: row?.floyTag ?? row?.ftnum ?? '',
+  mR: row?.mR ?? row?.ftmr ?? '',
+  geneticsVialNumber: row?.geneticsVialNumber ?? row?.genetics_vial_number ?? '',
+  finCurl: row?.finCurl ?? row?.fin_curl ?? '',
+  raySpine: row?.raySpine ?? row?.rayspine ?? '',
+  KN: row?.KN ?? row?.kn ?? '',
+  RSD: row?.RSD ?? row?.rsd ?? '',
+  editInitials: row?.editInitials ?? row?.edit_initials ?? row?.edit_initial ?? '',
+  uploadedBy: row?.uploadedBy ?? row?.uploaded_by ?? '',
+});
+
 // Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
 // localRows never seems to return anything(?) - feel free to change if there is an issue.
 // const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
 // const dbRows = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
 // const sequence = localRows.length + dbRows.length + 1;
-const getNextFishFid = (data, parentMrFid) => {
-  const existing = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
+const getNextFishId = (data, parentMrId, parentMrFid) => {
+  const existing = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+  const parentRows = existing.filter((row) => {
+    if (parentMrFid) {
+      const rowMrFid = row?.mrFid ?? row?.mr_fid;
 
-  const maxSequence = existing.reduce((currentMax, row) => {
-    const fieldId = row?.fFid ?? '';
-    const sequencePart = String(fieldId).split('-').pop();
+      return rowMrFid && String(rowMrFid) === String(parentMrFid);
+    }
+    const rowMrId = row?.mrId ?? row?.mr_id;
+
+    return parentMrId != null && rowMrId != null && String(rowMrId) === String(parentMrId);
+  });
+
+  let maxSequence = 0;
+
+  parentRows.forEach((row) => {
+    const id = row?.fFid ?? row?.f_fid ?? row?.localDisplayId ?? '';
+    const sequencePart = String(id).split('-').pop();
     const sequenceNumber = Number(sequencePart);
 
-    if (Number.isFinite(sequenceNumber) && sequenceNumber > currentMax) {
-      return sequenceNumber;
+    if (Number.isFinite(sequenceNumber) && sequenceNumber > maxSequence) {
+      maxSequence = sequenceNumber;
     }
+  });
 
-    return currentMax;
-  }, 0);
+  const sequenceText = String(maxSequence + 1).padStart(3, '0');
 
-  const nextSequence = maxSequence + 1;
-  const sequenceText = String(nextSequence).padStart(3, '0');
-  const fishFid = `${parentMrFid}-${sequenceText}`;
-
-  return fishFid;
+  return {
+    fishFid: parentMrFid ? `${parentMrFid}-${sequenceText}` : undefined,
+    localDisplayId: !parentMrFid && parentMrId ? `MR-${parentMrId}-${sequenceText}` : undefined,
+  };
 };
 
 const FishDataEntry = connect(
   'doSaveFishDataEntry',
   'doUpdateFishDataEntry',
   'doUpdateCurrentTab',
+  'doMoRiverDatasheetLoadData',
   'selectDataEntryData',
   'selectDataEntryFishData',
   'selectBaseData',
@@ -82,6 +115,7 @@ const FishDataEntry = connect(
     doSaveFishDataEntry,
     doUpdateFishDataEntry,
     doUpdateCurrentTab,
+    doMoRiverDatasheetLoadData,
     dataEntryData,
     dataEntryFishData,
     baseData,
@@ -105,7 +139,7 @@ const FishDataEntry = connect(
       lengthTypes: [],
       markRecaptureOptions: [],
     });
-    const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
+    const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
     const [data, setData] = useState(ensureTrailingBlankFishRow(rowData));
     const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
@@ -184,34 +218,51 @@ const FishDataEntry = connect(
     };
 
     const handleCopyLastRowBtn = () => {
-      if (!parentMrFid) {
-        console.error('Cannot copy Fish row: missing parent mrFid.');
+      if (!parentMrFid && !parentMrId) {
+        console.error('Cannot copy Fish row: missing parent ID.');
         window.alert('Save the Missouri River draft first before copying Fish.');
         return;
       }
-      const fishFid = getNextFishFid(data ?? [], parentMrFid);
-      // Grab last object from data array
-      const lastRowData = (data ?? [])
-        .slice()
-        .reverse()
-        .find((row) => !isUntouchedPlaceholderFishRow(row));
-      if (!lastRowData) {
+      const rows = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+
+      if (rows.length === 0) {
         window.alert('No existing Fish row found to copy.');
         return;
       }
+      // Grab last object from data array
+      const lastRowData = rows[rows.length - 1];
+      const { fishFid, localDisplayId } = getNextFishId(rows, parentMrId, parentMrFid);
 
       // Format new row data
       const newRowData = {
         // ...lastRowData,
         fid: null, // Reset fid if copying a save data object
-        fFid: fishFid,
-        mrId: parentMrId,
-        mr_id: parentMrId,
-        mrFid: parentMrFid,
+        clientId: crypto.randomUUID(),
+        ...(parentMrId != null
+          ? {
+              mrId: Number(parentMrId),
+              mr_id: Number(parentMrId),
+            }
+          : {}),
+        ...(parentMrFid
+          ? {
+              mrFid: parentMrFid,
+              mr_fid: parentMrFid,
+              fFid: fishFid,
+              f_fid: fishFid,
+            }
+          : {}),
+        ...(localDisplayId
+          ? {
+              localDisplayId,
+            }
+          : {}),
         species: lastRowData?.species,
         lengthType: lastRowData?.lengthType,
         countF: 1,
         _status: OfflineStatuses.New,
+        _isPlaceholderRow: false,
+        _isTouched: true,
       };
       setData((prev) => {
         const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
@@ -245,18 +296,24 @@ const FishDataEntry = connect(
 
             let nextRow = currentRow;
             if (isPlaceholderRow) {
-              const fishFid = parentMrFid ? getNextFishFid(newData, parentMrFid) : undefined;
+              const { fishFid, localDisplayId } = getNextFishId(newData, parentMrId, parentMrFid);
 
               nextRow = {
                 ...getBaseDefaultValues({ baseData }),
                 ...getFishRiverDefaultValues({ dataEntryData }),
-                ...(parentMrId != null ? { mrId: parentMrId, mr_id: parentMrId } : {}),
+                clientId: crypto.randomUUID(),
+                ...(parentMrId != null ? { mrId: Number(parentMrId), mr_id: Number(parentMrId) } : {}),
                 ...(parentMrFid
                   ? {
                       mrFid: parentMrFid,
                       mr_fid: parentMrFid,
                       fFid: fishFid,
                       f_fid: fishFid,
+                    }
+                  : {}),
+                ...(localDisplayId
+                  ? {
+                      localDisplayId,
                     }
                   : {}),
                 _status: OfflineStatuses.New,
@@ -287,8 +344,10 @@ const FishDataEntry = connect(
       setIsSubmitAttempted(true);
       setValidationErrorRowCount(0);
 
-      const rowsToProcess = data?.filter(
-        (row) => row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited
+      const rowsToProcess = (data ?? []).filter(
+        (row) =>
+          !isUntouchedPlaceholderFishRow(row) &&
+          (row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited)
       );
 
       try {
@@ -308,6 +367,7 @@ const FishDataEntry = connect(
               mr_fid: parentRowMrFid,
               mrFid: parentRowMrFid,
               fFid: fishFid,
+              f_fid: fishFid,
               _status: OfflineStatuses.Queued,
               version: item.version ?? 0,
               updatedAt: new Date().toISOString(),
@@ -318,7 +378,7 @@ const FishDataEntry = connect(
               weight: item?.weight == null || item?.weight === '' ? null : Number(item?.weight),
             };
 
-            return { item, payload, isNew };
+            return { item, payload, isNew, clientId };
           }) ?? [];
 
         // Validate all rows first; if any fail, stay on Fish and do not submit any rows.
@@ -339,7 +399,7 @@ const FishDataEntry = connect(
           return;
         }
 
-        for (const { item, payload, isNew } of rowPayloads) {
+        for (const { item, payload, isNew, clientId } of rowPayloads) {
           try {
             if (online) {
               if (isNew) {
@@ -348,24 +408,34 @@ const FishDataEntry = connect(
                 await doUpdateFishDataEntry(payload);
               }
             } else {
-              isNew ? await createData('fish', payload) : await updateData('fish', payload);
+              isNew ? await createData('fish', payload) : await updateData('fish', clientId, payload);
             }
           } catch (error) {
             console.error('Fish API failed, queuing offline:', error);
-            isNew ? await createData('fish', payload) : await updateData('fish', payload);
+            isNew ? await createData('fish', payload) : await updateData('fish', clientId, payload);
           }
         }
 
-        setData((prev) =>
-          prev.map((row) =>
-            row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited
-              ? { ...row, _status: OfflineStatuses.Queued, clientId: row.clientId ?? crypto.randomUUID() }
-              : row
-          )
-        );
+        setData((prev) => {
+          const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+          const updatedRows = existingRows.map((row) => {
+            const matchingPayloadEntry = rowPayloads.find(({ item }) => item === row);
+
+            if (!matchingPayloadEntry) {
+              return row;
+            }
+            return {
+              ...matchingPayloadEntry.payload,
+              _status: OfflineStatuses.Queued,
+            };
+          });
+          return ensureTrailingBlankFishRow(updatedRows);
+        });
 
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
-        sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft, fishCount: 1 }));
+        const fishCount = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row)).length;
+        sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft, fishCount: fishCount }));
+        await doMoRiverDatasheetLoadData(parentMrId ?? parentMrFid);
         doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
@@ -373,7 +443,7 @@ const FishDataEntry = connect(
     };
 
     useEffect(() => {
-      const rowData = items?.map((item) => ({ ...item, bendRiverMile: baseData?.bendRiverMile }));
+      const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
       setData(ensureTrailingBlankFishRow(rowData));
     }, [baseData?.bendRiverMile, items]);
 

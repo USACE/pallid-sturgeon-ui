@@ -134,7 +134,9 @@ const MissouriRiverDataEntryForm = connect(
 
       try {
         const draft = JSON.parse(savedDraft);
-        if (!draft?.mrFid) return null;
+        const draftMrId = draft?.mrId ?? draft?.mr_id;
+        const draftMrFid = draft?.mrFid ?? draft?.mr_fid;
+        if (!draftMrId && !draftMrFid) return null;
 
         const checkSiteId =
           String(draft?.siteRouteKey || draft?.siteFid || draft?.site_fid || draft?.siteId) !== String(siteRouteKey);
@@ -146,6 +148,7 @@ const MissouriRiverDataEntryForm = connect(
         return null;
       }
     };
+
     const draft = getOfflineDraft();
 
     const newForm = () => {
@@ -454,7 +457,10 @@ const MissouriRiverDataEntryForm = connect(
         updatedAt: new Date().toISOString(),
       });
 
-      if (!payload.mrFid) {
+      const finalMrId = payload?.mrId ?? payload?.mr_id;
+      const finalMrFid = payload?.mrFid ?? payload?.mr_fid;
+
+      if (!finalMrId && !finalMrFid) {
         console.error('Missing mrFid. Cannot save Missouri River draft.');
         return;
       }
@@ -514,10 +520,13 @@ const MissouriRiverDataEntryForm = connect(
           updatedAt: new Date().toISOString(),
         };
         const payload = filterNullEmptyObjects(formattedValues);
-        if (!payload.mrFid && !payload.mr_fid) {
+        const finalMrId = payload?.mrId ?? payload?.mr_id;
+        const finalMrFid = payload?.mrFid ?? payload?.mr_fid;
+        if (!finalMrId && !finalMrFid) {
           console.error('Missing mrFid. Cannot submit Missouri River form.');
           return;
         }
+
         try {
           newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
         } catch (error) {
@@ -738,7 +747,7 @@ const MissouriRiverDataEntryForm = connect(
       };
       // Only run when offline in offline status and mrFid exists
       !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
-    }, [mrFid, , isOnline, currentTab, setFishData]);
+    }, [mrFid, isOnline, currentTab]);
 
     // Get Offline Fish Data
     useEffect(() => {
@@ -750,7 +759,8 @@ const MissouriRiverDataEntryForm = connect(
       };
       // Only run when offline in offline status and mrFid exists
       !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
-    }, [mrFid, , isOnline, currentTab, setFishData]);
+      isOnline && setFishData(dataEntryFishData?.items);
+    }, [mrFid, , isOnline, currentTab, dataEntryFishData, setFishData]);
 
     return (
       <FormProvider {...methods}>

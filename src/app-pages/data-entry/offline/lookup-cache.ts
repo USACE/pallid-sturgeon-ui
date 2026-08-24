@@ -423,13 +423,16 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
   const draftSeIdList = Array.from(draftSeId);
 
   const fishResults = await Promise.all(
-    draftMrIdList.map((mrId) => {
+    draftMrIdList.map(async (mrId) => {
       const query = new URLSearchParams({
         id: String(userRoleId),
         mrId: String(mrId),
       });
+      const rows = await getRows(`${API_BASE}/psapi/fishDataEntry?${query.toString()}`, `Fish for MR ${mrId}`);
 
-      return getRows(`${API_BASE}/psapi/fishDataEntry?${query.toString()}`, `Fish for MR ${mrId}`);
+      console.log('Offline Download Fish', { mrId, count: rows.length, rows });
+
+      return rows;
     })
   );
 
@@ -456,13 +459,19 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
   );
 
   const telemetryResults = await Promise.all(
-    draftSeIdList.map((seId) => {
+    draftSeIdList.map(async (seId) => {
       const query = new URLSearchParams({
         id: String(userRoleId),
         seId: String(seId),
       });
+      const rows = await getRows(
+        `${API_BASE}/psapi/telemetryDataEntry?${query.toString()}`,
+        `Telemetry for Search Effort ${seId}`
+      );
 
-      return getRows(`${API_BASE}/psapi/telemetryDataEntry?${query.toString()}`, `Telemetry for Search Effort ${seId}`);
+      console.log('Offline Download Telemetry', { seId, count: rows.length, rows });
+
+      return rows;
     })
   );
 
@@ -628,6 +637,44 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
     });
   }
   telemetryCount = telemetryRows.length;
+
+  for (const mrId of draftMrIdList) {
+    const mrRecord = await db.moriver.where('mr_id').equals(mrId).first();
+
+    if (!mrRecord) continue;
+
+    const mrFishCount = await db.fish
+      .filter((fish) => {
+        const fishMrId = fish?.mrId ?? fish?.mr_id;
+
+        return fishMrId != null && String(fishMrId) === String(mrId);
+      })
+      .count();
+
+    await db.moriver.put({
+      ...mrRecord,
+      fishCount: mrFishCount,
+    });
+  }
+
+  for (const seId of draftSeIdList) {
+    const searchRecord = await db.search.where('se_id').equals(seId).first();
+
+    if (!searchRecord) continue;
+
+    const seTelemetryCount = await db.telemetry
+      .filter((tel) => {
+        const telemetrySeId = tel?.seId ?? tel?.se_id;
+
+        return telemetrySeId != null && String(telemetrySeId) === String(seId);
+      })
+      .count();
+
+    await db.search.put({
+      ...searchRecord,
+      telemetryCount: seTelemetryCount,
+    });
+  }
 
   await db.meta.put({
     key: 'datasheetsLastDownloaded',

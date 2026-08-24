@@ -22,6 +22,9 @@ const MissouriRiverOverview = connect(
     const siteId = routeParams?.siteId;
     const mrId = routeParams.mrId;
     const isOnline = navigator.onLine;
+    const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
+    const savedMoriverDraft = sessionStorage.getItem(moriverDraftKey);
+    const moriverSaved = Boolean(mrId) || Boolean(savedMoriverDraft);
 
     const breadcrumbLinks = [
       {
@@ -66,14 +69,20 @@ const MissouriRiverOverview = connect(
                   title: 'Missouri River',
                   content: <MissouriRiverDataEntryForm />,
                 },
-                {
-                  title: `Fish (${dataEntryFishTotalCount})`,
-                  content: <FishDataEntry />,
-                  isDisabled: isOnline ? !!!dataEntryData?.mrId : !!!dataEntryData?.mrFid, // Disable tab when no Missouri River data exists yet
-                },
+                ...(moriverSaved
+                  ? [
+                      {
+                        title: `Fish (${dataEntryFishTotalCount})`,
+                        content: <FishDataEntry />,
+                      },
+                    ]
+                  : []),
               ]}
-              onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}
-              defaultTab={currentTab}
+              onTabChange={(_str, ind) => {
+                if (ind === 1 && !moriverSaved) return;
+                doUpdateCurrentTab(ind);
+              }}
+              defaultTab={moriverSaved ? currentTab : 0}
             />
           </Card.Body>
         </Card>
