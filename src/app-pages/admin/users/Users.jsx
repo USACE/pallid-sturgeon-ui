@@ -24,31 +24,23 @@ const breadcrumbLinks = [
 ];
 
 export default connect(
-  'doDomainFieldOfficesFetch',
-  'doDomainProjectsFetch',
   'doFetchUsers',
   'doFetchRoles',
   'doModalOpen',
   'doUpdateRoleOffice',
   'selectUsersData',
   'selectRoles',
-  'selectDomains',
-  ({
-    doDomainFieldOfficesFetch,
-    doDomainProjectsFetch,
-    doFetchUsers,
-    doFetchRoles,
-    doModalOpen,
-    doUpdateRoleOffice,
-    usersData,
-    roles,
-    domains,
-  }) => {
-    const { projects, fieldOffices } = domains;
+  'selectLookupData',
+  'selectUserRole',
+  ({ doFetchUsers, doFetchRoles, doModalOpen, doUpdateRoleOffice, usersData, roles, lookupData, userRole }) => {
+    const { projects, fieldOffices } = lookupData;
+    const { projectCode } = userRole;
+    const projectPspa = [1, 3, 4, 5, 6];
+    const projectOptions = projects.filter((item) =>
+      Number(projectCode) === 2 ? Number(item.code) === 2 : projectPspa.includes(Number(item.code))
+    );
 
     useEffect(() => {
-      doDomainFieldOfficesFetch({ showAll: true });
-      doDomainProjectsFetch(false);
       doFetchUsers();
       doFetchRoles();
     }, []);
@@ -121,7 +113,7 @@ export default connect(
                     headerName='Project'
                     width={300}
                     cellEditor='projectEditor'
-                    cellEditorParams={{ projects }}
+                    cellEditorParams={{ projects: projectOptions }}
                     cellRenderer={(params) => projectCodeList[params.value]}
                   />
                 </AgGridReact>

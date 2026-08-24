@@ -66,6 +66,7 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false }) =>
         }),
       micro: yup
         .string()
+        .min(6, 'Values must be 6 digits only')
         .max(6, 'Values cannot exceed 6 digits')
         .when(['segment', 'project'], {
           is: (segment, project) => Number(project) == 1 && microSegmentRequired.includes(segment),
