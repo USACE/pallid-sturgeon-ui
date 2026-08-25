@@ -1271,8 +1271,7 @@ const MissouriRiverDataEntryForm = connect(
                     label='1-Velocity (0.2 or 0.6)'
                     type='number'
                     onChange={handleChange}
-                    required={hasPDSG && gearType === 'S' ? true : false}
-                    isMuted={hasPDSG && gearType === 'S' ? false : true}
+                    isMuted={true}
                   />
                 </Grid>
               </Grid>
