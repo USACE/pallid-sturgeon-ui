@@ -5,14 +5,25 @@ import { mdiDownload } from '@mdi/js';
 import Button from '@components/button';
 import Icon from '@components/icon/icon';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
+import { useEffect, useState } from 'react';
 
 const SupplementalTable = connect(
   'doFetchAllDatasheet',
   'selectSuppDataSummary',
   ({ doFetchAllDatasheet, suppDataSummary }) => {
+    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const { data } = suppDataSummary;
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (event) => {
+        setIsDarkMode(event.matches);
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }, []);
 
     return (
       <>
@@ -24,7 +35,10 @@ const SupplementalTable = connect(
           icon={<Icon path={mdiDownload} />}
           handleClick={() => doFetchAllDatasheet('supplemental-datasheet')}
         />
-        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
+        <div
+          className={`mt-2 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
+          style={{ width: '100%', height: '600px' }}
+        >
           <AgGridReact
             rowData={data}
             defaultColDef={{
@@ -45,7 +59,7 @@ const SupplementalTable = connect(
             <AgGridColumn field='bend' />
             <AgGridColumn field='bendrn' headerName='Bend R/N' />
             <AgGridColumn field='bendRiverMile' />
-            <AgGridColumn field='netRiverMile' headerName= 'Net River Mile' />
+            <AgGridColumn field='netRiverMile' headerName='Net River Mile' />
             <AgGridColumn field='hatcheryOrigin' />
             <AgGridColumn field='checkedby' />
           </AgGridReact>

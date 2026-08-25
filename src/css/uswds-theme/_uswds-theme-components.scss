@@ -152,8 +152,13 @@ div.usa-alert {
   }
 }
 
-// .usa-button {
-//   // background-color: var(--color-form-btn) !important;
-//   // border: 2px solid var(--color-form-btn-border) !important;
-//   // color: var(--color-form-btn-text) !important;
-// }
+.usa-table td {
+  background-color: var(--background-color) !important;
+  border: 1px solid var(--text-color) !important;
+}
+
+.usa-table th {
+  background-color: var(--color-table-header-color) !important;
+  border: 1px solid var(--text-color) !important;
+  color: var(--text-color) !important;
+}

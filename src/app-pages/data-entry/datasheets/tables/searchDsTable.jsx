@@ -8,6 +8,7 @@ import SearchIdCellRenderer from '@common/gridCellRenderers/searchIdCellRenderer
 
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { Button } from '@trussworks/react-uswds';
+import { useEffect, useState } from 'react';
 
 const telemetryCellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
@@ -30,6 +31,7 @@ const SearchDsTable = connect(
     searchEffortSitesDatasheetData,
     routeParams,
   }) => {
+    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const siteId = routeParams?.siteId;
 
     const handleAddButtonClick = () => {
@@ -42,6 +44,17 @@ const SearchDsTable = connect(
       doUpdateComplexStateField({ name: 'isEditForm', value: false });
       doUpdateUrl(`/sites-list/${siteId}/search-effort`);
     };
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (event) => {
+        setIsDarkMode(event.matches);
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }, []);
 
     return (
       <>
@@ -61,7 +74,10 @@ const SearchDsTable = connect(
             </Button>
           </div>
         </Row>
-        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
+        <div
+          className={`mt-2 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
+          style={{ width: '100%', height: '600px' }}
+        >
           <AgGridReact
             rowHeight={35}
             rowData={searchEffortSitesDatasheetData}

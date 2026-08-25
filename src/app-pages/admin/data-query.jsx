@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact } from 'ag-grid-react';
 import { mdiDownload, mdiHelpCircle } from '@mdi/js';
@@ -22,8 +22,21 @@ const breadcrumbLinks = [
 ];
 
 export default connect('doDomainProjectsFetch', 'selectDomains', ({ doDomainProjectsFetch, domains }) => {
+  const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
+
   useEffect(() => {
     doDomainProjectsFetch();
+  }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (event) => {
+      setIsDarkMode(event.matches);
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
   }, []);
 
   const { projects } = domains;
@@ -82,7 +95,10 @@ export default connect('doDomainProjectsFetch', 'selectDomains', ({ doDomainProj
               icon={<Icon path={mdiDownload} />}
               // handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
             />
-            <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
+            <div
+              className={`mt-3 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
+              style={{ width: '100%', height: '600px' }}
+            >
               <AgGridReact
                 // rowData={geneticCardSummaryData}
                 defaultColDef={{
