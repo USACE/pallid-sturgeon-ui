@@ -47,7 +47,7 @@ export default connect(
     useEffect(() => {
       const cleanupOnlineListener = initOnlineListener();
 
-      if (isAuthenticated && userHasRole) {
+      if (isAuthenticated && userHasRole && navigator.onLine) {
         doGetAllLookupData();
       } else {
         const landingModalSeen = sessionStorage.getItem('landingModalSeen');

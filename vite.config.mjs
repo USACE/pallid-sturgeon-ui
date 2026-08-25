@@ -29,7 +29,7 @@ export default ({ mode }) => {
         },
         workbox: {
           cleanupOutdatedCaches: true,
-          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
+          maximumFileSizeToCacheInBytes: 8 * 1024 * 1024,
           globPatterns: ['**/*.{js,css,html,ico,png,svg,jpg,jpeg,woff,woff2}'],
           navigateFallback: 'index.html',
         },

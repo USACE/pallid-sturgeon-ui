@@ -58,15 +58,15 @@ const handleOffline = () => {
 
 async function handleVisibilityChange() {
   if (document.visibilityState !== 'visible') return;
-  if (!navigator.onLine) return;
+  // if (!navigator.onLine) return;
 
-  setOnlineState(true);
+  setOnlineState(navigator.onLine);
 
-  try {
-    await syncNow();
-  } catch (err) {
-    console.error('Auto-sync failed after tab became visible:', err);
-  }
+  // try {
+  //   await syncNow();
+  // } catch (err) {
+  //   console.error('Auto-sync failed after tab became visible:', err);
+  // }
 }
 
 let initialized = false;
@@ -80,15 +80,17 @@ export function initOnlineListener(): () => void {
   window.addEventListener('offline', handleOffline);
   window.addEventListener('visibilitychange', handleVisibilityChange);
 
-  autoSync.start();
-  notifyOnlineStatusListeners();
+  setOnlineState(navigator.onLine);
+
+  // autoSync.start();
+  // notifyOnlineStatusListeners();
 
   return () => {
     window.removeEventListener('online', handleOnline);
     window.removeEventListener('offline', handleOffline);
     window.removeEventListener('visibilitychange', handleVisibilityChange);
 
-    autoSync.stop();
+    // autoSync.stop();
     initialized = false;
   };
 }

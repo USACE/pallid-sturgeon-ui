@@ -10,7 +10,7 @@ import OfflineSetupButton from '../initiate-offline-setup/OfflineSetupButton';
 
 import './syncBanner.scss';
 
-const SyncBanner = connect('selectAuth', ({ auth }) => {
+const SyncBanner = connect('selectAuth', 'doRefreshOfflineAuth', ({ auth, doRefreshOfflineAuth }) => {
   const online = useOnlineStatus();
   const pending = useLiveQuery(() => db.outbox.count(), [], 0);
   const pwaMode = usePwaMode();
@@ -23,7 +23,14 @@ const SyncBanner = connect('selectAuth', ({ auth }) => {
       setSyncing(true);
       setMessage('');
 
-      const result = await syncNow(auth?.token);
+      const refreshAuth = await doRefreshOfflineAuth();
+      const syncToken = refreshAuth?.token ?? auth?.token;
+
+      if (!syncToken) {
+        throw new Error('Authentication is required before syncing.');
+      }
+
+      const result = await syncNow(syncToken);
       const remaining = await getPendingCount();
 
       if (remaining === 0 && result.errors === 0 && result.conflicts === 0) {
