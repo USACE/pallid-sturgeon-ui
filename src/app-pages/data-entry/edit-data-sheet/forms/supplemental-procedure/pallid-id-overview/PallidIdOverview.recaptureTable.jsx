@@ -32,7 +32,7 @@ const headerData = [
     },
     {
       label: 'Pallid/Hybrid',
-      name: 'pallidHybrd',
+      name: 'pallidHybrid',
     },
     {
       label: 'CWT',
