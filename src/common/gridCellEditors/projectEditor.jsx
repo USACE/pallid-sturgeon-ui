@@ -16,7 +16,6 @@ const ProjectEditor = forwardRef(({ value, projects }, ref) => {
       title='Edit Project'
       value={selectedValue}
       onChange={(v) => setSelectedValue(v)}
-      defaultOption={value}
       options={createDropdownOptions(projects)}
     />
   );

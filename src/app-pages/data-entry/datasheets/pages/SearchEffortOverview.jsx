@@ -23,6 +23,9 @@ const SearchEffortOverview = connect(
     const siteId = routeParams?.siteId;
     const seId = routeParams?.seId;
     const online = isOnline();
+    const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
+    const savedSearchDraft = sessionStorage.getItem(searchDraftKey);
+    const searchSaved = Boolean(seId) || Boolean(savedSearchDraft);
 
     const breadcrumbLinks = [
       { text: 'Sites List', href: '/sites-list', current: false },
@@ -61,13 +64,20 @@ const SearchEffortOverview = connect(
                   title: 'Search Effort',
                   content: <SearchEffortDataEntryForm />,
                 },
-                {
-                  title: `Telemetry (${dataEntryTelemetryTotalCount})`,
-                  content: <TelemetryDataEntry />,
-                },
+                ...(searchSaved
+                  ? [
+                      {
+                        title: `Telemetry (${dataEntryTelemetryTotalCount})`,
+                        content: <TelemetryDataEntry />,
+                      },
+                    ]
+                  : []),
               ]}
-              onTabChange={(_str, ind) => doUpdateCurrentTab(ind)}
-              defaultTab={currentTab}
+              onTabChange={(_str, ind) => {
+                if (ind === 1 && !searchSaved) return;
+                doUpdateCurrentTab(ind);
+              }}
+              defaultTab={searchSaved ? currentTab : 0}
             />
           </Card.Body>
         </Card>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -53,7 +53,6 @@ const SearchEffortDataEntryForm = connect(
     lookupData,
     doUpdateCurrentTab,
   }) => {
-    const prevIsEditFormRef = useRef(isEditForm);
     const siteRouteKey = routeParams?.siteId;
     const siteId = siteRouteKey;
     const { searchTypeCodes } = lookupData;
@@ -211,7 +210,7 @@ const SearchEffortDataEntryForm = connect(
 
       const values = getCastedValues();
 
-      const clientId = values.clientId ?? crypto.randomUUID();
+      const clientId = values.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();
 
       const payload = filterNullEmptyObjects({
         ...values,
@@ -227,8 +226,11 @@ const SearchEffortDataEntryForm = connect(
         updatedAt: new Date().toISOString(),
       });
 
-      if (!payload.seFid) {
-        console.error('Missing seFid. Cannot save draft offline.');
+      const draftSeId = payload?.seId ?? payload?.se_id;
+      const draftSeFid = payload?.seFid ?? payload?.se_fid;
+
+      if (!draftSeId && !draftSeFid) {
+        console.error('Missing Search Effort ID. Cannot save draft offline.');
         return;
       }
 
@@ -254,6 +256,7 @@ const SearchEffortDataEntryForm = connect(
         setValue('seFid', payload.seFid);
         setValue('status', 1);
 
+        doResetTelemetryDataEntries();
         doUpdateCurrentTab(1);
       } catch (error) {
         console.error('Save draft failed:', error);
@@ -261,6 +264,7 @@ const SearchEffortDataEntryForm = connect(
         if (!isOnline()) {
           await db.search.put(payload);
           sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
+          doResetTelemetryDataEntries();
           doUpdateCurrentTab(1);
         }
       }
@@ -272,7 +276,7 @@ const SearchEffortDataEntryForm = connect(
       const values = getCastedValues();
       const draft = getOfflineSearchEffortDraft();
 
-      const clientId = values.clientId ?? draft?.clientId ?? crypto.randomUUID();
+      const clientId = values.clientId ?? draft?.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();
 
       const payload = filterNullEmptyObjects({
         ...draft,
@@ -297,13 +301,19 @@ const SearchEffortDataEntryForm = connect(
             await doSaveSearchDataEntry(payload);
           }
         } else {
-          await createData('search', payload);
+          const serverSeId = Number(payload?.seId ?? payload?.se_id) > 0;
+          if (serverSeId) {
+            await updateData('search', clientId, payload);
+          } else {
+            await createData('search', payload);
+          }
         }
 
         setValue('clientId', clientId);
         setValue('status', 2);
 
         sessionStorage.removeItem(searchDraftKey);
+        refreshSiteDatasheet();
         doUpdateUrl(`/sites-list/${siteRouteKey}`);
 
         setSubmitMessage({
@@ -315,7 +325,12 @@ const SearchEffortDataEntryForm = connect(
       } catch (error) {
         console.error('Search submit failed, queueing offline:', error);
 
-        await updateData('search', clientId, payload);
+        const serverSeId = Number(payload?.seId ?? payload?.se_id) > 0;
+        if (serverSeId) {
+          await updateData('search', clientId, payload);
+        } else {
+          await createData('search', payload);
+        }
 
         setValue('clientId', clientId);
         setValue('status', 2);
@@ -335,7 +350,10 @@ const SearchEffortDataEntryForm = connect(
 
       try {
         const draft = JSON.parse(savedDraft);
-        if (!draft?.seFid) return null;
+        const draftSeId = draft?.seId ?? draft?.se_id;
+        const draftSeFid = draft?.seFid ?? draft?.se_fid;
+
+        if (!draftSeId && !draftSeFid) return null;
 
         if (String(draft.siteRouteKey || draft.siteFid || draft.site_fid || draft.siteId) !== String(siteRouteKey)) {
           return null;
@@ -407,17 +425,6 @@ const SearchEffortDataEntryForm = connect(
       }
       reset(defaultValues);
     }, [reset, defaultValues, isEditForm, dataEntryTelemetryTotalCount]);
-
-    // Reset form
-    useEffect(() => {
-      const prevIsEditForm = prevIsEditFormRef.current;
-
-      if (!isEditForm && prevIsEditForm !== false) {
-        doResetTelemetryDataEntries();
-      }
-
-      prevIsEditFormRef.current = isEditForm;
-    }, [isEditForm, doResetTelemetryDataEntries]);
 
     // Set IDs
     useEffect(() => {
@@ -511,7 +518,7 @@ const SearchEffortDataEntryForm = connect(
 
             <Grid tablet={{ col: 2 }}>
               <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
-                {searchTypeCodes.map((opt, idx) => (
+                {searchTypeOptions.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
                     {`${opt.code} - ${opt.description}`}
                   </option>

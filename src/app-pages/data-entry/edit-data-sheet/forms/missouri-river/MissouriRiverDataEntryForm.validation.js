@@ -1,6 +1,7 @@
 import * as yup from 'yup';
 import { ValidationMessages } from '@src/utils/enums';
 import { formatDate } from '@src/utils/helpers';
+import { generateFieldId } from '@src/app-pages/data-entry/dataEntryHelper';
 
 export const microSegmentRequired = [8, 9, 10, 11, 13, 14];
 
@@ -16,7 +17,7 @@ export const gearReqFields = {
   velocity02or062: ['GN18', 'GN81', 'GN14', 'GN41', 'OT04', 'TN', 'TLC1', 'TLC2', 'POT02'],
 };
 
-export const getMissouriRiverSchema = ({ riverMile }) =>
+export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false }) =>
   yup.object().shape(
     {
       fishCount: yup.number().nullable(),
@@ -65,6 +66,7 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         }),
       micro: yup
         .string()
+        .min(6, 'Values must be 6 digits only')
         .max(6, 'Values cannot exceed 6 digits')
         .when(['segment', 'project'], {
           is: (segment, project) => Number(project) == 1 && microSegmentRequired.includes(segment),
@@ -148,11 +150,22 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         })
         .nullable()
         .notRequired(),
-      stopTime: yup.string().when('deploymentType', {
-        is: (deploymentType) => deploymentType === 'p',
-        then: (schema) => schema.required(ValidationMessages.FieldRequired),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
+      stopTime: yup
+        .string()
+        .when('deploymentType', {
+          is: (deploymentType) => deploymentType === 'p',
+          then: (schema) => schema.required(ValidationMessages.FieldRequired),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        })
+        .test('stop-after-start', 'Stop Time must be after Start Time', function (stopTime) {
+          const { startTime } = this.parent;
+          if (!startTime || !stopTime) return true;
+          const toSeconds = (time) => {
+            const [hours, minutes, seconds] = time.split(':').map(Number);
+            return hours * 3600 + minutes * 60 + seconds;
+          };
+          return toSeconds(stopTime) > toSeconds(startTime);
+        }),
       stopLatitude: yup
         .string()
         .when(['deploymentType', 'gear'], {
@@ -230,8 +243,8 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
       distance: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .when('gear', {
-          is: (val) => gearReqFields.distance.includes(val),
+        .when(['gear', 'gearType'], {
+          is: (gear, gearType) => gearType === 'S' && gearReqFields.distance.includes(gear),
           then: (schema) =>
             schema.required(ValidationMessages.FieldRequired).when('u2', {
               is: (val) => ![null, undefined, ''].includes(val),
@@ -344,8 +357,8 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
       velocitybot1: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .when('gear', {
-          is: (val) => gearReqFields.velocitybot1.includes(val),
+        .when(['gear', 'gearType'], {
+          is: (gear, gearType) => hasPDSG && gearType === 'S' && gearReqFields.velocitybot1.includes(gear),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -358,8 +371,9 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
       velocity081: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .when(['depth2', 'gear'], {
-          is: (depth2, gear) => gearReqFields.velocity081.includes(gear) || depth2 >= 1.2,
+        .when(['depth2', 'gear', 'gearType'], {
+          is: (depth2, gear, gearType) =>
+            hasPDSG && gearType === 'S' && gearReqFields.velocity081.includes(gear) && Number(depth2) >= 1.2,
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -373,7 +387,11 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .nullable()
-        .notRequired()
+        .when(['gearType'], {
+          is: (gearType) => hasPDSG && gearType === 'S',
+          then: (schema) => schema.required(ValidationMessages.FieldRequired),
+          otherwise: (schema) => schema.nullable().notRequired(),
+        })
         .typeError(ValidationMessages.FieldRequired)
         .min(0, 'Value cannot be negative')
         .test({
@@ -383,8 +401,8 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
       velocitybot2: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .when('gear', {
-          is: (val) => gearReqFields.velocitybot2.includes(val),
+        .when(['gear', 'gearType'], {
+          is: (gear, gearType) => hasPDSG && gearType === 'S' && gearReqFields.velocitybot2.includes(gear),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -397,8 +415,9 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
       velocity082: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .when(['depth2', 'gear'], {
-          is: (depth2, gear) => gearReqFields.velocity082.includes(gear) || depth2 >= 1.2,
+        .when(['depth2', 'gear', 'gearType'], {
+          is: (depth2, gear, gearType) =>
+            hasPDSG && gearType === 'S' && gearReqFields.velocity082.includes(gear) && Number(depth2) >= 1.2,
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -411,8 +430,8 @@ export const getMissouriRiverSchema = ({ riverMile }) =>
       velocity02or062: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .when('gear', {
-          is: (val) => gearReqFields.velocity02or062.includes(val),
+        .when(['gear', 'gearType'], {
+          is: (gear, gearType) => hasPDSG && gearType == 'S' && gearReqFields.velocity02or062.includes(gear),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -445,9 +464,9 @@ const getBaseDefaultValues = ({ baseData }) => ({
   siteId: baseData?.siteId ?? '',
 });
 
-export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData, fishCount = 0 }) => ({
+export const getMissouriRiverDefaultValues = ({ baseData, dataEntryData, moriverCount = 0, fishCount = 0 }) => ({
   ...getBaseDefaultValues({ baseData }),
-  mrFid: dataEntryData?.mrFid ?? '',
+  mrFid: dataEntryData?.mrFid ?? generateFieldId(moriverCount),
   seFid: dataEntryData?.seFid ?? '',
   mrId: dataEntryData?.mrId ?? '',
   seId: dataEntryData?.SeId ?? '',

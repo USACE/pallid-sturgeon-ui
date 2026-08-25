@@ -31,16 +31,31 @@ export const getTelemetryColumns = ({
   const columnHelper = createColumnHelper();
 
   return [
-    columnHelper.accessor('tId', {
+    columnHelper.accessor((row) => row?.tId ?? row?.t_id ?? row?.serverId ?? '', {
+      id: 'tId',
       header: 'ID',
       cell: ({ cell }) => <span>{cell.getValue()}</span>,
       size: 150,
     }),
-    columnHelper.accessor('tFid', {
-      header: 'Field ID',
-      cell: ({ cell }) => <span>{getRowIndex(cell.getValue())}</span>,
-      size: 150,
-    }),
+    columnHelper.accessor(
+      (row) => {
+        const tFid = row?.tFid ?? row?.t_fid;
+        const tId = row?.tId ?? row?.t_id ?? row?.serverId;
+        if (tFid) {
+          return tFid;
+        }
+        if (!tId && row?.localDisplayId) {
+          return row.localDisplayId;
+        }
+        return '';
+      },
+      {
+        id: 'tFid',
+        header: 'Field ID',
+        cell: ({ cell }) => <span>{getRowIndex(cell.getValue())}</span>,
+        size: 150,
+      }
+    ),
     columnHelper.accessor('bend', {
       header: 'Bend',
       cell: TableCell,
@@ -81,7 +96,7 @@ export const getTelemetryColumns = ({
       header: 'Capture Time',
       cell: TableCell,
       size: 200,
-      meta: { type: 'text' },
+      meta: { type: 'text', required: true },
     }),
     columnHelper.accessor('captureLatitude', {
       header: 'Capture Latitude',

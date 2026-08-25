@@ -34,11 +34,26 @@ export const getFishColumns = ({
       cell: ({ cell }) => <span>{cell.getValue()}</span>,
       size: 150,
     }),
-    columnHelper.accessor('fFid', {
-      header: 'Field ID',
-      cell: ({ cell }) => <span>{getRowIndex(cell.getValue())}</span>,
-      size: 150,
-    }),
+    columnHelper.accessor(
+      (row) => ({
+        fieldId: row?.fFid ?? '',
+        localDisplayId: row?._status !== 'synced' ? (row?.localDisplayId ?? '') : '',
+      }),
+      {
+        id: 'fFid',
+        header: 'Field ID',
+        cell: ({ cell }) => {
+          const value = cell.getValue();
+
+          if (value?.fieldId) {
+            return <span>{getRowIndex(value.fieldId)}</span>;
+          }
+
+          return <span>{value?.localDisplayId ?? ''}</span>;
+        },
+        size: 150,
+      }
+    ),
     columnHelper.accessor('supplementalData', {
       header: 'Supp/Proc Link',
       cell: FishLinkTableCell,

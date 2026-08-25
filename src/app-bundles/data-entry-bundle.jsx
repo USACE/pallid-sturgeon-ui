@@ -247,6 +247,9 @@ export default {
   doSearchEffortDatasheetLoadData:
     (id) =>
     async ({ dispatch, store }) => {
+      dispatch({ type: 'RESET_TELEMETRY_DATA_ENTRIES' });
+
+      if (!id) return;
       if (isOnline()) {
         // Load data
         store.doFetchTelemetryDataEntry({ seId: id, id: store.selectUserRole().id }, null, false);
@@ -254,8 +257,10 @@ export default {
       }
       const telemetryRecords = await db.telemetry
         .filter((row) => {
-          const rowSearchId = row?.seId ?? row?.se_id ?? row?.seFid ?? row?.se_fid;
-          return String(rowSearchId) === String(id);
+          const rowSearchId = [row?.seId, row?.se_id, row?.seFid, row?.se_fid];
+          return rowSearchId.some(
+            (value) => value !== undefined && value !== null && value !== '' && String(value) === String(id)
+          );
         })
         .toArray();
 
@@ -512,13 +517,16 @@ export default {
     (params, ignoreToast = false, loadData = false, callback = false) =>
     async ({ dispatch, store, apiGet }) => {
       dispatch({ type: 'DATA_ENTRY_FETCH_START', payload: params });
+      dispatch({ type: 'RESET_TELEMETRY_DATA_ENTRIES' });
       const searchId = params?.tableId ?? params?.seId ?? params?.seFid;
 
       if (!isOnline()) {
         const searchRecord = await db.search
           .filter((row) => {
-            const rowSearchId = row?.seId ?? row?.se_id ?? row?.seFid ?? row?.se_fid;
-            return String(rowSearchId) === String(searchId);
+            const rowSearchId = [row?.seId, row?.se_id, row?.seFid, row?.se_fid];
+            return rowSearchId.some(
+              (value) => value !== undefined && value !== null && value !== '' && String(value) === String(searchId)
+            );
           })
           .first();
         if (!searchRecord) {
@@ -636,7 +644,7 @@ export default {
               store.doUpdateUrl(`/sites-list/${siteId}/search-effort/${seId}`);
               store.doUpdateComplexStateField({ name: 'isEditForm', value: true });
               store.doFetchSearchDataEntry({ tableId: seId }, false, false, true);
-              store.doSearchEffortDatasheetLoadData({ seId: seId });
+              store.doSearchEffortDatasheetLoadData({ seId });
             }
           }
         } else {
