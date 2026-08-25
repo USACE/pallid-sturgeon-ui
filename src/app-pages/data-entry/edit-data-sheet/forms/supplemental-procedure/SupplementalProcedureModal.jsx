@@ -187,6 +187,8 @@ const SupplementalProcedureModal = connect(
     };
 
     const tagnumber = watch('tagnumber');
+    const pitrn = watch('pitrn');
+    const isTagNumberRequired = pitrn !== null && pitrn !== undefined && pitrn !== '';
 
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
@@ -717,6 +719,7 @@ const SupplementalProcedureModal = connect(
                   name='tagnumber'
                   label='Tag Number'
                   onChange={handleChange}
+                  required={isTagNumberRequired}
                   warning={getTagnumberWarning()}
                   maxLength={tagNumberMaxLength()}
                 />
