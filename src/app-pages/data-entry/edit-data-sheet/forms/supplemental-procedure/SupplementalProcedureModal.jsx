@@ -224,7 +224,9 @@ const SupplementalProcedureModal = connect(
         ensureGeneticsVialPrefix(val);
       }
 
-      trigger(name);
+      if (submitCount > 0) {
+        trigger(name);
+      }
     };
 
     const fmtTimeHHMMSS = (val) => {
@@ -492,12 +494,6 @@ const SupplementalProcedureModal = connect(
       setIsSaving(true);
 
       try {
-        const valid = await trigger();
-
-        if (!valid) {
-          console.warn('Supplemental/Procedure form validation failed:', errors);
-          return;
-        }
         // Format any values need for final payload
         const identifyingData = getIdentifyingData();
         const suppDataObj = formatSuppDataObj();
@@ -1183,7 +1179,7 @@ const SupplementalProcedureModal = connect(
           )}
         </FormProvider>
 
-        <ModalFooter showCancelButton onSave={() => doSubmit()} onCancel={() => handleCancel()} customClosingLogic />
+        <ModalFooter showCancelButton onSave={handleSubmit(doSubmit)} onCancel={() => handleCancel()} customClosingLogic />
       </ModalContent>
     );
   }
