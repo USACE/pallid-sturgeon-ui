@@ -629,21 +629,21 @@ const MissouriRiverDataEntryForm = connect(
 
     // Set Structure Flow and SetSite1 options and reset values when necessary
     useEffect(() => {
-      setValue('setSite1', '', { shouldValidate: shouldAutoValidate });
-      setValue('structureFlow', '', { shouldValidate: shouldAutoValidate });
+      // setValue('setSite1', '', { shouldValidate: shouldAutoValidate });
+      // setValue('structureFlow', '', { shouldValidate: shouldAutoValidate });
       setSs1Options(getSs1Options(microStructure));
       setStructureFlowOptions(getStructureFlowOptions(microStructure));
     }, [microStructure, shouldAutoValidate]);
 
     // Set Structure Mod options and reset Structure Mod value when necessary
     useEffect(() => {
-      setValue('structureMod', '', { shouldValidate: shouldAutoValidate });
+      // setValue('structureMod', '', { shouldValidate: shouldAutoValidate });
       setStructureModOptions(getStructureModOptions(structureFlow));
     }, [structureFlow, shouldAutoValidate]);
 
     // Set SetSite1 options and reset SetSite1 value when necessary
     useEffect(() => {
-      setValue('setSite2', '', { shouldValidate: shouldAutoValidate });
+      // setValue('setSite2', '', { shouldValidate: shouldAutoValidate });
       setSs2Options(getSs2Options(setSite1));
     }, [setSite1, shouldAutoValidate]);
 
@@ -1271,8 +1271,7 @@ const MissouriRiverDataEntryForm = connect(
                     label='1-Velocity (0.2 or 0.6)'
                     type='number'
                     onChange={handleChange}
-                    required={hasPDSG && gearType === 'S' ? true : false}
-                    isMuted={hasPDSG && gearType === 'S' ? false : true}
+                    isMuted={true}
                   />
                 </Grid>
               </Grid>
