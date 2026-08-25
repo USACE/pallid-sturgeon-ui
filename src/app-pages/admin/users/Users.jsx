@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { mdiAccountPlus } from '@mdi/js';
@@ -33,6 +33,7 @@ export default connect(
   'selectLookupData',
   'selectUserRole',
   ({ doFetchUsers, doFetchRoles, doModalOpen, doUpdateRoleOffice, usersData, roles, lookupData, userRole }) => {
+    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const { projects, fieldOffices } = lookupData;
     const { projectCode } = userRole;
     const projectPspa = [1, 3, 4, 5, 6];
@@ -43,6 +44,17 @@ export default connect(
     useEffect(() => {
       doFetchUsers();
       doFetchRoles();
+    }, []);
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (event) => {
+        setIsDarkMode(event.matches);
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
     }, []);
 
     return (
@@ -60,7 +72,10 @@ export default connect(
                 icon={<Icon path={mdiAccountPlus} />}
                 handleClick={() => doModalOpen(AddUserFormModal)}
               />
-              <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
+              <div
+                className={`mt-3 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
+                style={{ width: '100%', height: '600px' }}
+              >
                 <AgGridReact
                   suppressClickEdit
                   rowHeight={35}

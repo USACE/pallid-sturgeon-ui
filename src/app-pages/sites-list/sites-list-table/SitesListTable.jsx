@@ -11,6 +11,7 @@ import ExportButton from '@components/button/exportButton';
 import Icon from '@components/icon/icon';
 
 import '@pages/data-summaries/data-summary.scss';
+import { useEffect, useState } from 'react';
 
 const cellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
@@ -22,13 +23,25 @@ const SitesListTable = connect(
   'selectSitesData',
   'selectExportData',
   ({ doModalOpen, doDomainBendRnFetch, sitesData, exportData }) => {
+    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
+
     const handleAddButton = () => {
       doModalOpen(SitesFormModal);
-
       if (navigator.onLine) {
         doDomainBendRnFetch();
       }
     };
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (event) => {
+        setIsDarkMode(event.matches);
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }, []);
 
     return (
       <div>
@@ -49,7 +62,10 @@ const SitesListTable = connect(
             </Button>
           </div>
         </Grid>
-        <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
+        <div
+          className={`mt-2 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
+          style={{ height: '600px', width: '100%' }}
+        >
           <AgGridReact
             rowHeight={35}
             defaultColDef={{

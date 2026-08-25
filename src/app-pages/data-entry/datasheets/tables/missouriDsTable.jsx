@@ -10,6 +10,7 @@ import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
 import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { Button } from '@trussworks/react-uswds';
+import { useEffect, useState } from 'react';
 
 const fishCellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
@@ -43,11 +44,12 @@ const MissouriDsTable = connect(
     routeParams,
     isDraft,
   }) => {
+    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const siteId = routeParams?.siteId;
+    const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
     const data = isDraft ? moriverDraftSitesDatasheetData : moriverSitesDatasheetData;
 
     const handleAddButtonClick = () => {
-      const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
       sessionStorage.removeItem(moriverDraftKey);
       // Reset form data
       doResetFormData();
@@ -56,6 +58,17 @@ const MissouriDsTable = connect(
       doUpdateComplexStateField({ name: 'isEditForm', value: false });
       doUpdateUrl(`/sites-list/${siteId}/missouri-river`);
     };
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (event) => {
+        setIsDarkMode(event.matches);
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }, []);
 
     return (
       <>
@@ -75,7 +88,10 @@ const MissouriDsTable = connect(
             </Button>
           </div>
         </Row>
-        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
+        <div
+          className={`mt-2 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
+          style={{ width: '100%', height: '600px' }}
+        >
           <AgGridReact
             rowHeight={35}
             rowData={data}

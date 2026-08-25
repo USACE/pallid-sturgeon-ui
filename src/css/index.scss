@@ -40,7 +40,7 @@ th {
 }
 
 td {
-  color: $color-gray-dark;
+  color: var(--text-color);
   font-weight: normal;
   font-size: small;
 }
