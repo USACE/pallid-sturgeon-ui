@@ -5,7 +5,12 @@ import { mdiCellphoneCog, mdiDownload, mdiEarth } from '@mdi/js';
 
 import LoaderButton from '@src/app-components/loader/LoaderButton';
 import Icon from '@src/app-components/icon/icon';
-import { downloadLookupsForOffline, downloadSitesForOffline, downloadDatasheetsForOffline } from '../lookup-cache';
+import {
+  downloadLookupsForOffline,
+  downloadSitesForOffline,
+  downloadDatasheetsForOffline,
+  downloadPallidIdDataForOffline,
+} from '../lookup-cache';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 
 const OfflineSetupButton = connect('selectAuth', 'selectUserRole', ({ auth, userRole }) => {
@@ -26,10 +31,11 @@ const OfflineSetupButton = connect('selectAuth', 'selectUserRole', ({ auth, user
       const lookupResult = await downloadLookupsForOffline(auth?.token);
       const siteResult = await downloadSitesForOffline(auth?.token, userRole?.id);
       const datasheetResult = await downloadDatasheetsForOffline(auth?.token, userRole?.id);
+      const pallidResult = await downloadPallidIdDataForOffline(auth?.token);
 
       setLookupDownloadStatus({
         type: 'success',
-        message: `Offline sites & lookups downloaded successfully. Saved ${siteResult.count ?? 0} sites for ${siteResult.year}, ${datasheetResult.count} datasheets, & ${lookupResult.count ?? 0} lookup rows.`,
+        message: `Offline sites & lookups downloaded successfully. Saved ${siteResult.count ?? 0} sites for ${siteResult.year}, ${datasheetResult.count} datasheets, & ${lookupResult.count ?? 0} lookup rows/${pallidResult.count ?? 0} Pallid ID records.`,
       });
     } catch (error) {
       console.error('Lookup download failed:', error);

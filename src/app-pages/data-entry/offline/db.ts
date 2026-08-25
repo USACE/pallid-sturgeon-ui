@@ -460,6 +460,7 @@ export class PSOfflineDB extends Dexie {
   meta!: Table<MetaKV, string>;
 
   lookups!: Table<LookupItem, number>;
+  pallidId!: Table<PallidIdCacheEntry, string>;
 
   constructor() {
     super('ps_offline_db');
@@ -476,6 +477,21 @@ export class PSOfflineDB extends Dexie {
       outbox: '++_id, tableName, op, ts, clientId, serverId',
       meta: 'key',
       lookups: '++id, lookupName, code',
+    });
+
+    this.version(10).stores({
+      sites: 'clientId, serverId, site_id, site_fid, _status',
+      moriver: 'clientId, serverId, mr_id, mr_fid, site_id, site_fid, siteRouteKey, updatedAt, setdate, _status',
+      search: 'clientId, serverId, se_id, seFid, site_id, site_fid, siteRouteKey, _status',
+      fish: 'clientId, serverId, f_id, fFid, mr_id, mrFid, mr_fid, _status',
+      telemetry: 'clientId, serverId, t_id, se_id, tFid, seFid, _status',
+      supplemental: 'clientId, serverId, s_id, f_id, fFid, f_fid, _status',
+      procedure: 'clientId, serverId, id, s_id, f_id, fFid, f_fid, _status',
+
+      outbox: '++_id, tableName, op, ts, clientId, serverId',
+      meta: 'key',
+      lookups: '++id, lookupName, code',
+      pallidId: 'tagnumber, updatedAt',
     });
   }
 }
@@ -520,5 +536,14 @@ export interface LookupItem {
   code: string | number;
   label: string;
   raw?: any;
+  updatedAt: string;
+}
+
+export interface PallidIdCacheEntry {
+  tagnumber: string;
+  geneticNeeds?: string;
+  lab?: string;
+  stockedJuvenileInfo: any[];
+  recaptureInfo: any[];
   updatedAt: string;
 }

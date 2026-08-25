@@ -694,6 +694,102 @@ export async function downloadDatasheetsForOffline(token?: string, userRoleId?: 
   };
 }
 
+export async function downloadPallidIdDataForOffline(token?: string) {
+  const response = await fetch(`${API_BASE}/psapi/DataEntry/getAllPallidIdOfflineData`, {
+    method: 'GET',
+    headers: getAuthHeaders(token),
+  });
+
+  if (response.status === 401) {
+    throw new Error('Authorization expired while downloading Pallid ID data.');
+  }
+
+  if (!response.ok) {
+    throw new Error(`Failed to download Pallid ID data: ${response.status}`);
+  }
+
+  const json = await response.json();
+  const data = json?.data ?? json;
+  const genetics = data?.genetics ?? [];
+  const stockedJuveniles = data?.stockedJuveniles ?? [];
+  const recaptureInfo = data?.recaptureInfo ?? [];
+  const normalizeTag = (value: unknown) =>
+    String(value ?? '')
+      .trim()
+      .toUpperCase();
+  const pallidByTag = new Map<string, any>();
+  const getOrCreate = (tagValue: unknown) => {
+    const tag = normalizeTag(tagValue);
+
+    if (!tag) {
+      return null;
+    }
+
+    if (!pallidByTag.has(tag)) {
+      pallidByTag.set(tag, {
+        tagnumber: tag,
+        geneticNeeds: '',
+        lab: '',
+        stockedJuvenileInfo: [],
+        recaptureInfo: [],
+        updatedAt: new Date().toISOString(),
+      });
+    }
+    return pallidByTag.get(tag);
+  };
+
+  for (const row of genetics) {
+    const entry = getOrCreate(row?.pitTag);
+
+    if (!entry) continue;
+
+    entry.geneticNeeds = row?.reason ?? '';
+    entry.lab = row?.sendTo ?? '';
+  }
+
+  for (const row of stockedJuveniles) {
+    const entry = getOrCreate(row?.pitTag);
+
+    if (!entry) continue;
+
+    entry.stockedJuvenileInfo.push({
+      hatchery: row?.hatchery ?? null,
+      stockSite: row?.stockSite ?? null,
+      yearClass: row?.yearClass ?? null,
+      cwt: row?.cwt ?? null,
+      scute: row?.scute ?? null,
+      er: row?.er ?? null,
+      el: row?.el ?? null,
+    });
+  }
+
+  for (const row of recaptureInfo) {
+    const entry = getOrCreate(row?.tagnumber);
+
+    if (entry) {
+      entry.recaptureInfo.push(row);
+    }
+  }
+
+  const rows = Array.from(pallidByTag.values());
+
+  await db.pallidId.clear();
+
+  if (rows.length > 0) {
+    await db.pallidId.bulkPut(rows);
+  }
+
+  await db.meta.put({
+    key: 'pallidIdLastDownloaded',
+    value: new Date().toISOString(),
+  });
+
+  return {
+    ok: true,
+    count: rows.length,
+  };
+}
+
 async function clearOldDownloadedDatasheets() {
   const clearSyncedRows = async (table: any) => {
     const rows = await table.toArray();
