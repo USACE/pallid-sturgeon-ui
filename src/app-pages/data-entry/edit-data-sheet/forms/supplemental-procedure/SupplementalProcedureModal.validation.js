@@ -20,11 +20,12 @@ export const suppProcValidationSchema = ({ projectId, species }) =>
           otherwise: (schema) => schema.notRequired(),
         })
         // Conditional Length Limits (10 without decimal, 14 with decimal)
-        .test('tagNumber-length', 'Length exceeds the allowed limit', (value) => {
+        .test('tagNumber-length', 'Invalid tag number length', (value) => {
           if (!value) return true;
           const hasDecimal = value.includes('.');
+          const charCount = hasDecimal ? value.replace('.', '').length : value.length;
           const maxLength = hasDecimal ? 14 : 10;
-          return value.length <= maxLength;
+          return charCount === maxLength;
         }),
       elcolor: yup.string().required(ValidationMessages.FieldRequired),
       elhv: yup.string().when('elcolor', {

@@ -657,14 +657,19 @@ const SupplementalProcedureModal = connect(
       description: val,
     }));
 
-    const getTagnumberWarning = () => {
+    const getTagNumberWarning = () => {
+      if (!tagnumber) return null;
+      
       const hasDecimal = String(tagnumber)?.includes('.');
+      
       if (hasDecimal) {
-        const parseVal = String(tagnumber)?.replace('.', '');
-        return parseVal?.length < 14 && parseVal !== '' ? 'Value cannot be less than or greater than 14 digits' : null;
+        const charCount = String(tagnumber)?.replace('.', '').length;
+        return charCount !== 14
+          ? 'Tag number must be exactly 14 characters when a decimal is present'
+          : null;
       } else {
-        return tagnumber && String(tagnumber)?.length < 10
-          ? 'Value cannot be less than or greater than 10 digits'
+        return String(tagnumber)?.length !== 10
+          ? 'Tag number must be exactly 10 characters when no decimal is present'
           : null;
       }
     };
@@ -720,7 +725,7 @@ const SupplementalProcedureModal = connect(
                   label='Tag Number'
                   onChange={handleChange}
                   required={isTagNumberRequired}
-                  warning={getTagnumberWarning()}
+                  warning={getTagNumberWarning()}
                   maxLength={tagNumberMaxLength()}
                 />
               </Grid>
