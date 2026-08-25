@@ -12,6 +12,7 @@ import Modal from './app-components/modal/primary-modal/PrimaryModal';
 import SecondaryModal from './app-components/modal/secondary-modal/SecondaryModal';
 import { initOnlineListener } from './app-pages/data-entry/offline/online-listener';
 import SyncBanner from './app-pages/data-entry/offline/sync-banner/SyncBanner';
+import { usePwaMode } from './app-pages/data-entry/offline/pwa-mode';
 
 import 'react-toastify/dist/ReactToastify.css';
 import './css/bootstrap/css/bootstrap.water.min.css';
@@ -41,11 +42,12 @@ export default connect(
   ({ doGetAllLookupData, doModalOpen, route: Route, auth, loadingState, loadingMessage }) => {
     const isAuthenticated = !!auth?.token;
     const userHasRole = !!auth?.authData?.role;
+    const pwaMode = usePwaMode();
 
     useEffect(() => {
       const cleanupOnlineListener = initOnlineListener();
 
-      if (isAuthenticated && userHasRole) {
+      if (isAuthenticated && userHasRole && navigator.onLine) {
         doGetAllLookupData();
       } else {
         const landingModalSeen = sessionStorage.getItem('landingModalSeen');
@@ -61,7 +63,7 @@ export default connect(
       <>
         {loadingState && <LoadingModal text={loadingMessage} />}
         <ToastContainer autoClose={3500} hideProgressBar={false} />
-        <NavBar />
+        {(!pwaMode || !isAuthenticated) && <NavBar />}
         {auth.token && <SyncBanner />}
         <PageContent>{auth.token ? <Route /> : <Hero />}</PageContent>
         <Modal closeWithEscape />
