@@ -47,6 +47,10 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
     rowSpecies && setSpecies(rowSpecies);
   }, [rowSpecies]);
 
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
   return (
     <div
       id={cell.id}
