@@ -20,11 +20,7 @@ import Icon from '@components/icon/icon';
 import { getSuppProcDefaultValues, suppProcValidationSchema } from './SupplementalProcedureModal.validation';
 import { createDropdownOptions, isEmpty } from '@pages/data-entry/dataEntryHelper';
 
-// import {
-//   getOfflineDraft,
-//   reloadOfflineDraft,
-// } from '@src/app-pages/data-entry/offline/offlineHelper';
-import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
+import { OfflineStatuses } from '@src/utils/enums';
 import { isOnline } from '@src/app-pages/data-entry/offline/sync';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 
@@ -64,7 +60,6 @@ const SupplementalProcedureModal = connect(
   'doSaveProcedureDataEntry',
   'doUpdateProcedureDataEntry',
   'selectDataEntryLastParams',
-  'selectUserRole',
   ({
     doGetPallidIdData,
     isEditForm,
@@ -78,24 +73,11 @@ const SupplementalProcedureModal = connect(
     doSaveProcedureDataEntry,
     doUpdateProcedureDataEntry,
     dataEntryLastParams,
-    userRole,
     row: fishData,
   }) => {
     const { projectId } = baseData;
-    // const { fid, mrFid, fFid, species } = fishData;
-
-    // const supplementalDataExists = !!dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)?.length;
-    // const procedureDataExists = !!dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)?.length;
-
-    // const initialSuppData = supplementalDataExists
-    //   ? dataEntrySupplemental?.items?.filter((data) => data.fFid === fFid)[0]
-    //   : null;
-    // const initialProcData = procedureDataExists
-    //   ? dataEntryProcedure?.items?.filter((data) => data.fFid === fFid)[0]
-    //   : null;
     const fid = fishData?.fid ?? fishData?.fId ?? fishData?.f_id;
     const fFid = fishData?.fFid ?? fishData?.f_fid ?? fishData?.ffid;
-    const mrFid = fishData?.mrFid ?? fishData?.mr_fid;
     const species = fishData?.species;
 
     const matchesFish = (row) => {
@@ -119,7 +101,6 @@ const SupplementalProcedureModal = connect(
         return matchesSupp || matchesFish(row);
       }) ?? null;
 
-    const supplementalDataExists = Boolean(initialSuppData);
     const procedureDataExists = Boolean(initialProcData);
 
     const suppDraftKey = `currentSupplementalDraft:${fFid}`;
@@ -166,7 +147,6 @@ const SupplementalProcedureModal = connect(
       mode: 'onSubmit',
       reValidateMode: 'onChange',
       stateOptions: [],
-      // shouldUnregister: true,
     });
 
     const {
@@ -177,7 +157,6 @@ const SupplementalProcedureModal = connect(
       trigger,
       reset,
       clearErrors,
-      handleSubmit,
     } = methods;
 
     const toggleProcedureSection = () => {
@@ -287,7 +266,6 @@ const SupplementalProcedureModal = connect(
       if (genetic == 'Y') {
         setValue('geneticsVialNumber', geneticsVialNumber ? geneticsVialNumber : geneticsVialPrefix);
         setIsGeneticsVialReadOnly(false);
-        // ['PDSG', 'USG'].includes(species) && setIsGeneticsVialRequired(true);
       } else {
         if (geneticsVialNumber) {
           // TODO: this confirm dialog is a bit ugly; use a different confirm method?
@@ -297,7 +275,6 @@ const SupplementalProcedureModal = connect(
           if (confirmed) {
             setValue('geneticsVialNumber', null);
             setIsGeneticsVialReadOnly(true);
-            // ['PDSG', 'USG'].includes(species) && setIsGeneticsVialRequired(false);
           } else {
             setValue('genetic', 'Y');
           }
@@ -316,9 +293,7 @@ const SupplementalProcedureModal = connect(
     // if Supplemental draft exists in sessionStorage (offline mode), load it into the form
     const getOfflineSupplementalDraft = () => {
       const suppDraftJson = sessionStorage.getItem(suppDraftKey);
-      // console.warn('getOfflineSupplementalDraft - suppDraftJson:', suppDraftJson);
       if (!suppDraftJson) return null;
-      // console.warn('getOfflineSupplementalDraft - supplemental data found in sessionStorage - parsing JSON');
       try {
         const suppDraft = JSON.parse(suppDraftJson);
         if (!suppDraft?.fFid) return null;
@@ -335,9 +310,7 @@ const SupplementalProcedureModal = connect(
     // if Procedure draft exists in sessionStorage (offline mode), load it into the form
     const getOfflineProcedureDraft = () => {
       const procDraftJson = sessionStorage.getItem(procDraftKey);
-      // console.warn('getOfflineProcedureDraft - procDraftJson:', procDraftJson);
       if (!procDraftJson) return null;
-      // console.warn('getOfflineProcedureDraft - procedure data found in sessionStorage - parsing JSON');
       try {
         const procDraft = JSON.parse(procDraftJson);
         if (!procDraft?.fFid) return null;
@@ -352,12 +325,9 @@ const SupplementalProcedureModal = connect(
     };
 
     const reloadOfflineDrafts = () => {
-      // if (isEditForm) return false;
-
       const suppDraft = getOfflineSupplementalDraft();
       const procDraft = getOfflineProcedureDraft();
 
-      // console.warn('reloadOfflineDrafts - offline supplemental draft:', suppDraft, 'offline procedure draft:', procDraft);
       if (!suppDraft) return false;
 
       reset(
@@ -500,9 +470,6 @@ const SupplementalProcedureModal = connect(
         const identifyingData = getIdentifyingData();
         const suppDataObj = formatSuppDataObj();
         const procDataObj = formatProcDataObj();
-        // TODO: Maybe, unsure if necessary? Filter out any null/empty values for final payload
-        // const suppPayload = filterNullEmptyObjects(suppDataObj);
-        // const procPayload = filterNullEmptyObjects(procDataObj);
 
         const suppDraft = getOfflineSupplementalDraft();
         const suppClientId = suppDataObj.clientId ?? suppDraft?.clientId ?? crypto.randomUUID();
@@ -526,7 +493,6 @@ const SupplementalProcedureModal = connect(
           version: suppDataObj.version ?? suppDraft?.version ?? 0,
           updatedAt: new Date().toISOString(),
         };
-        // console.warn('suppPayload', suppPayload);
 
         let procPayload = {
           ...identifyingData,
@@ -545,7 +511,6 @@ const SupplementalProcedureModal = connect(
           version: procDataObj.version ?? procDraft?.version ?? 0,
           updatedAt: new Date().toISOString(),
         };
-        // console.warn('procPayload', procPayload);
 
         const hasOfflineSuppDraft = Boolean(suppDraft?.clientId);
         const hasOfflineProcDraft = Boolean(procDraft?.clientId);
@@ -573,7 +538,6 @@ const SupplementalProcedureModal = connect(
             }
             sessionStorage.setItem(procDraftKey, JSON.stringify(procPayload));
           }
-          doModalClose();
           return;
         }
 
@@ -585,10 +549,8 @@ const SupplementalProcedureModal = connect(
           }
         } catch (error) {
           if (initialSuppData || hasOfflineSuppDraft) {
-            // console.warn('Online - Updating existing SUPP data: ', { suppPayload });
             await updateData('supplemental', suppClientId, suppPayload);
           } else {
-            // console.warn('Online - Creating SUPP data: ', { suppPayload });
             await createData('supplemental', suppPayload);
           }
         }
@@ -598,29 +560,19 @@ const SupplementalProcedureModal = connect(
         if (showProcedureSection) {
           try {
             if (initialProcData) {
-              // console.warn('Online - Updating existing PROC data: ', { procPayload });
               await doUpdateProcedureDataEntry(procPayload);
             } else {
-              // console.warn('Online - Creating PROC data: ', { procPayload });
               await doSaveProcedureDataEntry(procPayload);
             }
           } catch (error) {
             if (initialProcData || hasOfflineProcDraft) {
-              // console.warn('OFFLINE - Updating existing PROC data: ', { procPayload });
               await updateData('procedure', procClientId, procPayload);
             } else {
-              console.warn('OFFLINE - Creating PROC data: ', { procPayload });
               await createData('procedure', procPayload);
             }
           }
-          // console.warn('done with PROC data save');
-          // console.warn('procClientId', procClientId);
-          // console.warn('procDraftKey', procDraftKey);
-
-          // setValue('suppClientId', suppClientId);
           sessionStorage.setItem(procDraftKey, JSON.stringify(procPayload));
         }
-        doModalClose();
       } catch (error) {
         console.error('Procedure submit failed, queueing offline:', error);
         window.alert(`Supplemental/Procedure save failed: ${error?.message ?? error}`);
@@ -631,9 +583,15 @@ const SupplementalProcedureModal = connect(
     };
 
     useEffect(() => {
-      // console.warn('useEffect - isEditForm changed, reloading offline drafts');
       reloadOfflineDrafts();
     }, [isEditForm]);
+
+    const handleSaveAndClose = () => {
+      // Save Data
+      doSubmit();
+      // Close Modal
+      doModalClose();
+    };
 
     // TODO: this confirm dialog is a bit ugly
     const handleCancel = () => {
@@ -1175,7 +1133,11 @@ const SupplementalProcedureModal = connect(
           )}
         </FormProvider>
 
-        <ModalFooter showCancelButton onSave={() => doSubmit()} onCancel={() => handleCancel()} customClosingLogic />
+        <ModalFooter
+          onSave={() => doSubmit()}
+          onSecondarySave={() => handleSaveAndClose()}
+          onCancel={() => handleCancel()}
+        />
       </ModalContent>
     );
   }

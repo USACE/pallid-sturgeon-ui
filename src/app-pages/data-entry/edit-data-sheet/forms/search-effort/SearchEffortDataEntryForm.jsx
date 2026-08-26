@@ -19,6 +19,7 @@ import { db } from '@src/app-pages/data-entry/offline/db';
 import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 import { mdiCrosshairsGps } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
+import NavigateWarningModal from '@src/common/modals/NavigateWarningModal';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
 
@@ -31,6 +32,7 @@ const GPS_OPTIONS = {
 };
 
 const SearchEffortDataEntryForm = connect(
+  'doModalOpen',
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'doResetTelemetryDataEntries',
@@ -42,6 +44,7 @@ const SearchEffortDataEntryForm = connect(
   'selectLookupData',
   'doUpdateCurrentTab',
   ({
+    doModalOpen,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     doResetTelemetryDataEntries,
@@ -53,6 +56,8 @@ const SearchEffortDataEntryForm = connect(
     lookupData,
     doUpdateCurrentTab,
   }) => {
+    const browserGps = useGpsCapture(GPS_OPTIONS);
+    const ubloxGps = useUbloxSerialGps();
     const siteRouteKey = routeParams?.siteId;
     const siteId = siteRouteKey;
     const { searchTypeCodes } = lookupData;
@@ -89,8 +94,12 @@ const SearchEffortDataEntryForm = connect(
       handleSubmit,
     } = methods;
 
-    const browserGps = useGpsCapture(GPS_OPTIONS);
-    const ubloxGps = useUbloxSerialGps();
+    const seId = watch('seId');
+    const seFid = watch('seFid');
+    const searchTypeCode = watch('searchTypeCode');
+    const telemetryCount = Number(watch('telemetryCount') || 0);
+    const hasTelemetry = telemetryCount >= 1;
+    const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
     const captureGpsBest = async () => {
       if (USE_UBLOX_POC && ubloxGps.isConnected && ubloxGps.latestFix) {
@@ -154,11 +163,6 @@ const SearchEffortDataEntryForm = connect(
         window.alert(`GPS capture failed: ${e?.message || e}`);
       }
     };
-
-    const searchTypeCode = watch('searchTypeCode');
-    const telemetryCount = Number(watch('telemetryCount') || 0);
-    const hasTelemetry = telemetryCount >= 1;
-    const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
     const getTelemetryWarning = () => {
       if (Number(dataEntryTelemetryTotalCount || 0) === 0) {
@@ -257,7 +261,6 @@ const SearchEffortDataEntryForm = connect(
         setValue('status', 1);
 
         doResetTelemetryDataEntries();
-        doUpdateCurrentTab(1);
       } catch (error) {
         console.error('Save draft failed:', error);
 
@@ -265,7 +268,6 @@ const SearchEffortDataEntryForm = connect(
           await db.search.put(payload);
           sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
           doResetTelemetryDataEntries();
-          doUpdateCurrentTab(1);
         }
       }
     };
@@ -314,7 +316,6 @@ const SearchEffortDataEntryForm = connect(
 
         sessionStorage.removeItem(searchDraftKey);
         refreshSiteDatasheet();
-        doUpdateUrl(`/sites-list/${siteRouteKey}`);
 
         setSubmitMessage({
           type: 'success',
@@ -342,6 +343,22 @@ const SearchEffortDataEntryForm = connect(
         });
       }
     };
+
+    const handleSaveAndClose = (isSubmit = false) => {
+      // Save/Submit Form
+      isSubmit ? doSubmit() : doSaveDraft();
+      // Navigate to Fish Data Entry Form Tab
+      doUpdateUrl(`/sites-list/${siteRouteKey}`);
+    };
+
+    const handleSaveAndFish = (isSubmit = false) => {
+      // Save/Submit Form
+      isSubmit ? doSubmit() : doSaveDraft();
+      // Navigate to Fish Data Entry Form Tab
+      doUpdateCurrentTab(1);
+    };
+
+    const handleClose = () => doModalOpen(NavigateWarningModal, { url: `/sites-list/${siteRouteKey}` });
 
     const getOfflineSearchEffortDraft = () => {
       const savedDraft = sessionStorage.getItem(searchDraftKey);
@@ -481,14 +498,20 @@ const SearchEffortDataEntryForm = connect(
           </div>
         )}
         <>
-          <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 3 }}>
-              <TextInput name='seId' label='SE ID' readOnly />
+          <Grid row gap='md'>
+            <Grid tablet={{ col: 1 }}>
+              <p>
+                SE ID:<br></br>
+                <span className='text-bold'>{seId !== '' ? seId : '--'}</span>
+              </p>
             </Grid>
-            <Grid tablet={{ col: 3 }}>
-              <TextInput name='seFid' label='SE Field ID (Date-Time-SE#)' readOnly />
+            <Grid tablet={{ col: 2 }}>
+              <p>
+                SE Field ID (Date-Time-SE#):<br></br>
+                <span className='text-bold'>{seFid !== '' ? seFid : '--'}</span>
+              </p>
             </Grid>
-            <Grid tablet={{ col: 6 }}>
+            <Grid tablet={{ col: 8 }}>
               {!hasTelemetry ? (
                 <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
@@ -498,6 +521,23 @@ const SearchEffortDataEntryForm = connect(
                   Submit
                 </Button>
               )}
+              <Button
+                className='add-btn save-btn'
+                onClick={handleSubmit(() => handleSaveAndClose(hasTelemetry))}
+                type='button'
+              >
+                Save & Close
+              </Button>
+              <Button
+                className='add-btn save-btn'
+                onClick={handleSubmit(() => handleSaveAndFish(hasTelemetry))}
+                type='button'
+              >
+                Save & Open Telemetry
+              </Button>
+              <Button className='close-btn save-btn' onClick={handleClose} type='button'>
+                Close
+              </Button>
             </Grid>
           </Grid>
           <Grid row gap='md' className='padding-bottom-3'>

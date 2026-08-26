@@ -36,8 +36,10 @@ import { db } from '@src/app-pages/data-entry/offline/db';
 import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 
 import '../../../dataentry.scss';
+import NavigateWarningModal from '@src/common/modals/NavigateWarningModal';
 
 const MissouriRiverDataEntryForm = connect(
+  'doModalOpen',
   'doUpdateBaseData',
   'doAddMoRiverDataEntry',
   'doUpdateMoRiverDataEntry',
@@ -52,6 +54,7 @@ const MissouriRiverDataEntryForm = connect(
   'selectCurrentTab',
   'selectMoriverSitesDraftDatasheetTotalResults',
   ({
+    doModalOpen,
     doUpdateBaseData,
     doAddMoRiverDataEntry,
     doUpdateMoRiverDataEntry,
@@ -475,15 +478,12 @@ const MissouriRiverDataEntryForm = connect(
         setValue('clientId', clientId);
         setValue('mrFid', payload?.mrFid);
         setValue('status', DataEntryStatuses.Draft);
-
-        doUpdateCurrentTab(1);
       } catch (error) {
         console.error('Save draft failed:', error);
 
         if (!isOnline) {
           await db.moriver.put(payload);
           sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
-          doUpdateCurrentTab(1);
         }
       }
     };
@@ -538,7 +538,6 @@ const MissouriRiverDataEntryForm = connect(
         sessionStorage.removeItem(moriverDraftKey);
       }
       refreshSiteDatasheet();
-      doUpdateUrl(`/sites-list/${siteRouteKey}`);
       setSubmitMessage({
         type: ApiStatuses.Success,
         text: isOnline
@@ -546,6 +545,22 @@ const MissouriRiverDataEntryForm = connect(
           : 'Missouri River form saved offline successfully. It will sync when you are back online.',
       });
     };
+
+    const handleSaveAndClose = (isSubmit = false) => {
+      // Save/Submit Form
+      isSubmit ? doSubmit() : doSaveDraft();
+      // Navigate to Fish Data Entry Form Tab
+      doUpdateUrl(`/sites-list/${siteRouteKey}`);
+    };
+
+    const handleSaveAndFish = (isSubmit = false) => {
+      // Save/Submit Form
+      isSubmit ? doSubmit() : doSaveDraft();
+      // Navigate to Fish Data Entry Form Tab
+      doUpdateCurrentTab(1);
+    };
+
+    const handleClose = () => doModalOpen(NavigateWarningModal, { url: `/sites-list/${siteRouteKey}` });
 
     const reloadOfflineDraft = () => {
       if (!draft) return false;
@@ -746,18 +761,6 @@ const MissouriRiverDataEntryForm = connect(
       };
       // Only run when offline in offline status and mrFid exists
       !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
-    }, [mrFid, isOnline, currentTab]);
-
-    // Get Offline Fish Data
-    useEffect(() => {
-      const populateOfflineFishData = async (id) => {
-        const cachedData = await db.fish.toArray();
-        // Determine whether to search via Table ID or Field ID
-        const filteredCachedData = cachedData.filter((item) => String(item?.mrFid) === String(id));
-        setFishData(filteredCachedData);
-      };
-      // Only run when offline in offline status and mrFid exists
-      !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
       isOnline && setFishData(dataEntryFishData?.items);
     }, [mrFid, , isOnline, currentTab, dataEntryFishData, setFishData]);
 
@@ -785,19 +788,34 @@ const MissouriRiverDataEntryForm = connect(
                 <span className='text-bold'>{seFid !== '' ? seFid : '--'}</span>
               </p>
             </Grid>
-            {!hasFishRecords ? (
-              <Grid tablet={{ col: 2 }}>
+            <Grid tablet={{ col: 8 }}>
+              {!hasFishRecords ? (
                 <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
                 </Button>
-              </Grid>
-            ) : (
-              <Grid tablet={{ col: 2 }}>
+              ) : (
                 <Button className='add-btn save-btn' onClick={handleSubmit(doSubmit)} type='button'>
                   Submit
                 </Button>
-              </Grid>
-            )}
+              )}
+              <Button
+                className='add-btn save-btn'
+                onClick={handleSubmit(() => handleSaveAndClose(hasFishRecords))}
+                type='button'
+              >
+                Save & Close
+              </Button>
+              <Button
+                className='add-btn save-btn'
+                onClick={handleSubmit(() => handleSaveAndFish(hasFishRecords))}
+                type='button'
+              >
+                Save & Open Fish Datasheet
+              </Button>
+              <Button className='close-btn save-btn' onClick={handleClose} type='button'>
+                Close
+              </Button>
+            </Grid>
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
