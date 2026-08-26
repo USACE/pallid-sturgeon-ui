@@ -9,8 +9,7 @@ const ModalFooter = connect(
   'doModalClose',
   ({
     doModalClose,
-    cancelText = 'Cancel',
-    customClosingLogic = false,
+    cancelText = 'Close',
     onCancel = null,
     onSave,
     saveIsDisabled = false,
@@ -19,25 +18,41 @@ const ModalFooter = connect(
     showSaveButton = true,
     isSaveButtonLoading = false,
     children,
+    showSecondarySaveButton = null,
+    onSecondarySave,
+    secondarySaveText = 'Save & Close',
   }) => {
-    const handleClick = (e) => {
-      if (onSave) onSave(e);
-      if (!customClosingLogic) doModalClose();
-    };
-
     return (
       <footer className={`primary-modal-footer ${children ? 'has-extra-actions' : ''}`}>
         <div className='left-group'>
           {showSaveButton && (
-            <LoaderButton disabled={saveIsDisabled} isLoading={isSaveButtonLoading} onClick={handleClick} type='button'>
+            <LoaderButton
+              disabled={saveIsDisabled}
+              isLoading={isSaveButtonLoading}
+              onClick={onSave}
+              type='button'
+              className='add-btn'
+            >
               {saveText}
             </LoaderButton>
           )}
           {children && <div className='extra-actions'>{children}</div>}
         </div>
+        {(showSecondarySaveButton || onSecondarySave) && (
+          <LoaderButton
+            disabled={saveIsDisabled}
+            isLoading={isSaveButtonLoading}
+            onClick={onSecondarySave}
+            type='button'
+            className='add-btn'
+          >
+            {secondarySaveText}
+          </LoaderButton>
+        )}
         {(showCancelButton || onCancel) && (
           <Button
             base
+            className='close-btn'
             onClick={(e) => {
               if (onCancel) onCancel(e);
               doModalClose();
