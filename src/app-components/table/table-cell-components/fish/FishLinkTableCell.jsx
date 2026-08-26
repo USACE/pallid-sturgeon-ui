@@ -9,6 +9,11 @@ import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-shee
 const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, getValue, row }) => {
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
+  const isPlaceholderRow = row?.original?._isPlaceholderRow === true;
+
+  if (isPlaceholderRow) {
+    return null;
+  }
 
   // Check if supplemental data exists for Fish
   const hasSupplemental = value > 0;
