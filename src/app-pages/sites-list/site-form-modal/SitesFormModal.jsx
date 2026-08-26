@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { Alert, Grid } from '@trussworks/react-uswds';
 
@@ -125,6 +125,8 @@ const SitesFormModal = connect(
     const bend = watch('bend');
     const bendRiverMile = watch('bendRiverMile');
     const sampleUnitType = watch('sampleUnitType');
+    const comments = watch('last_edit_comment');
+    const editInitials = watch('editInitials');
 
     const segmentValue = segment?.value;
     const bendValue = bend?.value;
@@ -143,15 +145,6 @@ const SitesFormModal = connect(
             : item.description,
       }));
       return filteredOptions;
-    };
-
-    const buildDescription = (type, value) => {
-      if (type === 'segment') {
-        return segments?.filter((item) => Number(item.code) === Number(value))?.[0]?.description;
-      }
-      if (type === 'bend') {
-        bendRiverMileData?.filter((item) => Number(item.bend) === Number(value))?.[0]?.bendDescription;
-      }
     };
 
     const buildSegmentsOptions = () => {
@@ -177,6 +170,25 @@ const SitesFormModal = connect(
       }));
       return formattedOptions;
     };
+
+    const buildSegmentDescription = useCallback(() => {
+      return segments?.filter((item) => Number(item.code) === Number(data?.segmentId))?.[0]?.description;
+    }, [data]);
+
+    const buildBendDescription = useCallback(() => {
+      const type = data?.sampleUnitType;
+      const options = bendDataMapping[type]?.filter((item) => Number(item.segment) === Number(segmentValue));
+      const filteredOptions = options?.map((item) => ({
+        value: type === 'B' || type === 'S' ? item.bend : item.code,
+        label:
+          type === 'B' || type === 'S'
+            ? item.bendDescription
+              ? `${item.bend} - ${item.bendDescription}`
+              : item.bend
+            : item.description,
+      }));
+      return filteredOptions?.filter((item) => Number(item.value) === Number(data?.bend))?.[0]?.label;
+    }, [data, segmentValue]);
 
     const getBendRiverMileId = (type) => {
       if (!type) return;
@@ -294,16 +306,16 @@ const SitesFormModal = connect(
       if (data?.segmentId) {
         setValue('segmentId', {
           value: data?.segmentId,
-          label: buildDescription('segment', data?.segmentId),
+          label: buildSegmentDescription(),
         });
       }
       if (data?.bend) {
         setValue('bend', {
           value: data?.bend,
-          label: buildDescription('bend', data?.bend),
+          label: buildBendDescription(),
         });
       }
-    }, [data?.segmentId, data?.bend]);
+    }, [data?.segmentId, data?.bend, buildSegmentDescription, buildBendDescription]);
 
     useEffect(() => {
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
@@ -418,6 +430,7 @@ const SitesFormModal = connect(
                 options={bendOptions}
                 readOnly={!segment}
                 closeMenuOnSelect
+                menuPlacement='auto'
                 required
               />
               <SelectInput name='bendrn' label='Bend R/N' required>
@@ -428,7 +441,7 @@ const SitesFormModal = connect(
                 ))}
               </SelectInput>
               <p className='margin-top-2'>Bend River Mile: {getUpperRiverMile(sampleUnitType) ?? '--'}</p>
-              {edit && (
+              {edit && (comments || editInitials) && (
                 <Grid row gap='md'>
                   <Grid tablet={{ col: 9 }}>
                     <TextArea name='last_edit_comment' label='Comments' readOnly />

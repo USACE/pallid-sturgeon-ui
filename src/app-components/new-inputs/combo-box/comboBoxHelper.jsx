@@ -1,19 +1,19 @@
 // To make multi select look like other elements
 export const baseStyle = {
-  container: (provided) => ({ ...provided, zIndex: '9999' }),
+  container: (provided) => ({ ...provided }),
   control: (base, state) => ({
     ...base,
-    border: '1px solid #6fc3db',
-    borderColor: state.isFocused ? '#6fc3db' : '#6fc3db',
+    border: '1px solid #000000',
+    borderColor: state.isFocused ? '#000000' : '#000000',
     boxShadow: state.isFocused ? '0 0 0 2px rgb(36,145,255)' : 'none',
     '&:hover': {
-      borderColor: state.isFocused ? '#ccc' : '#6fc3db',
+      borderColor: state.isFocused ? '#ccc' : '#000000',
     },
   }),
 };
 
 export const customSelectStyles = {
-  container: (provided) => ({ ...provided, zIndex: '9999' }),
+  container: (provided) => ({ ...provided }),
   control: (base, state) => ({
     ...base,
     border: '1px solid #e74c3c',
@@ -32,7 +32,7 @@ export const customSelectStyles = {
 };
 
 export const customSelectStylesNonRequired = {
-  container: (provided) => ({ ...provided, zIndex: '9999' }),
+  container: (provided) => ({ ...provided }),
   control: (base) => ({
     ...base,
   }),
