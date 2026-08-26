@@ -194,8 +194,18 @@ const FishDataEntry = connect(
       online,
     });
 
+    const scrollToBottom = useCallback(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: 'smooth',
+        });
+      });
+    }, []);
+
     const handleAddRow = async () => {
       setData((prev) => ensureTrailingBlankFishRow(prev));
+      scrollToBottom();
 
       // Add default values here
       // const base = getBaseDefaultValues({ baseData });
@@ -268,6 +278,7 @@ const FishDataEntry = connect(
         const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
         return ensureTrailingBlankFishRow([...existingRows, newRowData]);
       });
+      scrollToBottom();
     };
 
     const handleAddMultipleRows = (rows) => {
@@ -276,6 +287,7 @@ const FishDataEntry = connect(
         const existingRows = (oldData ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
         return ensureTrailingBlankFishRow([...existingRows, ...rows]);
       });
+      scrollToBottom();
     };
 
     const handleRemoveMultipleRows = useCallback((indicesToRemove) => {
@@ -288,6 +300,8 @@ const FishDataEntry = connect(
 
     const handleUpdateData = useCallback(
       (rowIndex, columnId, updatedValue) => {
+        const touchedPlaceholderRow = isUntouchedPlaceholderFishRow(data?.[rowIndex]);
+
         setData((oldData) => {
           const newData = oldData ? [...oldData] : [];
           if (newData[rowIndex]) {
@@ -336,8 +350,12 @@ const FishDataEntry = connect(
           }
           return oldData;
         });
+
+        if (touchedPlaceholderRow) {
+          scrollToBottom();
+        }
       },
-      [baseData, dataEntryData, parentMrFid, parentMrId]
+      [baseData, data, dataEntryData, parentMrFid, parentMrId, scrollToBottom]
     );
 
     const handleSubmitAll = async () => {
@@ -396,6 +414,7 @@ const FishDataEntry = connect(
 
         if (invalidRowCount > 0) {
           setValidationErrorRowCount(invalidRowCount);
+          scrollToBottom();
           return;
         }
 
