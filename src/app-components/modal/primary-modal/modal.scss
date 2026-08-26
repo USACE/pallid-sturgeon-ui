@@ -9,8 +9,6 @@ div.usa-modal__content div.usa-modal__main {
   max-width: none;
 }
 
-//background-color: var(--color-modal);
-
 .primary-modal-content {
   &.modal-body {
     background-color: var(--color-modal) !important;
@@ -49,7 +47,6 @@ div.usa-modal {
         top: 0.75rem;
         right: 0.5rem;
         position: absolute;
-        z-index: 1000;
       }
     }
   }
@@ -69,7 +66,6 @@ div.usa-modal {
     background-color: var(--color-modal);
     display: flex;
     position: sticky;
-    z-index: 1000;
   }
 
   .primary-modal-header {
