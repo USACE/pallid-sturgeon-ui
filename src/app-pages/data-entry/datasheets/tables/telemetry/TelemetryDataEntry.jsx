@@ -93,6 +93,7 @@ const TelemetryDataEntry = connect(
   'selectLookupData',
   'doUpdateCurrentTab',
   'selectRouteParams',
+  'doUpdateUrl',
   ({
     doSaveTelemetryDataEntry,
     doUpdateTelemetryDataEntry,
@@ -104,6 +105,7 @@ const TelemetryDataEntry = connect(
     lookupData,
     doUpdateCurrentTab,
     routeParams,
+    doUpdateUrl,
   }) => {
     const { frequencyId, spawnBehavior, macros, mesos, positionConfidence } = lookupData;
     const { items } = dataEntryTelemetryData;
@@ -618,6 +620,21 @@ const TelemetryDataEntry = connect(
       }
     };
 
+    const handleSaveAndClose = () => {
+      // Submit Data
+      handleSubmitAll();
+      // Navigate to Search Effort Entry Form Tab
+      doUpdateCurrentTab(0);
+    };
+
+    const handleSaveAndOpenMoriver = () => {
+      // Submit Data
+      handleSubmitAll();
+      // Navigate to Missouri Entry Form Tab
+      doUpdateCurrentTab(0);
+      doUpdateUrl(`/sites-list/${siteId}/missouri-river`);
+    };
+
     useEffect(() => {
       const tableDataChanged = !_isEqual(data, prevTableDataRef.current);
       tableDataChanged && setTableIsDirty(true);
@@ -652,21 +669,25 @@ const TelemetryDataEntry = connect(
           validationSchema={tableValidationSchema}
           showValidationErrors={isSubmitAttempted}
         />
-        <div style={{ justifyContent: 'space-between', display: 'flex' }}>
-          <Button
-            className='margin-top-2 add-btn'
-            onClick={() => {
-              handleSubmitAll();
-            }}
-            type='button'
-          >
-            Submit
-          </Button>
-          <Button className='margin-top-2 secondary-btn' onClick={() => handleCopyLastRowBtn()} type='button'>
-            <Icon focusable={false} className='margin-right-1' path={mdiContentCopy} />
-            Copy Last Row
-          </Button>
-        </div>
+        <Button className='margin-top-2 secondary-btn' onClick={() => handleCopyLastRowBtn()} type='button'>
+          <Icon focusable={false} className='margin-right-1' path={mdiContentCopy} />
+          Copy Last Row
+        </Button>
+        <Button
+          className='margin-top-2 add-btn'
+          onClick={() => {
+            handleSubmitAll();
+          }}
+          type='button'
+        >
+          Submit
+        </Button>
+        <Button className='margin-top-2 add-btn' onClick={() => handleSaveAndClose()} type='button'>
+          Save & Close
+        </Button>
+        <Button className='margin-top-2 add-btn' onClick={() => handleSaveAndOpenMoriver()} type='button'>
+          Save & Open MR Datasheet
+        </Button>
       </FormProvider>
     );
   }

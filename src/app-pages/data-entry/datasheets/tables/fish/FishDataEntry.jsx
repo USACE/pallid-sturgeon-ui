@@ -442,6 +442,13 @@ const FishDataEntry = connect(
       }
     };
 
+    const handleSaveAndClose = () => {
+      // Submit Data
+      handleSubmitAll();
+      // Navigate to Missouri Entry Form Tab
+      doUpdateCurrentTab(0);
+    };
+
     useEffect(() => {
       const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
       setData(ensureTrailingBlankFishRow(rowData));
@@ -473,6 +480,9 @@ const FishDataEntry = connect(
         </Button>
         <Button className='margin-top-2 add-btn' onClick={() => handleSubmitAll()} type='button'>
           Submit
+        </Button>
+        <Button className='margin-top-2 add-btn' onClick={() => handleSaveAndClose()} type='button'>
+          Save & Close Datasheet
         </Button>
         {validationErrorRowCount > 0 && (
           <p aria-live='polite' className='margin-y-1 text-secondary-dark'>
