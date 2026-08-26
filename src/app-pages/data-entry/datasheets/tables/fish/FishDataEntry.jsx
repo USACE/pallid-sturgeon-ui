@@ -183,6 +183,31 @@ const FishDataEntry = connect(
       mode: 'onBlur',
     });
 
+    const isFishCellRequired = useCallback(
+      (row, columnId) => {
+        if (!row || isUntouchedPlaceholderFishRow(row)) {
+          return false;
+        }
+
+        const hasFloyTagPrefix = row?.ftPrefix != null && String(row.ftPrefix).trim() !== '';
+        const hasFloyTag = row?.floyTag != null && String(row.floyTag).trim() !== '';
+
+        if (columnId === 'ftPrefix' || columnId === 'floyTag') {
+          return hasFloyTagPrefix || hasFloyTag;
+        }
+
+        try {
+          const description = schema.describe({ value: row });
+          const tests = description?.fields?.[columnId]?.tests ?? [];
+
+          return tests.some((test) => test?.name === 'required');
+        } catch {
+          return false;
+        }
+      },
+      [schema]
+    );
+
     const tableColumns = getFishColumns({
       gear,
       speciesOptions,
@@ -474,6 +499,7 @@ const FishDataEntry = connect(
           data={data}
           enablePagination={false}
           initialTableState={{}}
+          isCellRequired={isFishCellRequired}
           key={tableKey}
           placeholderClick={handleAddRow}
           placeholderText='No Fish Data found.'
