@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { mdiContentSave } from '@mdi/js';
 
-import Button from '@components/button';
 import Select from '@components/select';
 import RoleFilter from '@components/role-filter';
 import Icon from '@components/icon/icon';
@@ -16,6 +15,7 @@ import { NoRoleAccessMessage } from './helper';
 
 import './admin.scss';
 import Breadcrumb from '@src/app-components/breadcrumb';
+import { Button } from '@trussworks/react-uswds';
 
 const breadcrumbLinks = [
   {
@@ -197,7 +197,7 @@ export default connect(
                     </td>
                     <td style={{ width: '5%' }}>
                       <Button
-                        className={'icon-button small-btn'}
+                        className='add-btn'
                         title='Save'
                         disabled={!isRoleItemUpdated || !isOfficeItemUpdated || !isProjectItemUpdated}
                         onClick={function () {
@@ -215,8 +215,9 @@ export default connect(
                             }
                           );
                         }}
-                        icon={<Icon path={mdiContentSave} className={`button-icon ${user.id} mr-2`} />}
-                      />
+                      >
+                        <Icon path={mdiContentSave} className={`button-icon ${user.id} mr-2`} />
+                      </Button>
                     </td>
                   </tr>
                 );

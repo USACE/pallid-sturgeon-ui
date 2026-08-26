@@ -5,15 +5,26 @@ import { mdiDownload } from '@mdi/js';
 import Button from '@components/button';
 import Icon from '@components/icon/icon';
 
-import 'ag-grid-community/dist/styles/ag-grid.css';
-import 'ag-grid-community/dist/styles/ag-theme-balham.css';
 import { dateFormatter } from '@src/common/gridHelpers/ag-grid-helper';
+import { useEffect, useState } from 'react';
 
 const TelemetryTable = connect(
   'doFetchAllDatasheet',
   'selectTelemetryDataSummary',
   ({ doFetchAllDatasheet, telemetryDataSummary }) => {
+    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const { data } = telemetryDataSummary;
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (event) => {
+        setIsDarkMode(event.matches);
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }, []);
 
     return (
       <>
@@ -25,7 +36,10 @@ const TelemetryTable = connect(
           icon={<Icon path={mdiDownload} />}
           handleClick={() => doFetchAllDatasheet('telemetry-datasheet')}
         />
-        <div className='ag-theme-balham mt-2' style={{ width: '100%', height: '600px' }}>
+        <div
+          className={`mt-2 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
+          style={{ width: '100%', height: '600px' }}
+        >
           <AgGridReact
             rowData={data}
             defaultColDef={{

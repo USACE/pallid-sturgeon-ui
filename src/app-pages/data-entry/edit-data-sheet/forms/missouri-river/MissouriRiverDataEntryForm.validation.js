@@ -387,11 +387,6 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false }) =>
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .nullable()
-        .when(['gearType'], {
-          is: (gearType) => hasPDSG && gearType === 'S',
-          then: (schema) => schema.required(ValidationMessages.FieldRequired),
-          otherwise: (schema) => schema.nullable().notRequired(),
-        })
         .typeError(ValidationMessages.FieldRequired)
         .min(0, 'Value cannot be negative')
         .test({

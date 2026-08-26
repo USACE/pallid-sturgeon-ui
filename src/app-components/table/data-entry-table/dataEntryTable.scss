@@ -1,4 +1,5 @@
 @use '@styles/_variables';
+@use '@styles/_theme' as theme;
 
 .w3-container {
   border: 1px solid black;
@@ -23,7 +24,7 @@ table {
 
 table input,
 table select {
-  border: 1px solid #000;
+  border: 1px solid var(--text-color);
   border-radius: 4px;
   padding: 5px;
 }

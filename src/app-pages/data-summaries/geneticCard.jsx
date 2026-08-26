@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { AgGridReact, AgGridColumn } from 'ag-grid-react';
 import { mdiDownload, mdiHelpCircle } from '@mdi/js';
@@ -42,6 +42,7 @@ export default connect(
     geneticCardSummaryParams: params,
     geneticCardSummaryPagination,
   }) => {
+    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const { year, minDate, maxDate, broodstock, hatchWild, speciesId } = params;
     const { totalResults } = geneticCardSummaryPagination;
     const fieldDisabled = !year;
@@ -51,6 +52,17 @@ export default connect(
         doFetchGeneticCardSummary(params);
       }
     }, [params]);
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (event) => {
+        setIsDarkMode(event.matches);
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }, []);
 
     return (
       <div className='container-fluid'>
@@ -144,7 +156,10 @@ export default connect(
               icon={<Icon path={mdiDownload} />}
               handleClick={() => doFetchAllGeneticCardSummary('genetic-card-summary')}
             />
-            <div className='ag-theme-balham mt-3' style={{ width: '100%', height: '600px' }}>
+            <div
+              className={`mt-3 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
+              style={{ width: '100%', height: '600px' }}
+            >
               <AgGridReact
                 rowData={geneticCardSummaryData}
                 defaultColDef={{

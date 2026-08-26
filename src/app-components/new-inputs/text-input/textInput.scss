@@ -16,6 +16,6 @@ div.usa-hint {
   &.warning-message {
     font-style: italic;
     font-size: 15px;
-    color: $color-black;
+    color: var(--text-color);
   }
 }
