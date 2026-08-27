@@ -14,7 +14,6 @@ import Icon from '@src/app-components/icon/icon';
 import {
   getMissouriRiverDefaultValues,
   getMissouriRiverSchema,
-  microSegmentRequired,
   gearReqFields,
 } from './MissouriRiverDataEntryForm.validation';
 import { filterNullEmptyObjects, formatCoordFlt } from '@src/utils/helpers';
@@ -25,7 +24,6 @@ import {
   currentDate,
   fmtTimeHHMMSS,
   isEmpty,
-  normalize,
   removeDuplicates,
 } from '@src/app-pages/data-entry/dataEntryHelper';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
@@ -37,6 +35,7 @@ import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datashee
 
 import '../../../dataentry.scss';
 import NavigateWarningModal from '@src/common/modals/NavigateWarningModal';
+import MicroBuilder from './MicroBuilder';
 
 const MissouriRiverDataEntryForm = connect(
   'doModalOpen',
@@ -100,10 +99,6 @@ const MissouriRiverDataEntryForm = connect(
 
     const [gearCodeOptions, setGearCodeOptions] = useState(onlineGearCodes);
     const [mesoOptions, setMesoOptions] = useState(onlineMesos);
-    const [structureFlowOptions, setStructureFlowOptions] = useState([]);
-    const [structureModOptions, setStructureModOptions] = useState([]);
-    const [ss1Options, setSs1Options] = useState([]);
-    const [ss2Options, setSs2Options] = useState([]);
     const [offlineLookups, setOfflineLookups] = useState({
       bendRiverMile: [],
       bendSelections: [],
@@ -210,66 +205,6 @@ const MissouriRiverDataEntryForm = connect(
       return options.map((item) => ({ code: item.mesoHabitatCode }));
     };
 
-    const getStructureFlowOptions = (microStructure) => {
-      // When 0 is entered, the tables are no longer used to limit options
-      if (microStructure == null || microStructure == '') return [];
-      if (Number(microStructure) === 0) {
-        return structureFlows;
-      } else {
-        const options = microHabitats.filter((item) => Number(item.microStructureCode) === Number(microStructure));
-        const filteredOptions = options.map((item) => ({
-          code: item.structureFlowCode,
-          description: item.structureFlow,
-        }));
-        return [{ code: 0, description: 'NOT DESCRIBED' }, ...removeDuplicates(filteredOptions)];
-      }
-    };
-
-    const getStructureModOptions = (structureFlow) => {
-      // When 0 is entered, the tables are no longer used to limit options
-      if (structureFlow == null || structureFlow == '') return [];
-      if (Number(structureFlow) === 0) {
-        return structureMods;
-      } else {
-        const options = microHabitats.filter((item) => Number(item.structureFlowCode) === Number(structureFlow));
-        const filteredOptions = options.map((item) => ({
-          code: item.structureModCode,
-          description: item.structureMod,
-        }));
-        return [{ code: 0, description: 'NOT DESCRIBED' }, ...removeDuplicates(filteredOptions)];
-      }
-    };
-
-    const getSs1Options = (microStructure) => {
-      // When 0 is entered, the tables are no longer used to limit options
-      if (microStructure == null || microStructure == '') return [];
-      if (Number(microStructure) === 0) {
-        return setSite1Options;
-      } else {
-        const options = microSetSite.filter((item) => Number(item.microStructureCode) === Number(microStructure));
-        const filteredOptions = options.map((item) => ({
-          code: item.ss1Code,
-          description: item.ss1Description,
-        }));
-        return [{ code: 0, description: 'NOT DESCRIBED' }, ...removeDuplicates(filteredOptions)];
-      }
-    };
-
-    const getSs2Options = (setSite1) => {
-      // When 0 is entered, the tables are no longer used to limit options
-      if (setSite1 == null || setSite1 == '') return [];
-      if (Number(setSite1) === 0) {
-        return setSite2Options;
-      } else {
-        const options = microSetSite.filter((item) => Number(item.ss1Code) === Number(setSite1));
-        const filteredOptions = options.map((item) => ({
-          code: item.ss2Code,
-          description: item.ss2Description,
-        }));
-        return [{ code: 0, description: 'NOT DESCRIBED' }, ...removeDuplicates(filteredOptions)];
-      }
-    };
-
     const handleMesoOptions = useCallback(
       (mesosData, gearType, gearCode, macro, season) => {
         let options = gearType === 'S' ? getMacroMesoOptions(macro) : mesosData;
@@ -335,14 +270,7 @@ const MissouriRiverDataEntryForm = connect(
     const gearType = watch('gearType');
     const setdate = watch('setdate');
     const subsamplepass = watch('subsamplepass');
-    const micro = watch('micro');
-    const microStructure = watch('microStructure');
     const netrivermile = watch('netrivermile');
-    const structureFlow = watch('structureFlow');
-    const structureMod = watch('structureMod');
-    const setSite1 = watch('setSite1');
-    const setSite2 = watch('setSite2');
-    const setSite3 = watch('setSite3');
     const stopTime = watch('stopTime');
     const temp = watch('temp');
     const depth1 = watch('depth1');
@@ -367,13 +295,6 @@ const MissouriRiverDataEntryForm = connect(
         return 'Temp >= 12.8 for a gill net gear code';
       } else {
         return;
-      }
-    };
-
-    const getDigitsWarning = (val, options) => {
-      if (val === null || val === '' || val === undefined) return;
-      if (options?.filter((item) => String(item.value) === String(val))?.length === 0) {
-        return 'Entered digit does not exist for this field, please enter a new digit or select from dropdown';
       }
     };
 
@@ -599,69 +520,6 @@ const MissouriRiverDataEntryForm = connect(
       handleMesoOptions(mesos, gearType, gearCode, macro, season);
     }, [mesos, gearType, gearCode, macro, season]);
 
-    // Sync Micro code -> Digits (Micro Structure, Structure Flow, Structure Mod, Set Site 1, Set Site 2, Set Site 3)
-    useEffect(() => {
-      if (!micro) return;
-      const split = micro.slice(0, 6).split('');
-      const currentDigits = [
-        normalize(microStructure),
-        normalize(structureFlow),
-        normalize(structureMod),
-        normalize(setSite1),
-        normalize(setSite2),
-        normalize(setSite3),
-      ];
-      if (split.join('') !== currentDigits.join('')) {
-        setValue('microStructure', split[0] || '', { shouldValidate: shouldAutoValidate });
-        setValue('structureFlow', split[1] || '', { shouldValidate: shouldAutoValidate });
-        setValue('structureMod', split[2] || '', { shouldValidate: shouldAutoValidate });
-        setValue('setSite1', split[3] || '', { shouldValidate: shouldAutoValidate });
-        setValue('setSite2', split[4] || '', { shouldValidate: shouldAutoValidate });
-        setValue('setSite3', split[5] || '', { shouldValidate: shouldAutoValidate });
-      }
-    }, [micro, shouldAutoValidate]);
-
-    // Sync Digits (Micro Structure, Structure Flow, Structure Mod, Set Site 1, Set Site 2, Set Site 3) -> Micro code
-    useEffect(() => {
-      const digits = [
-        normalize(microStructure),
-        normalize(structureFlow),
-        normalize(structureMod),
-        normalize(setSite1),
-        normalize(setSite2),
-        normalize(setSite3),
-      ];
-      const allFilled = digits.every((d) => d !== '');
-      if (!allFilled) return;
-      const joined = digits.join('');
-      if (joined !== micro) {
-        setValue('micro', joined, {
-          shouldValidate: shouldAutoValidate,
-          shouldDirty: false,
-        });
-      }
-    }, [microStructure, structureFlow, structureMod, setSite1, setSite2, setSite3, shouldAutoValidate]);
-
-    // Set Structure Flow and SetSite1 options and reset values when necessary
-    useEffect(() => {
-      setValue('setSite1', '', { shouldValidate: shouldAutoValidate });
-      setValue('structureFlow', '', { shouldValidate: shouldAutoValidate });
-      setSs1Options(getSs1Options(microStructure));
-      setStructureFlowOptions(getStructureFlowOptions(microStructure));
-    }, [microStructure, shouldAutoValidate]);
-
-    // Set Structure Mod options and reset Structure Mod value when necessary
-    useEffect(() => {
-      setValue('structureMod', '', { shouldValidate: shouldAutoValidate });
-      setStructureModOptions(getStructureModOptions(structureFlow));
-    }, [structureFlow, shouldAutoValidate]);
-
-    // Set SetSite1 options and reset SetSite1 value when necessary
-    useEffect(() => {
-      setValue('setSite2', '', { shouldValidate: shouldAutoValidate });
-      setSs2Options(getSs2Options(setSite1));
-    }, [setSite1, shouldAutoValidate]);
-
     // Both Velocity (bot) 1 and Velocity (0.8 or 0.5) 1 must be filled out before setting the start time when using a Larval Drift Net gear.
     useEffect(() => {
       if (gearCode.startsWith('LDN') && velocitybot1 === null && velocity081 === null) {
@@ -701,46 +559,6 @@ const MissouriRiverDataEntryForm = connect(
         }
       }
     }, [dataEntryData, mesoOptions]);
-
-    // Populate Structure Flow Dropdown Value from Existing API Data
-    useEffect(() => {
-      if (structureFlowOptions.length > 0) {
-        if (dataEntryData?.structureFlow) {
-          setValue('structureFlow', dataEntryData?.structureFlow);
-          shouldAutoValidate && trigger('structureFlow');
-        }
-      }
-    }, [dataEntryData, structureFlowOptions, shouldAutoValidate, trigger]);
-
-    // Populate Structure Mod Dropdown Value from Existing API Data
-    useEffect(() => {
-      if (structureModOptions.length > 0) {
-        if (dataEntryData?.structureMod) {
-          setValue('structureMod', dataEntryData?.structureMod);
-          shouldAutoValidate && trigger('structureMod');
-        }
-      }
-    }, [dataEntryData, structureModOptions, shouldAutoValidate, trigger]);
-
-    // Populate Set Site 1 Dropdown Value from Existing API Data
-    useEffect(() => {
-      if (ss1Options.length > 0) {
-        if (dataEntryData?.setSite1) {
-          setValue('setSite1', dataEntryData?.setSite1);
-          shouldAutoValidate && trigger('setSite1');
-        }
-      }
-    }, [dataEntryData, ss1Options, shouldAutoValidate, trigger]);
-
-    // Populate Set Site 2 Dropdown Value from Existing API Data
-    useEffect(() => {
-      if (ss2Options.length > 0) {
-        if (dataEntryData?.setSite2) {
-          setValue('setSite2', dataEntryData?.setSite2);
-          shouldAutoValidate && trigger('setSite2');
-        }
-      }
-    }, [dataEntryData, ss2Options, shouldAutoValidate, trigger]);
 
     // netrivermile in baseData
     useEffect(() => {
@@ -928,110 +746,7 @@ const MissouriRiverDataEntryForm = connect(
               </Grid>
             </Grid>
 
-            <Grid tablet={{ col: 8 }}>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 3 }}>
-                  <TextInput
-                    name='micro'
-                    label='Micro'
-                    onChange={handleChange}
-                    required={Number(projectId) === 1 && microSegmentRequired.includes(segmentId)}
-                    maxLength={6}
-                  />
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <SelectInput
-                    name='microStructure'
-                    label='Micro Structure'
-                    onChange={handleChange}
-                    warning={getDigitsWarning(microStructure, createDropdownOptions(microStructures))}
-                  >
-                    {createDropdownOptions(microStructures).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <SelectInput
-                    name='structureFlow'
-                    label='Structure Flow'
-                    onChange={handleChange}
-                    required={microStructure}
-                    warning={getDigitsWarning(structureFlow, createDropdownOptions(structureFlowOptions))}
-                  >
-                    {createDropdownOptions(structureFlowOptions).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <SelectInput
-                    name='structureMod'
-                    label='Structure Mod'
-                    onChange={handleChange}
-                    required={structureFlow}
-                    warning={getDigitsWarning(structureMod, createDropdownOptions(structureModOptions))}
-                  >
-                    {createDropdownOptions(structureModOptions).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </Grid>
-              </Grid>
-              <Grid row gap='md'>
-                <Grid tablet={{ col: 3 }} offset={3}>
-                  <SelectInput
-                    name='setSite1'
-                    label='Set Site 1'
-                    onChange={handleChange}
-                    required={structureMod}
-                    warning={getDigitsWarning(setSite1, createDropdownOptions(ss1Options))}
-                  >
-                    {createDropdownOptions(ss1Options).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <SelectInput
-                    name='setSite2'
-                    label='Set Site 2'
-                    onChange={handleChange}
-                    required={setSite1}
-                    warning={getDigitsWarning(setSite2, createDropdownOptions(ss2Options))}
-                  >
-                    {createDropdownOptions(ss2Options).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </Grid>
-                <Grid tablet={{ col: 3 }}>
-                  <SelectInput
-                    name='setSite3'
-                    label='Set Site 3'
-                    onChange={handleChange}
-                    required={setSite2}
-                    warning={getDigitsWarning(setSite3, createDropdownOptions(ss3Options))}
-                  >
-                    {createDropdownOptions(ss3Options).map((item, index) => (
-                      <option key={index + 1} value={item.value}>
-                        {item.text}
-                      </option>
-                    ))}
-                  </SelectInput>
-                </Grid>
-              </Grid>
-            </Grid>
+            <MicroBuilder shouldAutoValidate={shouldAutoValidate} />
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
