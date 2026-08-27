@@ -667,7 +667,7 @@ export default {
         if (!err && body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
-          store.doFetchMoRiverDataEntry({ tableId: body?.data }, false, false, true);
+          store.doFetchMoRiverDataEntry({ tableId: body?.data }, false, false, false);
         } else {
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
