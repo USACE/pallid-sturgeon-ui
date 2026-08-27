@@ -38,6 +38,7 @@ import NavigateWarningModal from '@src/common/modals/NavigateWarningModal';
 import MicroBuilder from './MicroBuilder';
 
 const MissouriRiverDataEntryForm = connect(
+  'doFetchMoRiverDataEntry',
   'doModalOpen',
   'doUpdateBaseData',
   'doAddMoRiverDataEntry',
@@ -53,6 +54,7 @@ const MissouriRiverDataEntryForm = connect(
   'selectCurrentTab',
   'selectMoriverSitesDraftDatasheetTotalResults',
   ({
+    doFetchMoRiverDataEntry,
     doModalOpen,
     doUpdateBaseData,
     doAddMoRiverDataEntry,
@@ -394,6 +396,8 @@ const MissouriRiverDataEntryForm = connect(
         } else {
           await db.moriver.put(payload);
         }
+        // Need to populate dataEntryData store
+        doFetchMoRiverDataEntry({ tableId: isOnline ? finalMrId : finalMrFid }, false, false, true);
         sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
 
         setValue('clientId', clientId);
