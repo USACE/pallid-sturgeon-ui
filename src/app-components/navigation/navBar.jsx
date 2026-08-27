@@ -71,9 +71,9 @@ const NavBar = connect(
                     Data Entry
                   </NavItem>
                 </RoleFilter>
-                {/* <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
-                    <NavItem href={['/data-upload']}>Data Upload</NavItem>
-                  </RoleFilter> */}
+                <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
+                  <NavItem href={['/data-upload']}>Data Upload</NavItem>
+                </RoleFilter>
                 {/* <RoleFilter allowRoles={['ADMINISTRATOR', 'OFFICE ADMIN', 'OFFICE USER']}>
                   <NavItem href={utilityLinks} asDropdown>
                     Utilities

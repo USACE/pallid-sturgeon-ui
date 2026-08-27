@@ -1,9 +1,12 @@
+import { connect } from 'redux-bundler-react';
 import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
 import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
 
-const LandingModal = () => {
+const LandingModal = connect('doModalClose', ({ doModalClose }) => {
   const handleAccept = () => {
     sessionStorage.setItem('landingModalSeen', 'true');
+    // Close Modal
+    doModalClose();
   };
   return (
     <ModalContent title='DEPARTMENT OF DEFENSE TERMS OF AGREEMENT'>
@@ -39,9 +42,9 @@ const LandingModal = () => {
           </ul>
         </div>
       </section>
-      <ModalFooter onSave={handleAccept} saveText='I Accept' />
+      <ModalFooter showSaveButton={false} onSecondarySave={handleAccept} secondarySaveText='I Accept' />
     </ModalContent>
   );
-};
+});
 
 export default LandingModal;
