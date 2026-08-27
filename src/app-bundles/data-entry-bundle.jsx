@@ -658,7 +658,7 @@ export default {
 
   doAddMoRiverDataEntry:
     (formData) =>
-    ({ dispatch, apiPost }) => {
+    ({ dispatch, store, apiPost }) => {
       const toastId = toast.loading('Saving datasheet...');
 
       const url = `${rootUrl}addMoriverDataEntry`;
@@ -667,6 +667,7 @@ export default {
         if (!err && body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
+          store.doFetchMoRiverDataEntry({ tableId: body?.data }, false, false, true);
         } else {
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
