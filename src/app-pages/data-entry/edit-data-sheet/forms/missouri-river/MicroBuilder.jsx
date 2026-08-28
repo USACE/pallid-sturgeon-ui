@@ -351,7 +351,7 @@ const MicroBuilder = connect(
       }
     }, [dataEntryData, ss2Options, shouldAutoValidate, trigger, currentTab]);
 
-    // Load offline lookup
+    // Load offline lookups
     useEffect(() => {
       const loadOfflineLookups = async () => {
         const entries = await Promise.all(lookupTableNames.map(async (name) => [name, await getLookupOptions(name)]));
