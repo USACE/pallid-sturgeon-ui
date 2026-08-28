@@ -7,6 +7,7 @@ import TextInput from '@src/app-components/new-inputs/text-input/TextInput';
 import { microSegmentRequired } from './MissouriRiverDataEntryForm.validation';
 import { createDropdownOptions, removeDuplicates } from '@src/app-pages/data-entry/dataEntryHelper';
 import { useEffect, useState } from 'react';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 
 const EMPTY_DIGITS = ['', '', '', '', '', ''];
 

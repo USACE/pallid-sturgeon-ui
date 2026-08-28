@@ -157,14 +157,16 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishReco
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
-        .test('stop-after-start', 'Stop Time must be after Start Time', function (stopTime) {
-          const { startTime } = this.parent;
-          if (!startTime || !stopTime) return true;
-          const toSeconds = (time) => {
-            const [hours, minutes, seconds] = time.split(':').map(Number);
-            return hours * 3600 + minutes * 60 + seconds;
-          };
-          return toSeconds(stopTime) > toSeconds(startTime);
+        .test({
+          test: (stopTime, { parent: { startTime } }) => {
+            if (!startTime || !stopTime) return true;
+            const toSeconds = (time) => {
+              const [hours, minutes, seconds] = time.split(':').map(Number);
+              return hours * 3600 + minutes * 60 + seconds;
+            };
+            return toSeconds(stopTime) > toSeconds(startTime);
+          },
+          message: 'Stop Time must be after Start Time',
         }),
       stopLatitude: yup
         .string()

@@ -85,6 +85,7 @@ const MissouriRiverDataEntryForm = connect(
   'selectDataEntryFishTotalCount',
   'selectCurrentTab',
   'selectMoriverSitesDraftDatasheetTotalResults',
+  'selectMoriverSitesDatasheetTotalResults',
   ({
     doFetchMoRiverDataEntry,
     doModalOpen,
@@ -101,6 +102,7 @@ const MissouriRiverDataEntryForm = connect(
     dataEntryFishTotalCount,
     currentTab,
     moriverSitesDraftDatasheetTotalResults,
+    moriverSitesDatasheetTotalResults,
   }) => {
     // Initialize GPS
     const { browserGps } = useGpsCapture(GPS_OPTIONS);
@@ -165,7 +167,9 @@ const MissouriRiverDataEntryForm = connect(
       ) ?? false;
 
     const getUpperLowerRiverMile = (bend, segment) =>
-      lookups?.bendRiverMile?.filter((item) => item.bend === bend && item.segment === segment)?.[0];
+      lookups?.bendRiverMile?.filter(
+        (item) => Number(item.bend) === Number(bend) && Number(item.segment) === Number(segment)
+      )?.[0];
 
     const getSeasonGearOfficeOptions = (season, fieldOffice, project) => {
       const options = lookups?.filteredGearCodes?.filter(
@@ -203,7 +207,7 @@ const MissouriRiverDataEntryForm = connect(
       baseData,
       dataEntryData,
       fishCount: isOnline ? dataEntryFishTotalCount : fishData?.length,
-      moriverCount: moriverSitesDraftDatasheetTotalResults,
+      moriverCount: Number(moriverSitesDraftDatasheetTotalResults) + Number(moriverSitesDatasheetTotalResults),
     });
 
     const schema = getMissouriRiverSchema({
@@ -263,6 +267,7 @@ const MissouriRiverDataEntryForm = connect(
       return {
         ...values,
         bendrivermile: parseFloat(values?.bendrivermile),
+        conductivity: parseFloat(values?.conductivity),
         depth1: parseFloat(values?.depth1),
         depth2: parseFloat(values?.depth2),
         depth3: parseFloat(values?.depth3),
@@ -540,7 +545,7 @@ const MissouriRiverDataEntryForm = connect(
       isOnline && setFishData(dataEntryFishData?.items);
     }, [mrFid, , isOnline, currentTab, dataEntryFishData, setFishData]);
 
-    // Load offline lookup
+    // Load offline lookups
     useEffect(() => {
       const loadOfflineLookups = async () => {
         const entries = await Promise.all(lookupTableNames.map(async (name) => [name, await getLookupOptions(name)]));

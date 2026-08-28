@@ -436,7 +436,6 @@ const FishDataEntry = connect(
         const fishCount = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row)).length;
         sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft, fishCount: fishCount }));
         await doMoRiverDatasheetLoadData(parentMrId ?? parentMrFid);
-        doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
       }

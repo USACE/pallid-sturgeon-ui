@@ -614,7 +614,6 @@ const TelemetryDataEntry = connect(
         sessionStorage.setItem(draftKey, JSON.stringify({ ...draft, telemetryCount: telemetryCount }));
         const telemetryParentId = isOnline() ? seId || seFid : seFid || seId;
         await doSearchEffortDatasheetLoadData(telemetryParentId);
-        doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
       }
