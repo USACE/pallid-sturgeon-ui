@@ -40,16 +40,6 @@ const MicroBuilder = connect(
   ({ baseData, lookupData, dataEntryData, currentTab, shouldAutoValidate }) => {
     const isOnline = navigator.onLine;
     const { projectId, segmentId } = baseData;
-    // const {
-    //   microHabitats,
-    //   microStructures,
-    //   microSetSite,
-    //   setSite1Options,
-    //   setSite2Options,
-    //   setSite3Options,
-    //   structureFlows,
-    //   structureMods,
-    // } = lookupData;
     // Default lookups to online data, otherwise will be overwritten by offline cached lookup data if network status = offline
     const [lookups, setLookups] = useState(
       lookupTableNames.reduce((accumulator, currentKey) => {
