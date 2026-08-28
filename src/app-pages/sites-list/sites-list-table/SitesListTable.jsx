@@ -3,6 +3,7 @@ import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
 import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 import { mdiDownload, mdiPlus } from '@mdi/js';
 import { Button, Grid } from '@trussworks/react-uswds';
+import { useEffect, useState } from 'react';
 
 import SitesFormModal from '../site-form-modal/SitesFormModal';
 
@@ -11,7 +12,6 @@ import ExportButton from '@components/button/exportButton';
 import Icon from '@components/icon/icon';
 
 import '@pages/data-summaries/data-summary.scss';
-import { useEffect, useState } from 'react';
 
 const cellStyle = (params) => ({
   backgroundColor: params.data.bkgColor,
@@ -85,6 +85,7 @@ const SitesListTable = connect(
               sortable
               unSortIcon
             />
+            <AgGridColumn field='siteFid' width={125} sortable unSortIcon />
             <AgGridColumn field='year' width={100} sortable unSortIcon />
             <AgGridColumn field='fieldoffice' headerName='Field Office' sortable unSortIcon />
             <AgGridColumn field='projectId' headerName='Project' sortable unSortIcon />

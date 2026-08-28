@@ -39,13 +39,14 @@ const lookupTableNames = [
 ];
 
 const SitesFormModal = connect(
+  'doModalClose',
   'doAddSite',
   'doUpdateSite',
   'doUpdateUrl',
   'selectLookupData',
   'selectUserRole',
   'selectUsersData',
-  ({ doAddSite, doUpdateSite, doUpdateUrl, lookupData, userRole, usersData, edit, data }) => {
+  ({ doModalClose, doAddSite, doUpdateSite, doUpdateUrl, lookupData, userRole, usersData, edit, data }) => {
     // Default lookups to online data, otherwise will be overwritten by offline cached lookup data if network status = offline
     const isOnline = navigator.onLine;
     const [lookups, setLookups] = useState(
@@ -254,9 +255,8 @@ const SitesFormModal = connect(
           ? await updateData('sites', clientId, payload)
           : await createData('sites', payload);
       }
-      if (!isOnline) {
-        doUpdateUrl(`/sites-list/${finalSiteFid}`);
-      }
+      !edit && doUpdateUrl(`/sites-list/${finalSiteFid}`);
+      doModalClose();
     };
 
     // Update Bend options if Segment values change
