@@ -12,23 +12,21 @@ import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEff
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
-import { generateFieldId } from '../../../dataEntryHelper';
+import { fmtTimeHHMMSS, generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
-import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
 import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 import { mdiCrosshairsGps } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
 import NavigateWarningModal from '@src/common/modals/NavigateWarningModal';
-
-const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
+import { captureGpsBest, GPS_OPTIONS, USE_UBLOX_POC } from '@src/app-pages/data-entry/offline/offlineHelper';
 
 const isEmpty = (obj) => Object.keys(obj).length === 0;
 
-const GPS_OPTIONS = {
-  enableHighAccuracy: true,
-  timeout: 15000,
-  maximumAge: 0,
+const getTelemetryWarning = (telemetryCount) => {
+  const warningMsg = 'Telemetry fish must have a value';
+  return Number(telemetryCount || 0) === 0 ? warningMsg : null;
 };
 
 const SearchEffortDataEntryForm = connect(
@@ -56,33 +54,29 @@ const SearchEffortDataEntryForm = connect(
     lookupData,
     doUpdateCurrentTab,
   }) => {
+    // Initialize GPS
     const browserGps = useGpsCapture(GPS_OPTIONS);
     const ubloxGps = useUbloxSerialGps();
     const siteRouteKey = routeParams?.siteId;
-    const siteId = siteRouteKey;
-    const { searchTypeCodes } = lookupData;
-    const [offlineSearchTypeCodes, setOfflineSearchTypeCodes] = useState([]);
+    const [searchTypeCodes, setSearchTypeCodes] = useState(lookupData?.searchTypeCodes);
     const [submitMessage, setSubmitMessage] = useState(null);
-    const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
-    const isOfflineSite = String(siteId).startsWith('SITE-');
+    const searchDraftKey = `currentSearchEffortDraft:${siteRouteKey}`;
+    const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
+    const isOnline = navigator.onLine;
 
-    const defaultValues = useMemo(
-      () => getSearchEffortDefaultValues({ dataEntryData, telemetryCount: dataEntryTelemetryTotalCount }),
-      [dataEntryData?.siteId, dataEntryTelemetryTotalCount]
-    );
+    const defaultValues = getSearchEffortDefaultValues({
+      dataEntryData,
+      telemetryCount: Number(dataEntryTelemetryTotalCount || 0),
+    });
     const schema = getSearchEffortSchema();
 
     const methods = useForm({
-      defaultValues: {
-        ...getSearchEffortDefaultValues({ dataEntryData }),
-        telemetryCount: Number(dataEntryTelemetryTotalCount || 0),
-      },
+      defaultValues: defaultValues,
       resolver: yupResolver(schema),
       mode: 'onSubmit',
       reValidateMode: 'onChange',
       stateOptions: [],
     });
-
     const {
       formState: { errors, isValid, submitCount, isDirty },
       setFocus,
@@ -101,38 +95,10 @@ const SearchEffortDataEntryForm = connect(
     const hasTelemetry = telemetryCount >= 1;
     const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
-    const captureGpsBest = async () => {
-      if (USE_UBLOX_POC && ubloxGps.isConnected && ubloxGps.latestFix) {
-        console.log('[GPS SOURCE] using u-blox satellite serial GPS');
-        return {
-          best: ubloxGps.latestFix,
-          samples: [ubloxGps.latestFix],
-        };
-      }
-
-      console.log('[GPS SOURCE] using browser geolocation fallback');
-      return browserGps.captureBestOf(5, 700);
-    };
-
-    console.warn('VALUES: ', getValues());
-
-    const fmtTimeHHMMSS = (val) => {
-      const d = val ? new Date(val) : new Date();
-
-      if (Number.isNaN(d.getTime())) {
-        console.error('Invalid date:', val);
-        return '';
-      }
-
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mm = String(d.getMinutes()).padStart(2, '0');
-      const ss = String(d.getSeconds()).padStart(2, '0');
-      return `${hh}:${mm}:${ss}`;
-    };
-
+    // Capture Start Lat, Long, Time
     const handleCaptureStart = async () => {
       try {
-        const { best } = await captureGpsBest();
+        const { best } = await captureGpsBest({ browserGps, ubloxGps });
 
         setValue('startLatitude', Number(best.lat), { shouldValidate: true });
         setValue('startLongitude', Number(best.lng), { shouldValidate: true });
@@ -147,9 +113,10 @@ const SearchEffortDataEntryForm = connect(
       }
     };
 
+    // Capture Stop Lat, Long, Time
     const handleCaptureStop = async () => {
       try {
-        const { best } = await captureGpsBest();
+        const { best } = await captureGpsBest({ browserGps, ubloxGps });
 
         setValue('stopLatitude', Number(best.lat), { shouldValidate: true });
         setValue('stopLongitude', Number(best.lng), { shouldValidate: true });
@@ -162,13 +129,6 @@ const SearchEffortDataEntryForm = connect(
         console.error(e);
         window.alert(`GPS capture failed: ${e?.message || e}`);
       }
-    };
-
-    const getTelemetryWarning = () => {
-      if (Number(dataEntryTelemetryTotalCount || 0) === 0) {
-        return 'Telemetry fish must have a value';
-      }
-      return;
     };
 
     const handleChange = (e) => {
@@ -239,7 +199,7 @@ const SearchEffortDataEntryForm = connect(
       }
 
       try {
-        if (isOnline()) {
+        if (isOnline) {
           if (isEditForm) {
             doUpdateSearchDataEntry(payload);
           } else {
@@ -264,7 +224,7 @@ const SearchEffortDataEntryForm = connect(
       } catch (error) {
         console.error('Save draft failed:', error);
 
-        if (!isOnline()) {
+        if (!isOnline) {
           await db.search.put(payload);
           sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
           doResetTelemetryDataEntries();
@@ -296,7 +256,7 @@ const SearchEffortDataEntryForm = connect(
       });
 
       try {
-        if (isOnline()) {
+        if (isOnline) {
           if (isEditForm || payload.seId || payload.se_id) {
             await doUpdateSearchDataEntry(payload);
           } else {
@@ -319,7 +279,7 @@ const SearchEffortDataEntryForm = connect(
 
         setSubmitMessage({
           type: 'success',
-          text: isOnline()
+          text: isOnline
             ? 'Search Effort form submitted successfully.'
             : 'Search Effort form saved offline successfully. It will sync when you are back online.',
         });
@@ -407,41 +367,20 @@ const SearchEffortDataEntryForm = connect(
       reloadOfflineSearchEffortDraft();
     }, [isEditForm, dataEntryTelemetryTotalCount]);
 
+    // Load offline lookups
     useEffect(() => {
-      async function loadCachedLookups() {
+      const loadOfflineLookups = async () => {
         const options = await getLookupOptions('searchTypeCodes');
-        setOfflineSearchTypeCodes(options);
-      }
-      loadCachedLookups();
-    }, []);
-
-    const searchTypeOptions = searchTypeCodes?.length > 0 ? searchTypeCodes : offlineSearchTypeCodes;
+        setSearchTypeCodes(options);
+      };
+      !isOnline && loadOfflineLookups();
+    }, [isOnline]);
 
     useEffect(() => {
       const count = Number(dataEntryTelemetryTotalCount || 0);
 
       setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
     }, [dataEntryTelemetryTotalCount, setValue]);
-
-    useEffect(() => {
-      const draft = getOfflineSearchEffortDraft();
-
-      if (!isEditForm && draft) {
-        reset(
-          {
-            ...defaultValues,
-            ...draft,
-            telemetryCount: Number(draft.telemetryCount || dataEntryTelemetryTotalCount || 0),
-          },
-          {
-            keepDirty: false,
-            keepTouched: false,
-          }
-        );
-        return;
-      }
-      reset(defaultValues);
-    }, [reset, defaultValues, isEditForm, dataEntryTelemetryTotalCount]);
 
     // Set IDs
     useEffect(() => {
@@ -558,7 +497,7 @@ const SearchEffortDataEntryForm = connect(
 
             <Grid tablet={{ col: 2 }}>
               <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
-                {searchTypeOptions.map((opt, idx) => (
+                {searchTypeCodes.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
                     {`${opt.code} - ${opt.description}`}
                   </option>
@@ -611,7 +550,7 @@ const SearchEffortDataEntryForm = connect(
                 label='Stop Time (hh:mm:ss)'
                 required={hasTelemetry}
                 disabled={!hasTelemetry}
-                warning={!hasTelemetry ? getTelemetryWarning() : ''}
+                warning={!hasTelemetry ? getTelemetryWarning(dataEntryTelemetryTotalCount) : ''}
               />
               {hasTelemetry && (
                 <Button onClick={handleCaptureStop} type='button' className='primary-btn margin-top-1'>
@@ -628,7 +567,7 @@ const SearchEffortDataEntryForm = connect(
                 label='Stop Latitude'
                 required={hasTelemetry}
                 disabled={!hasTelemetry}
-                warning={!hasTelemetry ? getTelemetryWarning() : ''}
+                warning={!hasTelemetry ? getTelemetryWarning(dataEntryTelemetryTotalCount) : ''}
               />
             </Grid>
 
@@ -639,7 +578,7 @@ const SearchEffortDataEntryForm = connect(
                 label='Stop Longitude'
                 required={hasTelemetry}
                 disabled={!hasTelemetry}
-                warning={!hasTelemetry ? getTelemetryWarning() : ''}
+                warning={!hasTelemetry ? getTelemetryWarning(dataEntryTelemetryTotalCount) : ''}
               />
             </Grid>
           </Grid>

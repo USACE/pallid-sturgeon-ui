@@ -10,6 +10,8 @@ import SelectInput from '@src/app-components/new-inputs/select-input/SelectInput
 import TextInput from '@src/app-components/new-inputs/text-input/TextInput';
 import TextArea from '@src/app-components/new-inputs/text-area/TextArea';
 import Icon from '@src/app-components/icon/icon';
+import NavigateWarningModal from '@src/common/modals/NavigateWarningModal';
+import MicroBuilder from './MicroBuilder';
 
 import {
   getMissouriRiverDefaultValues,
@@ -19,23 +21,53 @@ import {
 import { filterNullEmptyObjects, formatCoordFlt } from '@src/utils/helpers';
 import Checkbox from '@src/app-components/check-box/Checkbox';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import {
-  createDropdownOptions,
-  currentDate,
-  fmtTimeHHMMSS,
-  isEmpty,
-  removeDuplicates,
-} from '@src/app-pages/data-entry/dataEntryHelper';
+import { createDropdownOptions, currentDate, fmtTimeHHMMSS, isEmpty } from '@src/app-pages/data-entry/dataEntryHelper';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
 import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 
 import '../../../dataentry.scss';
-import NavigateWarningModal from '@src/common/modals/NavigateWarningModal';
-import MicroBuilder from './MicroBuilder';
+
+const lookupTableNames = [
+  'bendRiverMile',
+  'bendSelections',
+  'gearCodes',
+  'filteredGearCodes',
+  'gearTypes',
+  'macros',
+  'mesos',
+  'macroMesos',
+  'microHabitats',
+  'microStructures',
+  'u6Options',
+  'u7Options',
+  'microSetSite',
+  'setSite1Options',
+  'setSite2Options',
+  'setSite3Options',
+  'structureFlows',
+  'structureMods',
+  'subsampleTypes',
+];
+
+const getDepthWarning = (depth) => {
+  const warningMsg = 'Depth is greater than 10';
+  return depth > 10 ? warningMsg : null;
+};
+
+const getTempWarning = (temp, gearCode) => {
+  if (temp > 30) {
+    return 'Temp is greater than 30';
+  } else if (temp >= 12.8 && gearCode.startsWith('GN')) {
+    return 'Temp >= 12.8 for a gill net gear code';
+  } else {
+    return null;
+  }
+};
 
 const MissouriRiverDataEntryForm = connect(
   'doFetchMoRiverDataEntry',
@@ -53,6 +85,7 @@ const MissouriRiverDataEntryForm = connect(
   'selectDataEntryFishTotalCount',
   'selectCurrentTab',
   'selectMoriverSitesDraftDatasheetTotalResults',
+  'selectMoriverSitesDatasheetTotalResults',
   ({
     doFetchMoRiverDataEntry,
     doModalOpen,
@@ -69,61 +102,27 @@ const MissouriRiverDataEntryForm = connect(
     dataEntryFishTotalCount,
     currentTab,
     moriverSitesDraftDatasheetTotalResults,
+    moriverSitesDatasheetTotalResults,
   }) => {
     // Initialize GPS
     const { browserGps } = useGpsCapture(GPS_OPTIONS);
     const ubloxGps = useUbloxSerialGps();
-    const {
-      bendRiverMile: onlineBendRiverMile,
-      bendSelections: onlineBendSelections,
-      gearCodes: onlineGearCodes,
-      filteredGearCodes: onlineFilteredGearCodes,
-      gearTypes: onlineGearTypes,
-      macros: onlineMacros,
-      mesos: onlineMesos,
-      macroMesos: onlineMacroMesos,
-      microHabitats: onlineMicroHabitats,
-      microStructures: onlineMicroStructures,
-      u6Options: onlineU6Options,
-      u7Options: onlineU7Options,
-      microSetSite: onlineMicroSetSite,
-      setSite1Options: onlineSetSite1Options,
-      setSite2Options: onlineSetSite2Options,
-      setSite3Options: onlineSetSite3Options,
-      structureFlows: onlineStructureFlows,
-      structureMods: onlineStructureMods,
-      subsampleTypes: onlineSubsampleTypes,
-    } = lookupData;
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
     const siteRouteKey = routeParams?.siteId;
     const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
     const isOnline = navigator.onLine;
-
-    const [gearCodeOptions, setGearCodeOptions] = useState(onlineGearCodes);
-    const [mesoOptions, setMesoOptions] = useState(onlineMesos);
-    const [offlineLookups, setOfflineLookups] = useState({
-      bendRiverMile: [],
-      bendSelections: [],
-      gearCodes: [],
-      filteredGearCodes: [],
-      gearTypes: [],
-      macros: [],
-      mesos: [],
-      macroMesos: [],
-      microHabitats: [],
-      microStructures: [],
-      u6Options: [],
-      u7Options: [],
-      microSetSite: [],
-      setSite1Options: [],
-      setSite2Options: [],
-      setSite3Options: [],
-      structureFlows: [],
-      structureMods: [],
-      subsampleTypes: [],
-    });
+    // Default lookups to online data, otherwise will be overwritten by offline cached lookup data if network status = offline
+    const [lookups, setLookups] = useState(
+      lookupTableNames.reduce((accumulator, currentKey) => {
+        accumulator[currentKey] = lookupData?.[currentKey] ?? [];
+        return accumulator;
+      }, {})
+    );
+    const [gearCodeOptions, setGearCodeOptions] = useState(lookupData.gearCodes);
+    const [mesoOptions, setMesoOptions] = useState(lookupData.mesos);
     const [submitMessage, setSubmitMessage] = useState(null);
     const [fishData, setFishData] = useState(dataEntryFishData?.items ?? []);
+    const hasFishRecords = isOnline ? dataEntryFishTotalCount > 0 : fishData?.length > 0;
 
     // Fetch Offline Draft Data
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
@@ -159,41 +158,21 @@ const MissouriRiverDataEntryForm = connect(
       }
     };
 
-    const resolveLookup = (onlineRows, offlineRows) =>
-      Array.isArray(onlineRows) && onlineRows.length > 0 ? onlineRows : (offlineRows ?? []);
-
-    const bendRiverMile = resolveLookup(onlineBendRiverMile, offlineLookups.bendRiverMile);
-    const bendSelections = resolveLookup(onlineBendSelections, offlineLookups.bendSelections);
-    const gearCodes = resolveLookup(onlineGearCodes, offlineLookups.gearCodes);
-    const filteredGearCodes = resolveLookup(onlineFilteredGearCodes, offlineLookups.filteredGearCodes);
-    const gearTypes = resolveLookup(onlineGearTypes, offlineLookups.gearTypes);
-    const macros = resolveLookup(onlineMacros, offlineLookups.macros);
-    const mesos = resolveLookup(onlineMesos, offlineLookups.mesos);
-    const macroMesos = resolveLookup(onlineMacroMesos, offlineLookups.macroMesos);
-    const microHabitats = resolveLookup(onlineMicroHabitats, offlineLookups.microHabitats);
-    const microStructures = resolveLookup(onlineMicroStructures, offlineLookups.microStructures);
-    const u6Options = resolveLookup(onlineU6Options, offlineLookups.u6Options);
-    const u7Options = resolveLookup(onlineU7Options, offlineLookups.u7Options);
-    const microSetSite = resolveLookup(onlineMicroSetSite, offlineLookups.microSetSite);
-    const setSite1Options = resolveLookup(onlineSetSite1Options, offlineLookups.setSite1Options);
-    const setSite2Options = resolveLookup(onlineSetSite2Options, offlineLookups.setSite2Options);
-    const setSite3Options = resolveLookup(onlineSetSite3Options, offlineLookups.setSite3Options);
-    const structureFlows = resolveLookup(onlineStructureFlows, offlineLookups.structureFlows);
-    const structureMods = resolveLookup(onlineStructureMods, offlineLookups.structureMods);
-    const subsampleTypes = resolveLookup(onlineSubsampleTypes, offlineLookups.subsampleTypes);
-
-    const ss3Options = removeDuplicates(
-      setSite3Options?.map((item) => ({
-        code: item.code,
-        description: item.description,
-      }))
-    );
+    const hasPDSG =
+      fishData.some(
+        (item) =>
+          String(item?.species || '')
+            .trim()
+            .toUpperCase() === 'PDSG'
+      ) ?? false;
 
     const getUpperLowerRiverMile = (bend, segment) =>
-      bendRiverMile?.filter((item) => item.bend === bend && item.segment === segment)?.[0];
+      lookups?.bendRiverMile?.filter(
+        (item) => Number(item.bend) === Number(bend) && Number(item.segment) === Number(segment)
+      )?.[0];
 
     const getSeasonGearOfficeOptions = (season, fieldOffice, project) => {
-      const options = filteredGearCodes.filter(
+      const options = lookups?.filteredGearCodes?.filter(
         (item) => item.fieldOfficeCode === fieldOffice && item.seasonCode === season && item.projectCode === project
       );
       return options.map((item) => ({
@@ -203,7 +182,7 @@ const MissouriRiverDataEntryForm = connect(
     };
 
     const getMacroMesoOptions = (macro) => {
-      const options = macroMesos.filter((item) => item.macroHabitatCode === macro);
+      const options = lookups?.macroMesos?.filter((item) => item.macroHabitatCode === macro);
       return options.map((item) => ({ code: item.mesoHabitatCode }));
     };
 
@@ -227,20 +206,14 @@ const MissouriRiverDataEntryForm = connect(
     const defaultValues = getMissouriRiverDefaultValues({
       baseData,
       dataEntryData,
-      fishCount: dataEntryFishTotalCount,
-      moriverCount: moriverSitesDraftDatasheetTotalResults,
+      fishCount: isOnline ? dataEntryFishTotalCount : fishData?.length,
+      moriverCount: Number(moriverSitesDraftDatasheetTotalResults) + Number(moriverSitesDatasheetTotalResults),
     });
-    const hasPDSG =
-      fishData.some(
-        (item) =>
-          String(item?.species || '')
-            .trim()
-            .toUpperCase() === 'PDSG'
-      ) ?? false;
 
     const schema = getMissouriRiverSchema({
       riverMile: getUpperLowerRiverMile(bend, segmentId),
       hasPDSG,
+      hasFishRecords,
     });
 
     // RHF Methods Config
@@ -255,10 +228,10 @@ const MissouriRiverDataEntryForm = connect(
       setFocus,
       watch,
       getValues,
-      trigger,
       setValue,
       handleSubmit,
       reset,
+      trigger,
     } = methods;
 
     const shouldAutoValidate = submitCount > 0;
@@ -284,28 +257,9 @@ const MissouriRiverDataEntryForm = connect(
     const mrFid = watch('mrFid');
     const seFid = watch('seFid');
 
-    const hasFishRecords = isOnline ? dataEntryFishTotalCount > 0 : fishData?.length > 0;
-
     const isStartTimeDisabled =
       gearCode.startsWith('LDN') &&
       (velocitybot1 === null || velocitybot1 === '' || velocity081 === null || velocity081 === '');
-
-    const getTempWarning = () => {
-      if (temp > 30) {
-        return 'Temp is greater than 30';
-      } else if (temp >= 12.8 && gearCode.startsWith('GN')) {
-        return 'Temp >= 12.8 for a gill net gear code';
-      } else {
-        return;
-      }
-    };
-
-    const getDepthWarning = (depth) => {
-      if (depth > 10) {
-        return 'Depth is greater than 10';
-      }
-      return;
-    };
 
     const formatDataObj = () => {
       const values = getValues();
@@ -313,6 +267,7 @@ const MissouriRiverDataEntryForm = connect(
       return {
         ...values,
         bendrivermile: parseFloat(values?.bendrivermile),
+        conductivity: parseFloat(values?.conductivity),
         depth1: parseFloat(values?.depth1),
         depth2: parseFloat(values?.depth2),
         depth3: parseFloat(values?.depth3),
@@ -355,7 +310,7 @@ const MissouriRiverDataEntryForm = connect(
     const handleChange = (e) => {
       const name = e?.target?.name;
       const val = e?.target?.value;
-      name === 'recorder' && setValue('recorder', val?.toUpperCase());
+      (name === 'recorder' || name === 'editInitials') && setValue(name, val?.toUpperCase());
     };
 
     const doSaveDraft = async () => {
@@ -416,6 +371,7 @@ const MissouriRiverDataEntryForm = connect(
 
     const doSubmit = async () => {
       setValue('status', DataEntryStatuses.Submitted);
+      trigger();
       const dataObj = formatDataObj();
       if (isOnline) {
         // Submit online
@@ -424,7 +380,7 @@ const MissouriRiverDataEntryForm = connect(
           console.error('Missing mrFid. Cannot submit Missouri River form.');
           return;
         }
-        newForm() ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+        doUpdateMoRiverDataEntry(payload);
       } else {
         // Submit offline
         const clientId = dataObj.clientId ?? draft?.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();
@@ -516,14 +472,16 @@ const MissouriRiverDataEntryForm = connect(
     // Set Gear Code options and reset Gear Code value when necessary
     useEffect(() => {
       setValue('gear', '');
-      setGearCodeOptions(gearType === 'S' ? getSeasonGearOfficeOptions(season, fieldoffice, projectId) : gearCodes);
+      setGearCodeOptions(
+        gearType === 'S' ? getSeasonGearOfficeOptions(season, fieldoffice, projectId) : lookups?.gearCodes
+      );
     }, [gearType]);
 
     // Set Meso options and reset Meso value when necessary
     useEffect(() => {
       setValue('meso', '');
-      handleMesoOptions(mesos, gearType, gearCode, macro, season);
-    }, [mesos, gearType, gearCode, macro, season]);
+      handleMesoOptions(lookups?.mesos, gearType, gearCode, macro, season);
+    }, [lookups?.mesos, gearType, gearCode, macro, season]);
 
     // Both Velocity (bot) 1 and Velocity (0.8 or 0.5) 1 must be filled out before setting the start time when using a Larval Drift Net gear.
     useEffect(() => {
@@ -535,7 +493,7 @@ const MissouriRiverDataEntryForm = connect(
 
     useEffect(() => {
       if (gearCode) {
-        setValue('deploymentType', gearCodes.filter((gear) => gear.code === gearCode)?.[0]?.deploymentType);
+        setValue('deploymentType', lookups?.gearCodes?.filter((gear) => gear.code === gearCode)?.[0]?.deploymentType);
         if (newForm()) {
           if (gearCode === 'TLC1') {
             setValue('u2', 20);
@@ -586,6 +544,15 @@ const MissouriRiverDataEntryForm = connect(
       !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
       isOnline && setFishData(dataEntryFishData?.items);
     }, [mrFid, , isOnline, currentTab, dataEntryFishData, setFishData]);
+
+    // Load offline lookups
+    useEffect(() => {
+      const loadOfflineLookups = async () => {
+        const entries = await Promise.all(lookupTableNames.map(async (name) => [name, await getLookupOptions(name)]));
+        setLookups(Object.fromEntries(entries));
+      };
+      !isOnline && loadOfflineLookups();
+    }, [isOnline]);
 
     return (
       <FormProvider {...methods}>
@@ -660,7 +627,7 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
             <Grid tablet={{ col: 1 }}>
               <SelectInput name='subsamplen' label='Subsample R/N' onChange={handleChange} required>
-                {createDropdownOptions(bendSelections).map((item, index) => (
+                {createDropdownOptions(lookups?.bendSelections).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
                   </option>
@@ -669,7 +636,7 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
             <Grid tablet={{ col: 2 }}>
               <SelectInput name='subsampleType' label='Subsample Type' onChange={handleChange} required>
-                {createDropdownOptions(subsampleTypes).map((item, index) => (
+                {createDropdownOptions(lookups?.subsampleTypes).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
                   </option>
@@ -678,7 +645,7 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
             <Grid tablet={{ col: 2 }}>
               <SelectInput name='gearType' label='Gear Type' onChange={handleChange} required>
-                {createDropdownOptions(gearTypes).map((item, index) => (
+                {createDropdownOptions(lookups?.gearTypes).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
                   </option>
@@ -711,7 +678,7 @@ const MissouriRiverDataEntryForm = connect(
               <Grid row gap='md'>
                 <Grid tablet={{ col: 6 }}>
                   <SelectInput name='macro' label='Macro' onChange={handleChange} required>
-                    {createDropdownOptions(macros).map((item, index) => (
+                    {createDropdownOptions(lookups?.macros).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.value}
                       </option>
@@ -736,7 +703,7 @@ const MissouriRiverDataEntryForm = connect(
                     type='number'
                     onChange={handleChange}
                     required
-                    warning={getTempWarning()}
+                    warning={getTempWarning(temp, gearCode)}
                   />
                 </Grid>
                 <Grid tablet={{ col: 6 }}>
@@ -907,7 +874,7 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
                   <SelectInput name='u6' label='U6' onChange={handleChange}>
-                    {u6Options.map((item, index) => (
+                    {lookups?.u6Options?.map((item, index) => (
                       <option key={index + 1} value={item.code}>
                         {item.description}
                       </option>
@@ -916,7 +883,7 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
                 <Grid tablet={{ col: 3 }}>
                   <SelectInput name='u7' label='U7' onChange={handleChange}>
-                    {createDropdownOptions(u7Options).map((item, index) => (
+                    {createDropdownOptions(lookups?.u7Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
                       </option>

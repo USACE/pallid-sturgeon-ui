@@ -7,6 +7,7 @@ import TextInput from '@src/app-components/new-inputs/text-input/TextInput';
 import { microSegmentRequired } from './MissouriRiverDataEntryForm.validation';
 import { createDropdownOptions, removeDuplicates } from '@src/app-pages/data-entry/dataEntryHelper';
 import { useEffect, useState } from 'react';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 
 const EMPTY_DIGITS = ['', '', '', '', '', ''];
 
@@ -19,6 +20,17 @@ const digitFieldMapping = {
   5: 'setSite3',
 };
 
+const lookupTableNames = [
+  'microHabitats',
+  'microStructures',
+  'microSetSite',
+  'setSite1Options',
+  'setSite2Options',
+  'setSite3Options',
+  'structureFlows',
+  'structureMods',
+];
+
 const digitWarningMsg = 'Entered digit does not exist for this field, please enter a new digit or select from dropdown';
 
 const MicroBuilder = connect(
@@ -27,17 +39,15 @@ const MicroBuilder = connect(
   'selectDataEntryData',
   'selectCurrentTab',
   ({ baseData, lookupData, dataEntryData, currentTab, shouldAutoValidate }) => {
+    const isOnline = navigator.onLine;
     const { projectId, segmentId } = baseData;
-    const {
-      microHabitats,
-      microStructures,
-      microSetSite,
-      setSite1Options,
-      setSite2Options,
-      setSite3Options,
-      structureFlows,
-      structureMods,
-    } = lookupData;
+    // Default lookups to online data, otherwise will be overwritten by offline cached lookup data if network status = offline
+    const [lookups, setLookups] = useState(
+      lookupTableNames.reduce((accumulator, currentKey) => {
+        accumulator[currentKey] = lookupData?.[currentKey] ?? [];
+        return accumulator;
+      }, {})
+    );
 
     const [microWarning, setMicroWarning] = useState(false);
     const [digitWarnings, setDigitWarnings] = useState(Array(6).fill(null));
@@ -48,7 +58,7 @@ const MicroBuilder = connect(
     const [ss2Options, setSs2Options] = useState([]);
 
     const ss3Options = removeDuplicates(
-      setSite3Options?.map((item) => ({
+      lookups?.setSite3Options?.map((item) => ({
         code: item.code,
         description: item.description,
       }))
@@ -58,9 +68,11 @@ const MicroBuilder = connect(
       // When 0 is entered, the tables are no longer used to limit options
       if (microStructure == null || microStructure == '') return [];
       if (Number(microStructure) === 0) {
-        return structureFlows;
+        return lookups?.structureFlows;
       } else {
-        const options = microHabitats.filter((item) => Number(item.microStructureCode) === Number(microStructure));
+        const options = lookups?.microHabitats?.filter(
+          (item) => Number(item.microStructureCode) === Number(microStructure)
+        );
         const filteredOptions = options.map((item) => ({
           code: item.structureFlowCode,
           description: item.structureFlow,
@@ -73,9 +85,11 @@ const MicroBuilder = connect(
       // When 0 is entered, the tables are no longer used to limit options
       if (structureFlow == null || structureFlow == '') return [];
       if (Number(structureFlow) === 0) {
-        return structureMods;
+        return lookups?.structureMods;
       } else {
-        const options = microHabitats.filter((item) => Number(item.structureFlowCode) === Number(structureFlow));
+        const options = lookups?.microHabitats?.filter(
+          (item) => Number(item.structureFlowCode) === Number(structureFlow)
+        );
         const filteredOptions = options.map((item) => ({
           code: item.structureModCode,
           description: item.structureMod,
@@ -88,9 +102,11 @@ const MicroBuilder = connect(
       // When 0 is entered, the tables are no longer used to limit options
       if (microStructure == null || microStructure == '') return [];
       if (Number(microStructure) === 0) {
-        return setSite1Options;
+        return lookups?.setSite1Options;
       } else {
-        const options = microSetSite.filter((item) => Number(item.microStructureCode) === Number(microStructure));
+        const options = lookups?.microSetSite?.filter(
+          (item) => Number(item.microStructureCode) === Number(microStructure)
+        );
         const filteredOptions = options.map((item) => ({
           code: item.ss1Code,
           description: item.ss1Description,
@@ -103,9 +119,9 @@ const MicroBuilder = connect(
       // When 0 is entered, the tables are no longer used to limit options
       if (setSite1 == null || setSite1 == '') return [];
       if (Number(setSite1) === 0) {
-        return setSite2Options;
+        return lookups?.setSite2Options;
       } else {
-        const options = microSetSite.filter((item) => Number(item.ss1Code) === Number(setSite1));
+        const options = lookups?.microSetSite?.filter((item) => Number(item.ss1Code) === Number(setSite1));
         const filteredOptions = options.map((item) => ({
           code: item.ss2Code,
           description: item.ss2Description,
@@ -114,7 +130,7 @@ const MicroBuilder = connect(
       }
     };
 
-    const { watch, setValue, trigger, getValues, reset } = useFormContext();
+    const { watch, setValue, trigger } = useFormContext();
     const micro = watch('micro');
     const microStructure = watch('microStructure');
     const structureFlow = watch('structureFlow');
@@ -130,7 +146,8 @@ const MicroBuilder = connect(
       // digit 0: Micro Structure
       if (
         digit === 0 &&
-        createDropdownOptions(microStructures)?.filter((item) => String(item.value) === String(val))?.length === 0
+        createDropdownOptions(lookups?.microStructures)?.filter((item) => String(item.value) === String(val))
+          ?.length === 0
       ) {
         return false;
       }
@@ -185,8 +202,8 @@ const MicroBuilder = connect(
       if (allSelected) {
         // digit 0: Micro Structure
         if (
-          createDropdownOptions(microStructures)?.filter((item) => String(item.value) === String(digits[0]))?.length ===
-          0
+          createDropdownOptions(lookups?.microStructures)?.filter((item) => String(item.value) === String(digits[0]))
+            ?.length === 0
         ) {
           return false;
         }
@@ -334,6 +351,15 @@ const MicroBuilder = connect(
       }
     }, [dataEntryData, ss2Options, shouldAutoValidate, trigger, currentTab]);
 
+    // Load offline lookups
+    useEffect(() => {
+      const loadOfflineLookups = async () => {
+        const entries = await Promise.all(lookupTableNames.map(async (name) => [name, await getLookupOptions(name)]));
+        setLookups(Object.fromEntries(entries));
+      };
+      !isOnline && loadOfflineLookups();
+    }, [isOnline]);
+
     return (
       <Grid tablet={{ col: 8 }}>
         <Grid row gap='md'>
@@ -354,7 +380,7 @@ const MicroBuilder = connect(
               onChange={(e) => handleDropdownChange(0, e?.target?.value)}
               warning={micro && !digitWarnings[0] && digitWarnings[0] !== null ? digitWarningMsg : null}
             >
-              {createDropdownOptions(microStructures).map((item, index) => (
+              {createDropdownOptions(lookups?.microStructures).map((item, index) => (
                 <option key={index + 1} value={item.value}>
                   {item.text}
                 </option>
