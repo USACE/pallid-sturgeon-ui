@@ -120,6 +120,7 @@ const MissouriRiverDataEntryForm = connect(
     const [mesoOptions, setMesoOptions] = useState(lookupData.mesos);
     const [submitMessage, setSubmitMessage] = useState(null);
     const [fishData, setFishData] = useState(dataEntryFishData?.items ?? []);
+    const hasFishRecords = isOnline ? dataEntryFishTotalCount > 0 : fishData?.length > 0;
 
     // Fetch Offline Draft Data
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
@@ -201,13 +202,14 @@ const MissouriRiverDataEntryForm = connect(
     const defaultValues = getMissouriRiverDefaultValues({
       baseData,
       dataEntryData,
-      fishCount: dataEntryFishTotalCount,
+      fishCount: isOnline ? dataEntryFishTotalCount : fishData?.length,
       moriverCount: moriverSitesDraftDatasheetTotalResults,
     });
 
     const schema = getMissouriRiverSchema({
       riverMile: getUpperLowerRiverMile(bend, segmentId),
       hasPDSG,
+      hasFishRecords,
     });
 
     // RHF Methods Config
@@ -225,6 +227,7 @@ const MissouriRiverDataEntryForm = connect(
       setValue,
       handleSubmit,
       reset,
+      trigger,
     } = methods;
 
     const shouldAutoValidate = submitCount > 0;
@@ -249,8 +252,6 @@ const MissouriRiverDataEntryForm = connect(
     const u7 = watch('u7');
     const mrFid = watch('mrFid');
     const seFid = watch('seFid');
-
-    const hasFishRecords = isOnline ? dataEntryFishTotalCount > 0 : fishData?.length > 0;
 
     const isStartTimeDisabled =
       gearCode.startsWith('LDN') &&
@@ -304,7 +305,7 @@ const MissouriRiverDataEntryForm = connect(
     const handleChange = (e) => {
       const name = e?.target?.name;
       const val = e?.target?.value;
-      (name === 'recorder' || name === 'editInitials') && setValue('recorder', val?.toUpperCase());
+      (name === 'recorder' || name === 'editInitials') && setValue(name, val?.toUpperCase());
     };
 
     const doSaveDraft = async () => {
@@ -365,6 +366,7 @@ const MissouriRiverDataEntryForm = connect(
 
     const doSubmit = async () => {
       setValue('status', DataEntryStatuses.Submitted);
+      trigger();
       const dataObj = formatDataObj();
       if (isOnline) {
         // Submit online
@@ -373,7 +375,7 @@ const MissouriRiverDataEntryForm = connect(
           console.error('Missing mrFid. Cannot submit Missouri River form.');
           return;
         }
-        newForm() ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
+        doUpdateMoRiverDataEntry(payload);
       } else {
         // Submit offline
         const clientId = dataObj.clientId ?? draft?.clientId ?? dataEntryData?.clientId ?? crypto.randomUUID();

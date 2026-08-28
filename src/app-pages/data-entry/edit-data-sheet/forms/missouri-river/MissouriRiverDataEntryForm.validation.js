@@ -17,7 +17,7 @@ export const gearReqFields = {
   velocity02or062: ['GN18', 'GN81', 'GN14', 'GN41', 'OT04', 'TN', 'TLC1', 'TLC2', 'POT02'],
 };
 
-export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false }) =>
+export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishRecords }) =>
   yup.object().shape(
     {
       fishCount: yup.number().nullable(),
@@ -153,7 +153,7 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false }) =>
       stopTime: yup
         .string()
         .when('deploymentType', {
-          is: (deploymentType) => deploymentType === 'p',
+          is: (deploymentType) => deploymentType === 'p' && hasFishRecords,
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
