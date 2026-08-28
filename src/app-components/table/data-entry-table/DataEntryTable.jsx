@@ -277,18 +277,6 @@ const DataEntryTable = ({
                     return (
                       <td className={cellClasses} key={cell.id} style={{ width: cell.column.getSize() + 'px' }}>
                         <div className='d-flex align-items-center'>
-                          {showValidationErrors && cellError && (
-                            <Tooltip
-                              iconSize='large'
-                              place='bottom'
-                              header={cell.column.columnDef.header}
-                              content={cellError}
-                              iconStyle={{ color: 'red', marginRight: '5px' }}
-                              isError
-                              noDelay
-                              border
-                            />
-                          )}
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           {showRequiredAsterisk && (
                             <span aria-hidden='true' className='cell-required-asterisk'>

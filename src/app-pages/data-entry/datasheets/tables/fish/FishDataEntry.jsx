@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
-import { Button } from '@trussworks/react-uswds';
+import { Alert, Button } from '@trussworks/react-uswds';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 
@@ -573,7 +573,7 @@ const FishDataEntry = connect(
           Submit
         </Button>
         {validationErrorRowCount > 0 && (
-          <div aria-live='polite' className='margin-y-1 text-secondary-dark'>
+          <Alert aria-live='polite' className='margin-y-1' headingLevel='h4' noIcon slim type='error'>
             <p className='margin-y-0'>
               {validationErrorRowCount} row{validationErrorRowCount === 1 ? '' : 's'}
               {validationErrorRowCount === 1 ? ' has ' : ' have '}validation errors that must be corrected before data
@@ -598,7 +598,7 @@ const FishDataEntry = connect(
                 ))}
               </ul>
             )}
-          </div>
+          </Alert>
         )}
       </FormProvider>
     );
