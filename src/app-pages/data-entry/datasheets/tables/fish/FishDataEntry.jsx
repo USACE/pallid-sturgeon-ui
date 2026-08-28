@@ -283,6 +283,7 @@ const FishDataEntry = connect(
       // Grab last object from data array
       const lastRowData = rows[rows.length - 1];
       const { fishFid, localDisplayId } = getNextFishId(rows, parentMrId, parentMrFid);
+      const resolvedFishFid = fishFid ?? localDisplayId;
 
       // Format new row data
       const newRowData = {
@@ -299,8 +300,12 @@ const FishDataEntry = connect(
           ? {
               mrFid: parentMrFid,
               mr_fid: parentMrFid,
-              fFid: fishFid,
-              f_fid: fishFid,
+            }
+          : {}),
+        ...(resolvedFishFid
+          ? {
+              fFid: resolvedFishFid,
+              f_fid: resolvedFishFid,
             }
           : {}),
         ...(localDisplayId
@@ -352,6 +357,7 @@ const FishDataEntry = connect(
             let nextRow = currentRow;
             if (isPlaceholderRow) {
               const { fishFid, localDisplayId } = getNextFishId(newData, parentMrId, parentMrFid);
+              const resolvedFishFid = fishFid ?? localDisplayId;
 
               nextRow = {
                 ...getBaseDefaultValues({ baseData }),
@@ -362,8 +368,12 @@ const FishDataEntry = connect(
                   ? {
                       mrFid: parentMrFid,
                       mr_fid: parentMrFid,
-                      fFid: fishFid,
-                      f_fid: fishFid,
+                    }
+                  : {}),
+                ...(resolvedFishFid
+                  ? {
+                      fFid: resolvedFishFid,
+                      f_fid: resolvedFishFid,
                     }
                   : {}),
                 ...(localDisplayId
@@ -426,7 +436,7 @@ const FishDataEntry = connect(
             const clientId = item.clientId ?? crypto.randomUUID();
             const parentRowMrId = item.mrId ?? item.mr_id;
             const parentRowMrFid = item.mrFid ?? item.mr_fid;
-            const fishFid = item.fFid ?? item.f_fid;
+            const fishFid = item.fFid ?? item.f_fid ?? item.localDisplayId;
 
             const payload = {
               ...item,
