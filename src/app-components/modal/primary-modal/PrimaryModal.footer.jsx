@@ -21,8 +21,7 @@ const ModalFooter = connect(
     showSecondarySaveButton = null,
     onSecondarySave,
     secondarySaveText = 'Save & Close',
-  }) => {
-    return (
+  }) => (
       <footer className={`primary-modal-footer ${children ? 'has-extra-actions' : ''}`}>
         <div className='left-group'>
           {showSaveButton && (
@@ -55,14 +54,13 @@ const ModalFooter = connect(
             className='close-btn'
             onClick={(e) => {
               if (onCancel) onCancel(e);
-              doModalClose();
+              else doModalClose();
             }}
           >
             {cancelText}
           </Button>
         )}
       </footer>
-    );
-  }
+    )
 );
 export default ModalFooter;

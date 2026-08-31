@@ -12,7 +12,7 @@ import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEff
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
-import { fmtTimeHHMMSS, generateFieldId } from '../../../dataEntryHelper';
+import { fmtTimeHHMMSS, formatGpsCoordinate, generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
@@ -99,13 +99,15 @@ const SearchEffortDataEntryForm = connect(
     const handleCaptureStart = async () => {
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
+        const latitude = formatGpsCoordinate(best?.lat);
+        const longitude = formatGpsCoordinate(best?.lng);
 
-        setValue('startLatitude', Number(best.lat), { shouldValidate: true });
-        setValue('startLongitude', Number(best.lng), { shouldValidate: true });
+        setValue('startLatitude', latitude, { shouldValidate: true });
+        setValue('startLongitude', longitude, { shouldValidate: true });
         setValue('startTime', fmtTimeHHMMSS(), { shouldValidate: true });
 
         window.alert(
-          `Captured START\nsource=${best.source || 'browser'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+          `Captured START\nsource=${best.source || 'browser'}\nlat=${best?.lat}\nlng=${best?.lng}\nacc=${Math.round(best?.accuracy)}m`
         );
       } catch (e) {
         console.error(e);
@@ -117,9 +119,11 @@ const SearchEffortDataEntryForm = connect(
     const handleCaptureStop = async () => {
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
+        const latitude = formatGpsCoordinate(best?.lat);
+        const longitude = formatGpsCoordinate(best?.lng);
 
-        setValue('stopLatitude', Number(best.lat), { shouldValidate: true });
-        setValue('stopLongitude', Number(best.lng), { shouldValidate: true });
+        setValue('stopLatitude', latitude, { shouldValidate: true });
+        setValue('stopLongitude', longitude, { shouldValidate: true });
         setValue('stopTime', fmtTimeHHMMSS(), { shouldValidate: true });
 
         window.alert(

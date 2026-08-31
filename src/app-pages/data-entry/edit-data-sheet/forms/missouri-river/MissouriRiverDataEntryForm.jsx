@@ -21,7 +21,13 @@ import {
 import { filterNullEmptyObjects, formatCoordFlt } from '@src/utils/helpers';
 import Checkbox from '@src/app-components/check-box/Checkbox';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { createDropdownOptions, currentDate, fmtTimeHHMMSS, isEmpty } from '@src/app-pages/data-entry/dataEntryHelper';
+import {
+  createDropdownOptions,
+  currentDate,
+  fmtTimeHHMMSS,
+  formatGpsCoordinate,
+  isEmpty,
+} from '@src/app-pages/data-entry/dataEntryHelper';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
@@ -286,6 +292,7 @@ const MissouriRiverDataEntryForm = connect(
         velocitybot2: parseFloat(values?.velocitybot2),
         velocity082: parseFloat(values?.velocity082),
         velocity02or062: parseFloat(values?.velocity02or062),
+        width: parseFloat(values?.width),
       };
     };
 
@@ -314,7 +321,7 @@ const MissouriRiverDataEntryForm = connect(
         setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: shouldAutoValidate });
 
         window.alert(
-          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best?.lat}\nlng=${best?.lng}\nacc=${Math.round(best?.accuracy)}m`
         );
       } catch (e) {
         console.error(e);
@@ -841,7 +848,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLatitude'
                     label='Stop Latitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
                   />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>
@@ -849,7 +856,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLongitude'
                     label='Stop Longitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>
