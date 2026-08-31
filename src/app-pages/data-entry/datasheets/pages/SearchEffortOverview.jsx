@@ -34,7 +34,7 @@ const SearchEffortOverview = connect(
     ];
 
     return (
-      <div className='container-fluid'>
+      <div className='container-fluid search-overview-container'>
         <Breadcrumb paths={breadcrumbLinks} />
 
         <div className='row'>

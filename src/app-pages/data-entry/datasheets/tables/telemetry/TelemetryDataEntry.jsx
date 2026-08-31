@@ -24,6 +24,7 @@ import { db } from '@src/app-pages/data-entry/offline/db';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
+import { formatGpsCoordinate } from '@src/app-pages/data-entry/dataEntryHelper';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
 console.log('GPS POC flag', import.meta.env.VITE_USE_UBLOX_POC, USE_UBLOX_POC);
@@ -33,11 +34,6 @@ const GPS_OPTIONS = {
   timeout: 15000,
   maximumAge: 0,
 };
-
-// const getNextSequence = (data, seFid) => {
-//   const existing = data.filter((item) => item.seFid === seFid);
-//   return existing.length + 1;
-// };
 
 const createBlankTelemetryRow = () => ({
   _isPlaceholderRow: true,
@@ -227,10 +223,13 @@ const TelemetryDataEntry = connect(
 
         console.log('GPS result:', { fix, time });
 
+        const latitude = formatGpsCoordinate(fix?.lat);
+        const longitude = formatGpsCoordinate(fix?.lng);
+
         const computedValues = {
           captureTime: time,
-          captureLatitude: Number(fix.lat),
-          captureLongitude: Number(fix.lng),
+          captureLatitude: latitude,
+          captureLongitude: longitude,
         };
 
         handleUpdateData(rowIndex, null, computedValues);
