@@ -97,6 +97,7 @@ export const exportOfflineRecoveryData = async () => {
   const outbox = await db.outbox.toArray();
   const timestamp = getTimestamp();
   let exportedRecords = 0;
+  let exportedFiles = 0;
 
   for (const config of EXPORT_CONFIG) {
     const items = outbox.filter((item) => item.tableName === config.tableName);
@@ -120,12 +121,14 @@ export const exportOfflineRecoveryData = async () => {
       recordMap.set(item.clientId, exportRow);
     }
     const rows = Array.from(recordMap.values());
+    if (rows.length === 0) continue;
     exportedRecords += rows.length;
     const csv = rowsToCsv(rows);
     downloadCsv(`offline-${config.filename}-${timestamp}.csv`, csv);
+    exportedFiles++;
   }
   return {
-    files: 7,
+    files: exportedFiles,
     records: exportedRecords,
   };
 };

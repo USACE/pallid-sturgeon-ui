@@ -63,34 +63,34 @@ const SitesListTable = connect(
 
     return (
       <div>
-        <Grid row style={{ justifyContent: 'space-between' }}>
-          <ExportButton
-            variant='info'
-            size='small'
-            isOutline
-            isDisabled={sitesData?.length === 0}
-            filename={`sites-list-${new Date().toISOString()}`}
-            data={exportData}
-            icon={<Icon path={mdiDownload} />}
-          />
-          <Button
-            type='button'
-            outline
-            size='small'
-            className='recovery-export-btn'
-            disabled={exportingRecovery || pendingRecoveryCount === 0}
-            onClick={handleRecoveryExport}
-            title={
-              pendingRecoveryCount === 0
-                ? 'No offline records are waiting to sync'
-                : 'Download recovery CSV files for all queued offline records'
-            }
-          >
-            <Icon path={mdiDownload} />
-            {exportingRecovery
-              ? 'Exporting...'
-              : `Export Offline Recovery${pendingRecoveryCount ? `(${pendingRecoveryCount})` : ''}`}
-          </Button>
+        <Grid row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ExportButton
+              variant='info'
+              size='small'
+              isOutline
+              isDisabled={sitesData?.length === 0}
+              filename={`sites-list-${new Date().toISOString()}`}
+              data={exportData}
+              icon={<Icon path={mdiDownload} />}
+            />
+            {pendingRecoveryCount > 0 && (
+              <Button
+                type='button'
+                outline
+                size='small'
+                className='recovery-export-btn'
+                disabled={exportingRecovery}
+                onClick={handleRecoveryExport}
+                title={'Download recovery CSV files for all queued offline records'}
+              >
+                <Icon path={mdiDownload} />
+                {exportingRecovery
+                  ? 'Exporting...'
+                  : `Export Offline Recovery${pendingRecoveryCount ? `(${pendingRecoveryCount})` : ''}`}
+              </Button>
+            )}
+          </div>
           <div className='add-sites-btn'>
             <Button onClick={handleAddButton} className='add-btn' outline size='small' title='Add Site'>
               <Icon path={mdiPlus} />
