@@ -107,15 +107,15 @@ const SearchEffortDataEntryForm = connect(
     const handleCaptureStart = async () => {
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
-        const latitude = formatGpsCoordinate(best.lat);
-        const longitude = formatGpsCoordinate(best.lng);
+        const latitude = formatGpsCoordinate(best?.lat);
+        const longitude = formatGpsCoordinate(best?.lng);
 
         setValue('startLatitude', latitude, { shouldValidate: true });
         setValue('startLongitude', longitude, { shouldValidate: true });
         setValue('startTime', fmtTimeHHMMSS(), { shouldValidate: true });
 
         window.alert(
-          `Captured START\nsource=${best.source || 'browser'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+          `Captured START\nsource=${best.source || 'browser'}\nlat=${best?.lat}\nlng=${best?.lng}\nacc=${Math.round(best?.accuracy)}m`
         );
       } catch (e) {
         console.error(e);

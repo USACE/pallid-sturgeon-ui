@@ -235,8 +235,8 @@ const TelemetryDataEntry = connect(
 
         console.log('GPS result:', { fix, time });
 
-        const latitude = formatGpsCoordinate(fix.lat);
-        const longitude = formatGpsCoordinate(fix.lng);
+        const latitude = formatGpsCoordinate(fix?.lat);
+        const longitude = formatGpsCoordinate(fix?.lng);
 
         const computedValues = {
           captureTime: time,
