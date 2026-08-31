@@ -11,7 +11,6 @@ import OfflineSetupButton from '../initiate-offline-setup/OfflineSetupButton';
 import Button from '@src/app-components/button';
 
 import './syncBanner.scss';
-import { mesoOptions } from '../../edit-data-sheet/forms/_shared/selectHelper';
 
 const SyncBanner = connect(
   'selectAuth',
