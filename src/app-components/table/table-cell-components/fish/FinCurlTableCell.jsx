@@ -62,6 +62,11 @@ const FinCurlTableCell = connect('selectBaseData', ({ baseData, getValue, row, c
     rowLength && setLength(rowLength);
   }, [rowSpecies, rowLength]);
 
+  useEffect(() => {
+    setValue(initialValue);
+    previousValueRef.current = initialValue;
+  }, [initialValue]);
+
   return (
     <select
       aria-label='Fin Curl'

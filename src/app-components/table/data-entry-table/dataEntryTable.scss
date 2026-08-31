@@ -45,6 +45,11 @@ table select:disabled {
   height: 30px;
 }
 
+.cell-error .d-flex.align-items-center > select {
+  background-color: #fa9595;
+  height: 30px;
+}
+
 .cell-error .d-flex.align-items-center > div > div {
   background-color: #fa9595;
   height: 30px;
@@ -237,4 +242,12 @@ table {
 
 .input-error {
   background-color: #fa9595 !important;
+}
+
+.cell-required-asterisk {
+  color: #dd0000;
+  font-size: 1.1rem;
+  line-height: 1;
+  margin-left: 4px;
+  flex-shrink: 0;
 }

@@ -54,6 +54,12 @@ const FloyTagPrefixTableCell = connect(({ getValue, row, column, table, cell }) 
     }, 500);
   }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
 
+  // Sync value state when initialValue changes (for loading new records)
+  useEffect(() => {
+    setValue(initialValue);
+    previousValueRef.current = initialValue;
+  }, [initialValue]);
+
   return (
     <select
       aria-label='Floy Tag Prefix'

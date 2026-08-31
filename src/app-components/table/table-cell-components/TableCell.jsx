@@ -241,7 +241,7 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
       style={{ width: '100%', borderColor: 'hsl(0, 0%, 80%)', minWidth: 200 }}
       value={value ?? ''}
     >
-      <option key={0} value='' className='none' style={{ display: 'none' }}>
+      <option key={0} value='' className='none'>
         {DROPDOWN_PLACEHOLDER_TEXT}
       </option>
       {columnMeta?.options?.map((option) => (

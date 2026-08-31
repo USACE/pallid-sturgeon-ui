@@ -40,6 +40,11 @@ const FloyTagTableCell = connect(({ getValue, row, column, table, cell }) => {
     }, 500);
   }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
 
+  // Sync value state when initialValue changes (for loading new records)
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
   return (
     <input
       aria-label='Floy Tag'
