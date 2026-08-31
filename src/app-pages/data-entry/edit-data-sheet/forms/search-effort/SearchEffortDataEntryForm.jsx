@@ -127,7 +127,7 @@ const SearchEffortDataEntryForm = connect(
     const handleCaptureStop = async () => {
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
-        const latitude = formatGpsCoordinate(best.lat);
+        const latitude = formatGpsCoordinate(best?.lat);
         const longitude = formatGpsCoordinate(best.lng);
 
         setValue('stopLatitude', latitude, { shouldValidate: true });
