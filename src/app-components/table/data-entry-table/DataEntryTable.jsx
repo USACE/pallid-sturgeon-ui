@@ -264,10 +264,6 @@ const DataEntryTable = ({
                 <EmptyTableRow onAddClick={placeholderClick} placeholderText={placeholderText} />
               )}
               {table.getRowModel()?.rows?.map((row) => (
-                // <tr
-                //   key={row.id}
-                //   className={`${row.getIsSelected() ? 'selected-row' : ''} ${showValidationErrors && rowErrors && rowErrors?.[row.id] && Object.keys(rowErrors[row.id])?.length !== 0 ? 'row-error' : ''}`}
-                // >
                 <tr
                   key={row.id}
                   className={[
