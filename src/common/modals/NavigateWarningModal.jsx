@@ -16,7 +16,13 @@ const NavigateWarningModal = connect('doUpdateUrl', 'doModalClose', ({ doUpdateU
           Press Cancel to go back and save your data, or OK to proceed.
         </h6>
       </section>
-      <ModalFooter onSave={() => handleNavigation()} onCancel={() => doModalClose()} saveText='OK' customSaveLogic />
+      <ModalFooter
+        onSave={() => handleNavigation()}
+        cancelText='Cancel'
+        onCancel={() => doModalClose()}
+        saveText='OK'
+        customSaveLogic
+      />
     </ModalContent>
   );
 });

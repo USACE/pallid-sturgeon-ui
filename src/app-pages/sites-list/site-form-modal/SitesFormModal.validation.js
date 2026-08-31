@@ -13,14 +13,6 @@ export const sitesValidationSchema = yup.object().shape({
   sampleUnitType: yup.string().required(ValidationMessages.FieldRequired),
   bend: yup.object().required(ValidationMessages.FieldRequired),
   bendrn: yup.string().required(ValidationMessages.FieldRequired),
-  last_edit_comment: yup.string().when('edit', {
-    is: true,
-    then: (schema) => schema.required(ValidationMessages.FieldRequired),
-  }),
-  editInitials: yup.string().when('edit', {
-    is: true,
-    then: (schema) => schema.required(ValidationMessages.FieldRequired),
-  }),
 });
 
 export const getSitesDefaultValues = ({ edit, data, user }) => ({

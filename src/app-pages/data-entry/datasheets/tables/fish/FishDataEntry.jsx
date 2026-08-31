@@ -543,10 +543,16 @@ const FishDataEntry = connect(
         const fishCount = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row)).length;
         sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft, fishCount: fishCount }));
         await doMoRiverDatasheetLoadData(parentMrId ?? parentMrFid);
-        doUpdateCurrentTab(0);
       } catch (err) {
         console.error('Submit failed:', err);
       }
+    };
+
+    const handleSaveAndClose = () => {
+      // Submit Data
+      handleSubmitAll();
+      // Navigate to Missouri Entry Form Tab
+      doUpdateCurrentTab(0);
     };
 
     useEffect(() => {
@@ -581,6 +587,9 @@ const FishDataEntry = connect(
         </Button>
         <Button className='margin-top-2 add-btn' onClick={() => handleSubmitAll()} type='button'>
           Submit
+        </Button>
+        <Button className='margin-top-2 add-btn' onClick={() => handleSaveAndClose()} type='button'>
+          Save & Close Datasheet
         </Button>
         {validationErrorRowCount > 0 && (
           <Alert aria-live='polite' className='margin-y-1' headingLevel='h4' noIcon slim type='error'>
