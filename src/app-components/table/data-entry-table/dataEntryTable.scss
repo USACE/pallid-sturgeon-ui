@@ -251,3 +251,15 @@ table {
   margin-left: 4px;
   flex-shrink: 0;
 }
+
+.sync-recovery-row {
+  background-color: #fbeaea;
+
+  td:first-child {
+    border-left: 4px solid #b50909;
+  }
+
+  td {
+    background-color: #fbeaea;
+  }
+}

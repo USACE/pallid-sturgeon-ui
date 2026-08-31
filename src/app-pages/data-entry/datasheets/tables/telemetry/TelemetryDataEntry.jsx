@@ -20,6 +20,7 @@ import {
   getTelemetryDefaultValues,
 } from './TelemetryDataEntry.validation';
 import { getTelemetryColumns } from './helpers.telemetry';
+import { db } from '@src/app-pages/data-entry/offline/db';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
@@ -561,6 +562,29 @@ const TelemetryDataEntry = connect(
           await telemetryDataEntrySchema.validate(payload, { abortEarly: false });
 
           try {
+            if (row._syncRecoveryError && row.clientId) {
+              await updateData('telemetry', row.clientId, payload);
+              setData((currentRows) => {
+                const updatedRows = (currentRows ?? []).map((currentRow) => {
+                  if (String(currentRow?.clientId) !== String(row.clientId)) {
+                    return currentRow;
+                  }
+                  return {
+                    ...currentRow,
+                    ...payload,
+                    clientId: row.clientId,
+                    _syncRecoveryError: false,
+                    _syncRecoveryMessage: undefined,
+                    _status: 'queued',
+                    _isPlaceholderRow: false,
+                    _isTouched: true,
+                  };
+                });
+                return ensureTrailingBlankTelemetryRow(updatedRows);
+              });
+              continue;
+            }
+
             if (isOnline()) {
               if (isNew) {
                 console.log('Creating row online:', payload);
@@ -610,8 +634,12 @@ const TelemetryDataEntry = connect(
 
         const telemetryCount = (data ?? []).filter((row) => !isUntouchedPlaceholderTelemetryRow(row)).length;
         sessionStorage.setItem(draftKey, JSON.stringify({ ...draft, telemetryCount: telemetryCount }));
-        const telemetryParentId = isOnline() ? seId || seFid : seFid || seId;
-        await doSearchEffortDatasheetLoadData(telemetryParentId);
+        const hasRecoveryRow = rowsToProcess.some((row) => row._syncRecoveryError && row.clientId);
+        if (!hasRecoveryRow) {
+          const telemetryParentId = isOnline() ? seId || seFid : seFid || seId;
+          await doSearchEffortDatasheetLoadData(telemetryParentId);
+          doUpdateCurrentTab(0);
+        }
       } catch (err) {
         console.error('Submit failed:', err);
       }
@@ -646,6 +674,68 @@ const TelemetryDataEntry = connect(
         })) ?? [];
       setData(ensureTrailingBlankTelemetryRow(refreshRows));
     }, [items]);
+
+    useEffect(() => {
+      const loadRecoveryRow = async () => {
+        const recoveryOutboxId = sessionStorage.getItem('syncRecoveryOutboxId');
+        if (!recoveryOutboxId) return;
+
+        const outboxItem = await db.outbox.get(Number(recoveryOutboxId));
+        if (!outboxItem || outboxItem.tableName !== 'ds_telemetry_fish') {
+          sessionStorage.removeItem('syncRecoveryOutboxId');
+          return;
+        }
+
+        const localRow = await db.telemetry.get(outboxItem.clientId);
+        const recoveryRow = localRow ?? outboxItem.payload;
+        if (!recoveryRow) return;
+
+        const recoverySeKeys = [recoveryRow?.seId, recoveryRow?.se_id, recoveryRow?.seFid, recoveryRow?.se_fid]
+          .filter((value) => value !== undefined && value !== null && value !== '')
+          .map(String);
+
+        const currentSeKeys = [seId, seFid]
+          .filter((value) => value !== undefined && value !== null && value !== '')
+          .map(String);
+
+        const belongsToCurrentSearch = recoverySeKeys.some((key) => currentSeKeys.includes(key));
+        if (!belongsToCurrentSearch) {
+          console.warn('Recovery Telemetry row does not match current Search Effort.', {
+            recoveryRow,
+            seId,
+            seFid,
+          });
+          return;
+        }
+
+        const formattedRecoveryRow = {
+          ...recoveryRow,
+          captureTime: recoveryRow?.captureTime ?? recoveryRow?.captureDate ?? '',
+          spawnBehavior: recoveryRow?.spawnBehavior ?? recoveryRow?.suspectedSpawningActivity ?? '',
+          _status: outboxItem.syncError ? 'edited' : 'queued',
+          _syncRecoveryError: Boolean(outboxItem.syncError),
+          _syncRecoveryMessage: outboxItem.syncError ?? undefined,
+          _isPlaceholderRow: false,
+          _isTouched: true,
+        };
+
+        setData((currentRows) => {
+          const realRows = (currentRows ?? []).filter((row) => !isUntouchedPlaceholderTelemetryRow(row));
+          const existingIndex = realRows.findIndex(
+            (row) => row?.clientId && recoveryRow?.clientId && String(row.clientId) === String(recoveryRow.clientId)
+          );
+
+          if (existingIndex >= 0) {
+            realRows[existingIndex] = formattedRecoveryRow;
+          } else {
+            realRows.push(formattedRecoveryRow);
+          }
+
+          return ensureTrailingBlankTelemetryRow(realRows);
+        });
+      };
+      loadRecoveryRow();
+    }, [items, seId, seFid]);
 
     return (
       <FormProvider {...methods}>

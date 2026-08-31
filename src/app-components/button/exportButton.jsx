@@ -2,22 +2,13 @@ import { useCSVDownloader } from 'react-papaparse';
 
 import { classArray } from '@src/utils';
 
-const ExportButton = ({
-  size = '',
-  variant = 'primary',
-  icon = null,
-  isOutline = false,
-  isDisabled = false,
-  filename,
-  data,
-  className,
-}) => {
+const ExportButton = ({ size = '', icon = null, isDisabled = false, filename, data, className }) => {
   const { CSVDownloader, Type } = useCSVDownloader();
 
   const classes = classArray([
-    'btn',
+    'usa-button',
+    'secondary-btn',
     size && size === 'small' ? 'btn-sm' : size === 'large' ? 'btn-lg' : '',
-    `btn-${isOutline ? 'outline-' : ''}${variant}`,
     isDisabled && 'disabled not-allowed',
     'pb-2',
     className,

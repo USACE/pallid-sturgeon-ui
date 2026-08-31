@@ -10,6 +10,9 @@ import SitesFormModal from '../site-form-modal/SitesFormModal';
 import SiteIdCellRenderer from '@src/app-pages/sites-list/sites-list-table/siteIdCellRenderer';
 import ExportButton from '@components/button/exportButton';
 import Icon from '@components/icon/icon';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@src/app-pages/data-entry/offline/db';
+import { exportOfflineRecoveryData } from '@src/app-pages/data-entry/offline/export-recovery';
 
 import '@pages/data-summaries/data-summary.scss';
 
@@ -24,11 +27,26 @@ const SitesListTable = connect(
   'selectExportData',
   ({ doModalOpen, doDomainBendRnFetch, sitesData, exportData }) => {
     const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const pendingRecoveryCount = useLiveQuery(() => db.outbox.count(), [], 0);
+    const [exportingRecovery, setExportingRecovery] = useState(false);
 
     const handleAddButton = () => {
       doModalOpen(SitesFormModal);
       if (navigator.onLine) {
         doDomainBendRnFetch();
+      }
+    };
+
+    const handleRecoveryExport = async () => {
+      try {
+        setExportingRecovery(true);
+        const result = await exportOfflineRecoveryData();
+        console.log('Offline recovery export completed:', result);
+      } catch (err) {
+        console.log('Offline recovery export failed:', err);
+        window.alert('Offline recovery export failed. Your offline data has not been deleted.');
+      } finally {
+        setExportingRecovery(false);
       }
     };
 
@@ -45,16 +63,31 @@ const SitesListTable = connect(
 
     return (
       <div>
-        <Grid row style={{ justifyContent: 'space-between' }}>
-          <ExportButton
-            variant='info'
-            size='small'
-            isOutline
-            isDisabled={sitesData?.length === 0}
-            filename={`sites-list-${new Date().toISOString()}`}
-            data={exportData}
-            icon={<Icon path={mdiDownload} />}
-          />
+        <Grid row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <ExportButton
+              size='small'
+              isDisabled={sitesData?.length === 0}
+              filename={`sites-list-${new Date().toISOString()}`}
+              data={exportData}
+              icon={<Icon path={mdiDownload} />}
+            />
+            {pendingRecoveryCount > 0 && (
+              <Button
+                outline
+                size='small'
+                className='secondary-btn btn-outline'
+                disabled={exportingRecovery}
+                onClick={handleRecoveryExport}
+                title={'Download recovery CSV files for all queued offline records'}
+              >
+                <Icon path={mdiDownload} />
+                {exportingRecovery
+                  ? 'Exporting...'
+                  : `Export Offline Recovery${pendingRecoveryCount ? `(${pendingRecoveryCount})` : ''}`}
+              </Button>
+            )}
+          </div>
           <div className='add-sites-btn'>
             <Button onClick={handleAddButton} className='add-btn' outline size='small' title='Add Site'>
               <Icon path={mdiPlus} />
