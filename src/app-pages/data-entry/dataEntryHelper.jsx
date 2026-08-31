@@ -70,3 +70,11 @@ export const removeDuplicates = (arr) => {
 export const currentDate = new Date().toISOString().split('T')[0];
 
 export const normalize = (val) => (val ? String(val) : '');
+
+export const formatGpsCoordinate = (value) => {
+  const number = Number(value);
+  if (!Number.isFinite(number)) {
+    return null;
+  }
+  return Number(number.toFixed(5));
+};

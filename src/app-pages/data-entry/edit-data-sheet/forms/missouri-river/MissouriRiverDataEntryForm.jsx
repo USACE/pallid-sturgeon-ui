@@ -21,7 +21,13 @@ import {
 import { filterNullEmptyObjects, formatCoordFlt } from '@src/utils/helpers';
 import Checkbox from '@src/app-components/check-box/Checkbox';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { createDropdownOptions, currentDate, fmtTimeHHMMSS, isEmpty } from '@src/app-pages/data-entry/dataEntryHelper';
+import {
+  createDropdownOptions,
+  currentDate,
+  fmtTimeHHMMSS,
+  formatGpsCoordinate,
+  isEmpty,
+} from '@src/app-pages/data-entry/dataEntryHelper';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
