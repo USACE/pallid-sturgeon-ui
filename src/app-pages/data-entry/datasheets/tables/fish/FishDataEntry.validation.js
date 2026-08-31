@@ -176,27 +176,13 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .string()
         .nullable()
         .notRequired()
-        .test({
-          test: (tagnumber) => {
-            const hasDecimal = tagnumber?.includes('.');
-            if (hasDecimal) {
-              return !(tagnumber?.length > 14);
-            } else {
-              return true;
-            }
-          },
-          message:
-            'Tag Number may be no more than 14 digits when there is a decimal.',
-        })
-        .test({
-          test: (tagnumber) => {
-            if (tagnumber === null || tagnumber === '' || tagnumber === undefined) return true;
-            if (data?.filter((item) => item.tagnumber === tagnumber)?.length > 1) {
-              return false;
-            }
-            return true;
-          },
-          message: 'Duplicate Tag Number entries for the same Missouri River Field ID not allowed.',
+        // Conditional Length Limits (10 without decimal, 14 with decimal)
+        .test('tagNumber-length', 'Invalid tag number length', (value) => {
+          if (!value) return true;
+          const hasDecimal = value.includes('.');
+          const charCount = hasDecimal ? value.replace('.', '').length : value.length;
+          const maxLength = hasDecimal ? 14 : 10;
+          return charCount === maxLength;
         }),
       finCurl: yup.string().when(['length', 'segment', 'species'], {
         is: (length, segment, species) =>
