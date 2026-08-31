@@ -151,6 +151,7 @@ const SupplementalProcedureModal = connect(
 
     const {
       formState: { errors, isValid, touchedFields, submitCount, isDirty },
+      handleSubmit,
       watch,
       getValues,
       setValue,
@@ -587,12 +588,10 @@ const SupplementalProcedureModal = connect(
       reloadOfflineDrafts();
     }, [isEditForm]);
 
-    const handleSaveAndClose = () => {
-      // Save Data
-      doSubmit();
-      // Close Modal
+    const handleSaveAndClose = handleSubmit(async () => {
+      await doSubmit();
       doModalClose();
-    };
+    });
 
     // TODO: this confirm dialog is a bit ugly
     const handleCancel = () => {
@@ -1141,8 +1140,8 @@ const SupplementalProcedureModal = connect(
         </FormProvider>
 
         <ModalFooter
-          onSave={() => doSubmit()}
-          onSecondarySave={() => handleSaveAndClose()}
+          onSave={handleSubmit(doSubmit)}
+          onSecondarySave={handleSaveAndClose}
           onCancel={() => handleCancel()}
         />
       </ModalContent>
