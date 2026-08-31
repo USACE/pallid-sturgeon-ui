@@ -3,7 +3,7 @@ import { connect } from 'redux-bundler-react';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
-import { Button } from '@trussworks/react-uswds';
+import { Alert, Button } from '@trussworks/react-uswds';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
 
@@ -143,6 +143,7 @@ const FishDataEntry = connect(
     const [tableKey, setTableKey] = useState(0);
     const [data, setData] = useState(ensureTrailingBlankFishRow(rowData));
     const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
+    const [validationErrorRows, setValidationErrorRows] = useState([]);
     const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
 
     // Get Missouri River Draft Data
@@ -183,6 +184,31 @@ const FishDataEntry = connect(
       mode: 'onBlur',
     });
 
+    const isFishCellRequired = useCallback(
+      (row, columnId) => {
+        if (!row || isUntouchedPlaceholderFishRow(row)) {
+          return false;
+        }
+
+        const hasFloyTagPrefix = row?.ftPrefix != null && String(row.ftPrefix).trim() !== '';
+        const hasFloyTag = row?.floyTag != null && String(row.floyTag).trim() !== '';
+
+        if (columnId === 'ftPrefix' || columnId === 'floyTag') {
+          return hasFloyTagPrefix || hasFloyTag;
+        }
+
+        try {
+          const description = schema.describe({ value: row });
+          const tests = description?.fields?.[columnId]?.tests ?? [];
+
+          return tests.some((test) => test?.name === 'required');
+        } catch {
+          return false;
+        }
+      },
+      [schema]
+    );
+
     const tableColumns = getFishColumns({
       gear,
       speciesOptions,
@@ -194,8 +220,33 @@ const FishDataEntry = connect(
       online,
     });
 
+    const columnHeaderById = useMemo(() => {
+      const headers = {};
+
+      tableColumns.forEach((column) => {
+        const key = column?.id ?? column?.accessorKey;
+        if (!key) {
+          return;
+        }
+
+        headers[String(key)] = typeof column?.header === 'string' ? column.header : String(key);
+      });
+
+      return headers;
+    }, [tableColumns]);
+
+    const scrollToBottom = useCallback(() => {
+      requestAnimationFrame(() => {
+        window.scrollTo({
+          top: document.documentElement.scrollHeight,
+          behavior: 'smooth',
+        });
+      });
+    }, []);
+
     const handleAddRow = async () => {
       setData((prev) => ensureTrailingBlankFishRow(prev));
+      scrollToBottom();
 
       // Add default values here
       // const base = getBaseDefaultValues({ baseData });
@@ -232,6 +283,7 @@ const FishDataEntry = connect(
       // Grab last object from data array
       const lastRowData = rows[rows.length - 1];
       const { fishFid, localDisplayId } = getNextFishId(rows, parentMrId, parentMrFid);
+      const resolvedFishFid = fishFid ?? localDisplayId;
 
       // Format new row data
       const newRowData = {
@@ -248,8 +300,12 @@ const FishDataEntry = connect(
           ? {
               mrFid: parentMrFid,
               mr_fid: parentMrFid,
-              fFid: fishFid,
-              f_fid: fishFid,
+            }
+          : {}),
+        ...(resolvedFishFid
+          ? {
+              fFid: resolvedFishFid,
+              f_fid: resolvedFishFid,
             }
           : {}),
         ...(localDisplayId
@@ -268,6 +324,7 @@ const FishDataEntry = connect(
         const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
         return ensureTrailingBlankFishRow([...existingRows, newRowData]);
       });
+      scrollToBottom();
     };
 
     const handleAddMultipleRows = (rows) => {
@@ -276,6 +333,7 @@ const FishDataEntry = connect(
         const existingRows = (oldData ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
         return ensureTrailingBlankFishRow([...existingRows, ...rows]);
       });
+      scrollToBottom();
     };
 
     const handleRemoveMultipleRows = useCallback((indicesToRemove) => {
@@ -288,6 +346,8 @@ const FishDataEntry = connect(
 
     const handleUpdateData = useCallback(
       (rowIndex, columnId, updatedValue) => {
+        const touchedPlaceholderRow = isUntouchedPlaceholderFishRow(data?.[rowIndex]);
+
         setData((oldData) => {
           const newData = oldData ? [...oldData] : [];
           if (newData[rowIndex]) {
@@ -297,6 +357,7 @@ const FishDataEntry = connect(
             let nextRow = currentRow;
             if (isPlaceholderRow) {
               const { fishFid, localDisplayId } = getNextFishId(newData, parentMrId, parentMrFid);
+              const resolvedFishFid = fishFid ?? localDisplayId;
 
               nextRow = {
                 ...getBaseDefaultValues({ baseData }),
@@ -307,8 +368,12 @@ const FishDataEntry = connect(
                   ? {
                       mrFid: parentMrFid,
                       mr_fid: parentMrFid,
-                      fFid: fishFid,
-                      f_fid: fishFid,
+                    }
+                  : {}),
+                ...(resolvedFishFid
+                  ? {
+                      fFid: resolvedFishFid,
+                      f_fid: resolvedFishFid,
                     }
                   : {}),
                 ...(localDisplayId
@@ -336,28 +401,42 @@ const FishDataEntry = connect(
           }
           return oldData;
         });
+
+        if (touchedPlaceholderRow) {
+          scrollToBottom();
+        }
       },
-      [baseData, dataEntryData, parentMrFid, parentMrId]
+      [baseData, data, dataEntryData, parentMrFid, parentMrId, scrollToBottom]
     );
 
     const handleSubmitAll = async () => {
       setIsSubmitAttempted(true);
       setValidationErrorRowCount(0);
+      setValidationErrorRows([]);
 
-      const rowsToProcess = (data ?? []).filter(
-        (row) =>
-          !isUntouchedPlaceholderFishRow(row) &&
-          (row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited)
-      );
+      let nonPlaceholderRowNumber = 0;
+      const rowsToProcess = (data ?? []).reduce((acc, row) => {
+        if (isUntouchedPlaceholderFishRow(row)) {
+          return acc;
+        }
+
+        nonPlaceholderRowNumber += 1;
+
+        if (row._status === OfflineStatuses.New || row._status === OfflineStatuses.Edited) {
+          acc.push({ item: row, rowNumber: nonPlaceholderRowNumber });
+        }
+
+        return acc;
+      }, []);
 
       try {
         const rowPayloads =
-          rowsToProcess?.map((item) => {
+          rowsToProcess?.map(({ item, rowNumber }) => {
             const isNew = !item.fid;
             const clientId = item.clientId ?? crypto.randomUUID();
             const parentRowMrId = item.mrId ?? item.mr_id;
             const parentRowMrFid = item.mrFid ?? item.mr_fid;
-            const fishFid = item.fFid ?? item.f_fid;
+            const fishFid = item.fFid ?? item.f_fid ?? item.localDisplayId;
 
             const payload = {
               ...item,
@@ -378,24 +457,52 @@ const FishDataEntry = connect(
               weight: item?.weight == null || item?.weight === '' ? null : Number(item?.weight),
             };
 
-            return { item, payload, isNew, clientId };
+            return { item, payload, isNew, clientId, rowNumber };
           }) ?? [];
 
         // Validate all rows first; if any fail, stay on Fish and do not submit any rows.
         const validationResults = await Promise.all(
-          rowPayloads.map(async ({ payload }) => {
+          rowPayloads.map(async ({ payload, rowNumber }) => {
             try {
               await schema.validate(payload, { abortEarly: false });
-              return true;
-            } catch {
-              return false;
+              return { isValid: true, rowNumber, errors: [] };
+            } catch (error) {
+              const validationErrors = error?.inner?.length ? error.inner : [error];
+              const seen = new Set();
+              const errors = validationErrors
+                .map((item) => {
+                  const message = item?.message;
+                  if (!message) {
+                    return null;
+                  }
+
+                  const columnId = String(item?.path ?? '').split('.').pop() || '';
+                  const columnName = (columnHeaderById[columnId] ?? columnId) || 'Row';
+                  const key = `${columnName}|${message}`;
+                  if (seen.has(key)) {
+                    return null;
+                  }
+
+                  seen.add(key);
+                  return { columnName, message };
+                })
+                .filter(Boolean);
+
+              return {
+                isValid: false,
+                rowNumber,
+                errors,
+              };
             }
           })
         );
-        const invalidRowCount = validationResults.filter((isValid) => !isValid).length;
+        const invalidRows = validationResults.filter((result) => !result.isValid);
+        const invalidRowCount = invalidRows.length;
 
         if (invalidRowCount > 0) {
           setValidationErrorRowCount(invalidRowCount);
+          setValidationErrorRows(invalidRows);
+          scrollToBottom();
           return;
         }
 
@@ -461,6 +568,7 @@ const FishDataEntry = connect(
           data={data}
           enablePagination={false}
           initialTableState={{}}
+          isCellRequired={isFishCellRequired}
           key={tableKey}
           placeholderClick={handleAddRow}
           placeholderText='No Fish Data found.'
@@ -484,11 +592,32 @@ const FishDataEntry = connect(
           Save & Close Datasheet
         </Button>
         {validationErrorRowCount > 0 && (
-          <p aria-live='polite' className='margin-y-1 text-secondary-dark'>
-            {validationErrorRowCount} row{validationErrorRowCount === 1 ? '' : 's'}
-            {validationErrorRowCount === 1 ? ' has ' : ' have '}validation errors that must be corrected before data can
-            be submitted.
-          </p>
+          <Alert aria-live='polite' className='margin-y-1' headingLevel='h4' noIcon slim type='error'>
+            <p className='margin-y-0'>
+              {validationErrorRowCount} row{validationErrorRowCount === 1 ? '' : 's'}
+              {validationErrorRowCount === 1 ? ' has ' : ' have '}validation errors that must be corrected before data
+              can be submitted.
+            </p>
+            {validationErrorRows.length > 0 && (
+              <ul className='margin-top-1 margin-bottom-0 padding-left-3'>
+                {validationErrorRows.map((rowError) => (
+                  <li key={`row-${rowError.rowNumber}`}>
+                    Row {rowError.rowNumber}:{' '}
+                    {rowError.errors?.length > 0
+                      ? rowError.errors.map((errorItem, index) => (
+                          <React.Fragment
+                            key={`row-${rowError.rowNumber}-${errorItem.columnName}-${errorItem.message}-${index}`}
+                          >
+                            {index > 0 ? '; ' : ''}
+                            <u>{errorItem.columnName}</u>: {errorItem.message}
+                          </React.Fragment>
+                        ))
+                      : 'Validation error'}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Alert>
         )}
       </FormProvider>
     );

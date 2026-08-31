@@ -56,6 +56,11 @@ const LengthTableCell = connect(({ getValue, row, column, table, cell }) => {
     setCount(rowCount);
   }, [rowSpecies, rowCount]);
 
+  // Sync value state when initialValue changes (for loading new records)
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
   // Reset cell value if the field is disabled
   useEffect(() => {
     // Avoid clearing during transient mount states before dependent fields are loaded.

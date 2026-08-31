@@ -52,6 +52,11 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
     setSpecies(rowSpecies);
   }, [rowSpecies]);
 
+  // Sync value state when initialValue changes (for loading new records)
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
   // Set warning flag
   useEffect(() => {
     // The system shall warn the user if species = PDSG and project = 1 and weight field is null

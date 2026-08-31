@@ -51,6 +51,11 @@ const CountTableCell = connect(({ getValue, row, column, table, cell }) => {
     setSpecies(rowSpecies);
   }, [rowSpecies]);
 
+  // Sync value state when initialValue changes (for loading new records)
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
   useEffect(() => {
     // Do not auto-populate count for untouched placeholder rows.
     // Wait until species is actually selected.
