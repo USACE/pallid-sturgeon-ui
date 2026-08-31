@@ -218,6 +218,14 @@ const TelemetryDataEntry = connect(
       return `${hh}:${mm}:${ss}`;
     };
 
+    const formatGpsCoordinate = (value) => {
+      const number = Number(value);
+      if (!Number.isFinite(number)) {
+        return null;
+      }
+      return Number(number.toFixed(5));
+    };
+
     const handleCaptureRow = async (rowIndex) => {
       try {
         console.log('GPS capturing for row', rowIndex);
@@ -227,10 +235,13 @@ const TelemetryDataEntry = connect(
 
         console.log('GPS result:', { fix, time });
 
+        const latitude = formatGpsCoordinate(fix.lat);
+        const longitude = formatGpsCoordinate(fix.lng);
+
         const computedValues = {
           captureTime: time,
-          captureLatitude: Number(fix.lat),
-          captureLongitude: Number(fix.lng),
+          captureLatitude: latitude,
+          captureLongitude: longitude,
         };
 
         handleUpdateData(rowIndex, null, computedValues);

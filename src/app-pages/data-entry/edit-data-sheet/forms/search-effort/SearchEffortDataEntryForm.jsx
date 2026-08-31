@@ -95,13 +95,23 @@ const SearchEffortDataEntryForm = connect(
     const hasTelemetry = telemetryCount >= 1;
     const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
+    const formatGpsCoordinate = (value) => {
+      const number = Number(value);
+      if (!Number.isFinite(number)) {
+        return null;
+      }
+      return Number(number.toFixed(5));
+    };
+
     // Capture Start Lat, Long, Time
     const handleCaptureStart = async () => {
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
+        const latitude = formatGpsCoordinate(best.lat);
+        const longitude = formatGpsCoordinate(best.lng);
 
-        setValue('startLatitude', Number(best.lat), { shouldValidate: true });
-        setValue('startLongitude', Number(best.lng), { shouldValidate: true });
+        setValue('startLatitude', latitude, { shouldValidate: true });
+        setValue('startLongitude', longitude, { shouldValidate: true });
         setValue('startTime', fmtTimeHHMMSS(), { shouldValidate: true });
 
         window.alert(
@@ -117,9 +127,11 @@ const SearchEffortDataEntryForm = connect(
     const handleCaptureStop = async () => {
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
+        const latitude = formatGpsCoordinate(best.lat);
+        const longitude = formatGpsCoordinate(best.lng);
 
-        setValue('stopLatitude', Number(best.lat), { shouldValidate: true });
-        setValue('stopLongitude', Number(best.lng), { shouldValidate: true });
+        setValue('stopLatitude', latitude, { shouldValidate: true });
+        setValue('stopLongitude', longitude, { shouldValidate: true });
         setValue('stopTime', fmtTimeHHMMSS(), { shouldValidate: true });
 
         window.alert(

@@ -290,12 +290,21 @@ const MissouriRiverDataEntryForm = connect(
     };
 
     // Capture Start and Stop Lat, Long, Time
+    const formatGpsCoordinate = (value) => {
+      const number = Number(value);
+      if (!Number.isFinite(number)) {
+        return null;
+      }
+      return Number(number.toFixed(5));
+    };
     const handleCapture = async (type) => {
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
+        const latitude = formatGpsCoordinate(best.lat);
+        const longitude = formatGpsCoordinate(best.lng);
 
-        setValue(`${type}Latitude`, best.lat, { shouldValidate: shouldAutoValidate });
-        setValue(`${type}Longitude`, best.lng, { shouldValidate: shouldAutoValidate });
+        setValue(`${type}Latitude`, latitude, { shouldValidate: shouldAutoValidate });
+        setValue(`${type}Longitude`, longitude, { shouldValidate: shouldAutoValidate });
         setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: shouldAutoValidate });
 
         window.alert(
