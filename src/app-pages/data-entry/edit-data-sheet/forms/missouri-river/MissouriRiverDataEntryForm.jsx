@@ -292,6 +292,7 @@ const MissouriRiverDataEntryForm = connect(
         velocitybot2: parseFloat(values?.velocitybot2),
         velocity082: parseFloat(values?.velocity082),
         velocity02or062: parseFloat(values?.velocity02or062),
+        width: parseFloat(values?.width),
       };
     };
 
@@ -834,7 +835,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLatitude'
                     label='Stop Latitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
                   />
                 </Grid>
                 <Grid tablet={{ col: 4 }}>
@@ -842,7 +843,7 @@ const MissouriRiverDataEntryForm = connect(
                     name='stopLongitude'
                     label='Stop Longitude'
                     onChange={handleChange}
-                    required={deploymentType === 'a' && gearCode.startsWith('LDN')}
+                    required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
                   />
                 </Grid>
                 <Grid row gap='md' table={{ col: 3 }}>

@@ -5,12 +5,17 @@ import { Button } from '@trussworks/react-uswds';
 import Icon from '@components/icon/icon';
 import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
 import { OfflineStatuses } from '@src/utils/enums';
+import { useMemo } from 'react';
 
 const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, getValue, row }) => {
   const value = getValue();
   const isPlaceholderRow = row?.original?._isPlaceholderRow === true;
-  const rowFid = row?.original?.fid ?? row?.original?.fId ?? row?.original?.f_id;
-  const hasFishId = rowFid !== null && rowFid !== undefined && String(rowFid) !== '';
+
+  const rowFid = useMemo(() => row.getValue('fid') || row.getValue('fId') || row.getValue('f_id'), [row]);
+  const rowFfid = useMemo(() => row.getValue('fFid') || row.getValue('f_fid'), [row]);
+  const hasFishId =
+    (rowFid !== null && rowFid !== undefined && String(rowFid) !== '') ||
+    (rowFfid !== null && rowFfid !== undefined && String(rowFfid) !== '');
   const isUnsavedNewFish = row?.original?._status === OfflineStatuses.New || !hasFishId;
 
   if (isPlaceholderRow) {
