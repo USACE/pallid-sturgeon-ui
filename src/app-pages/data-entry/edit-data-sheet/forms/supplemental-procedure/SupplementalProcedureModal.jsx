@@ -157,7 +157,6 @@ const SupplementalProcedureModal = connect(
       trigger,
       reset,
       clearErrors,
-      handleSubmit,
     } = methods;
 
     const toggleProcedureSection = () => {
@@ -572,6 +571,9 @@ const SupplementalProcedureModal = connect(
           }
           sessionStorage.setItem(procDraftKey, JSON.stringify(procPayload));
         }
+
+        // Reset the form while keeping current values - clears dirty state on Save
+        reset(getValues(), { keepValues: true });
       } catch (error) {
         console.error('Procedure submit failed, queueing offline:', error);
         window.alert(`Supplemental/Procedure save failed: ${error?.message ?? error}`);
@@ -1139,7 +1141,7 @@ const SupplementalProcedureModal = connect(
         </FormProvider>
 
         <ModalFooter
-          onSave={() => handleSubmit(doSubmit)}
+          onSave={() => doSubmit()}
           onSecondarySave={() => handleSaveAndClose()}
           onCancel={() => handleCancel()}
         />
