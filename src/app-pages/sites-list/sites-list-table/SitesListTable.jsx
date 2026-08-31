@@ -66,9 +66,7 @@ const SitesListTable = connect(
         <Grid row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ExportButton
-              variant='info'
               size='small'
-              isOutline
               isDisabled={sitesData?.length === 0}
               filename={`sites-list-${new Date().toISOString()}`}
               data={exportData}
@@ -76,10 +74,9 @@ const SitesListTable = connect(
             />
             {pendingRecoveryCount > 0 && (
               <Button
-                type='button'
                 outline
                 size='small'
-                className='recovery-export-btn'
+                className='secondary-btn btn-outline'
                 disabled={exportingRecovery}
                 onClick={handleRecoveryExport}
                 title={'Download recovery CSV files for all queued offline records'}
