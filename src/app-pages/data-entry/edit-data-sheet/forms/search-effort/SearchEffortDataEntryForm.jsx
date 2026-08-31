@@ -12,7 +12,7 @@ import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEff
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
-import { fmtTimeHHMMSS, generateFieldId } from '../../../dataEntryHelper';
+import { fmtTimeHHMMSS, formatGpsCoordinate, generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
@@ -94,14 +94,6 @@ const SearchEffortDataEntryForm = connect(
     const telemetryCount = Number(watch('telemetryCount') || 0);
     const hasTelemetry = telemetryCount >= 1;
     const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
-
-    const formatGpsCoordinate = (value) => {
-      const number = Number(value);
-      if (!Number.isFinite(number)) {
-        return null;
-      }
-      return Number(number.toFixed(5));
-    };
 
     // Capture Start Lat, Long, Time
     const handleCaptureStart = async () => {

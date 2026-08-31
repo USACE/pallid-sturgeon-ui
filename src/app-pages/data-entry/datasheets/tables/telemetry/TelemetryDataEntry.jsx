@@ -23,7 +23,7 @@ import { getTelemetryColumns } from './helpers.telemetry';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
-import { server } from 'typescript';
+import { formatGpsCoordinate } from '@src/app-pages/data-entry/dataEntryHelper';
 
 const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
 console.log('GPS POC flag', import.meta.env.VITE_USE_UBLOX_POC, USE_UBLOX_POC);
@@ -33,11 +33,6 @@ const GPS_OPTIONS = {
   timeout: 15000,
   maximumAge: 0,
 };
-
-// const getNextSequence = (data, seFid) => {
-//   const existing = data.filter((item) => item.seFid === seFid);
-//   return existing.length + 1;
-// };
 
 const createBlankTelemetryRow = () => ({
   _isPlaceholderRow: true,
@@ -216,14 +211,6 @@ const TelemetryDataEntry = connect(
       const mm = String(d.getMinutes()).padStart(2, '0');
       const ss = String(d.getSeconds()).padStart(2, '0');
       return `${hh}:${mm}:${ss}`;
-    };
-
-    const formatGpsCoordinate = (value) => {
-      const number = Number(value);
-      if (!Number.isFinite(number)) {
-        return null;
-      }
-      return Number(number.toFixed(5));
     };
 
     const handleCaptureRow = async (rowIndex) => {
