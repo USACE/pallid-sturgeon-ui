@@ -10,6 +10,9 @@ import SitesFormModal from '../site-form-modal/SitesFormModal';
 import SiteIdCellRenderer from '@src/app-pages/sites-list/sites-list-table/siteIdCellRenderer';
 import ExportButton from '@components/button/exportButton';
 import Icon from '@components/icon/icon';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '@src/app-pages/data-entry/offline/db';
+import { exportOfflineRecoveryData } from '@src/app-pages/data-entry/offline/export-recovery';
 
 import '@pages/data-summaries/data-summary.scss';
 
@@ -24,11 +27,26 @@ const SitesListTable = connect(
   'selectExportData',
   ({ doModalOpen, doDomainBendRnFetch, sitesData, exportData }) => {
     const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const pendingRecoveryCount = useLiveQuery(() => db.outbox.count(), [], 0);
+    const [exportingRecovery, setExportingRecovery] = useState(false);
 
     const handleAddButton = () => {
       doModalOpen(SitesFormModal);
       if (navigator.onLine) {
         doDomainBendRnFetch();
+      }
+    };
+
+    const handleRecoveryExport = async () => {
+      try {
+        setExportingRecovery(true);
+        const result = await exportOfflineRecoveryData();
+        console.log('Offline recovery export completed:', result);
+      } catch (err) {
+        console.log('Offline recovery export failed:', err);
+        window.alert('Offline recovery export failed. Your offline data has not been deleted.');
+      } finally {
+        setExportingRecovery(false);
       }
     };
 
@@ -55,6 +73,24 @@ const SitesListTable = connect(
             data={exportData}
             icon={<Icon path={mdiDownload} />}
           />
+          <Button
+            type='button'
+            outline
+            size='small'
+            className='recovery-export-btn'
+            disabled={exportingRecovery || pendingRecoveryCount === 0}
+            onClick={handleRecoveryExport}
+            title={
+              pendingRecoveryCount === 0
+                ? 'No offline records are waiting to sync'
+                : 'Download recovery CSV files for all queued offline records'
+            }
+          >
+            <Icon path={mdiDownload} />
+            {exportingRecovery
+              ? 'Exporting...'
+              : `Export Offline Recovery${pendingRecoveryCount ? `(${pendingRecoveryCount})` : ''}`}
+          </Button>
           <div className='add-sites-btn'>
             <Button onClick={handleAddButton} className='add-btn' outline size='small' title='Add Site'>
               <Icon path={mdiPlus} />

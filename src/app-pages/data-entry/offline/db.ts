@@ -1,5 +1,4 @@
 import Dexie, { Table } from 'dexie';
-import { NumberLiteralType } from 'typescript';
 
 export interface DataEntry {
   clientId: string;
@@ -440,6 +439,12 @@ export interface OutboxItem {
   payload?: any;
   clientVersion: number;
   ts: number;
+
+  // sync recovery
+  syncError?: string;
+  syncHttp?: number;
+  lastSyncAttempt?: number;
+  syncAttempts?: number;
 }
 
 export interface MetaKV {
@@ -521,4 +526,8 @@ export interface LookupItem {
   label: string;
   raw?: any;
   updatedAt: string;
+}
+
+if (import.meta.env.DEV) {
+  (window as any).ps_offline_db = db;
 }

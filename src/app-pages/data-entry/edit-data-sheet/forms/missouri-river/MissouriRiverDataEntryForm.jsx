@@ -105,7 +105,7 @@ const MissouriRiverDataEntryForm = connect(
     moriverSitesDatasheetTotalResults,
   }) => {
     // Initialize GPS
-    const { browserGps } = useGpsCapture(GPS_OPTIONS);
+    const browserGps = useGpsCapture(GPS_OPTIONS);
     const ubloxGps = useUbloxSerialGps();
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
     const siteRouteKey = routeParams?.siteId;
@@ -292,8 +292,23 @@ const MissouriRiverDataEntryForm = connect(
     // Capture Start and Stop Lat, Long, Time
     const handleCapture = async (type) => {
       try {
-        const { best } = await captureGpsBest({ browserGps, ubloxGps });
+        const gpsResult = await captureGpsBest({ browserGps, ubloxGps });
+        if (!gpsResult) {
+          throw new Error(
+            'GPS did not return a location result. Confirm the GPS is connected and has a satellite fix, then try again.'
+          );
+        }
 
+        const { best } = gpsResult;
+        if (!best) {
+          throw new Error(
+            'GPS is connected but no valid location fix is available yet. Wait for satellite fix and try again.'
+          );
+        }
+
+        if (!Number.isFinite(Number(best.lat)) || !Number.isFinite(Number(best.lng))) {
+          throw new Error('GPS returned an invalid latitude or longitude. Try capturing again.');
+        }
         setValue(`${type}Latitude`, best.lat, { shouldValidate: shouldAutoValidate });
         setValue(`${type}Longitude`, best.lng, { shouldValidate: shouldAutoValidate });
         setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: shouldAutoValidate });
@@ -543,7 +558,7 @@ const MissouriRiverDataEntryForm = connect(
       // Only run when offline in offline status and mrFid exists
       !isOnline && mrFid !== '' && populateOfflineFishData(mrFid);
       isOnline && setFishData(dataEntryFishData?.items);
-    }, [mrFid, , isOnline, currentTab, dataEntryFishData, setFishData]);
+    }, [mrFid, isOnline, currentTab, dataEntryFishData, setFishData]);
 
     // Load offline lookups
     useEffect(() => {
