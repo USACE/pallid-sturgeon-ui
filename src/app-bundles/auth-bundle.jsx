@@ -1,4 +1,10 @@
 import Keycloak from '@components/keycloak';
+import {
+  getOfflineAuthSession,
+  isOfflineAuthSessionValid,
+  saveOfflineAuthSession,
+  clearOfflineAuthSession,
+} from '@src/app-pages/data-entry/offline/offline-auth';
 
 const keycloakUrl = import.meta.env.VITE_KEYCLOAK_URL;
 const redirectUrl = import.meta.env.VITE_REDIRECT_URL;
@@ -17,6 +23,8 @@ const createAuthBundle = (options) => ({
       authData: null,
       sessionState: null,
       roles: [],
+      offlineSession: null,
+      offlineAuthenticated: false,
     };
 
     return (state = initialState, { type, payload }) => {
@@ -41,6 +49,28 @@ const createAuthBundle = (options) => ({
               ...state.authData,
               role: payload,
             },
+          };
+        case 'OFFLINE_AUTH_ENABLED':
+          return {
+            ...state,
+            offlineSession: payload,
+            offlineAuthenticated: true,
+          };
+        case 'RESTORE_OFFLINE_AUTH':
+          return {
+            ...state,
+            loading: false,
+            token: payload.token ?? null,
+            authData: payload.authData,
+            roles: payload.roles ?? [],
+            offlineSession: payload.offlineSession,
+            offlineAuthenticated: true,
+          };
+        case 'CLEAR_OFFLINE_AUTH':
+          return {
+            ...state,
+            offlineSession: null,
+            offlineAuthenticated: false,
           };
         default:
           return state;
@@ -68,14 +98,106 @@ const createAuthBundle = (options) => ({
         console.log('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX');
       },
       onSessionEnding: (remainingTime) => {
-        console.log(
-          '=======================================>>>>' + remainingTime
-        );
+        console.log('=======================================>>>>' + remainingTime);
       },
     });
 
     keycloak.checkForSession();
+
+    if (!navigator.onLine) {
+      store.doRestoreOfflineAuth();
+    }
   },
+
+  doRestoreOfflineAuth:
+    () =>
+    async ({ dispatch }) => {
+      const offlineSession = await getOfflineAuthSession();
+
+      if (!isOfflineAuthSessionValid(offlineSession)) {
+        return false;
+      }
+
+      keycloak.restoreTokens({
+        accessToken: offlineSession.accessToken,
+        refreshToken: offlineSession.refreshToken,
+      });
+
+      dispatch({
+        type: 'RESTORE_OFFLINE_AUTH',
+        payload: {
+          token: offlineSession.accessToken,
+          authData: offlineSession.authData,
+          roles: offlineSession.roles,
+          offlineSession,
+        },
+      });
+      return true;
+    },
+
+  doEnableOfflineAuth:
+    () =>
+    async ({ dispatch, store }) => {
+      const auth = store.selectAuth();
+      const refreshToken = keycloak?.getRefreshToken();
+      const session = await saveOfflineAuthSession({
+        accessToken: auth?.token,
+        refreshToken,
+        authData: auth?.authData,
+        roles: auth?.roles ?? [],
+      });
+
+      dispatch({
+        type: 'OFFLINE_AUTH_ENABLED',
+        payload: session,
+      });
+      return session;
+    },
+
+  doRefreshOfflineAuth:
+    () =>
+    async ({ dispatch, store }) => {
+      if (!navigator.onLine) {
+        throw new Error('Internet connection is required to refresh authentication.');
+      }
+      const offlineSession = await getOfflineAuthSession();
+
+      if (!offlineSession || !isOfflineAuthSessionValid(offlineSession)) {
+        throw new Error('Offline field session has expired. Please log in again.');
+      }
+      if (!offlineSession.refreshToken) {
+        throw new Error('No offline Keycloak token is available. Please log in again.');
+      }
+
+      keycloak.restoreTokens({
+        accessToken: offlineSession.accessToken,
+        refreshToken: offlineSession.refreshToken,
+      });
+
+      const tokens = await keycloak.refreshStoredSession();
+      const currentAuth = store.selectAuth();
+      const updatedSession = await saveOfflineAuthSession({
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        authData: currentAuth?.authData,
+        roles: currentAuth?.roles ?? [],
+      });
+
+      dispatch({
+        type: 'UPDATE_AUTH',
+        payload: {
+          token: tokens.accessToken,
+          authData: currentAuth?.authData,
+          roles: currentAuth?.roles ?? [],
+          loading: false,
+        },
+      });
+
+      return {
+        token: tokens.accessToken,
+        session: updatedSession,
+      };
+    },
 
   doAuthenticate:
     () =>
@@ -93,7 +215,12 @@ const createAuthBundle = (options) => ({
 
   doAuthLogout:
     () =>
-    ({ store }) => {
+    async ({ dispatch, store }) => {
+      await clearOfflineAuthSession();
+      sessionStorage.removeItem('offlineSetupReady');
+      sessionStorage.removeItem('isLoggedIn');
+
+      dispatch({ type: 'CLEAR_OFFLINE_AUTH' });
       store.doAuthUpdate(null);
     },
 
@@ -111,9 +238,7 @@ const createAuthBundle = (options) => ({
   doFetchAuthRoles:
     (accessToken) =>
     ({ dispatch, apiGetWithToken, store }) => {
-      const authInfo = accessToken
-        ? JSON.parse(atob(accessToken.split('.')[1]))
-        : null;
+      const authInfo = accessToken ? JSON.parse(atob(accessToken.split('.')[1])) : null;
 
       if (authInfo) {
         const url = `/psapi/userRoleOffices/${authInfo.email}`;
@@ -125,8 +250,7 @@ const createAuthBundle = (options) => ({
               authData: {
                 fullName: authInfo ? authInfo.name : '',
                 userId: authInfo ? Number(authInfo.sub) : '',
-                name:
-                  authInfo && authInfo.name ? authInfo.name.split('.')[0] : '',
+                name: authInfo && authInfo.name ? authInfo.name.split('.')[0] : '',
                 exp: authInfo ? authInfo.exp : '',
               },
               loading: false,

@@ -90,7 +90,8 @@
   },
   "devDependencies": {
     "env-cmd": "^10.1.0",
-    "eslint-plugin-react": "^7.37.2"
+    "eslint-plugin-react": "^7.37.2",
+    "vite-plugin-pwa": "^1.3.0"
   },
   "resolutions": {
     "@typescript-eslint/typescript-estree": "^5.62.0"

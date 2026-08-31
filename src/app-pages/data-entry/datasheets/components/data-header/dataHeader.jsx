@@ -35,7 +35,7 @@ const DataHeader = connect(
     return (
       <Card className='test mb-3'>
         <Card.Body>
-          {!isEmpty && (
+          {(firstIdValue || secondIdValue) && (
             <Grid row gap='md' className='padding-bottom-1 border-bottom'>
               <Grid tablet={{ col: 2 }}>
                 <span className='text-bold'>{firstIdLabel}</span> {firstIdValue || '--'}

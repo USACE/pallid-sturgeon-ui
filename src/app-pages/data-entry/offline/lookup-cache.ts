@@ -56,7 +56,7 @@ export async function downloadLookupsForOffline(token?: string) {
     { key: 'mesos', name: 'mesos' },
     { key: 'positionConfidence', name: 'positionConfidence' },
     // search effort
-    { key: 'searchTypes', name: 'searchTypeCodes' },
+    { key: 'searchTypeCodes', name: 'searchTypeCodes' },
     // missouri river
     { key: 'gearCodes', name: 'gearCodes' },
     { key: 'filteredGearCodes', name: 'filteredGearCodes' },
@@ -717,6 +717,23 @@ async function clearOldDownloadedDatasheets() {
 export async function getLookupOptions(lookupName: string) {
   const rows = await db.lookups.where('lookupName').equals(lookupName).toArray();
 
+  // Lookup tables that don't have code/description field names or have additional fields
+  const customDataObjArr = [
+    'bendRiverMile',
+    'fieldOfficeSegments',
+    'years',
+    'filteredGearCodes',
+    'macroMesos',
+    'microHabitats',
+    'microSetSite',
+    'fishCodes',
+  ];
+
+  if (customDataObjArr.includes(lookupName)) {
+    return rows.map((row: any) => row.raw);
+  }
+
+  // Default
   return rows.map((row: any) => ({
     code: row.code,
     description: row.label,

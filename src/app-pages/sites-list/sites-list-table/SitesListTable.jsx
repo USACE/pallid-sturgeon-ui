@@ -3,6 +3,7 @@ import { AgGridColumn } from 'ag-grid-react/lib/agGridColumn';
 import { AgGridReact } from 'ag-grid-react/lib/agGridReact';
 import { mdiDownload, mdiPlus } from '@mdi/js';
 import { Button, Grid } from '@trussworks/react-uswds';
+import { useEffect, useState } from 'react';
 
 import SitesFormModal from '../site-form-modal/SitesFormModal';
 
@@ -22,13 +23,25 @@ const SitesListTable = connect(
   'selectSitesData',
   'selectExportData',
   ({ doModalOpen, doDomainBendRnFetch, sitesData, exportData }) => {
+    const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
+
     const handleAddButton = () => {
       doModalOpen(SitesFormModal);
-
       if (navigator.onLine) {
         doDomainBendRnFetch();
       }
     };
+
+    useEffect(() => {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = (event) => {
+        setIsDarkMode(event.matches);
+      };
+      mediaQuery.addEventListener('change', handleChange);
+      return () => {
+        mediaQuery.removeEventListener('change', handleChange);
+      };
+    }, []);
 
     return (
       <div>
@@ -49,7 +62,10 @@ const SitesListTable = connect(
             </Button>
           </div>
         </Grid>
-        <div className='ag-theme-balham mt-2' style={{ height: '600px', width: '100%' }}>
+        <div
+          className={`mt-2 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
+          style={{ height: '600px', width: '100%' }}
+        >
           <AgGridReact
             rowHeight={35}
             defaultColDef={{
@@ -69,6 +85,7 @@ const SitesListTable = connect(
               sortable
               unSortIcon
             />
+            <AgGridColumn field='siteFid' width={125} sortable unSortIcon />
             <AgGridColumn field='year' width={100} sortable unSortIcon />
             <AgGridColumn field='fieldoffice' headerName='Field Office' sortable unSortIcon />
             <AgGridColumn field='projectId' headerName='Project' sortable unSortIcon />

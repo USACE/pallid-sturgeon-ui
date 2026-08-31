@@ -34,7 +34,18 @@ export const getSearchEffortSchema = () =>
       }),
     stopTime: yup.string().when('telemetryCount', {
       is: (val) => Number(val) > 0,
-      then: (schema) => schema.required(ValidationMessages.FieldRequired),
+      then: (schema) =>
+        schema.required(ValidationMessages.FieldRequired).test({
+          test: (stopTime, { parent: { startTime } }) => {
+            if (!startTime || !stopTime) return true;
+            const toSeconds = (time) => {
+              const [hours, minutes, seconds] = time.split(':').map(Number);
+              return hours * 3600 + minutes * 60 + seconds;
+            };
+            return toSeconds(stopTime) > toSeconds(startTime);
+          },
+          message: 'Stop Time must be after Start Time',
+        }),
       otherwise: (schema) =>
         schema
           .transform((value, originalValue) => (originalValue === '' ? null : value))
@@ -52,10 +63,7 @@ export const getSearchEffortSchema = () =>
             test: (val) => (Number(val) >= 36 && Number(val) <= 49) || Number(val) === 0,
             message: 'Value must be between 36 and 49 degrees. (Enter 0 if unknown)',
           }),
-        otherwise: (schema) =>
-          schema
-            .nullable()
-            .notRequired(),
+        otherwise: (schema) => schema.nullable().notRequired(),
       }),
     stopLongitude: yup
       .number()
@@ -68,10 +76,7 @@ export const getSearchEffortSchema = () =>
             test: (val) => (Number(val) >= -110 && Number(val) <= -89) || Number(val) === 0,
             message: 'Value must be between -110 and -89 degrees. (Enter 0 if unknown)',
           }),
-        otherwise: (schema) =>
-          schema
-            .nullable()
-            .notRequired(),
+        otherwise: (schema) => schema.nullable().notRequired(),
       }),
     temp: yup.string().nullable(),
     conductivity: yup.string().nullable(),

@@ -6,6 +6,8 @@ import SitesListTable from './sites-list-table/SitesListTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import Pagination from '@components/pagination';
 import Card from '@src/app-components/card';
+import { usePwaMode } from '../data-entry/offline/pwa-mode';
+import { getCurrentFieldStudyYear } from '../data-entry/offline/lookup-cache';
 
 import './sitesList.scss';
 
@@ -37,6 +39,9 @@ const SitesList = connect(
     office,
     project,
   }) => {
+    const pwaMode = usePwaMode();
+    const fieldStudyYear = getCurrentFieldStudyYear();
+
     // Load data
     useEffect(() => {
       doSitesLoadData();
@@ -54,17 +59,24 @@ const SitesList = connect(
     return (
       <div className='container-fluid'>
         <Breadcrumb paths={breadcrumbLinks} />
-        <SitesListFilter />
+        {!pwaMode && <SitesListFilter />}
+        {pwaMode && (
+          <div className='margin-bottom-2'>
+            <strong>Field Study Year: {fieldStudyYear}</strong>
+          </div>
+        )}
         <Card>
           <Card.Header text='Sites List' />
           <Card.Body>
             <SitesListTable />
-            <Pagination
-              className='margin-top-2'
-              itemCount={sitesTotalResults}
-              defaultItemsPerPage={20}
-              handlePageChange={(pageNumber, pageSize) => doSetSitesPagination({ pageNumber, pageSize })}
-            />
+            {!pwaMode && (
+              <Pagination
+                className='margin-top-2'
+                itemCount={sitesTotalResults}
+                defaultItemsPerPage={20}
+                handlePageChange={(pageNumber, pageSize) => doSetSitesPagination({ pageNumber, pageSize })}
+              />
+            )}
           </Card.Body>
         </Card>
       </div>

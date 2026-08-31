@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { connect } from 'redux-bundler-react';
 import { Alert, Grid } from '@trussworks/react-uswds';
 
@@ -14,93 +14,65 @@ import ErrorSummary from '@components/error-summary/ErrorSummary';
 import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
 import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
 
-import { createData, updateData, isOnline } from '@src/app-pages/data-entry/offline/api';
+import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 
-import { fieldOfficeTypes, projectTypes } from '@src/utils/enums';
+import { fieldOfficeTypes } from '@src/utils/enums';
 import { getSitesDefaultValues, sitesValidationSchema } from './SitesFormModal.validation';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
+import { createDropdownOptions } from '@src/app-pages/data-entry/dataEntryHelper';
 
 import '../sitesList.scss';
-import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 
-const createDropdownOptions = (data) => {
-  if (!data) return [];
-
-  return data.map((item) => ({
-    value: item.code ?? item.value ?? item.year,
-    text: item.description ?? item.text ?? item.label ?? item.year,
-  }));
-};
+const lookupTableNames = [
+  'bendRiverMile',
+  'bendSelections',
+  'chutes',
+  'fieldOffices',
+  'fieldOfficeSegments',
+  'projects',
+  'reach',
+  'sampleUnitTypes',
+  'seasons',
+  'segments',
+  'years',
+];
 
 const SitesFormModal = connect(
+  'doModalClose',
   'doAddSite',
   'doUpdateSite',
   'doUpdateUrl',
   'selectLookupData',
   'selectUserRole',
   'selectUsersData',
-  ({ doAddSite, doUpdateSite, doUpdateUrl, lookupData, userRole, usersData, edit, data }) => {
+  ({ doModalClose, doAddSite, doUpdateSite, doUpdateUrl, lookupData, userRole, usersData, edit, data }) => {
+    // Default lookups to online data, otherwise will be overwritten by offline cached lookup data if network status = offline
+    const isOnline = navigator.onLine;
+    const [lookups, setLookups] = useState(
+      lookupTableNames.reduce((accumulator, currentKey) => {
+        accumulator[currentKey] = lookupData?.[currentKey] ?? [];
+        return accumulator;
+      }, {})
+    );
     const [bendOptions, setBendOptions] = useState([]);
     const [segmentOptions, setSegmentOptions] = useState([]);
-    const [offlineLookups, setOfflineLookups] = useState({});
-
-    useEffect(() => {
-      async function loadOfflineLookups() {
-        const lookupNames = [
-          'bendRiverMile',
-          'bendSelections',
-          'chutes',
-          'fieldOffices',
-          'fieldOfficeSegments',
-          'projects',
-          'reach',
-          'sampleUnitTypes',
-          'seasons',
-          'segments',
-          'years',
-        ];
-
-        const results = await Promise.all(lookupNames.map(async (name) => [name, await getLookupOptions(name)]));
-
-        setOfflineLookups(Object.fromEntries(results));
-      }
-      loadOfflineLookups();
-    }, []);
-
-    const bendRiverMileData =
-      lookupData?.bendRiverMile?.length > 0 ? lookupData.bendRiverMile : (offlineLookups.bendRiverMile ?? []);
-    const bends =
-      lookupData?.bendSelections?.length > 0 ? lookupData.bendSelections : (offlineLookups.bendSelections ?? []);
-    const chutes = lookupData?.chutes?.length > 0 ? lookupData.chutes : (offlineLookups.chutes ?? []);
-    const fieldOffices =
-      lookupData?.fieldOffices?.length > 0 ? lookupData.fieldOffices : (offlineLookups.fieldOffices ?? []);
-    const fieldOfficeSegments =
-      lookupData?.fieldOfficeSegments?.length > 0
-        ? lookupData.fieldOfficeSegments
-        : (offlineLookups.fieldOfficeSegments ?? []);
-    const projects = lookupData?.projects?.length > 0 ? lookupData.projects : (offlineLookups.projects ?? []);
-    const reachData = lookupData?.reachData?.length > 0 ? lookupData.reachData : (offlineLookups.reachData ?? []);
-    const sampleUnitTypes =
-      lookupData?.sampleUnitTypes?.length > 0 ? lookupData.sampleUnitTypes : (offlineLookups.sampleUnitTypes ?? []);
-    const seasons = lookupData?.seasons?.length > 0 ? lookupData.seasons : (offlineLookups.seasons ?? []);
-    const segments = lookupData?.segments?.length > 0 ? lookupData.segments : (offlineLookups.segments ?? []);
-    const years = lookupData?.years?.length > 0 ? lookupData.years : (offlineLookups.years ?? []);
 
     const bendDataMapping = {
-      B: bendRiverMileData,
-      S: bendRiverMileData,
-      C: chutes,
-      A: reachData,
-      R: reachData,
+      B: lookups?.bendRiverMile,
+      S: lookups?.bendRiverMile,
+      C: lookups?.chutes,
+      A: lookups?.reachData,
+      R: lookups?.reachData,
     };
 
     const user = usersData?.find((user) => userRole.id === user.id);
-    const yearsOptions = useMemo(() => years?.map((item) => ({ value: item.year })), [years]);
-    const fieldOfficeOptions = fieldOffices.filter((item) => item.code !== 'ZZ');
+    const yearsOptions = useMemo(() => lookups?.years?.map((item) => ({ value: item.year })), [lookups?.years]);
+    const fieldOfficeOptions = lookups?.fieldOffices?.filter((item) => item.code !== 'ZZ');
     const projectsOptions =
       Number(user?.projectCode) === 1
-        ? projects.filter((item) => Number(item.code) !== 2)
-        : projects.filter((item) => Number(item.code) === 2);
+        ? lookups?.projects?.filter((item) => Number(item.code) !== 2)
+        : lookups?.projects?.filter((item) => Number(item.code) === 2);
 
     const methods = useForm({
       defaultValues: getSitesDefaultValues({ edit, data, user }),
@@ -125,6 +97,8 @@ const SitesFormModal = connect(
     const bend = watch('bend');
     const bendRiverMile = watch('bendRiverMile');
     const sampleUnitType = watch('sampleUnitType');
+    const comments = watch('last_edit_comment');
+    const editInitials = watch('editInitials');
 
     const segmentValue = segment?.value;
     const bendValue = bend?.value;
@@ -145,18 +119,11 @@ const SitesFormModal = connect(
       return filteredOptions;
     };
 
-    const buildDescription = (type, value) => {
-      if (type === 'segment') {
-        return segments?.filter((item) => Number(item.code) === Number(value))?.[0]?.description;
-      }
-      if (type === 'bend') {
-        bendRiverMileData?.filter((item) => Number(item.bend) === Number(value))?.[0]?.bendDescription;
-      }
-    };
-
     const buildSegmentsOptions = () => {
       // Filter by office
-      const fieldOfficeFilteredOptions = fieldOfficeSegments?.filter((item) => item.fieldOfficeCode === office);
+      const fieldOfficeFilteredOptions = lookups?.fieldOfficeSegments?.filter(
+        (item) => item.fieldOfficeCode === office
+      );
 
       // Filter by PSPA vs HAMP projects
       const projectFilteredOptions =
@@ -169,7 +136,7 @@ const SitesFormModal = connect(
             );
 
       const filteredOptions = projectFilteredOptions?.map(
-        (item) => segments?.filter((segment) => Number(segment.code) === Number(item.segmentCode))?.[0]
+        (item) => lookups?.segments?.filter((segment) => Number(segment.code) === Number(item.segmentCode))?.[0]
       );
       const formattedOptions = filteredOptions?.map((item) => ({
         value: item.code,
@@ -177,6 +144,25 @@ const SitesFormModal = connect(
       }));
       return formattedOptions;
     };
+
+    const buildSegmentDescription = useCallback(() => {
+      return lookups?.segments?.filter((item) => Number(item.code) === Number(data?.segmentId))?.[0]?.description;
+    }, [data]);
+
+    const buildBendDescription = useCallback(() => {
+      const type = data?.sampleUnitType;
+      const options = bendDataMapping[type]?.filter((item) => Number(item.segment) === Number(segmentValue));
+      const filteredOptions = options?.map((item) => ({
+        value: type === 'B' || type === 'S' ? item.bend : item.code,
+        label:
+          type === 'B' || type === 'S'
+            ? item.bendDescription
+              ? `${item.bend} - ${item.bendDescription}`
+              : item.bend
+            : item.description,
+      }));
+      return filteredOptions?.filter((item) => Number(item.value) === Number(data?.bend))?.[0]?.label;
+    }, [data, segmentValue]);
 
     const getBendRiverMileId = (type) => {
       if (!type) return;
@@ -255,7 +241,7 @@ const SitesFormModal = connect(
       const payload = filterNullEmptyObjects(dataObj);
 
       try {
-        if (isOnline()) {
+        if (isOnline) {
           data?.siteId || data?.site_id ? doUpdateSite(payload) : doAddSite(paramsObj, payload);
         } else {
           data?.siteId || data?.site_id
@@ -269,9 +255,8 @@ const SitesFormModal = connect(
           ? await updateData('sites', clientId, payload)
           : await createData('sites', payload);
       }
-      if (!isOnline()) {
-        doUpdateUrl(`/sites-list/${finalSiteFid}`);
-      }
+      !edit && doUpdateUrl(`/sites-list/${finalSiteFid}`);
+      doModalClose();
     };
 
     // Update Bend options if Segment values change
@@ -294,16 +279,16 @@ const SitesFormModal = connect(
       if (data?.segmentId) {
         setValue('segmentId', {
           value: data?.segmentId,
-          label: buildDescription('segment', data?.segmentId),
+          label: buildSegmentDescription(),
         });
       }
       if (data?.bend) {
         setValue('bend', {
           value: data?.bend,
-          label: buildDescription('bend', data?.bend),
+          label: buildBendDescription(),
         });
       }
-    }, [data?.segmentId, data?.bend]);
+    }, [data?.segmentId, data?.bend, buildSegmentDescription, buildBendDescription]);
 
     useEffect(() => {
       setFocus(errors?.[Object.keys(errors)[0]]?.['ref']?.['id']);
@@ -312,6 +297,15 @@ const SitesFormModal = connect(
     useEffect(() => {
       edit && trigger();
     }, [edit, trigger]);
+
+    // Load offline lookups
+    useEffect(() => {
+      const loadOfflineLookups = async () => {
+        const options = await Promise.all(lookupTableNames.map(async (name) => [name, await getLookupOptions(name)]));
+        setLookups(Object.fromEntries(options));
+      };
+      !isOnline && loadOfflineLookups();
+    }, [isOnline]);
 
     return (
       <ModalContent title={edit ? 'Update Site' : 'Add Site'}>
@@ -399,14 +393,14 @@ const SitesFormModal = connect(
                 required
               />
               <SelectInput name='season' label='Season' onChange={handleChange} readOnly={!project} required>
-                {createDropdownOptions(seasons).map((item, index) => (
+                {createDropdownOptions(lookups?.seasons).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
                   </option>
                 ))}
               </SelectInput>
               <SelectInput name='sampleUnitType' label='Sample Unit Type' required>
-                {createDropdownOptions(sampleUnitTypes).map((item, index) => (
+                {createDropdownOptions(lookups?.sampleUnitTypes).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
                   </option>
@@ -418,17 +412,18 @@ const SitesFormModal = connect(
                 options={bendOptions}
                 readOnly={!segment}
                 closeMenuOnSelect
+                menuPlacement='auto'
                 required
               />
               <SelectInput name='bendrn' label='Bend R/N' required>
-                {createDropdownOptions(bends).map((item, index) => (
+                {createDropdownOptions(lookups?.bendSelections).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
                   </option>
                 ))}
               </SelectInput>
               <p className='margin-top-2'>Bend River Mile: {getUpperRiverMile(sampleUnitType) ?? '--'}</p>
-              {edit && (
+              {edit && (comments || editInitials) && (
                 <Grid row gap='md'>
                   <Grid tablet={{ col: 9 }}>
                     <TextArea name='last_edit_comment' label='Comments' readOnly />

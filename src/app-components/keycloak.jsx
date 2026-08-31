@@ -121,6 +121,54 @@ class Keycloak {
     return this.refreshToken;
   }
 
+  restoreTokens({ accessToken, refreshToken, identityToken }) {
+    this.accessToken = accessToken ?? null;
+    this.refreshToken = refreshToken ?? null;
+    this.identityToken = identityToken ?? null;
+  }
+
+  async refreshStoredSession() {
+    if (!this.refreshToken) {
+      throw new Error('No store Keycloak refresh token is available.');
+    }
+
+    const data = new URLSearchParams();
+
+    data.append('refresh_token', this.refreshToken);
+    data.append('grant_type', 'refresh_token');
+    data.append('client_id', this.config.client);
+
+    const response = await fetch(`${this.keycloakUrl}/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: data,
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+
+      throw new Error(error?.error_description ?? error?.error ?? 'Unable to refresh Keycloak session.');
+    }
+
+    const result = await response.json();
+    this.accessToken = result.access_token;
+
+    if (result.refresh_token) {
+      this.refreshToken = result.refresh_token;
+    }
+    if (result.id_token) {
+      this.identityToken = result.id_token;
+    }
+
+    return {
+      accessToken: this.accessToken,
+      refreshToken: this.refreshToken,
+      identityToken: this.identityToken,
+    };
+  }
+
   getIdentityToken() {
     return this.identityToken;
   }

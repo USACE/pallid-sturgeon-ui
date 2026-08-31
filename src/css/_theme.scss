@@ -6,11 +6,11 @@
   --text-color: #121212;
   // FORM
   --color-form-input-border: #000000;
-  // @TODO: section border
   --color-form-input-disabled: #ccc9c9;
   --color-form-btn: #219bbd;
-  // --color-form-btn-text: #ffffff;
   --color-form-btn-border: #000000;
+  // TABLE
+  --color-table-header-color: #dfe1e2;
 }
 
 /* Automatically switches when Chrome/OS dark mode is active */
@@ -35,5 +35,6 @@
     --color-form-btn-text: #ffffff;
     --color-form-btn-border: #ffffff;
     // TABLE
+    --color-table-header-color: #404041;
   }
 }
