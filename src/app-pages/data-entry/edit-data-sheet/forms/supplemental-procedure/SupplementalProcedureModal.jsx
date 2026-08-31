@@ -157,6 +157,7 @@ const SupplementalProcedureModal = connect(
       trigger,
       reset,
       clearErrors,
+      handleSubmit,
     } = methods;
 
     const toggleProcedureSection = () => {
@@ -166,6 +167,8 @@ const SupplementalProcedureModal = connect(
     };
 
     const tagnumber = watch('tagnumber');
+    const pitrn = watch('pitrn');
+    const isTagNumberRequired = pitrn !== null && pitrn !== undefined && pitrn !== '';
 
     const isTouched = Object.keys(touchedFields).length > 0;
     const isShowErrorSummary = !isValid && (isTouched || isDirty || submitCount > 0) && !isEmpty(errors);
@@ -201,7 +204,9 @@ const SupplementalProcedureModal = connect(
         ensureGeneticsVialPrefix(val);
       }
 
-      trigger(name);
+      if (submitCount > 0) {
+        trigger(name);
+      }
     };
 
     const fmtTimeHHMMSS = (val) => {
@@ -460,12 +465,6 @@ const SupplementalProcedureModal = connect(
       setIsSaving(true);
 
       try {
-        const valid = await trigger();
-
-        if (!valid) {
-          console.warn('Supplemental/Procedure form validation failed:', errors);
-          return;
-        }
         // Format any values need for final payload
         const identifyingData = getIdentifyingData();
         const suppDataObj = formatSuppDataObj();
@@ -613,14 +612,19 @@ const SupplementalProcedureModal = connect(
       description: val,
     }));
 
-    const getTagnumberWarning = () => {
+    const getTagNumberWarning = () => {
+      if (!tagnumber) return null;
+      
       const hasDecimal = String(tagnumber)?.includes('.');
+      
       if (hasDecimal) {
-        const parseVal = String(tagnumber)?.replace('.', '');
-        return parseVal?.length < 14 && parseVal !== '' ? 'Value cannot be less than or greater than 14 digits' : null;
+        const charCount = String(tagnumber)?.replace('.', '').length;
+        return charCount !== 14
+          ? 'Tag number must be exactly 14 characters when a decimal is present'
+          : null;
       } else {
-        return tagnumber && String(tagnumber)?.length < 10
-          ? 'Value cannot be less than or greater than 10 digits'
+        return String(tagnumber)?.length !== 10
+          ? 'Tag number must be exactly 10 characters when no decimal is present'
           : null;
       }
     };
@@ -675,7 +679,8 @@ const SupplementalProcedureModal = connect(
                   name='tagnumber'
                   label='Tag Number'
                   onChange={handleChange}
-                  warning={getTagnumberWarning()}
+                  required={isTagNumberRequired}
+                  warning={getTagNumberWarning()}
                   maxLength={tagNumberMaxLength()}
                 />
               </Grid>
@@ -1134,7 +1139,7 @@ const SupplementalProcedureModal = connect(
         </FormProvider>
 
         <ModalFooter
-          onSave={() => doSubmit()}
+          onSave={() => handleSubmit(doSubmit)}
           onSecondarySave={() => handleSaveAndClose()}
           onCancel={() => handleCancel()}
         />

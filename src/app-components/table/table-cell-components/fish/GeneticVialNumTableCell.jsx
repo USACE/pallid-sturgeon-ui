@@ -76,6 +76,11 @@ const GeneticVialNumTableCell = connect('selectBaseData', ({ baseData, getValue,
     setSpecies(rowSpecies);
   }, [rowSpecies]);
 
+  // Sync value state when initialValue changes (for loading new records)
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
+
   return (
     <>
       {/* Formatting Genetic Vial Number */}

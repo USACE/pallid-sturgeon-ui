@@ -23,6 +23,7 @@ const DataEntryTable = ({
   data,
   columns,
   validationSchema,
+  isCellRequired,
   initialTableState,
   updateSourceData,
   addRow,
@@ -286,22 +287,17 @@ const DataEntryTable = ({
                     const cellError = rowErrors?.[row.id]?.[cell.column.id];
                     const isCellError = showValidationErrors && cellError !== undefined;
                     const cellClasses = isCellError ? 'cell-error' : '';
+                    const showRequiredAsterisk =
+                      typeof isCellRequired === 'function' && isCellRequired(row.original, cell.column.id, row.index);
                     return (
                       <td className={cellClasses} key={cell.id} style={{ width: cell.column.getSize() + 'px' }}>
                         <div className='d-flex align-items-center'>
-                          {showValidationErrors && cellError && (
-                            <Tooltip
-                              iconSize='large'
-                              place='bottom'
-                              header={cell.column.columnDef.header}
-                              content={cellError}
-                              iconStyle={{ color: 'red', marginRight: '5px' }}
-                              isError
-                              noDelay
-                              border
-                            />
-                          )}
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          {showRequiredAsterisk && (
+                            <span aria-hidden='true' className='cell-required-asterisk'>
+                              *
+                            </span>
+                          )}
                         </div>
                       </td>
                     );

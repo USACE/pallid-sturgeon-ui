@@ -10,10 +10,12 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
   const [value, setValue] = useState(initialValue);
   const [species, setSpecies] = useState();
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
+  const isPlaceholderRow = row?.original?._isPlaceholderRow === true && row?.original?._isTouched !== true;
 
   const debouncedUpdateRef = useRef();
 
   const isRequired =
+    !isPlaceholderRow &&
     (columnMeta?.gear?.startsWith('TL') || columnMeta?.gear?.startsWith('LDN')) &&
     !notRequiredSpeciesArr.includes(species);
 
@@ -46,6 +48,10 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
   useEffect(() => {
     rowSpecies && setSpecies(rowSpecies);
   }, [rowSpecies]);
+
+  useEffect(() => {
+    setValue(initialValue);
+  }, [initialValue]);
 
   return (
     <div
