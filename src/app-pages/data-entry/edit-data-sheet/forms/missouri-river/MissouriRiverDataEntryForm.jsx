@@ -21,7 +21,13 @@ import {
 import { filterNullEmptyObjects, formatCoordFlt } from '@src/utils/helpers';
 import Checkbox from '@src/app-components/check-box/Checkbox';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { createDropdownOptions, currentDate, fmtTimeHHMMSS, isEmpty } from '@src/app-pages/data-entry/dataEntryHelper';
+import {
+  createDropdownOptions,
+  currentDate,
+  fmtTimeHHMMSS,
+  formatGpsCoordinate,
+  isEmpty,
+} from '@src/app-pages/data-entry/dataEntryHelper';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
 import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
@@ -293,13 +299,15 @@ const MissouriRiverDataEntryForm = connect(
     const handleCapture = async (type) => {
       try {
         const { best } = await captureGpsBest({ browserGps, ubloxGps });
+        const latitude = formatGpsCoordinate(best?.lat);
+        const longitude = formatGpsCoordinate(best?.lng);
 
-        setValue(`${type}Latitude`, best.lat, { shouldValidate: shouldAutoValidate });
-        setValue(`${type}Longitude`, best.lng, { shouldValidate: shouldAutoValidate });
-        setValue(`${type}Time`, fmtTimeHHMMSS(best.capturedAt), { shouldValidate: shouldAutoValidate });
+        setValue(`${type}Latitude`, latitude, { shouldValidate: shouldAutoValidate });
+        setValue(`${type}Longitude`, longitude, { shouldValidate: shouldAutoValidate });
+        setValue(`${type}Time`, fmtTimeHHMMSS(best?.capturedAt), { shouldValidate: shouldAutoValidate });
 
         window.alert(
-          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best.lat}\nlng=${best.lng}\nacc=${Math.round(best.accuracy)}m`
+          `Captured ${type === 'start' ? 'START' : 'STOP'}\nlat=${best?.lat}\nlng=${best?.lng}\nacc=${Math.round(best?.accuracy)}m`
         );
       } catch (e) {
         console.error(e);
