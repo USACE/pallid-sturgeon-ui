@@ -760,13 +760,7 @@ const TelemetryDataEntry = connect(
           <Icon focusable={false} className='margin-right-1' path={mdiContentCopy} />
           Copy Last Row
         </Button>
-        <Button
-          className='margin-top-2 add-btn'
-          onClick={() => {
-            handleSubmitAll();
-          }}
-          type='button'
-        >
+        <Button className='margin-top-2 add-btn' onClick={() => handleSubmitAll()} type='button'>
           Submit
         </Button>
         <Button className='margin-top-2 add-btn' onClick={() => handleSaveAndClose()} type='button'>

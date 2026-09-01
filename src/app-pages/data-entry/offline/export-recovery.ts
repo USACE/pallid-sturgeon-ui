@@ -1,7 +1,5 @@
-import { POSITION } from 'react-toastify/dist/utils';
 import { db, type OutboxItem } from './db';
 import { getLocalRecordForOutboxItem } from './offline-recovery';
-import { toUpper } from 'lodash';
 
 const EXPORT_CONFIG: Array<{ tableName: OutboxItem['tableName']; filename: string; columns: string[] }> = [
   {
