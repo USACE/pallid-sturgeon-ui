@@ -27,6 +27,7 @@ export const getTelemetryColumns = ({
   macros,
   handleCaptureRow,
   online,
+  isSearchTypeRs,
 }) => {
   const columnHelper = createColumnHelper();
 
@@ -60,7 +61,7 @@ export const getTelemetryColumns = ({
       header: 'Bend',
       cell: TableCell,
       size: 100,
-      meta: { type: 'number' },
+      meta: { type: 'number', required: isSearchTypeRs },
     }),
     columnHelper.accessor('bendRiverMile', {
       header: 'River Mile',

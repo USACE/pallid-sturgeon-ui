@@ -666,7 +666,6 @@ export default {
       apiPost(url, formData, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
-          dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
           store.doFetchMoRiverDataEntry({ tableId: body?.data }, false, false, false);
         } else {
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
@@ -743,20 +742,19 @@ export default {
 
         const url = '/psapi/searchDataEntry';
 
-        apiPost(url, formData, (err, _body) => {
-          if (!err && _body?.status === ApiStatuses.Success) {
+        apiPost(url, formData, (err, body) => {
+          if (!err && body?.status === ApiStatuses.Success) {
             tSuccess(toastId, 'Datasheet successfully updated!');
-            dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_FINISHED' });
             dispatch({
               type: 'DATA_ENTRY_FETCH_START',
-              payload: { ...store.selectDataEntryLastParams(), seId: _body.data },
+              payload: { ...store.selectDataEntryLastParams(), seId: body?.data },
             });
-            store.doFetchSearchDataEntry();
-            resolve(_body);
+            store.doFetchSearchDataEntry({ tableId: body?.data }, false, false, false);
+            resolve(body);
           } else {
             dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_ERROR', payload: err });
             tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
-            reject(err || _body);
+            reject(err || body);
           }
         });
       }),
@@ -792,7 +790,7 @@ export default {
 
   doUpdateMoRiverDataEntry:
     (formData) =>
-    ({ dispatch, store, apiPut }) => {
+    ({ dispatch, apiPut }) => {
       const toastId = toast.loading('Saving datasheet...');
 
       const url = `${rootUrl}updateMoriverDataEntry`;
@@ -800,7 +798,6 @@ export default {
       apiPut(url, formData, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
-          dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_FINISHED' });
         } else {
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
@@ -870,7 +867,7 @@ export default {
 
   doUpdateSearchDataEntry:
     (formData) =>
-    ({ dispatch, apiPut }) => {
+    ({ dispatch, store, apiPut }) => {
       const toastId = toast.loading('Saving datasheet...');
 
       const url = '/psapi/searchDataEntry';
@@ -878,7 +875,7 @@ export default {
       apiPut(url, formData, (err, _body) => {
         if (!err) {
           tSuccess(toastId, 'Datasheet successfully updated!');
-          dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_FINISHED' });
+          store.doFetchSearchDataEntry({ tableId: formData?.seId }, false, false, false);
         } else {
           dispatch({ type: 'SEARCH_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');
