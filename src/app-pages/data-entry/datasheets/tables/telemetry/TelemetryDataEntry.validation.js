@@ -22,7 +22,7 @@ export const telemetryDataEntrySchema = yup.object().shape({
   }),
   bendRiverMile: optionalField(),
   radioTagNum: yup.number().required(ValidationMessages.FieldRequired),
-  frequencyIdCode: yup.number().required(ValidationMessages.SelectRequired),
+  frequencyIdCode: yup.string().required(ValidationMessages.SelectRequired),
   captureTime: yup.string().required(ValidationMessages.FieldRequired),
   captureLatitude: yup
     .string()
@@ -40,8 +40,8 @@ export const telemetryDataEntrySchema = yup.object().shape({
       test: (value) => (Number(value) >= -110 && Number(value) <= -89) || Number(value) === 0,
       message: 'Value must be between -110 and -89 degrees. Enter 0 if unknown',
     }),
-  spawnBehavior: yup.string().nullable(),
-  positionConfidence: yup.number().required(ValidationMessages.FieldRequired),
+  suspectedSpawningActivity: yup.string().nullable(),
+  positionConfidence: yup.string().required(ValidationMessages.FieldRequired),
   mesoId: yup.string().nullable(),
   depth: optionalField(),
   macroId: yup.string().nullable(),
@@ -79,7 +79,7 @@ export const getTelemetryDefaultValues = ({ dataEntryData }) => ({
   captureTime: dataEntryData?.captureTime ?? '',
   captureLatitude: dataEntryData?.captureLatitude ?? '',
   captureLongitude: dataEntryData?.captureLongitude ?? '',
-  spawnBehavior: dataEntryData?.spawnBehavior ?? '',
+  suspectedSpawningActivity: dataEntryData?.suspectedSpawningActivity ?? '',
   positionConfidence: dataEntryData?.positionConfidence ?? '',
   mesoId: dataEntryData?.mesoId ?? '',
   depth: dataEntryData?.depth ?? '',

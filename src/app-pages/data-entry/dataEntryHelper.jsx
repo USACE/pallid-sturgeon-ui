@@ -1,3 +1,5 @@
+import React from 'react';
+
 export const CreateComboboxOptions = (data) => {
   if (!data) return [];
 
@@ -77,4 +79,48 @@ export const formatGpsCoordinate = (value) => {
     return null;
   }
   return Number(number.toFixed(5));
+};
+
+const createBlankRow = () => ({
+  _isPlaceholderRow: true,
+  _isTouched: false,
+});
+
+export const isUntouchedPlaceholderRow = (row) => row?._isPlaceholderRow === true && row?._isTouched !== true;
+
+export const ensureTrailingBlankRow = (rows) => {
+  const normalizedRows = rows ?? [];
+
+  if (normalizedRows.length === 0) {
+    return [createBlankRow()];
+  }
+
+  const lastRow = normalizedRows[normalizedRows.length - 1];
+  if (isUntouchedPlaceholderRow(lastRow)) {
+    return normalizedRows;
+  }
+
+  return [...normalizedRows, createBlankRow()];
+};
+
+export const displayValidationTableErrors = (rowError) => {
+  if (rowError?.errors?.length === 1) {
+    return rowError?.errors?.map((errorItem, index) => (
+      <React.Fragment key={`row-${rowError.rowNumber}-${errorItem.columnName}-${errorItem.message}-${index}`}>
+        <u>{errorItem.columnName}</u>: {errorItem.message}
+      </React.Fragment>
+    ));
+  } else if (rowError?.errors?.length > 1) {
+    return (
+      <ul>
+        {rowError?.errors?.map((errorItem, index) => (
+          <li key={`row-${rowError.rowNumber}-${errorItem.columnName}-${errorItem.message}-${index}`}>
+            <u>{errorItem.columnName}</u>: {errorItem.message}
+          </li>
+        ))}
+      </ul>
+    );
+  } else {
+    return 'Validation error';
+  }
 };
