@@ -21,9 +21,6 @@ import {
 } from './TelemetryDataEntry.validation';
 import { getTelemetryColumns } from './helpers.telemetry';
 import { db } from '@src/app-pages/data-entry/offline/db';
-
-import '@pages/data-summaries/data-summary.scss';
-import '@pages/data-entry/dataentry.scss';
 import {
   displayValidationTableErrors,
   ensureTrailingBlankRow,
@@ -34,6 +31,9 @@ import {
 import { DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
 import { GPS_OPTIONS, USE_UBLOX_POC } from '@src/app-pages/data-entry/offline/offlineHelper';
 import { formatCoordFlt } from '@src/utils/helpers';
+
+import '@pages/data-summaries/data-summary.scss';
+import '@pages/data-entry/dataentry.scss';
 
 const lookupTableNames = ['frequencyId', 'spawnBehavior', 'macros', 'mesos', 'positionConfidence'];
 
@@ -104,7 +104,6 @@ const TelemetryDataEntry = connect(
   'doUpdateTelemetryDataEntry',
   'doSearchEffortDatasheetLoadData',
   'selectDataEntryTelemetryData',
-  'selectDataEntryLastParams',
   'selectBaseData',
   'selectDataEntryData',
   'selectLookupData',
@@ -116,7 +115,6 @@ const TelemetryDataEntry = connect(
     doUpdateTelemetryDataEntry,
     doSearchEffortDatasheetLoadData,
     dataEntryTelemetryData,
-    dataEntryLastParams,
     baseData,
     dataEntryData,
     lookupData,
@@ -135,29 +133,16 @@ const TelemetryDataEntry = connect(
     const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
     const [validationErrorRows, setValidationErrorRows] = useState([]);
     const siteId = routeParams?.siteId;
+    const searchTypeCode = dataEntryData?.searchTypeCode;
+    const isSearchTypeRs = searchTypeCode === 'RS';
 
     // Get Search Effort Draft Data
     const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
     const savedDraft = sessionStorage.getItem(searchDraftKey);
     const searchEffortDraft = savedDraft ? JSON.parse(savedDraft) : null;
-    const seId =
-      dataEntryData?.seId ??
-      dataEntryData?.se_id ??
-      baseData?.seId ??
-      baseData?.se_id ??
-      dataEntryLastParams?.seId ??
-      dataEntryLastParams?.se_id ??
-      dataEntryLastParams?.tableId ??
-      routeParams?.seId ??
-      searchEffortDraft?.seId ??
-      searchEffortDraft?.se_id;
+    const seId = dataEntryData?.seId ?? dataEntryData?.se_id ?? searchEffortDraft?.seId ?? searchEffortDraft?.se_id;
     const seFid =
-      dataEntryData?.seFid ??
-      dataEntryData?.se_fid ??
-      baseData?.seFid ??
-      baseData?.se_fid ??
-      searchEffortDraft?.seFid ??
-      searchEffortDraft?.se_fid;
+      dataEntryData?.seFid ?? dataEntryData?.se_fid ?? searchEffortDraft?.seFid ?? searchEffortDraft?.se_fid;
     const isOnline = navigator.onLine;
     const recoveryOutboxId = sessionStorage.getItem('syncRecoveryOutboxId');
 
@@ -205,7 +190,7 @@ const TelemetryDataEntry = connect(
     };
 
     const methods = useForm({
-      resolver: yupResolver(telemetryDataEntrySchema),
+      resolver: yupResolver(telemetryDataEntrySchema({ isSearchTypeRs })),
       mode: 'onBlur',
       defaultValues: getTelemetryDefaultValues({ baseData: baseData, dataEntryData: dataEntryTelemetryData }),
     });
@@ -309,6 +294,7 @@ const TelemetryDataEntry = connect(
       macros: lookups?.macros,
       handleCaptureRow,
       online: isOnline,
+      isSearchTypeRs,
     });
 
     const columnHeaderById = useMemo(() => {
@@ -380,7 +366,7 @@ const TelemetryDataEntry = connect(
         if (row?._isPlaceholderRow === true) {
           return Promise.resolve(row);
         }
-        return telemetryDataEntrySchema.validate(row, options);
+        return telemetryDataEntrySchema({ isSearchTypeRs }).validate(row, options);
       },
     };
 
@@ -441,7 +427,7 @@ const TelemetryDataEntry = connect(
         const validationResults = await Promise.all(
           rowPayloads.map(async ({ payload, rowNumber }) => {
             try {
-              await telemetryDataEntrySchema.validate(payload, { abortEarly: false });
+              await telemetryDataEntrySchema({ isSearchTypeRs }).validate(payload, { abortEarly: false });
               return { isValid: true, rowNumber, errors: [] };
             } catch (error) {
               const validationErrors = error?.inner?.length ? error.inner : [error];
