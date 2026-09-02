@@ -1,6 +1,6 @@
 import { db, type OutboxItem } from './db';
 import { pushOutboxItem } from './api';
-import { server } from 'typescript';
+import { cleanSyncErrorMessage } from './offline-recovery';
 
 export type SyncResult = {
   tried: number;
@@ -451,6 +451,19 @@ async function patchSupplementalChildrenAfterCreate(supplementalItem: OutboxItem
   }
 }
 
+const saveSyncFailure = async (item: OutboxItem, message?: string, http?: number) => {
+  if (item._id == null) return;
+
+  const syncMessage = cleanSyncErrorMessage(message, http);
+
+  await db.outbox.update(item._id, {
+    syncError: syncMessage,
+    syncHttp: http,
+    lastSyncAttempt: Date.now(),
+    syncAttempts: (item.syncAttempts ?? 0) + 1,
+  });
+};
+
 export async function syncNow(token?: string): Promise<SyncResult> {
   if (!isOnline()) {
     return { tried: 0, ok: 0, errors: 0, conflicts: 0, draftSkip: 0 };
@@ -570,6 +583,12 @@ export async function syncNow(token?: string): Promise<SyncResult> {
       } else if (res.status === 'conflict') {
         conflicts++;
 
+        await saveSyncFailure(
+          item,
+          'This record conflicts with a newer server version. Review the record before syncing again.',
+          409
+        );
+
         if (localRow) {
           await table.put({
             ...localRow,
@@ -578,14 +597,16 @@ export async function syncNow(token?: string): Promise<SyncResult> {
         }
       } else {
         errors++;
+        await saveSyncFailure(item, res.message, 'http' in res ? res.http : undefined);
         console.warn('Sync failed. Keeping item in outbox:', {
           item,
           result: res,
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Sync error:', itemSnap, err);
       errors++;
+      await saveSyncFailure(itemSnap, err?.message ?? 'Unexpected sync error');
     }
   }
 

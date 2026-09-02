@@ -281,6 +281,9 @@ async function addToSyncQueue(
       payload: nextPayload,
       clientVersion: entry.version ?? 0,
       ts: Date.now(),
+      syncError: undefined,
+      syncHttp: undefined,
+      lastSyncAttempt: undefined,
     });
     return;
   }

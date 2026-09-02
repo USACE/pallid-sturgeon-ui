@@ -31,6 +31,7 @@ const getTelemetryWarning = (telemetryCount) => {
 
 const SearchEffortDataEntryForm = connect(
   'doModalOpen',
+  'doFetchSearchDataEntry',
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'doResetTelemetryDataEntries',
@@ -43,6 +44,7 @@ const SearchEffortDataEntryForm = connect(
   'doUpdateCurrentTab',
   ({
     doModalOpen,
+    doFetchSearchDataEntry,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     doResetTelemetryDataEntries,
@@ -281,6 +283,8 @@ const SearchEffortDataEntryForm = connect(
           } else {
             await createData('search', payload);
           }
+          // Need to populate dataEntryData store
+          doFetchSearchDataEntry({ tableId: serverSeId }, false, false, false);
         }
 
         setValue('clientId', clientId);
