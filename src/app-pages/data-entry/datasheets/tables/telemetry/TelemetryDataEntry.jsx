@@ -238,6 +238,7 @@ const TelemetryDataEntry = connect(
       // Format new row data
       const newRowData = {
         ...getBaseDefaultValues({ baseData }),
+        bendRiverMile: '',
         tId: null, // Reset tId if copying a save data object
         t_id: null,
         clientId: crypto.randomUUID(),
@@ -326,6 +327,7 @@ const TelemetryDataEntry = connect(
 
             nextRow = {
               ...getBaseDefaultValues({ baseData }),
+              bendRiverMile: '',
               clientId: crypto.randomUUID(),
               ...(seId != null ? { seId: Number(seId), se_id: Number(seId) } : {}),
               ...(seFid
@@ -503,7 +505,7 @@ const TelemetryDataEntry = connect(
             }
           } catch (error) {
             console.error('Telemetry save failed, queuing offline:', error);
-            isNew ? await createData('fish', payload) : await updateData('fish', clientId, payload);
+            isNew ? await createData('telemetry', payload) : await updateData('telemetry', clientId, payload);
           }
         }
 
@@ -523,8 +525,8 @@ const TelemetryDataEntry = connect(
 
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
         const telemetryCount = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row)).length;
-        sessionStorage.setItem(searchEffortDraft, JSON.stringify({ ...draft, telemetryCount: telemetryCount }));
-        const hasRecoveryRow = rowsToProcess.some((row) => row._syncRecoveryError && row.clientId);
+        sessionStorage.setItem(searchDraftKey, JSON.stringify({ ...draft, telemetryCount: telemetryCount }));
+        const hasRecoveryRow = rowsToProcess.some(({ item }) => item?._syncRecoveryError && item?.clientId);
         if (!hasRecoveryRow) {
           const telemetryParentId = isOnline ? seId || seFid : seFid || seId;
           await doSearchEffortDatasheetLoadData(telemetryParentId);
