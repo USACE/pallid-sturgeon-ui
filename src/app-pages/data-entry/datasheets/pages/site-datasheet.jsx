@@ -7,7 +7,6 @@ import DataHeader from '../components/data-header/dataHeader';
 
 import MissouriDsTable from '../tables/missouriDsTable';
 import SearchDsTable from '../tables/searchDsTable';
-import SearchDraftDsTable from '../../edit-data-sheet/forms/search-effort/searchDraftDsTable';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import { getSiteRouteParams, isOfflineSiteRouteKey } from '../../offline/site-route-key';
 import { siteDatasheetUpdated } from '../../offline/datasheet-refresh';
@@ -156,7 +155,7 @@ const SiteDatasheet = connect(
                 },
                 {
                   title: `Search Effort Drafts (${searchEffortDraftCount})`,
-                  content: <SearchDraftDsTable />,
+                  content: <SearchDsTable isDraft />,
                 },
               ]}
               onTabChange={(_str, ind) => setCurrentTab(ind)}

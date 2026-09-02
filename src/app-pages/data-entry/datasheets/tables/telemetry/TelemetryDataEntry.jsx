@@ -5,6 +5,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
 import { mdiContentCopy } from '@mdi/js';
 import { Alert, Button } from '@trussworks/react-uswds';
+import { toast } from 'react-toastify';
 
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
@@ -520,6 +521,8 @@ const TelemetryDataEntry = connect(
           });
           return ensureTrailingBlankRow(updatedRows);
         });
+
+        toast.success('Datasheet successfully updated!');
 
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
         const telemetryCount = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row)).length;

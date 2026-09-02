@@ -106,7 +106,7 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='mrId'
               headerName='MR ID'
-              width={100}
+              width={85}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
                 type: 'missouriRiver',
@@ -118,7 +118,7 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='fishCount'
               headerName='Fish'
-              width={130}
+              width={70}
               cellStyle={fishCellStyle}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
@@ -131,7 +131,7 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='suppCount'
               headerName='Supplemental'
-              width={130}
+              width={125}
               cellStyle={suppCellStyle}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
@@ -144,7 +144,7 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='procCount'
               headerName='Procedure'
-              width={130}
+              width={105}
               cellStyle={procCellStyle}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
@@ -158,16 +158,14 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='setdate'
               headerName='Date'
+              width={90}
               valueGetter={(params) => dateFormatter(params.data.setdate)}
               sortable
               unSortIcon
             />
-            <AgGridColumn field='subsample' sortable unSortIcon />
-            <AgGridColumn field='gear' headerName='Gear Code' sortable unSortIcon />
-            <AgGridColumn field='recorder' headerName='Recorder' sortable unSortIcon />
-            <AgGridColumn field='checkby' headerName='Checked?' sortable unSortIcon />
-            {/* @TODO: Check with Tisha on approved field. */}
-            <AgGridColumn headerName='Approved?' sortable unSortIcon />
+            <AgGridColumn field='subsample' width={110} sortable unSortIcon />
+            <AgGridColumn field='gearCode' headerName='Gear Code' width={110} sortable unSortIcon />
+            <AgGridColumn field='recorder' headerName='Recorder' width={100} sortable unSortIcon />
           </AgGridReact>
         </div>
       </>
