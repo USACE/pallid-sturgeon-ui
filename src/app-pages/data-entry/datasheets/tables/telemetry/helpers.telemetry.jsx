@@ -27,6 +27,7 @@ export const getTelemetryColumns = ({
   macros,
   handleCaptureRow,
   online,
+  isSearchTypeRs,
 }) => {
   const columnHelper = createColumnHelper();
 
@@ -60,7 +61,7 @@ export const getTelemetryColumns = ({
       header: 'Bend',
       cell: TableCell,
       size: 100,
-      meta: { type: 'number' },
+      meta: { type: 'number', required: isSearchTypeRs },
     }),
     columnHelper.accessor('bendRiverMile', {
       header: 'River Mile',
@@ -111,7 +112,6 @@ export const getTelemetryColumns = ({
       meta: { type: 'text', required: true },
     }),
     columnHelper.accessor('positionConfidence', {
-      // select?
       header: 'Position Confidence',
       cell: TableCell,
       size: 200,
@@ -121,36 +121,31 @@ export const getTelemetryColumns = ({
         options: createDropdownOptions(positionConfidence),
       },
     }),
-    columnHelper.accessor('spawnBehavior', {
+    columnHelper.accessor('suspectedSpawningActivity', {
       header: 'Spawn Behavior',
       cell: TableCell,
       size: 200,
       meta: {
         type: 'select',
-        required: true,
         options: createDropdownOptions(spawnBehavior),
       },
     }),
-    columnHelper.accessor('mesoId', {
-      // select?
-      header: 'Meso',
-      cell: TableCell,
-      size: 200,
-      meta: {
-        type: 'select',
-        required: true,
-        options: createDropdownOptions(mesos),
-      },
-    }),
     columnHelper.accessor('macroId', {
-      // select?
       header: 'Macro',
       cell: TableCell,
       size: 200,
       meta: {
         type: 'select',
-        required: true,
         options: createDropdownOptions(macros),
+      },
+    }),
+    columnHelper.accessor('mesoId', {
+      header: 'Meso',
+      cell: TableCell,
+      size: 200,
+      meta: {
+        type: 'select',
+        options: createDropdownOptions(mesos),
       },
     }),
     columnHelper.accessor('depth', {

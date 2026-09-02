@@ -12,50 +12,50 @@ const optionalField = () =>
     })
     .nullable();
 
-export const telemetryDataEntrySchema = yup.object().shape({
-  seFid: yup.string().nullable(),
-  tFid: yup.string().nullable(),
-  bend: yup.string().when('searchTypeCode', {
-    is: (searchTypeCode) => searchTypeCode === 'RS',
-    then: (schema) => schema.required(ValidationMessages.FieldRequired),
-    otherwise: (schema) => schema.nullable(),
-  }),
-  bendRiverMile: optionalField(),
-  radioTagNum: yup.number().required(ValidationMessages.FieldRequired),
-  frequencyIdCode: yup.number().required(ValidationMessages.SelectRequired),
-  captureTime: yup.string().required(ValidationMessages.FieldRequired),
-  captureLatitude: yup
-    .string()
-    .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-    .required(ValidationMessages.FieldRequired)
-    .test({
-      test: (value) => (Number(value) >= 36 && Number(value) <= 49) || Number(value) === 0,
-      message: 'Value must be between 36 and 49 degrees. (Enter 0 if unknown)',
+export const telemetryDataEntrySchema = ({ isSearchTypeRs }) =>
+  yup.object().shape({
+    seFid: yup.string().nullable(),
+    tFid: yup.string().nullable(),
+    bend: yup.number().test({
+      test: () => isSearchTypeRs === false,
+      message: 'Value is required when Search Type = "River Sweep (RS)"',
     }),
-  captureLongitude: yup
-    .string()
-    .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-    .required(ValidationMessages.FieldRequired)
-    .test({
-      test: (value) => (Number(value) >= -110 && Number(value) <= -89) || Number(value) === 0,
-      message: 'Value must be between -110 and -89 degrees. Enter 0 if unknown',
-    }),
-  spawnBehavior: yup.string().nullable(),
-  positionConfidence: yup.number().required(ValidationMessages.FieldRequired),
-  mesoId: yup.string().nullable(),
-  depth: optionalField(),
-  macroId: yup.string().nullable(),
-  temp: optionalField(),
-  conductivity: optionalField(),
-  turbidity: optionalField(),
-  silt: optionalField(),
-  sand: optionalField(),
-  gravel: optionalField(),
-  comments: yup.string().nullable(),
-  editInitials: yup.string().nullable(),
-  lastEditComment: yup.string().nullable(),
-  checkby: yup.string().nullable(),
-});
+    bendRiverMile: optionalField(),
+    radioTagNum: yup.number().required(ValidationMessages.FieldRequired),
+    frequencyIdCode: yup.string().required(ValidationMessages.SelectRequired),
+    captureTime: yup.string().required(ValidationMessages.FieldRequired),
+    captureLatitude: yup
+      .string()
+      .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+      .required(ValidationMessages.FieldRequired)
+      .test({
+        test: (value) => (Number(value) >= 36 && Number(value) <= 49) || Number(value) === 0,
+        message: 'Value must be between 36 and 49 degrees. (Enter 0 if unknown)',
+      }),
+    captureLongitude: yup
+      .string()
+      .transform((value, originalValue) => (originalValue === '' ? undefined : value))
+      .required(ValidationMessages.FieldRequired)
+      .test({
+        test: (value) => (Number(value) >= -110 && Number(value) <= -89) || Number(value) === 0,
+        message: 'Value must be between -110 and -89 degrees. Enter 0 if unknown',
+      }),
+    suspectedSpawningActivity: yup.string().nullable(),
+    positionConfidence: yup.string().required(ValidationMessages.FieldRequired),
+    mesoId: yup.string().nullable(),
+    depth: optionalField(),
+    macroId: yup.string().nullable(),
+    temp: optionalField(),
+    conductivity: optionalField(),
+    turbidity: optionalField(),
+    silt: optionalField(),
+    sand: optionalField(),
+    gravel: optionalField(),
+    comments: yup.string().nullable(),
+    editInitials: yup.string().nullable(),
+    lastEditComment: yup.string().nullable(),
+    checkby: yup.string().nullable(),
+  });
 
 export const getBaseDefaultValues = ({ baseData }) => ({
   year: baseData?.year ?? '',
@@ -79,7 +79,7 @@ export const getTelemetryDefaultValues = ({ dataEntryData }) => ({
   captureTime: dataEntryData?.captureTime ?? '',
   captureLatitude: dataEntryData?.captureLatitude ?? '',
   captureLongitude: dataEntryData?.captureLongitude ?? '',
-  spawnBehavior: dataEntryData?.spawnBehavior ?? '',
+  suspectedSpawningActivity: dataEntryData?.suspectedSpawningActivity ?? '',
   positionConfidence: dataEntryData?.positionConfidence ?? '',
   mesoId: dataEntryData?.mesoId ?? '',
   depth: dataEntryData?.depth ?? '',
