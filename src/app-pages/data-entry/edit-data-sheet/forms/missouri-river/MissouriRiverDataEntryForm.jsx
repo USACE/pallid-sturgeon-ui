@@ -297,13 +297,6 @@ const MissouriRiverDataEntryForm = connect(
     };
 
     // Capture Start and Stop Lat, Long, Time
-    const formatGpsCoordinate = (value) => {
-      const number = Number(value);
-      if (!Number.isFinite(number)) {
-        return null;
-      }
-      return Number(number.toFixed(5));
-    };
     const handleCapture = async (type) => {
       try {
         const gpsResult = await captureGpsBest({ browserGps, ubloxGps });

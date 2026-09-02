@@ -97,14 +97,6 @@ const SearchEffortDataEntryForm = connect(
     const hasTelemetry = telemetryCount >= 1;
     const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
-    const formatGpsCoordinate = (value) => {
-      const number = Number(value);
-      if (!Number.isFinite(number)) {
-        return null;
-      }
-      return Number(number.toFixed(5));
-    };
-
     // Capture Start Lat, Long, Time
     const handleCaptureStart = async () => {
       try {
