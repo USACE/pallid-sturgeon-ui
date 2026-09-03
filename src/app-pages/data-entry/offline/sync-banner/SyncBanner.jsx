@@ -89,6 +89,7 @@ const SyncBanner = connect(
           return;
         }
         if (target.type === 'search') {
+          const telemetrySearchDraftRecovery = item.tableName === 'ds_telemetry_fish' && target.tab === 0;
           if (item.tableName === 'ds_telemetry_fish' && item._id != null) {
             sessionStorage.setItem('syncRecoveryOutboxId', String(item._id));
           }
@@ -98,14 +99,16 @@ const SyncBanner = connect(
             value: true,
           });
           doUpdateUrl(`/sites-list/${target.siteKey}/search-effort/${target.formKey}`);
-          doFetchSearchDataEntry(
-            {
-              tableId: target.formKey,
-            },
-            false,
-            true,
-            true
-          );
+          if (!telemetrySearchDraftRecovery) {
+            doFetchSearchDataEntry(
+              {
+                tableId: target.formKey,
+              },
+              false,
+              true,
+              true
+            );
+          }
           return;
         }
         if (target.type === 'moriver') {
@@ -154,29 +157,62 @@ const SyncBanner = connect(
               size='small'
               variant='danger'
               isOutline
-              text={`${'\u26A0'} ${failedItems.length} records${failedItems.length !== 1 ? 's' : ''} need attention`}
-              handleClick={() => setShowErrors((current) => !current)}
+              text={`${'\u26A0'} ${failedItems.length} records${failedItems.length !== 1 ? '' : ''} need attention`}
+              handleClick={() => setShowErrors(true)}
             />
-            {showErrors && (
+          </div>
+        )}
+        {showErrors && failedItems.length > 0 && (
+          <div className='sync-modal-overlay' role='presentation' onClick={(event) => setShowErrors(false)}>
+            <div
+              className='sync-modal'
+              role='dialog'
+              aria-modal='true'
+              aria-labelledby='sync-problems-title'
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className='sync-modal-header'>
+                <h2 id='sync-problems-title' className='sync-modal-title'>
+                  Sync Problems
+                </h2>
+                <button
+                  type='button'
+                  className='sync-modal-close'
+                  aria-label='Close sync problems'
+                  onClick={() => setShowErrors(false)}
+                >
+                  x
+                </button>
+              </div>
+              <p className='sync-modal-help'>
+                Some records could not be synced. Your offline data is still saved. Review each problem below and open
+                the form that needs attention.
+              </p>
               <div className='sync-error-list'>
                 {failedItems.map((item) => (
                   <div key={item._id} className='sync-error-item'>
                     <strong>{getEntityLabel(item.tableName)}</strong>
-                    <div>{item.syncError ?? 'Sync failed.'}</div>
+                    <div className='sync-error-message'>{item.syncError ?? 'Sync failed.'}</div>
                     {item.syncHttp && <small>Server status: {item.syncHttp}</small>}
-                    <div>
+                    <div className='margin-top-1'>
                       <Button
                         size='small'
                         variant='info'
                         isOutline
                         text='Open Record'
-                        handleClick={() => handleOpenProblem(item)}
+                        handleClick={() => {
+                          setShowErrors(false);
+                          handleOpenProblem(item);
+                        }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
-            )}
+              <div className='sync-modal-actions'>
+                <Button size='small' variant='info' isOutline text='Close' handleClick={() => setShowErrors(false)} />
+              </div>
+            </div>
           </div>
         )}
         {!pwaMode && <OfflineSetupButton />}

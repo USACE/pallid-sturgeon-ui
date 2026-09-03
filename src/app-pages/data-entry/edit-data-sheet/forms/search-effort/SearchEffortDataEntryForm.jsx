@@ -13,7 +13,7 @@ import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEffortDataEntryForm.validation';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import { useSharedUbloxGps } from '@src/app-pages/data-entry/offline/UbloxGpsContent';
 import { fmtTimeHHMMSS, formatGpsCoordinate, generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
@@ -35,6 +35,7 @@ const SearchEffortDataEntryForm = connect(
   'doFetchSearchDataEntry',
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
+  'selectDataEntryTelemetryData',
   'doResetTelemetryDataEntries',
   'doUpdateUrl',
   'selectDataEntryData',
@@ -48,6 +49,7 @@ const SearchEffortDataEntryForm = connect(
     doFetchSearchDataEntry,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
+    dataEntryTelemetryData,
     doResetTelemetryDataEntries,
     doUpdateUrl,
     dataEntryData,
@@ -59,13 +61,15 @@ const SearchEffortDataEntryForm = connect(
   }) => {
     // Initialize GPS
     const browserGps = useGpsCapture(GPS_OPTIONS);
-    const ubloxGps = useUbloxSerialGps();
+    const ubloxGps = useSharedUbloxGps();
     const siteRouteKey = routeParams?.siteId;
     const [searchTypeCodes, setSearchTypeCodes] = useState(lookupData?.searchTypeCodes);
     const [submitMessage, setSubmitMessage] = useState(null);
     const searchDraftKey = `currentSearchEffortDraft:${siteRouteKey}`;
+    const recoveryOutboxId = sessionStorage.getItem('syncRecoveryOutboxId');
     const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
     const isOnline = navigator.onLine;
+    const loadedTelemetryCount = (dataEntryTelemetryData?.items ?? []).filter(Boolean).length;
 
     const defaultValues = getSearchEffortDefaultValues({
       dataEntryData,
@@ -94,7 +98,11 @@ const SearchEffortDataEntryForm = connect(
     const seId = watch('seId');
     const seFid = watch('seFid');
     const searchTypeCode = watch('searchTypeCode');
-    const telemetryCount = Number(watch('telemetryCount') || 0);
+    const telemetryCount = Math.max(
+      Number(watch('telemetryCount') || 0),
+      Number(dataEntryTelemetryTotalCount || 0),
+      loadedTelemetryCount
+    );
     const hasTelemetry = telemetryCount >= 1;
     const isShowErrorSummary = submitCount > 0 && !isEmpty(errors);
 
@@ -240,7 +248,36 @@ const SearchEffortDataEntryForm = connect(
       }
     };
 
+    const patchRecoveryTelemetryParent = async (recoveryItem, serverSeId) => {
+      if (!recoveryItem || recoveryItem._id == null || recoveryItem.tableName !== 'ds_telemetry_fish') return;
+      if (!Number.isFinite(Number(serverSeId)) || Number(serverSeId) <= 0) {
+        console.warn('Unable to patch recovered Telemetry: invalid Search Effort ID', serverSeId);
+        return;
+      }
+      const currentPayload = recoveryItem.payload ?? {};
+      await db.outbox.update(recoveryItem._id, {
+        payload: {
+          ...currentPayload,
+          seId: Number(serverSeId),
+          se_id: Number(serverSeId),
+        },
+        syncError: undefined,
+        syncHttp: undefined,
+      });
+
+      const telemetryRow = await db.telemetry.get(recoveryItem.clientId);
+      if (telemetryRow) {
+        await db.telemetry.put({
+          ...telemetryRow,
+          seId: Number(serverSeId),
+          se_id: Number(serverSeId),
+          _status: 'queued',
+        });
+      }
+    };
+
     const doSubmit = async () => {
+      let telemetryDependencyRecovery = false;
       setValue('status', 2);
 
       const values = getCastedValues();
@@ -264,11 +301,39 @@ const SearchEffortDataEntryForm = connect(
       });
 
       try {
+        const recoveryItem = recoveryOutboxId ? await db.outbox.get(Number(recoveryOutboxId)) : null;
+        telemetryDependencyRecovery = recoveryItem?.tableName === 'ds_telemetry_fish';
+        let submitSeId = Number(payload?.seId ?? payload?.se_id) > 0 ? Number(payload?.seId ?? payload?.se_id) : null;
+
         if (isOnline) {
-          if (isEditForm || payload.seId || payload.se_id) {
-            await doUpdateSearchDataEntry(payload);
+          const serverSeId = Number(payload?.seId ?? payload?.se_id ?? 0);
+          const hasServerId = Number.isFinite(serverSeId) && serverSeId > 0;
+          if (hasServerId) {
+            const response = await doUpdateSearchDataEntry(payload);
+            submitSeId = Number(response?.data ?? response?.seId ?? response?.se_id ?? serverSeId) || serverSeId;
           } else {
-            await doSaveSearchDataEntry(payload);
+            const response = await doSaveSearchDataEntry(payload);
+            submitSeId = Number(response?.data ?? response?.seId ?? response?.se_id) || null;
+            if (telemetryDependencyRecovery && submitSeId) {
+              const localSearch = await db.search.get(clientId);
+              if (localSearch) {
+                await db.search.put({
+                  ...localSearch,
+                  ...payload,
+                  seId: Number(submitSeId),
+                  se_id: Number(submitSeId),
+                  status: 2,
+                  _status: 'synced',
+                  serverId: Number(submitSeId),
+                  updatedAt: new Date().toISOString(),
+                });
+              }
+              await patchRecoveryTelemetryParent(recoveryItem, submitSeId);
+            }
+          }
+
+          if (telemetryDependencyRecovery && submitSeId) {
+            await patchRecoveryTelemetryParent(recoveryItem, submitSeId);
           }
         } else {
           const serverSeId = Number(payload?.seId ?? payload?.se_id) > 0;
@@ -281,18 +346,26 @@ const SearchEffortDataEntryForm = connect(
           // Need to populate dataEntryData store
           doFetchSearchDataEntry({ tableId: serverSeId }, false, false, false);
         }
-
+        if (isOnline && telemetryDependencyRecovery && !submitSeId) {
+          throw new Error(
+            'Search Effort submitted, but the server did not return a Search Effort ID. Telemetry cannot be linked yet.'
+          );
+        }
         setValue('clientId', clientId);
         setValue('status', 2);
 
+        if (submitSeId) {
+          setValue('seId', submitSeId);
+        }
         sessionStorage.removeItem(searchDraftKey);
         refreshSiteDatasheet();
-
         setSubmitMessage({
           type: 'success',
-          text: isOnline
-            ? 'Search Effort form submitted successfully.'
-            : 'Search Effort form saved offline successfully. It will sync when you are back online.',
+          text: telemetryDependencyRecovery
+            ? 'Search Effort submitted successfully. Open Telemetry tab and submit the Telemetry record again.'
+            : isOnline
+              ? 'Search Effort form submitted successfully.'
+              : 'Search Effort form saved offline successfully. It will sync when you are back online.',
         });
       } catch (error) {
         console.error('Search submit failed, queueing offline:', error);
@@ -353,6 +426,91 @@ const SearchEffortDataEntryForm = connect(
       }
     };
 
+    const loadRecoverySearchEffortDraft = async () => {
+      if (!recoveryOutboxId) {
+        return false;
+      }
+
+      const outboxItem = await db.outbox.get(Number(recoveryOutboxId));
+      if (!outboxItem || outboxItem.tableName !== 'ds_telemetry_fish') {
+        return false;
+      }
+
+      const telemetryRecord = (await db.telemetry.get(outboxItem.clientId)) ?? outboxItem.payload;
+      if (!telemetryRecord) {
+        return false;
+      }
+
+      const telemetrySeId = telemetryRecord?.seId ?? telemetryRecord?.se_id;
+      const telemetrySeFid = telemetryRecord?.seFid ?? telemetryRecord?.se_fid;
+      const parentSearch = await db.search
+        .filter((search) => {
+          const searchSeId = search?.seId ?? search?.se_id;
+          const searchSeFid = search?.seFid ?? search?.se_fid;
+          const idMatch = telemetrySeId != null && searchSeId != null && String(searchSeId) === String(telemetrySeId);
+          const fidMatch = telemetrySeFid && searchSeFid && String(searchSeFid) === String(telemetrySeFid);
+
+          return idMatch || fidMatch;
+        })
+        .first();
+
+      if (!parentSearch) {
+        console.warn('Unable to load parent Search Effort draft for sync recovery:', {
+          telemetryRecord,
+          telemetrySeId,
+          telemetrySeFid,
+        });
+        return false;
+      }
+
+      const routeSearchKey = routeParams?.seId;
+      const parentSearchKey = [parentSearch?.seId, parentSearch?.se_id, parentSearch?.seFid, parentSearch?.se_fid]
+        .filter((value) => value !== undefined && value !== null && value !== null)
+        .map(String);
+      if (routeSearchKey && parentSearchKey.length > 0 && !parentSearchKey.includes(String(routeSearchKey))) {
+        return false;
+      }
+
+      const telemetryRows = await db.telemetry
+        .filter((tel) => {
+          const rowSeId = tel?.seId ?? tel?.se_id;
+          const rowSeFid = tel?.seFid ?? tel?.se_fid;
+          const idMatch = telemetrySeId != null && rowSeId != null && String(rowSeId) === String(telemetrySeId);
+          const fidMatch = telemetrySeFid && rowSeFid && String(rowSeFid) === String(telemetrySeFid);
+
+          return idMatch || fidMatch;
+        })
+        .toArray();
+
+      const telemetryCount = telemetryRows?.length;
+      const recoveryDraft = {
+        ...parentSearch,
+        telemetryCount: telemetryCount,
+      };
+
+      reset(
+        {
+          ...getSearchEffortDefaultValues({
+            dataEntryData: recoveryDraft,
+            telemetryCount: telemetryCount,
+          }),
+          ...recoveryDraft,
+          telemetryCount: telemetryCount,
+        },
+        {
+          keepDirty: false,
+          keepTouched: false,
+        }
+      );
+      setValue('telemetryCount', telemetryCount, {
+        shouldValidate: true,
+        shouldDirty: false,
+        shouldTouch: false,
+      });
+      sessionStorage.setItem(searchDraftKey, JSON.stringify(recoveryDraft));
+      return true;
+    };
+
     const reloadOfflineSearchEffortDraft = () => {
       if (isEditForm) return false;
 
@@ -388,10 +546,11 @@ const SearchEffortDataEntryForm = connect(
     }, [isOnline]);
 
     useEffect(() => {
+      if (recoveryOutboxId) return;
       const count = Number(dataEntryTelemetryTotalCount || 0);
 
       setValue('telemetryCount', count, { shouldValidate: true, shouldDirty: false, shouldTouch: false });
-    }, [dataEntryTelemetryTotalCount, setValue]);
+    }, [dataEntryTelemetryTotalCount, setValue, recoveryOutboxId]);
 
     // Set IDs
     useEffect(() => {
@@ -436,6 +595,11 @@ const SearchEffortDataEntryForm = connect(
         window.removeEventListener('beforeunload', handleBeforeUnload);
       };
     }, [isDirty]);
+
+    useEffect(() => {
+      if (!recoveryOutboxId) return;
+      void loadRecoverySearchEffortDraft();
+    }, [recoveryOutboxId, routeParams?.seId]);
 
     return (
       <FormProvider {...methods}>

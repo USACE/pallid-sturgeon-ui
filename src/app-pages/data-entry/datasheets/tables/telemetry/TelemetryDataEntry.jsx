@@ -8,7 +8,7 @@ import { Alert, Button } from '@trussworks/react-uswds';
 import { toast } from 'react-toastify';
 
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import { useSharedUbloxGps } from '@src/app-pages/data-entry/offline/UbloxGpsContent';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 
@@ -96,7 +96,7 @@ const formatRow = (row) => {
     positionConfidence: !isNaN(Number(row.positionConfidence)) ? Number(row.positionConfidence) : '',
     suspectedSpawningActivity: !isNaN(Number(row.suspectedSpawningActivity))
       ? Number(row.suspectedSpawningActivity)
-      : '',
+      : null,
   };
 };
 
@@ -125,7 +125,7 @@ const TelemetryDataEntry = connect(
   }) => {
     // Initialize GPS
     const browserGps = useGpsCapture(GPS_OPTIONS);
-    const ubloxGps = useUbloxSerialGps();
+    const ubloxGps = useSharedUbloxGps();
     const { items } = dataEntryTelemetryData;
     const rowData = items?.map((item) => ({ ...normalizeTelemetryRow(item) }));
     const [tableKey, setTableKey] = useState(0);
@@ -156,7 +156,10 @@ const TelemetryDataEntry = connect(
     );
 
     const captureGpsFix = async () => {
-      if (USE_UBLOX_POC && ubloxGps.isConnected && ubloxGps.latestFix) {
+      if (USE_UBLOX_POC && ubloxGps.isConnected) {
+        if (!ubloxGps.latestFix) {
+          throw new Error('u-blox GPS is connected but a satellite fix is not available yet.');
+        }
         console.log('[GPS SOURCE] using u-blox satellite serial GPS');
         return ubloxGps.captureOnce();
       }
@@ -239,6 +242,7 @@ const TelemetryDataEntry = connect(
       // Format new row data
       const newRowData = {
         ...getBaseDefaultValues({ baseData }),
+        bendRiverMile: '',
         tId: null, // Reset tId if copying a save data object
         t_id: null,
         clientId: crypto.randomUUID(),
@@ -327,6 +331,7 @@ const TelemetryDataEntry = connect(
 
             nextRow = {
               ...getBaseDefaultValues({ baseData }),
+              bendRiverMile: '',
               clientId: crypto.randomUUID(),
               ...(seId != null ? { seId: Number(seId), se_id: Number(seId) } : {}),
               ...(seFid
@@ -476,7 +481,39 @@ const TelemetryDataEntry = connect(
           try {
             // Sync Recovery Logic
             if (payload?._syncRecoveryError && payload?.clientId) {
-              await updateData('telemetry', payload.clientId, payload);
+              if (isOnline) {
+                const parentSeId = payload?.seId ?? payload?.se_id;
+                if (!parentSeId) {
+                  throw new Error('Search Effort ID is missing.');
+                }
+                if (isNew) {
+                  await doSaveTelemetryDataEntry(payload);
+                } else {
+                  await doUpdateTelemetryDataEntry(payload);
+                }
+
+                const recoveryItem = await db.outbox
+                  .filter(
+                    (item) =>
+                      item.tableName === 'ds_telemetry_fish' && String(item.clientId) === String(payload.clientId)
+                  )
+                  .first();
+                if (recoveryItem?._id != null) {
+                  await db.outbox.delete(recoveryItem._id);
+                }
+                const localRow = await db.telemetry.get(payload.clientId);
+                if (localRow) {
+                  await db.telemetry.put({
+                    ...localRow,
+                    ...payload,
+                    _status: DataEntryStatuses.Synced,
+                  });
+                }
+                sessionStorage.removeItem('syncRecoveryOutboxId');
+              } else {
+                await updateData('telemetry', payload.clientId, payload);
+              }
+
               setData((currentRows) => {
                 const updatedRows = (currentRows ?? []).map((currentRow) => {
                   if (String(currentRow?.clientId) !== String(payload.clientId)) {
@@ -487,7 +524,7 @@ const TelemetryDataEntry = connect(
                     ...payload,
                     _syncRecoveryError: false,
                     _syncRecoveryMessage: undefined,
-                    _status: DataEntryStatuses.Queued,
+                    _status: isOnline ? DataEntryStatuses.Synced : DataEntryStatuses.Queued,
                     _isPlaceholderRow: false,
                     _isTouched: true,
                   };
@@ -504,7 +541,7 @@ const TelemetryDataEntry = connect(
             }
           } catch (error) {
             console.error('Telemetry save failed, queuing offline:', error);
-            isNew ? await createData('fish', payload) : await updateData('fish', clientId, payload);
+            isNew ? await createData('telemetry', payload) : await updateData('telemetry', clientId, payload);
           }
         }
 
@@ -526,8 +563,8 @@ const TelemetryDataEntry = connect(
 
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
         const telemetryCount = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row)).length;
-        sessionStorage.setItem(searchEffortDraft, JSON.stringify({ ...draft, telemetryCount: telemetryCount }));
-        const hasRecoveryRow = rowsToProcess.some((row) => row._syncRecoveryError && row.clientId);
+        sessionStorage.setItem(searchDraftKey, JSON.stringify({ ...draft, telemetryCount: telemetryCount }));
+        const hasRecoveryRow = rowsToProcess.some(({ item }) => item?._syncRecoveryError && item?.clientId);
         if (!hasRecoveryRow) {
           const telemetryParentId = isOnline ? seId || seFid : seFid || seId;
           await doSearchEffortDatasheetLoadData(telemetryParentId);

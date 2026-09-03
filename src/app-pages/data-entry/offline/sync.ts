@@ -55,6 +55,59 @@ const enum TableName {
   Procedure = 'ds_procedure',
 }
 
+const hasValue = (value: any) => {
+  return value !== undefined && value !== null && value !== '';
+};
+
+const valuesMatch = (left: any, right: any) => {
+  return hasValue(left) && hasValue(right) && String(left) === String(right);
+};
+
+const findParentForTelemetry = async (payload: any) => {
+  const telemetrySeId = payload?.seId ?? payload?.se_id;
+  const telemetrySeFid = payload?.seFid ?? payload?.se_fid;
+
+  return db.search
+    .filter((search: any) => {
+      const searchSeId = search?.seId ?? search?.se_id;
+      const searchSeFid = search?.seFid ?? search?.se_fid;
+
+      return valuesMatch(searchSeId, telemetrySeId) || valuesMatch(searchSeFid, telemetrySeFid);
+    })
+    .first();
+};
+
+const getSyncDependencyError = async (item: OutboxItem): Promise<string | null> => {
+  const payload = item.payload ?? {};
+  if (item.tableName === TableName.Telemetry) {
+    const telemetryServerSeId = Number(payload?.seId ?? payload?.se_id ?? 0);
+    const serverSearchId = Number.isFinite(telemetryServerSeId) && telemetryServerSeId > 0;
+    if (serverSearchId) {
+      return null;
+    }
+
+    const parentSearch = await findParentForTelemetry(payload);
+    if (!parentSearch) {
+      return (
+        'Telemetry cannot sync because its Search Effort cannot be found.' +
+        'Confirm this Telemetry record belongs to the Search Effort form.'
+      );
+    }
+
+    const searchStatus = Number(parentSearch?.status);
+    const offlineStatus = String(parentSearch?._status ?? '').toLowerCase();
+    const isDraft = searchStatus === 1 || offlineStatus === 'draft';
+
+    if (isDraft) {
+      return (
+        'Telemetry cannot sync because its Search Effort has not been submitted. ' +
+        'Please submit Search Effort form before attempting to sync.'
+      );
+    }
+  }
+  return null;
+};
+
 async function patchSiteChildrenAfterCreate(siteItem: OutboxItem, siteResult: any) {
   if (siteItem.tableName !== 'ds_sites') return;
   if (siteItem.op !== 'create') return;
@@ -512,6 +565,21 @@ export async function syncNow(token?: string): Promise<SyncResult> {
 
       const table: any = getTable(item.tableName);
       const localRow: any = await table.get(item.clientId);
+
+      const dependencyIssue = await getSyncDependencyError(item);
+
+      if (dependencyIssue) {
+        console.warn('Sync dependency issue:', {
+          outboxId: item._id,
+          tableName: item.tableName,
+          clientId: item.clientId,
+          message: dependencyIssue,
+        });
+        errors++;
+
+        await saveSyncFailure(item, dependencyIssue);
+        continue;
+      }
 
       if (item.tableName === TableName.Supplemental && item.op === 'create') {
         const payload = item.payload ?? {};
