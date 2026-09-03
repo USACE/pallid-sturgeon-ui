@@ -104,11 +104,31 @@ export default {
         };
       });
 
+      // Mirror API default ordering while offline: site_id desc.
+      // Draft-only rows without a numeric Site ID are sorted by Site FID desc.
+      const sortedSites = [...normalizedSites].sort((a, b) => {
+        const aSiteId = Number(a?.siteId ?? a?.site_id ?? a?.serverId);
+        const bSiteId = Number(b?.siteId ?? b?.site_id ?? b?.serverId);
+        const aHasId = Number.isFinite(aSiteId) && aSiteId > 0;
+        const bHasId = Number.isFinite(bSiteId) && bSiteId > 0;
+
+        if (aHasId && bHasId) {
+          return bSiteId - aSiteId;
+        }
+        if (aHasId) return -1;
+        if (bHasId) return 1;
+
+        const aSiteFid = String(a?.siteFid ?? a?.site_fid ?? '');
+        const bSiteFid = String(b?.siteFid ?? b?.site_fid ?? '');
+
+        return bSiteFid.localeCompare(aSiteFid, undefined, { numeric: true, sensitivity: 'base' });
+      });
+
       dispatch({
         type: 'SITES_UPDATED_ITEMS',
         payload: {
-          items: normalizedSites,
-          totalCount: normalizedSites.length,
+          items: sortedSites,
+          totalCount: sortedSites.length,
         },
       });
     },
