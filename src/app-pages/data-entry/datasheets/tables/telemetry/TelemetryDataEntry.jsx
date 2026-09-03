@@ -480,7 +480,39 @@ const TelemetryDataEntry = connect(
           try {
             // Sync Recovery Logic
             if (payload?._syncRecoveryError && payload?.clientId) {
-              await updateData('telemetry', payload.clientId, payload);
+              if (isOnline) {
+                const parentSeId = payload?.seId ?? payload?.se_id;
+                if (!parentSeId) {
+                  throw new Error('Search Effort ID is missing.');
+                }
+                if (isNew) {
+                  await doSaveTelemetryDataEntry(payload);
+                } else {
+                  await doUpdateTelemetryDataEntry(payload);
+                }
+
+                const recoveryItem = await db.outbox
+                  .filter(
+                    (item) =>
+                      item.tableName === 'ds_telemetry_fish' && String(item.clientId) === String(payload.clientId)
+                  )
+                  .first();
+                if (recoveryItem?._id != null) {
+                  await db.outbox.delete(recoveryItem._id);
+                }
+                const localRow = await db.telemetry.get(payload.clientId);
+                if (localRow) {
+                  await db.telemetry.put({
+                    ...localRow,
+                    ...payload,
+                    _status: DataEntryStatuses.Synced,
+                  });
+                }
+                sessionStorage.removeItem('syncRecoveryOutboxId');
+              } else {
+                await updateData('telemetry', payload.clientId, payload);
+              }
+
               setData((currentRows) => {
                 const updatedRows = (currentRows ?? []).map((currentRow) => {
                   if (String(currentRow?.clientId) !== String(payload.clientId)) {
@@ -491,7 +523,7 @@ const TelemetryDataEntry = connect(
                     ...payload,
                     _syncRecoveryError: false,
                     _syncRecoveryMessage: undefined,
-                    _status: DataEntryStatuses.Queued,
+                    _status: isOnline ? DataEntryStatuses.Synced : DataEntryStatuses.Queued,
                     _isPlaceholderRow: false,
                     _isTouched: true,
                   };
