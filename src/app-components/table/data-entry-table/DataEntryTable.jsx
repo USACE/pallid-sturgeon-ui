@@ -263,43 +263,48 @@ const DataEntryTable = ({
               {table.getRowModel()?.rows?.length === 0 && (
                 <EmptyTableRow onAddClick={placeholderClick} placeholderText={placeholderText} />
               )}
-              {table.getRowModel()?.rows?.map((row) => (
-                <tr
-                  key={row.id}
-                  className={[
-                    row.getIsSelected() ? 'selected-row' : '',
-                    showValidationErrors &&
-                    rowErrors &&
-                    rowErrors?.[row.id] &&
-                    Object.keys(rowErrors[row.id])?.length !== 0
-                      ? 'row-error'
-                      : '',
-                    row.original?._syncRecoveryError ? 'sync-recovery-row' : '',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  {row.getVisibleCells().map((cell) => {
-                    const cellError = rowErrors?.[row.id]?.[cell.column.id];
-                    const isCellError = showValidationErrors && cellError !== undefined;
-                    const cellClasses = isCellError ? 'cell-error' : '';
-                    const showRequiredAsterisk =
-                      typeof isCellRequired === 'function' && isCellRequired(row.original, cell.column.id, row.index);
-                    return (
-                      <td className={cellClasses} key={cell.id} style={{ width: cell.column.getSize() + 'px' }}>
-                        <div className='d-flex align-items-center'>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                          {showRequiredAsterisk && (
-                            <span aria-hidden='true' className='cell-required-asterisk'>
-                              *
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
+              {table.getRowModel()?.rows?.map((row) => {
+                const isPlaceholderRow = row.original?._isPlaceholderRow === true && row.original?._isTouched !== true;
+
+                return (
+                  <tr
+                    key={row.id}
+                    className={[
+                      row.getIsSelected() ? 'selected-row' : '',
+                      showValidationErrors &&
+                      !isPlaceholderRow &&
+                      rowErrors &&
+                      rowErrors?.[row.id] &&
+                      Object.keys(rowErrors[row.id])?.length !== 0
+                        ? 'row-error'
+                        : '',
+                      row.original?._syncRecoveryError ? 'sync-recovery-row' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                  >
+                    {row.getVisibleCells().map((cell) => {
+                      const cellError = rowErrors?.[row.id]?.[cell.column.id];
+                      const isCellError = showValidationErrors && cellError !== undefined;
+                      const cellClasses = isCellError ? 'cell-error' : '';
+                      const showRequiredAsterisk =
+                        typeof isCellRequired === 'function' && isCellRequired(row.original, cell.column.id, row.index);
+                      return (
+                        <td className={cellClasses} key={cell.id} style={{ width: cell.column.getSize() + 'px' }}>
+                          <div className='d-flex align-items-center'>
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            {showRequiredAsterisk && (
+                              <span aria-hidden='true' className='cell-required-asterisk'>
+                                *
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
             </tbody>
           </Table>
         </div>

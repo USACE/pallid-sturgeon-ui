@@ -28,7 +28,7 @@ import {
   formatGpsCoordinate,
   isEmpty,
 } from '@src/app-pages/data-entry/dataEntryHelper';
-import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import { useSharedUbloxGps } from '@src/app-pages/data-entry/offline/UbloxGpsContent';
 import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
@@ -112,7 +112,7 @@ const MissouriRiverDataEntryForm = connect(
   }) => {
     // Initialize GPS
     const browserGps = useGpsCapture(GPS_OPTIONS);
-    const ubloxGps = useUbloxSerialGps();
+    const ubloxGps = useSharedUbloxGps();
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
     const siteRouteKey = routeParams?.siteId;
     const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
