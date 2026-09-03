@@ -81,7 +81,7 @@ const SitesFormModal = connect(
       stateOptions: [],
     });
     const {
-      formState: { errors, isValid },
+      formState: { errors, isValid, isDirty },
       setFocus,
       watch,
       getValues,
@@ -257,6 +257,17 @@ const SitesFormModal = connect(
       }
       !edit && doUpdateUrl(`/sites-list/${finalSiteFid}`);
       doModalClose();
+    };
+
+    const handleClose = () => {
+      if (isDirty) {
+        const confirmed = confirm('Any changes will not be saved. Is this okay?');
+        if (confirmed) {
+          doModalClose();
+        }
+      } else {
+        doModalClose();
+      }
     };
 
     // Update Bend options if Segment values change
@@ -440,6 +451,7 @@ const SitesFormModal = connect(
             saveIsDisabled={!isValid}
             saveText={edit ? 'Apply Changes' : 'Save'}
             onSave={() => handleSave()}
+            onCancel={() => handleClose()}
           />
         </FormProvider>
       </ModalContent>

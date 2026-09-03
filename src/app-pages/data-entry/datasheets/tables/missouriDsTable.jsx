@@ -12,17 +12,44 @@ import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { Button } from '@trussworks/react-uswds';
 import { useEffect, useState } from 'react';
 
-const fishCellStyle = (params) => ({
-  backgroundColor: params.data.bkgColor,
-});
+const fishCellStyle = (params) => {
+  const isOnline = navigator.onLine;
+  var offlineBkgColor = '';
+  if (!isOnline) {
+    if (params?.data?.fishCount > 0) {
+      offlineBkgColor = '#daf2ea';
+    }
+  }
+  return {
+    backgroundColor: isOnline ? params.data.bkgColor : offlineBkgColor,
+  };
+};
 
-const suppCellStyle = (params) => ({
-  backgroundColor: params.data.suppBkgColor,
-});
+const suppCellStyle = (params) => {
+  const isOnline = navigator.onLine;
+  var offlineBkgColor = '';
+  if (!isOnline) {
+    if (params?.data?.suppCount > 0) {
+      offlineBkgColor = '#daf2ea';
+    }
+  }
+  return {
+    backgroundColor: isOnline ? params.data.suppBkgColor : offlineBkgColor,
+  };
+};
 
-const procCellStyle = (params) => ({
-  backgroundColor: params.data.procBkgColor,
-});
+const procCellStyle = (params) => {
+  const isOnline = navigator.onLine;
+  var offlineBkgColor = '';
+  if (!isOnline) {
+    if (params?.data?.procCount > 0) {
+      offlineBkgColor = '#daf2ea';
+    }
+  }
+  return {
+    backgroundColor: isOnline ? params.data.procBkgColor : offlineBkgColor,
+  };
+};
 
 const MissouriDsTable = connect(
   'doResetFormData',
@@ -131,26 +158,16 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='suppCount'
               headerName='Supplemental'
-              width={125}
               cellStyle={suppCellStyle}
-              cellRenderer='mrIdCellRenderer'
-              cellRendererParams={{
-                type: 'supplemental',
-                tab: 1,
-              }}
+              width={125}
               sortable
               unSortIcon
             />
             <AgGridColumn
               field='procCount'
               headerName='Procedure'
-              width={105}
               cellStyle={procCellStyle}
-              cellRenderer='mrIdCellRenderer'
-              cellRendererParams={{
-                type: 'procedure',
-                tab: 1,
-              }}
+              width={105}
               sortable
               unSortIcon
             />
