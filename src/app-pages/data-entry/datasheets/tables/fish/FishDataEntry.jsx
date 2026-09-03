@@ -19,28 +19,7 @@ import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 import Icon from '@src/app-components/icon/icon';
 import { mdiContentCopy } from '@mdi/js';
-
-const createBlankFishRow = () => ({
-  _isPlaceholderRow: true,
-  _isTouched: false,
-});
-
-const isUntouchedPlaceholderFishRow = (row) => row?._isPlaceholderRow === true && row?._isTouched !== true;
-
-const ensureTrailingBlankFishRow = (rows) => {
-  const normalizedRows = rows ?? [];
-
-  if (normalizedRows.length === 0) {
-    return [createBlankFishRow()];
-  }
-
-  const lastRow = normalizedRows[normalizedRows.length - 1];
-  if (isUntouchedPlaceholderFishRow(lastRow)) {
-    return normalizedRows;
-  }
-
-  return [...normalizedRows, createBlankFishRow()];
-};
+import { ensureTrailingBlankRow, isUntouchedPlaceholderRow } from '@src/app-pages/data-entry/dataEntryHelper';
 
 const normalizeFishRow = (row = {}) => ({
   ...row,
@@ -63,27 +42,14 @@ const normalizeFishRow = (row = {}) => ({
   uploadedBy: row?.uploadedBy ?? row?.uploaded_by ?? '',
 });
 
-// Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
-// localRows never seems to return anything(?) - feel free to change if there is an issue.
-// const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
-// const dbRows = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
-// const sequence = localRows.length + dbRows.length + 1;
+// Calculate next Fish Field ID suffix from the current Fish table rows.
+// Suffix always advances as max(existing suffix) + 1 for non-placeholder rows.
 const getNextFishId = (data, parentMrId, parentMrFid) => {
-  const existing = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
-  const parentRows = existing.filter((row) => {
-    if (parentMrFid) {
-      const rowMrFid = row?.mrFid ?? row?.mr_fid;
-
-      return rowMrFid && String(rowMrFid) === String(parentMrFid);
-    }
-    const rowMrId = row?.mrId ?? row?.mr_id;
-
-    return parentMrId != null && rowMrId != null && String(rowMrId) === String(parentMrId);
-  });
+  const existing = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
 
   let maxSequence = 0;
 
-  parentRows.forEach((row) => {
+  existing.forEach((row) => {
     const id = row?.fFid ?? row?.f_fid ?? row?.localDisplayId ?? '';
     const sequencePart = String(id).split('-').pop();
     const sequenceNumber = Number(sequencePart);
@@ -141,7 +107,7 @@ const FishDataEntry = connect(
     });
     const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
-    const [data, setData] = useState(ensureTrailingBlankFishRow(rowData));
+    const [data, setData] = useState(ensureTrailingBlankRow(rowData));
     const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
     const [validationErrorRows, setValidationErrorRows] = useState([]);
     const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
@@ -161,11 +127,11 @@ const FishDataEntry = connect(
     const markRecaptureOptions =
       onlineMarkRecaptureOptions?.length > 0 ? onlineMarkRecaptureOptions : offlineLookups.markRecaptureOptions;
 
-    const dataForValidation = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+    const dataForValidation = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
     const schema = useMemo(() => FishDataEntrySchema({ gear, data: dataForValidation }), [gear, dataForValidation]);
     const tableValidationSchema = {
       validate: (row, options) => {
-        if (isUntouchedPlaceholderFishRow(row)) {
+        if (isUntouchedPlaceholderRow(row)) {
           return Promise.resolve(row);
         }
 
@@ -186,7 +152,7 @@ const FishDataEntry = connect(
 
     const isFishCellRequired = useCallback(
       (row, columnId) => {
-        if (!row || isUntouchedPlaceholderFishRow(row)) {
+        if (!row || isUntouchedPlaceholderRow(row)) {
           return false;
         }
 
@@ -245,27 +211,8 @@ const FishDataEntry = connect(
     }, []);
 
     const handleAddRow = async () => {
-      setData((prev) => ensureTrailingBlankFishRow(prev));
+      setData((prev) => ensureTrailingBlankRow(prev));
       scrollToBottom();
-
-      // Add default values here
-      // const base = getBaseDefaultValues({ baseData });
-      // const fishFid = getNextFishFid(data ?? [], parentMrFid);
-
-      // const newRowData = {
-      //   ...base,
-      //   ...getFishRiverDefaultValues({ dataEntryData }),
-      //   mrId: parentMrId,
-      //   mr_id: parentMrId,
-      //   mrFid: parentMrFid,
-      //   mr_fid: parentMrFid,
-      //   fFid: fishFid,
-      //   f_fid: fishFid,
-      //   _status: OfflineStatuses.New,
-      // };
-
-      // setData((prev) => (prev ? [...prev, newRowData] : [newRowData]));
-      // setData((prev) => ensureTrailingBlankFishRow(prev));
     };
 
     const handleCopyLastRowBtn = () => {
@@ -274,7 +221,7 @@ const FishDataEntry = connect(
         window.alert('Save the Missouri River draft first before copying Fish.');
         return;
       }
-      const rows = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+      const rows = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
 
       if (rows.length === 0) {
         window.alert('No existing Fish row found to copy.');
@@ -321,8 +268,8 @@ const FishDataEntry = connect(
         _isTouched: true,
       };
       setData((prev) => {
-        const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
-        return ensureTrailingBlankFishRow([...existingRows, newRowData]);
+        const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
+        return ensureTrailingBlankRow([...existingRows, newRowData]);
       });
       scrollToBottom();
     };
@@ -330,8 +277,8 @@ const FishDataEntry = connect(
     const handleAddMultipleRows = (rows) => {
       // Handle any data mapping or formatting here
       setData((oldData) => {
-        const existingRows = (oldData ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
-        return ensureTrailingBlankFishRow([...existingRows, ...rows]);
+        const existingRows = (oldData ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
+        return ensureTrailingBlankRow([...existingRows, ...rows]);
       });
       scrollToBottom();
     };
@@ -339,20 +286,20 @@ const FishDataEntry = connect(
     const handleRemoveMultipleRows = useCallback((indicesToRemove) => {
       setData((oldData) => {
         const remainingRows = oldData.filter((_, index) => !indicesToRemove.includes(index));
-        return ensureTrailingBlankFishRow(remainingRows);
+        return ensureTrailingBlankRow(remainingRows);
       });
       setTableKey((old) => old + 1);
     }, []);
 
     const handleUpdateData = useCallback(
       (rowIndex, columnId, updatedValue) => {
-        const touchedPlaceholderRow = isUntouchedPlaceholderFishRow(data?.[rowIndex]);
+        const touchedPlaceholderRow = isUntouchedPlaceholderRow(data?.[rowIndex]);
 
         setData((oldData) => {
           const newData = oldData ? [...oldData] : [];
           if (newData[rowIndex]) {
             const currentRow = newData[rowIndex];
-            const isPlaceholderRow = isUntouchedPlaceholderFishRow(currentRow);
+            const isPlaceholderRow = isUntouchedPlaceholderRow(currentRow);
 
             let nextRow = currentRow;
             if (isPlaceholderRow) {
@@ -397,7 +344,7 @@ const FishDataEntry = connect(
               newData[rowIndex]._status = OfflineStatuses.Edited;
             }
 
-            return ensureTrailingBlankFishRow(newData);
+            return ensureTrailingBlankRow(newData);
           }
           return oldData;
         });
@@ -416,7 +363,7 @@ const FishDataEntry = connect(
 
       let nonPlaceholderRowNumber = 0;
       const rowsToProcess = (data ?? []).reduce((acc, row) => {
-        if (isUntouchedPlaceholderFishRow(row)) {
+        if (isUntouchedPlaceholderRow(row)) {
           return acc;
         }
 
@@ -476,7 +423,10 @@ const FishDataEntry = connect(
                     return null;
                   }
 
-                  const columnId = String(item?.path ?? '').split('.').pop() || '';
+                  const columnId =
+                    String(item?.path ?? '')
+                      .split('.')
+                      .pop() || '';
                   const columnName = (columnHeaderById[columnId] ?? columnId) || 'Row';
                   const key = `${columnName}|${message}`;
                   if (seen.has(key)) {
@@ -524,7 +474,7 @@ const FishDataEntry = connect(
         }
 
         setData((prev) => {
-          const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row));
+          const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
           const updatedRows = existingRows.map((row) => {
             const matchingPayloadEntry = rowPayloads.find(({ item }) => item === row);
 
@@ -536,11 +486,11 @@ const FishDataEntry = connect(
               _status: OfflineStatuses.Queued,
             };
           });
-          return ensureTrailingBlankFishRow(updatedRows);
+          return ensureTrailingBlankRow(updatedRows);
         });
 
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
-        const fishCount = (data ?? []).filter((row) => !isUntouchedPlaceholderFishRow(row)).length;
+        const fishCount = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row)).length;
         sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft, fishCount: fishCount }));
         await doMoRiverDatasheetLoadData(parentMrId ?? parentMrFid);
       } catch (err) {
@@ -557,7 +507,7 @@ const FishDataEntry = connect(
 
     useEffect(() => {
       const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
-      setData(ensureTrailingBlankFishRow(rowData));
+      setData(ensureTrailingBlankRow(rowData));
     }, [baseData?.bendRiverMile, items]);
 
     return (

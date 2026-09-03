@@ -6,7 +6,7 @@ import { mdiCellphoneCog, mdiDownload, mdiEarth } from '@mdi/js';
 import LoaderButton from '@src/app-components/loader/LoaderButton';
 import Icon from '@src/app-components/icon/icon';
 import { downloadLookupsForOffline, downloadSitesForOffline, downloadDatasheetsForOffline } from '../lookup-cache';
-import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import { useSharedUbloxGps } from '../UbloxGpsContent';
 import { usePwaMode } from '../pwa-mode';
 import { getOfflineAuthSession, isOfflineAuthSessionValid } from '../offline-auth';
 
@@ -18,7 +18,7 @@ const OfflineSetupButton = connect(
   'doUpdateUrl',
   'doEnableOfflineAuth',
   ({ auth, userRole, doUpdateUrl, doEnableOfflineAuth }) => {
-    const ubloxGps = useUbloxSerialGps();
+    const ubloxGps = useSharedUbloxGps();
     const pwaMode = usePwaMode();
 
     const [lookupDownloadStatus, setLookupDownloadStatus] = useState(null);
@@ -39,7 +39,7 @@ const OfflineSetupButton = connect(
       setLookupDownloadStatus(null);
 
       // Connect ublox satellite GPS
-      ubloxGps?.connect();
+      await ubloxGps?.connect();
 
       // Download Offline lookups
       try {

@@ -11,7 +11,7 @@ import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 import { getSearchEffortSchema, getSearchEffortDefaultValues } from './SearchEffortDataEntryForm.validation';
 import { filterNullEmptyObjects } from '@src/utils/helpers';
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import { useSharedUbloxGps } from '@src/app-pages/data-entry/offline/UbloxGpsContent';
 import { fmtTimeHHMMSS, formatGpsCoordinate, generateFieldId } from '../../../dataEntryHelper';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
@@ -31,6 +31,7 @@ const getTelemetryWarning = (telemetryCount) => {
 
 const SearchEffortDataEntryForm = connect(
   'doModalOpen',
+  'doFetchSearchDataEntry',
   'doSaveSearchDataEntry',
   'doUpdateSearchDataEntry',
   'doResetTelemetryDataEntries',
@@ -43,6 +44,7 @@ const SearchEffortDataEntryForm = connect(
   'doUpdateCurrentTab',
   ({
     doModalOpen,
+    doFetchSearchDataEntry,
     doSaveSearchDataEntry,
     doUpdateSearchDataEntry,
     doResetTelemetryDataEntries,
@@ -56,7 +58,7 @@ const SearchEffortDataEntryForm = connect(
   }) => {
     // Initialize GPS
     const browserGps = useGpsCapture(GPS_OPTIONS);
-    const ubloxGps = useUbloxSerialGps();
+    const ubloxGps = useSharedUbloxGps();
     const siteRouteKey = routeParams?.siteId;
     const [searchTypeCodes, setSearchTypeCodes] = useState(lookupData?.searchTypeCodes);
     const [submitMessage, setSubmitMessage] = useState(null);
@@ -273,6 +275,8 @@ const SearchEffortDataEntryForm = connect(
           } else {
             await createData('search', payload);
           }
+          // Need to populate dataEntryData store
+          doFetchSearchDataEntry({ tableId: serverSeId }, false, false, false);
         }
 
         setValue('clientId', clientId);

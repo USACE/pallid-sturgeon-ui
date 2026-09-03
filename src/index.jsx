@@ -10,6 +10,7 @@ import NavigateWarningModal from './common/modals/NavigateWarningModal';
 
 import '@trussworks/react-uswds/lib/uswds.css';
 import '@trussworks/react-uswds/lib/index.css';
+import { UbloxGpsProvider } from './app-pages/data-entry/offline/UbloxGpsContent';
 
 const enhancedNavHelper = (store) => {
   const originalNavHelper = getNavHelper(store.doUpdateUrl);
@@ -45,9 +46,11 @@ cache.getAll().then((initialData) => {
 
   ReactDOM.render(
     <Provider store={store}>
-      <div onClick={navHelper}>
-        <App />
-      </div>
+      <UbloxGpsProvider>
+        <div onClick={navHelper}>
+          <App />
+        </div>
+      </UbloxGpsProvider>
     </Provider>,
     document.getElementById('root')
   );

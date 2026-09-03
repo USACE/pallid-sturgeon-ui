@@ -29,6 +29,8 @@ const getSelectOptionValue = (option) => {
 
 export const TableCell = ({ getValue, row, column, table, cell, cellError }) => {
   const columnMeta = column.columnDef.meta;
+  const isPlaceholderRow = row.original?._isPlaceholderRow === true && row.original?._isTouched !== true;
+  const isRequired = columnMeta?.required === true && !isPlaceholderRow;
   const type = columnMeta?.type ?? 'text';
   const tableMeta = table.options.meta;
   const initialValue = getValue();
@@ -142,8 +144,8 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
       menuPlacement='auto'
       placeholder={DROPDOWN_PLACEHOLDER_TEXT}
       isDisabled={columnMeta?.readOnly}
-      isRequired={columnMeta?.required}
-      isClearable={!columnMeta?.required}
+      isRequired={isRequired}
+      isClearable={!isRequired}
       aria-label={columnMeta?.label || 'Select an option'}
       components={{
         IndicatorSeparator: () => null,
@@ -237,7 +239,7 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
       id={cell.id}
       onBlur={handleBlur}
       onChange={handleChange}
-      required={columnMeta?.required}
+      required={isRequired}
       style={{ width: '100%', borderColor: 'hsl(0, 0%, 80%)', minWidth: 200 }}
       value={value ?? ''}
     >
@@ -260,7 +262,7 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
       onBlur={handleBlur}
       onChange={handleChange}
       readOnly={columnMeta?.readOnly}
-      required={columnMeta?.required}
+      required={isRequired}
       style={{ width: '100%', borderColor: 'hsl(0, 0%, 80%)', minWidth: 200 }}
       type={type}
       value={value ?? ''}
