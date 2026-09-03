@@ -95,7 +95,7 @@ const formatRow = (row) => {
     positionConfidence: !isNaN(Number(row.positionConfidence)) ? Number(row.positionConfidence) : '',
     suspectedSpawningActivity: !isNaN(Number(row.suspectedSpawningActivity))
       ? Number(row.suspectedSpawningActivity)
-      : '',
+      : null,
   };
 };
 
