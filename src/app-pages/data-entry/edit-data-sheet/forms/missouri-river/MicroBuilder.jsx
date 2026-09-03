@@ -368,7 +368,7 @@ const MicroBuilder = connect(
               name='micro'
               label='Micro'
               onChange={handleMicroChange}
-              required={Number(projectId) === 1 && microSegmentRequired.includes(segmentId)}
+              required={Number(projectId) === 1 && microSegmentRequired.includes(Number(segmentId))}
               warning={microWarning ? 'Invalid Micro Code' : null}
               maxLength={6}
             />

@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
+import { toast } from 'react-toastify';
+import { mdiCrosshairsGps } from '@mdi/js';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -17,7 +19,6 @@ import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 import { db } from '@src/app-pages/data-entry/offline/db';
 import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
-import { mdiCrosshairsGps } from '@mdi/js';
 import Icon from '@src/app-components/icon/icon';
 import NavigateWarningModal from '@src/common/modals/NavigateWarningModal';
 import { captureGpsBest, GPS_OPTIONS, USE_UBLOX_POC } from '@src/app-pages/data-entry/offline/offlineHelper';
@@ -227,6 +228,7 @@ const SearchEffortDataEntryForm = connect(
           }
         } else {
           await db.search.put(payload);
+          toast.success('Datasheet successfully saved as draft!');
         }
         sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
 
@@ -340,6 +342,9 @@ const SearchEffortDataEntryForm = connect(
           } else {
             await createData('search', payload);
           }
+          toast.success('Datasheet successfully submitted!');
+          // Need to populate dataEntryData store
+          doFetchSearchDataEntry({ tableId: serverSeId }, false, false, false);
         }
         if (isOnline && telemetryDependencyRecovery && !submitSeId) {
           throw new Error(

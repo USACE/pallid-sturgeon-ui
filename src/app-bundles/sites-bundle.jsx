@@ -54,13 +54,16 @@ export default {
   doSitesLoadData:
     () =>
     async ({ dispatch, store }) => {
+      const isOnline = navigator.onLine;
       dispatch({ type: 'LOADING_SITES_INIT_DATA' });
 
-      if (navigator.onLine) {
+      if (isOnline) {
+        // if network status is online, run API call
         store.doFetchSites();
         return;
       }
 
+      // If network status is offline...
       const fieldStudyYear = getCurrentFieldStudyYear();
       const localSites = await db.sites.filter((site) => Number(site.year) === fieldStudyYear).toArray();
       const moriverData = await db.moriver.toArray();
@@ -103,32 +106,23 @@ export default {
           bkgColor: siteHasForms(site) ? '#daf2ea' : (site?.bkgColor ?? null),
         };
       });
+      // Filter Cached vs Existing Sites normalized data
+      const cachedNewSites = normalizedSites.filter((item) => Number(item.siteId) === 0);
+      const existingSites = normalizedSites.filter(
+        (item) => item.siteId !== undefined && item.siteId !== null && Number(item.siteId) > 0
+      );
+      // Descending (Newest to Oldest)
+      const sortedCachedNewSites = [...cachedNewSites]?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      const sortedExistingSites = [...existingSites]?.sort((a, b) => Number(b.siteId) - Number(a.siteId));
 
-      // Mirror API default ordering while offline: site_id desc.
-      // Draft-only rows without a numeric Site ID are sorted by Site FID desc.
-      const sortedSites = [...normalizedSites].sort((a, b) => {
-        const aSiteId = Number(a?.siteId ?? a?.site_id ?? a?.serverId);
-        const bSiteId = Number(b?.siteId ?? b?.site_id ?? b?.serverId);
-        const aHasId = Number.isFinite(aSiteId) && aSiteId > 0;
-        const bHasId = Number.isFinite(bSiteId) && bSiteId > 0;
-
-        if (aHasId && bHasId) {
-          return bSiteId - aSiteId;
-        }
-        if (aHasId) return -1;
-        if (bHasId) return 1;
-
-        const aSiteFid = String(a?.siteFid ?? a?.site_fid ?? '');
-        const bSiteFid = String(b?.siteFid ?? b?.site_fid ?? '');
-
-        return bSiteFid.localeCompare(aSiteFid, undefined, { numeric: true, sensitivity: 'base' });
-      });
+      const sortedSites =
+        cachedNewSites?.length > 0 ? [...sortedCachedNewSites, ...sortedExistingSites] : sortedExistingSites;
 
       dispatch({
         type: 'SITES_UPDATED_ITEMS',
         payload: {
           items: sortedSites,
-          totalCount: sortedSites.length,
+          totalCount: normalizedSites.length,
         },
       });
     },

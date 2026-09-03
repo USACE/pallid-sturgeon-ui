@@ -10,9 +10,18 @@ import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { Button } from '@trussworks/react-uswds';
 import { useEffect, useState } from 'react';
 
-const telemetryCellStyle = (params) => ({
-  backgroundColor: params.data.bkgColor,
-});
+const telemetryCellStyle = (params) => {
+  const isOnline = navigator.onLine;
+  var offlineBkgColor = '';
+  if (!isOnline) {
+    if (params?.data?.telemetryCount > 0) {
+      offlineBkgColor = '#daf2ea';
+    }
+  }
+  return {
+    backgroundColor: isOnline ? params.data.bkgColor : offlineBkgColor,
+  };
+};
 
 const SearchDsTable = connect(
   'doResetFormData',
@@ -21,6 +30,7 @@ const SearchDsTable = connect(
   'doUpdateUrl',
   'doUpdateComplexStateField',
   'selectSearchEffortSitesDatasheetData',
+  'selectSearchEffortSitesDraftDatasheetData',
   'selectRouteParams',
   ({
     doResetFormData,
@@ -29,15 +39,18 @@ const SearchDsTable = connect(
     doUpdateUrl,
     doUpdateComplexStateField,
     searchEffortSitesDatasheetData,
+    searchEffortSitesDraftDatasheetData,
     routeParams,
+    isDraft,
   }) => {
     const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const siteId = routeParams?.siteId;
+    const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
+    const data = isDraft ? searchEffortSitesDraftDatasheetData : searchEffortSitesDatasheetData;
 
     const handleAddButtonClick = () => {
-      const searchDraftKey = `currentSearchEffortDraft:${siteId}`;
       sessionStorage.removeItem(searchDraftKey);
-      // reset form
+      // Reset form data
       doResetFormData();
       doResetTelemetryDataEntries();
       doUpdateCurrentTab(0);
@@ -80,9 +93,9 @@ const SearchDsTable = connect(
         >
           <AgGridReact
             rowHeight={35}
-            rowData={searchEffortSitesDatasheetData}
+            rowData={data}
             defaultColDef={{
-              width: 100,
+              width: 150,
             }}
             frameworkComponents={{
               searchIdCellRenderer: SearchIdCellRenderer,
@@ -91,6 +104,7 @@ const SearchDsTable = connect(
             <AgGridColumn
               field='seId'
               headerName='SE ID'
+              width={75}
               cellRenderer='searchIdCellRenderer'
               cellRendererParams={{
                 type: 'searchEffort',
@@ -101,7 +115,7 @@ const SearchDsTable = connect(
             <AgGridColumn
               field='telemetryCount'
               headerName='Telemetry'
-              width={130}
+              width={100}
               cellStyle={telemetryCellStyle}
               cellRenderer='searchIdCellRenderer'
               cellRendererParams={{
@@ -111,19 +125,19 @@ const SearchDsTable = connect(
               sortable
               unSortIcon
             />
-            <AgGridColumn field='searchTypeCode' width={150} sortable unSortIcon />
-            <AgGridColumn field='startTime' sortable unSortIcon />
-            <AgGridColumn field='startLatitude' width={150} sortable unSortIcon />
-            <AgGridColumn field='startLongitude' width={150} sortable unSortIcon />
-            <AgGridColumn field='stopTime' sortable unSortIcon />
-            <AgGridColumn field='stopLatitude' width={150} sortable unSortIcon />
-            <AgGridColumn field='stopLongitude' width={150} sortable unSortIcon />
-            <AgGridColumn field='temp' sortable unSortIcon />
-            <AgGridColumn field='conductivity' width={125} sortable unSortIcon />
-            <AgGridColumn field='recorder' sortable unSortIcon />
-            <AgGridColumn field='editInitials' width={125} sortable unSortIcon />
+            <AgGridColumn field='searchTypeCode' sortable unSortIcon />
+            <AgGridColumn field='startTime' width={100} sortable unSortIcon />
+            <AgGridColumn field='startLatitude' width={125} sortable unSortIcon />
+            <AgGridColumn field='startLongitude' width={130} sortable unSortIcon />
+            <AgGridColumn field='stopTime' width={100} sortable unSortIcon />
+            <AgGridColumn field='stopLatitude' width={125} sortable unSortIcon />
+            <AgGridColumn field='stopLongitude' width={130} sortable unSortIcon />
+            <AgGridColumn field='temp' width={75} sortable unSortIcon />
+            <AgGridColumn field='conductivity' width={120} sortable unSortIcon />
+            <AgGridColumn field='recorder' width={100} sortable unSortIcon />
+            <AgGridColumn field='editInitials' width={110} sortable unSortIcon />
             <AgGridColumn field='lastEditComment' width={200} sortable unSortIcon />
-            <AgGridColumn field='uploadedBy' width={200} sortable unSortIcon />
+            <AgGridColumn field='uploadedBy' sortable unSortIcon />
           </AgGridReact>
         </div>
       </>
