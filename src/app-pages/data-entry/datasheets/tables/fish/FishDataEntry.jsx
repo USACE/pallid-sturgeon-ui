@@ -42,27 +42,14 @@ const normalizeFishRow = (row = {}) => ({
   uploadedBy: row?.uploadedBy ?? row?.uploaded_by ?? '',
 });
 
-// Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
-// localRows never seems to return anything(?) - feel free to change if there is an issue.
-// const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
-// const dbRows = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
-// const sequence = localRows.length + dbRows.length + 1;
+// Calculate next Fish Field ID suffix from the current Fish table rows.
+// Suffix always advances as max(existing suffix) + 1 for non-placeholder rows.
 const getNextFishId = (data, parentMrId, parentMrFid) => {
   const existing = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
-  const parentRows = existing.filter((row) => {
-    if (parentMrFid) {
-      const rowMrFid = row?.mrFid ?? row?.mr_fid;
-
-      return rowMrFid && String(rowMrFid) === String(parentMrFid);
-    }
-    const rowMrId = row?.mrId ?? row?.mr_id;
-
-    return parentMrId != null && rowMrId != null && String(rowMrId) === String(parentMrId);
-  });
 
   let maxSequence = 0;
 
-  parentRows.forEach((row) => {
+  existing.forEach((row) => {
     const id = row?.fFid ?? row?.f_fid ?? row?.localDisplayId ?? '';
     const sequencePart = String(id).split('-').pop();
     const sequenceNumber = Number(sequencePart);
