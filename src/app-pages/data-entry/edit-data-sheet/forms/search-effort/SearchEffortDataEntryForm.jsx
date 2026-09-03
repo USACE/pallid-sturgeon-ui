@@ -229,6 +229,8 @@ const SearchEffortDataEntryForm = connect(
         } else {
           await db.search.put(payload);
           toast.success('Datasheet successfully saved as draft!');
+          // Need to populate dataEntryData store
+          doFetchSearchDataEntry({ tableId: draftSeFid }, false, false, false);
         }
         sessionStorage.setItem(searchDraftKey, JSON.stringify(payload));
 
