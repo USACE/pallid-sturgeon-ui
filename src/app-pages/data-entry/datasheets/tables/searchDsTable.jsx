@@ -10,9 +10,18 @@ import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
 import { Button } from '@trussworks/react-uswds';
 import { useEffect, useState } from 'react';
 
-const telemetryCellStyle = (params) => ({
-  backgroundColor: params.data.bkgColor,
-});
+const telemetryCellStyle = (params) => {
+  const isOnline = navigator.onLine;
+  var offlineBkgColor = '';
+  if (!isOnline) {
+    if (params?.data?.telemetryCount > 0) {
+      offlineBkgColor = '#daf2ea';
+    }
+  }
+  return {
+    backgroundColor: isOnline ? params.data.bkgColor : offlineBkgColor,
+  };
+};
 
 const SearchDsTable = connect(
   'doResetFormData',
