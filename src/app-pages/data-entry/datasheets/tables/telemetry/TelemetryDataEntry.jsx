@@ -7,7 +7,7 @@ import { mdiContentCopy } from '@mdi/js';
 import { Alert, Button } from '@trussworks/react-uswds';
 
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
-import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import { useSharedUbloxGps } from '@src/app-pages/data-entry/offline/UbloxGpsContent';
 import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 
@@ -124,7 +124,7 @@ const TelemetryDataEntry = connect(
   }) => {
     // Initialize GPS
     const browserGps = useGpsCapture(GPS_OPTIONS);
-    const ubloxGps = useUbloxSerialGps();
+    const ubloxGps = useSharedUbloxGps();
     const { items } = dataEntryTelemetryData;
     const rowData = items?.map((item) => ({ ...normalizeTelemetryRow(item) }));
     const [tableKey, setTableKey] = useState(0);
@@ -155,7 +155,10 @@ const TelemetryDataEntry = connect(
     );
 
     const captureGpsFix = async () => {
-      if (USE_UBLOX_POC && ubloxGps.isConnected && ubloxGps.latestFix) {
+      if (USE_UBLOX_POC && ubloxGps.isConnected) {
+        if (!ubloxGps.latestFix) {
+          throw new Error('u-blox GPS is connected but a satellite fix is not available yet.');
+        }
         console.log('[GPS SOURCE] using u-blox satellite serial GPS');
         return ubloxGps.captureOnce();
       }
