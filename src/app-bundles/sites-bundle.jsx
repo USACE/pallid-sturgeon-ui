@@ -57,6 +57,8 @@ export default {
       const isOnline = navigator.onLine;
       dispatch({ type: 'LOADING_SITES_INIT_DATA' });
 
+      const project = Number(store.selectUserRole()?.projectCode);
+
       if (isOnline) {
         // if network status is online, run API call
         store.doFetchSites();
@@ -65,7 +67,10 @@ export default {
 
       // If network status is offline...
       const fieldStudyYear = getCurrentFieldStudyYear();
-      const localSites = await db.sites.filter((site) => Number(site.year) === fieldStudyYear).toArray();
+      // Filter local sites appropriately by user's project ID
+      const localSites = await db.sites
+        .filter((site) => Number(site.year) === fieldStudyYear && project === site.projectId)
+        .toArray();
       const moriverData = await db.moriver.toArray();
       const searchData = await db.search.toArray();
       const siteHasForms = (site) => {
