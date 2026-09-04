@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
-import { mdiLogout, mdiMenuDown } from '@mdi/js';
+import { mdiLogout, mdiMenu, mdiMenuDown } from '@mdi/js';
 
 import Dropdown from '@components/dropdown';
 import NavItem from './navItem';
@@ -9,7 +9,6 @@ import Icon from '@components/icon/icon';
 
 import { classArray } from '@src/utils';
 import { projectMap } from '@pages/data-entry/helpers';
-import { isOnline } from '@src/app-pages/data-entry/offline/sync';
 
 import './navigation.scss';
 
@@ -29,7 +28,6 @@ const NavBar = connect(
     const [show, setShow] = useState(false);
     const isHome = pathname === '/';
     const user = userRole ? usersData.find((user) => userRole.id === user.id) : {};
-    const online = isOnline();
 
     const navClasses = classArray([
       'navbar',
@@ -49,13 +47,15 @@ const NavBar = connect(
           <a href='/'>Pallid Sturgeon Population Assessment</a>
         </div>
         <button
-          className='navbar-toggler'
+          className='navbar-hamburger-toggle-btn'
           type='button'
           aria-expanded='false'
           aria-label='Toggle navigation'
           onClick={() => toggleShow()}
         >
-          <span className='navbar-toggler-icon' />
+          <span>
+            <Icon path={mdiMenu} size={'25px'} focusable={false} />
+          </span>
         </button>
         <div className={navCollapseClasses}>
           <ul className='navbar-nav ml-auto'>
