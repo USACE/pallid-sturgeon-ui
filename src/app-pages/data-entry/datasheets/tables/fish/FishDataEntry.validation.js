@@ -98,11 +98,6 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             "Gear = LDN500, LDN750, or LDN1000, NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'",
         })
         .required(ValidationMessages.FieldRequired),
-      lengthType: yup.string().when('length', {
-        is: (length) => length !== null && length !== undefined && length !== '' && Number(length) !== 0,
-        then: (schema) => schema.required('Value is required when Length is entered'),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
       length: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
@@ -111,8 +106,25 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .max(9999, 'Value cannot exceed 9999')
         .when(['species', 'countF'], {
           is: (species, count) => ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1,
-          then: (schema) => schema.required('Length is required for PDSG, SNSG, SNPD'),
+          then: (schema) => schema.required('Value is required for PDSG, SNSG, SNPD when Count is 1'),
           otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      lengthType: yup
+        .string()
+        .nullable()
+        .notRequired()
+        .when(['species', 'countF'], {
+          is: (species, count) => ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1,
+          then: (schema) => schema.required('Value is required for PDSG, SNSG, SNPD when Count is 1'),
+        })
+        .when(['length', 'species', 'countF'], {
+          is: (length, species, count) => {
+            const isRequiredBySpeciesAndCount = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
+            const hasLength = length !== null && length !== undefined && length !== '' && Number(length) !== 0;
+
+            return !isRequiredBySpeciesAndCount && hasLength;
+          },
+          then: (schema) => schema.required('Value is required when Length is entered'),
         }),
       weight: yup
         .number()

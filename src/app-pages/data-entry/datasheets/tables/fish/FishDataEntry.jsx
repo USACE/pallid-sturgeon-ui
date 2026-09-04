@@ -12,7 +12,7 @@ import Icon from '@src/app-components/icon/icon';
 
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
-import { OfflineStatuses } from '@src/utils/enums';
+import { DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 import { getFishColumns } from './helpers.fish';
 import { ensureTrailingBlankRow, isUntouchedPlaceholderRow } from '@src/app-pages/data-entry/dataEntryHelper';
@@ -146,8 +146,21 @@ const FishDataEntry = connect(
           return false;
         }
 
+        const species = row?.species;
+        const count = Number(row?.countF);
+        const hasLength = row?.length !== null && row?.length !== undefined && row?.length !== '' && Number(row?.length) !== 0;
+
         const hasFloyTagPrefix = row?.ftPrefix != null && String(row.ftPrefix).trim() !== '';
         const hasFloyTag = row?.floyTag != null && String(row.floyTag).trim() !== '';
+
+        if (columnId === 'length') {
+          return ['PDSG', 'SNSG', 'SNPD'].includes(species) && count === 1;
+        }
+
+        if (columnId === 'lengthType') {
+          const isRequiredBySpeciesAndCount = ['PDSG', 'SNSG', 'SNPD'].includes(species) && count === 1;
+          return isRequiredBySpeciesAndCount || hasLength;
+        }
 
         if (columnId === 'ftPrefix' || columnId === 'floyTag') {
           return hasFloyTagPrefix || hasFloyTag;
