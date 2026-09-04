@@ -14,7 +14,10 @@ export const sitesValidationSchema = yup.object().shape({
     .nullable()
     .test('has-value', ValidationMessages.FieldRequired, (option) => !!option?.value),
   sampleUnitType: yup.string().required(ValidationMessages.FieldRequired),
-  bend: yup.object().required(ValidationMessages.FieldRequired),
+  bend: yup
+    .object()
+    .nullable()
+    .test('has-value', ValidationMessages.FieldRequired, (option) => !!option?.value),
   bendrn: yup.string().required(ValidationMessages.FieldRequired),
 });
 
