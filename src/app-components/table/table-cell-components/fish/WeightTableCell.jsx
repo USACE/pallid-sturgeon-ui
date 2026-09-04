@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { connect } from 'redux-bundler-react';
 import { debounce } from '../tableCellHelper';
 import { decimalNumberRegex } from '@src/utils/regex';
@@ -10,12 +10,11 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
   const tableMeta = table.options.meta;
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
-  const [species, setSpecies] = useState();
-  const [showWarning, setShowWarning] = useState(false);
 
   const project = Number(baseData?.projectId);
-
-  const rowSpecies = useMemo(() => row.getValue('species'), [row]);
+  const species = String(row.getValue('species') ?? '').toUpperCase();
+  const isWeightMissing = value === null || value === undefined || value === '';
+  const showWarning = isWeightMissing && species === 'PDSG' && project === 1;
 
   const debouncedUpdateRef = useRef();
 
@@ -47,25 +46,10 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
     }
   };
 
-  // Get latest species values
-  useEffect(() => {
-    setSpecies(rowSpecies);
-  }, [rowSpecies]);
-
   // Sync value state when initialValue changes (for loading new records)
   useEffect(() => {
     setValue(initialValue);
   }, [initialValue]);
-
-  // Set warning flag
-  useEffect(() => {
-    // The system shall warn the user if species = PDSG and project = 1 and weight field is null
-    if ((value === null || value === undefined) && species === 'PDSG' && Number(project) === 1) {
-      setShowWarning(true);
-    } else {
-      setShowWarning(false);
-    }
-  }, [value, species, project]);
 
   return (
     <div>
@@ -88,7 +72,7 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
       {showWarning && (
         <p>
           <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
-          Weight is required for a Pallid Sturgeon
+          Weight is required when Species is PDSG and Project is 1
         </p>
       )}
     </div>
