@@ -184,12 +184,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
           const maxLength = hasDecimal ? 14 : 10;
           return charCount === maxLength;
         }),
-      finCurl: yup.string().when(['length', 'segment', 'species'], {
-        is: (length, segment, species) =>
-          species === 'PDSG' && ((length < 425 && segment < 7) || (length < 250 && segment >= 7)),
-        then: (schema) => schema.required(ValidationMessages.FieldRequired),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
+      finCurl: yup.string().nullable().notRequired(),
       otolith: yup.string().nullable().notRequired(),
     })
     .test('at-least-one-or-both', 'Both Floy Tag Prefix and Floy Tag are required if one is filled', function (values) {

@@ -1,24 +1,16 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { connect } from 'redux-bundler-react';
 import { debounce, hasValueChanged } from '../tableCellHelper';
 
-const FinCurlTableCell = connect('selectBaseData', ({ baseData, getValue, row, column, table, cell }) => {
+const FinCurlTableCell = connect('selectBaseData', ({ getValue, row, column, table, cell }) => {
   const columnMeta = column.columnDef.meta;
   const tableMeta = table.options.meta;
   const initialValue = getValue();
-  const initialOptions = columnMeta?.options;
   const [value, setValue] = useState(initialValue);
-  const [species, setSpecies] = useState();
-  const [length, setLength] = useState();
-  const rowSpecies = useMemo(() => row.getValue('species'), [row]);
-  const rowLength = useMemo(() => row.getValue('length'), [row]);
-  const [options, setOptions] = useState(initialOptions);
-  const { segmentId } = baseData;
+  const options = columnMeta?.options ?? [];
 
   const debouncedUpdateRef = useRef();
   const previousValueRef = useRef(initialValue);
-
-  const isRequired = species === 'PDSG' && ((length < 425 && segmentId < 7) || (length < 250 && segmentId >= 7));
 
   const updateValue = useCallback((newValue) => {
     debouncedUpdateRef.current(newValue);
@@ -58,11 +50,6 @@ const FinCurlTableCell = connect('selectBaseData', ({ baseData, getValue, row, c
   }, [row.index, column.id, tableMeta?.updateData, columnMeta?.type, tableMeta]);
 
   useEffect(() => {
-    rowSpecies && setSpecies(rowSpecies);
-    rowLength && setLength(rowLength);
-  }, [rowSpecies, rowLength]);
-
-  useEffect(() => {
     setValue(initialValue);
     previousValueRef.current = initialValue;
   }, [initialValue]);
@@ -74,7 +61,7 @@ const FinCurlTableCell = connect('selectBaseData', ({ baseData, getValue, row, c
       id={cell.id}
       onBlur={handleBlur}
       onChange={handleChange}
-      required={columnMeta?.required || isRequired}
+      required={false}
       style={{ width: '100%', borderColor: 'hsl(0, 0%, 80%)' }}
       value={value ?? ''}
     >
