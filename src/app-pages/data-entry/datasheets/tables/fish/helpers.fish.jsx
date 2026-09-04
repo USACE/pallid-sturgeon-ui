@@ -71,6 +71,7 @@ export const getFishColumns = ({
       minSize: 80,
       maxSize: 120,
       meta: {
+        required: gear?.startsWith('TL') || gear?.startsWith('LDN'),
         gear: gear,
       },
     }),
