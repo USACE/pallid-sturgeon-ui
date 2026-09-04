@@ -12,11 +12,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .string()
         .when('species', {
           is: (species) =>
-            species !== null &&
-            species !== '' &&
-            species !== undefined &&
-            (gear?.startsWith('TL') || gear?.startsWith('LDN')) &&
-            !notRequiredSpeciesArr.includes(species),
+            (gear?.startsWith('TL') || gear?.startsWith('LDN')) || !notRequiredSpeciesArr.includes(species),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })

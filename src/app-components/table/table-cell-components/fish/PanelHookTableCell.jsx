@@ -8,16 +8,15 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
   const tableMeta = table.options.meta;
   const initialValue = getValue();
   const [value, setValue] = useState(initialValue);
-  const [species, setSpecies] = useState();
   const rowSpecies = useMemo(() => row.getValue('species'), [row]);
   const isPlaceholderRow = row?.original?._isPlaceholderRow === true && row?.original?._isTouched !== true;
+  const isExemptSpecies = rowSpecies ? notRequiredSpeciesArr.includes(rowSpecies) : false;
 
   const debouncedUpdateRef = useRef();
 
   const isRequired =
     !isPlaceholderRow &&
-    (columnMeta?.gear?.startsWith('TL') || columnMeta?.gear?.startsWith('LDN')) &&
-    !notRequiredSpeciesArr.includes(species);
+    ((columnMeta?.gear?.startsWith('TL') || columnMeta?.gear?.startsWith('LDN')) || !isExemptSpecies);
 
   const updateValue = useCallback((newValue) => {
     debouncedUpdateRef.current(newValue);
@@ -44,10 +43,6 @@ const PanelHookTableCell = connect(({ getValue, row, column, table, cell }) => {
       }
     }, 500);
   }, [row.index, column.id, tableMeta?.updateData, tableMeta]);
-
-  useEffect(() => {
-    rowSpecies && setSpecies(rowSpecies);
-  }, [rowSpecies]);
 
   useEffect(() => {
     setValue(initialValue);
