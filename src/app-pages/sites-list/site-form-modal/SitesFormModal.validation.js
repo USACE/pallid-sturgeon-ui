@@ -9,9 +9,15 @@ export const sitesValidationSchema = yup.object().shape({
   fieldoffice: yup.string().required(ValidationMessages.FieldRequired),
   projectId: yup.string().required(ValidationMessages.FieldRequired),
   season: yup.string().required(ValidationMessages.FieldRequired),
-  segmentId: yup.object().required(ValidationMessages.FieldRequired),
+  segmentId: yup
+    .object()
+    .nullable()
+    .test('has-value', ValidationMessages.FieldRequired, (option) => !!option?.value),
   sampleUnitType: yup.string().required(ValidationMessages.FieldRequired),
-  bend: yup.object().required(ValidationMessages.FieldRequired),
+  bend: yup
+    .object()
+    .nullable()
+    .test('has-value', ValidationMessages.FieldRequired, (option) => !!option?.value),
   bendrn: yup.string().required(ValidationMessages.FieldRequired),
 });
 
@@ -22,10 +28,10 @@ export const getSitesDefaultValues = ({ edit, data, user }) => ({
   year: data?.year ?? String(currentYear),
   fieldoffice: edit ? data?.fieldoffice : user?.officeCode === 'ZZ' ? '' : user?.officeCode,
   projectId: edit ? data?.projectId : user?.projectCode === '2' ? 2 : 1,
-  segmentId: data?.segmentId ?? '',
+  segmentId: data?.segmentId ?? null,
   season: data?.season ?? '',
   sampleUnitType: data?.sampleUnitType ?? 'B',
-  bend: data?.bend ?? '',
+  bend: data?.bend ?? null,
   bendrn: data?.bendrn ?? '',
   last_edit_comment: data?.last_edit_comment ?? '',
   editInitials: data?.editInitials ?? '',

@@ -293,7 +293,7 @@ const SitesFormModal = connect(
           label: buildSegmentDescription(),
         });
       }
-      if (data?.bend) {
+      if (data?.bend || data?.bend === 0) {
         setValue('bend', {
           value: data?.bend,
           label: buildBendDescription(),
