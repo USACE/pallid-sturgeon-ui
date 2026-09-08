@@ -116,7 +116,7 @@ export const useUbloxSerialGps = () => {
           const trimmed = line.trim();
           if (!trimmed) continue;
 
-          console.debug(`${LOG_PREFIX} RAW:`, trimmed);
+          // console.debug(`${LOG_PREFIX} RAW:`, trimmed);
           setRawLine(trimmed);
 
           const fix = parseNmeaLine(trimmed);
@@ -128,7 +128,7 @@ export const useUbloxSerialGps = () => {
             !Number.isNaN(fix.lat) &&
             !Number.isNaN(fix.lng)
           ) {
-            console.info(`${LOG_PREFIX} FIX:`, fix);
+            // console.info(`${LOG_PREFIX} FIX:`, fix);
             setLatestFix(fix);
           }
         }
