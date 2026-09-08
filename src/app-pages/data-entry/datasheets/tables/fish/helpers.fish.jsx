@@ -32,7 +32,7 @@ export const getFishColumns = ({
     columnHelper.accessor('fid', {
       header: 'Fish ID',
       cell: ({ cell }) => <span>{cell.getValue()}</span>,
-      size: 150,
+      size: 90,
     }),
     columnHelper.accessor(
       (row) => ({
@@ -51,13 +51,13 @@ export const getFishColumns = ({
 
           return <span>{value?.localDisplayId ?? ''}</span>;
         },
-        size: 150,
+        size: 80,
       }
     ),
     columnHelper.accessor('supplementalData', {
-      header: 'Supp/Proc Link',
+      header: 'Supple- mental',
       cell: FishLinkTableCell,
-      size: 60,
+      size: 50,
       enableSorting: false,
       meta: {
         centerText: true,
@@ -67,8 +67,8 @@ export const getFishColumns = ({
     columnHelper.accessor('panelHook', {
       header: 'Panel/Hook',
       cell: PanelHookTableCell,
-      size: 80,
-      minSize: 80,
+      size: 70,
+      minSize: 70,
       maxSize: 120,
       meta: {
         required: gear?.startsWith('TL') || gear?.startsWith('LDN'),
@@ -78,8 +78,8 @@ export const getFishColumns = ({
     columnHelper.accessor('species', {
       header: 'Species',
       cell: TableCell,
-      size: 200,
-      maxSize: 200,
+      size: 150,
+      maxSize: 150,
       meta: {
         type: 'combobox',
         required: true,
@@ -97,9 +97,9 @@ export const getFishColumns = ({
     columnHelper.accessor('lengthType', {
       header: 'Length Type',
       cell: TableCell,
-      size: 150,
-      minSize: 150,
-      maxSize: 180,
+      size: 100,
+      minSize: 100,
+      maxSize: 150,
       meta: {
         type: 'select',
         options: createDropdownOptions(lengthTypes),
@@ -108,24 +108,24 @@ export const getFishColumns = ({
     columnHelper.accessor('weight', {
       header: 'Weight(grams)',
       cell: WeightTableCell,
-      size: 150,
-      minSize: 150,
-      maxSize: 180,
+      size: 120,
+      minSize: 120,
+      maxSize: 150,
       meta: { type: 'number' },
     }),
     columnHelper.accessor('countF', {
       header: 'Count',
       cell: CountTableCell,
-      size: 100,
-      minSize: 100,
-      maxSize: 120,
+      size: 80,
+      minSize: 80,
+      maxSize: 100,
     }),
     columnHelper.accessor('ftPrefix', {
       header: 'Floy Tag Prefix',
       cell: FloyTagPrefixTableCell,
-      size: 150,
-      minSize: 150,
-      maxSize: 180,
+      size: 140,
+      minSize: 140,
+      maxSize: 150,
       meta: {
         options: createDropdownOptions(floyTagPrefixes),
       },
@@ -133,9 +133,9 @@ export const getFishColumns = ({
     columnHelper.accessor('floyTag', {
       header: 'Floy Tag',
       cell: FloyTagTableCell,
-      size: 150,
-      minSize: 150,
-      maxSize: 180,
+      size: 110,
+      minSize: 110,
+      maxSize: 120,
     }),
     columnHelper.accessor('mR', {
       header: 'Floy Tag M/R',
