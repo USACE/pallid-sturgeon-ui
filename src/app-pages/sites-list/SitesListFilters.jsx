@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { connect } from 'redux-bundler-react';
-import { Alert, Button, Grid } from '@trussworks/react-uswds';
+import { Button, Grid } from '@trussworks/react-uswds';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -109,9 +109,6 @@ const SitesListFilter = connect(
         <Card.Header text='Site Search Filter' />
         <Card.Body>
           <FormProvider {...methods}>
-            <Alert noIcon slim className='callout'>
-              Make selections from the drop down lists to go to the datasheets associated with your selection.
-            </Alert>
             <Grid row gap='md'>
               <Grid tablet={{ col: 1 }}>
                 <SelectInput label='Year' name='year' showOptionalText={false}>

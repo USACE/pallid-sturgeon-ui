@@ -5,6 +5,7 @@ import { useForm, FormProvider } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
 import { mdiContentCopy } from '@mdi/js';
 import { Alert, Button } from '@trussworks/react-uswds';
+import { toast } from 'react-toastify';
 
 import { useGpsCapture } from '@src/app-components/gps/gpsCapture';
 import { useSharedUbloxGps } from '@src/app-pages/data-entry/offline/UbloxGpsContent';
@@ -95,7 +96,7 @@ const formatRow = (row) => {
     positionConfidence: !isNaN(Number(row.positionConfidence)) ? Number(row.positionConfidence) : '',
     suspectedSpawningActivity: !isNaN(Number(row.suspectedSpawningActivity))
       ? Number(row.suspectedSpawningActivity)
-      : '',
+      : null,
   };
 };
 
@@ -480,7 +481,39 @@ const TelemetryDataEntry = connect(
           try {
             // Sync Recovery Logic
             if (payload?._syncRecoveryError && payload?.clientId) {
-              await updateData('telemetry', payload.clientId, payload);
+              if (isOnline) {
+                const parentSeId = payload?.seId ?? payload?.se_id;
+                if (!parentSeId) {
+                  throw new Error('Search Effort ID is missing.');
+                }
+                if (isNew) {
+                  await doSaveTelemetryDataEntry(payload);
+                } else {
+                  await doUpdateTelemetryDataEntry(payload);
+                }
+
+                const recoveryItem = await db.outbox
+                  .filter(
+                    (item) =>
+                      item.tableName === 'ds_telemetry_fish' && String(item.clientId) === String(payload.clientId)
+                  )
+                  .first();
+                if (recoveryItem?._id != null) {
+                  await db.outbox.delete(recoveryItem._id);
+                }
+                const localRow = await db.telemetry.get(payload.clientId);
+                if (localRow) {
+                  await db.telemetry.put({
+                    ...localRow,
+                    ...payload,
+                    _status: DataEntryStatuses.Synced,
+                  });
+                }
+                sessionStorage.removeItem('syncRecoveryOutboxId');
+              } else {
+                await updateData('telemetry', payload.clientId, payload);
+              }
+
               setData((currentRows) => {
                 const updatedRows = (currentRows ?? []).map((currentRow) => {
                   if (String(currentRow?.clientId) !== String(payload.clientId)) {
@@ -491,7 +524,7 @@ const TelemetryDataEntry = connect(
                     ...payload,
                     _syncRecoveryError: false,
                     _syncRecoveryMessage: undefined,
-                    _status: DataEntryStatuses.Queued,
+                    _status: isOnline ? DataEntryStatuses.Synced : DataEntryStatuses.Queued,
                     _isPlaceholderRow: false,
                     _isTouched: true,
                   };
@@ -525,6 +558,8 @@ const TelemetryDataEntry = connect(
           });
           return ensureTrailingBlankRow(updatedRows);
         });
+
+        toast.success('Datasheet successfully updated!');
 
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
         const telemetryCount = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row)).length;

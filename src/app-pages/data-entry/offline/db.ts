@@ -168,6 +168,7 @@ export interface SearchEffortEntry extends DataEntry {
   site_fid?: string;
   siteFid?: string;
   siteRouteKey?: string;
+  status?: number;
   temp?: number;
   conductivity?: number;
   last_updated?: string;

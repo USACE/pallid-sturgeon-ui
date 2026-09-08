@@ -114,19 +114,20 @@ const SitesListTable = connect(
               headerName='Site ID'
               cellRenderer='siteIdCellRenderer'
               cellRendererParams={{ edit: true }}
-              width={100}
+              width={80}
               sortable
               unSortIcon
             />
             <AgGridColumn field='siteFid' width={125} sortable unSortIcon />
-            <AgGridColumn field='year' width={100} sortable unSortIcon />
-            <AgGridColumn field='fieldoffice' headerName='Field Office' sortable unSortIcon />
-            <AgGridColumn field='projectId' headerName='Project' sortable unSortIcon />
-            <AgGridColumn field='segmentId' headerName='Segment' sortable unSortIcon />
-            <AgGridColumn field='season' sortable unSortIcon />
+            <AgGridColumn field='year' width={75} sortable unSortIcon />
+            <AgGridColumn field='fieldoffice' headerName='Field Office' width={115} sortable unSortIcon />
+            <AgGridColumn field='projectId' headerName='Project' width={100} sortable unSortIcon />
+            <AgGridColumn field='segmentId' headerName='Segment' width={100} sortable unSortIcon />
+            <AgGridColumn field='season' width={100} sortable unSortIcon />
             <AgGridColumn
               field='bend'
               headerName='Sample Unit'
+              width={115}
               cellStyle={cellStyle}
               cellRenderer='siteIdCellRenderer'
               cellRendererParams={{ edit: false }}
@@ -134,9 +135,9 @@ const SitesListTable = connect(
               unSortIcon
             />
             <AgGridColumn field='sampleUnitType' headerName='Sample Unit Type' sortable unSortIcon />
-            <AgGridColumn field='bendrn' headerName='Bend R/N' sortable unSortIcon />
-            <AgGridColumn field='bendRiverMile' sortable unSortIcon />
-            <AgGridColumn field='editInitials' sortable unSortIcon />
+            <AgGridColumn field='bendrn' headerName='Bend R/N' width={100} sortable unSortIcon />
+            <AgGridColumn field='bendRiverMile' width={135} sortable unSortIcon />
+            <AgGridColumn field='editInitials' width={115} sortable unSortIcon />
             <AgGridColumn field='last_edit_comment' headerName='Last Edit Comment' sortable unSortIcon />
             <AgGridColumn field='uploadedBy' sortable unSortIcon />
           </AgGridReact>

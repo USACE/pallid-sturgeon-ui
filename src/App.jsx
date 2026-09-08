@@ -51,16 +51,16 @@ export default connect(
     }, [doGetAllLookupData, isAuthenticated, userHasRole, doModalOpen]);
 
     return (
-      <>
+      <div className='page'>
         {loadingState && <LoadingModal text={loadingMessage} />}
         <ToastContainer autoClose={3500} hideProgressBar={false} />
         {(!pwaMode || !isAuthenticated) && <NavBar />}
         {auth.token && <SyncBanner />}
-        <PageContent>{auth.token ? <Route /> : <Hero />}</PageContent>
+        <PageContent className='main'>{auth.token ? <Route /> : <Hero />}</PageContent>
         <Modal closeWithEscape />
         <SecondaryModal closeWithEscape />
         <Footer />
-      </>
+      </div>
     );
   }
 );

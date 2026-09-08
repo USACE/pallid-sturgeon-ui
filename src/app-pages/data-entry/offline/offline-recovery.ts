@@ -110,13 +110,15 @@ const findParentSearch = async (record: any) => {
     return null;
   }
 
-  return db.search.filter((search) => {
-    const childKeys = [search?.seId, search?.se_id, search?.seFid, search?.se_fid]
-      .filter((value) => value !== undefined && value !== null && value !== '')
-      .map(String);
+  return db.search
+    .filter((search) => {
+      const childKeys = [search?.seId, search?.se_id, search?.seFid, search?.se_fid]
+        .filter((value) => value !== undefined && value !== null && value !== '')
+        .map(String);
 
-    return childKeys.some((value) => seKeys.includes(value));
-  });
+      return childKeys.some((value) => seKeys.includes(value));
+    })
+    .first();
 };
 
 const getFishRecordForChild = async (record: any) => {
@@ -175,6 +177,8 @@ export const getRecoveryTarget = async (item: OutboxItem): Promise<RecoveryTarge
     }
     case 'ds_telemetry_fish': {
       const parentSearch = await findParentSearch(record);
+      const parentIsDraft =
+        Number(parentSearch?.status) === 1 || String(parentSearch?._status ?? '').toLowerCase() === 'draft';
       const siteKey = getSiteKeyFromRecord(parentSearch) ?? getSiteKeyFromRecord(record);
       const searchKey = getSearchKeyFromRecord(parentSearch) ?? getSearchKeyFromRecord(record);
 
@@ -187,7 +191,7 @@ export const getRecoveryTarget = async (item: OutboxItem): Promise<RecoveryTarge
         type: 'search',
         siteKey: String(siteKey),
         formKey: String(searchKey),
-        tab: 1,
+        tab: parentIsDraft ? 0 : 1,
       };
     }
     case 'ds_moriver': {

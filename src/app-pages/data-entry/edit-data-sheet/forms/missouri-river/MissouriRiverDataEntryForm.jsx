@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button, Grid } from '@trussworks/react-uswds';
 import { mdiCrosshairsGps } from '@mdi/js';
+import { toast } from 'react-toastify';
 
 import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 import SelectInput from '@src/app-components/new-inputs/select-input/SelectInput';
@@ -357,7 +358,7 @@ const MissouriRiverDataEntryForm = connect(
         site_fid: isOfflineSite ? siteRouteKey : dataObj?.site_fid,
         siteRouteKey,
         status: DataEntryStatuses.Draft,
-        _status: 'draft',
+        _status: DataEntryStatuses.Draft,
         version: dataObj.version ?? 0,
         updatedAt: new Date().toISOString(),
       });
@@ -375,6 +376,7 @@ const MissouriRiverDataEntryForm = connect(
           newForm() ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
           await db.moriver.put(payload);
+          toast.success('Datasheet successfully updated!');
           // Need to populate dataEntryData store
           doFetchMoRiverDataEntry({ tableId: finalMrFid }, false, false, false);
         }
@@ -435,8 +437,10 @@ const MissouriRiverDataEntryForm = connect(
 
         try {
           newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+          toast.success('Datasheet successfully updated!');
         } catch (error) {
           console.error('Submit failed, queueing offline:', error);
+          toast.error('Submit failed, queueing offline!');
           newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
         }
         setValue('clientId', clientId);

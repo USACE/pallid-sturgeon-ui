@@ -66,10 +66,8 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishReco
         }),
       micro: yup
         .string()
-        .min(6, 'Values must be 6 digits only')
-        .max(6, 'Values cannot exceed 6 digits')
         .when(['segment', 'project'], {
-          is: (segment, project) => Number(project) == 1 && microSegmentRequired.includes(segment),
+          is: (segment, project) => Number(project) == 1 && microSegmentRequired.includes(Number(segment)),
           then: (schema) =>
             schema.when('u6', {
               is: (val) => !val,
@@ -77,7 +75,8 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishReco
               otherwise: (schema) => schema.nullable().notRequired(),
             }),
           otherwise: (schema) => schema.nullable().notRequired(),
-        }),
+        })
+        .test('micro-six-characters', 'Micro must be exactly 6 characters', (value) => !value || value.length === 6),
       microStructure: yup.string().nullable(),
       structureFlow: yup.string().when('microStructure', {
         is: (val) => val !== null && val !== '',
@@ -123,12 +122,24 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishReco
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
       startTime: yup.string().when(['gear', 'velocitybot1', 'velocity081'], {
-        is: (gear, velocitybot1, velocity081) =>
-          gear.startsWith('LDN') &&
-          (velocitybot1 === null || velocitybot1 === '') &&
-          (velocity081 === null || velocity081 === ''),
-        then: (schema) => schema.nullable().notRequired(),
-        otherwise: (schema) => schema.required(ValidationMessages.FieldRequired),
+        is: (gear, velocitybot1, velocity081) => {
+          // If gear is not Larvel Drift Net, ignore validation
+          if (!gear.startsWith('LDN')) return true;
+          // If gear is Larvel Drigt Net, execute validation
+          if (
+            gear.startsWith('LDN') &&
+            (velocitybot1 === null ||
+              velocitybot1 === '' ||
+              velocitybot1 === undefined ||
+              velocity081 === null ||
+              velocity081 === '' ||
+              velocity081 === undefined)
+          )
+            return false;
+          return true;
+        },
+        then: (schema) => schema.required(ValidationMessages.FieldRequired),
+        otherwise: (schema) => schema.nullable().notRequired(),
       }),
       startLatitude: yup
         .string()
@@ -193,7 +204,7 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishReco
           message: 'Value must be between -111 and -89 degrees.  Enter 0 if unknown',
         }),
       u1: yup.string().when('project', {
-        is: (val) => Number(val) === 3,
+        is: (project) => Number(project) === 3,
         then: (schema) => schema.required(ValidationMessages.FieldRequired),
         otherwise: (schema) => schema.nullable().notRequired(),
       }),
@@ -287,18 +298,9 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishReco
       depth1: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
-        .when('gear', {
-          is: (val) => gearReqFields.depth1.includes(val),
-          then: (schema) =>
-            schema.required(ValidationMessages.FieldRequired).when('meso', {
-              is: (val) => val !== null && val !== '' && val === 'BARS',
-              then: (schema) =>
-                schema.test({
-                  test: (value) => value <= 1.2,
-                  message: 'Value cannot be greater than 1.2 when Meso = BAR',
-                }),
-              otherwise: (schema) => schema.required(ValidationMessages.FieldRequired),
-            }),
+        .when(['gear', 'gearType'], {
+          is: (gear, gearType) => gearType === 'S' && gearReqFields.depth1.includes(gear),
+          then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
         .typeError(ValidationMessages.FieldRequired)
@@ -307,22 +309,23 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishReco
         .test({
           test: (value) => value === undefined || /^\-?\d{1,2}(\.\d)?$/.test(value.toString()),
           message: 'Must have at most 1 decimal place',
+        })
+        .test({
+          test: (depth1, { parent: { meso } }) => {
+            if (meso) {
+              if (depth1 !== '' && depth1 > 1.2) return false;
+              return true;
+            }
+            return true;
+          },
+          message: 'Value cannot be greater than 1.2 when Meso = BAR',
         }),
       depth2: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when('gear', {
           is: (val) => gearReqFields.depth2.includes(val),
-          then: (schema) =>
-            schema.required(ValidationMessages.FieldRequired).when('meso', {
-              is: (val) => val !== null && val !== '' && val === 'BARS',
-              then: (schema) =>
-                schema.test({
-                  test: (value) => value <= 1.2,
-                  message: 'Value cannot be greater than 1.2 when Meso = BAR',
-                }),
-              otherwise: (schema) => schema.required(ValidationMessages.FieldRequired),
-            }),
+          then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
         .typeError(ValidationMessages.FieldRequired)
@@ -331,22 +334,23 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishReco
         .test({
           test: (value) => value === undefined || /^\-?\d{1,2}(\.\d)?$/.test(value.toString()),
           message: 'Must have at most 1 decimal place',
+        })
+        .test({
+          test: (depth2, { parent: { meso } }) => {
+            if (meso) {
+              if (depth2 !== '' && depth2 > 1.2) return false;
+              return true;
+            }
+            return true;
+          },
+          message: 'Value cannot be greater than 1.2 when Meso = BAR',
         }),
       depth3: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
         .when('gear', {
           is: (val) => gearReqFields.depth3.includes(val),
-          then: (schema) =>
-            schema.required(ValidationMessages.FieldRequired).when('meso', {
-              is: (val) => val !== null && val !== '' && val === 'BARS',
-              then: (schema) =>
-                schema.test({
-                  test: (value) => value <= 1.2,
-                  message: 'Value cannot be greater than 1.2 when Meso = BAR',
-                }),
-              otherwise: (schema) => schema.required(ValidationMessages.FieldRequired),
-            }),
+          then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
         .typeError(ValidationMessages.FieldRequired)
@@ -355,6 +359,16 @@ export const getMissouriRiverSchema = ({ riverMile, hasPDSG = false, hasFishReco
         .test({
           test: (value) => value === undefined || /^\-?\d{1,2}(\.\d)?$/.test(value.toString()),
           message: 'Must have at most 1 decimal place',
+        })
+        .test({
+          test: (depth3, { parent: { meso } }) => {
+            if (meso) {
+              if (depth3 !== '' && depth3 > 1.2) return false;
+              return true;
+            }
+            return true;
+          },
+          message: 'Value cannot be greater than 1.2 when Meso = BAR',
         }),
       velocitybot1: yup
         .number()
