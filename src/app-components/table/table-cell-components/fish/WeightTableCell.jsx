@@ -72,7 +72,7 @@ const WeightTableCell = connect('selectBaseData', ({ baseData, getValue, row, co
       {showWarning && (
         <p>
           <Icon path={mdiAlert} style={{ color: '#9e741a' }} />
-          Weight is required when Species is PDSG and Project is 1
+          Required (PDSG)
         </p>
       )}
     </div>
