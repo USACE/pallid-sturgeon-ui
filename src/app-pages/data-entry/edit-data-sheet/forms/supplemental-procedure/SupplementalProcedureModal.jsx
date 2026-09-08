@@ -622,7 +622,7 @@ const SupplementalProcedureModal = connect(
       const hasDecimal = String(tagnumber)?.includes('.');
       
       if (hasDecimal) {
-        const charCount = String(tagnumber)?.replace('.', '').length;
+        const charCount = String(tagnumber)?.length;
         return charCount !== 14
           ? 'Tag number must be exactly 14 characters when a decimal is present'
           : null;
@@ -636,7 +636,7 @@ const SupplementalProcedureModal = connect(
     const tagNumberMaxLength = () => {
       const hasDecimal = String(tagnumber)?.includes('.');
       if (hasDecimal) {
-        return 15;
+        return 14;
       } else {
         return 10;
       }
