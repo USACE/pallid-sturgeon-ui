@@ -554,7 +554,17 @@ const FishDataEntry = connect(
           columns={tableColumns}
           data={data}
           enablePagination={false}
-          initialTableState={{}}
+          initialTableState={{
+            columnVisibility: {
+              fid: false,
+              otolith: false,
+              raySpine: false,
+              KN: false,
+              RSD: false,
+              editInitials: false,
+              uploadedBy: false,
+            },
+          }}
           isCellRequired={isFishCellRequired}
           key={tableKey}
           placeholderClick={handleAddRow}
