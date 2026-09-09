@@ -8,9 +8,12 @@ import { OfflineStatuses } from '@src/utils/enums';
 import { useEffect, useMemo, useState } from 'react';
 import { siteDatasheetUpdated } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 
+const noFishSpecies = ['NFSH', 'CNFH', 'CNA', 'NDNF'];
+
 const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, getValue, row }) => {
   const value = getValue();
   const isPlaceholderRow = row?.original?._isPlaceholderRow === true;
+  const isNoFishRow = noFishSpecies.includes(row?.original?.species);
   const [refreshCounter, setRefreshCounter] = useState(0);
 
   useEffect(() => {
@@ -51,7 +54,7 @@ const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, getValue, row }
     }
   }, [rowFfid, refreshCounter]);
 
-  if (isPlaceholderRow) {
+  if (isPlaceholderRow || isNoFishRow) {
     return null;
   }
 
