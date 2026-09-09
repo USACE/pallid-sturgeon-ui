@@ -32,7 +32,10 @@ const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, getValue, row }
   const hasFishId =
     (rowFid !== null && rowFid !== undefined && String(rowFid) !== '') ||
     (rowFfid !== null && rowFfid !== undefined && String(rowFfid) !== '');
-  const isUnsavedNewFish = row?.original?._status === OfflineStatuses.New || !hasFishId;
+  const isLocallyPersisted = [OfflineStatuses.Queued, OfflineStatuses.Edited, OfflineStatuses.Conflict, 'synced'].includes(
+    row?.original?._status
+  );
+  const isUnsavedNewFish = row?.original?._status === OfflineStatuses.New || (!hasFishId && !isLocallyPersisted);
   const hasOfflineSupplementalDraft = useMemo(() => {
     if (!rowFfid) {
       return false;
