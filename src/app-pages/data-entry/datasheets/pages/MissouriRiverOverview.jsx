@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { connect } from 'redux-bundler-react';
 
 import Card from '@components/card';
@@ -7,20 +8,23 @@ import TabContainer from '@components/tab';
 import Breadcrumb from '@src/app-components/breadcrumb';
 import MissouriRiverDataEntryForm from '../../edit-data-sheet/forms/missouri-river/MissouriRiverDataEntryForm';
 import FishDataEntry from '../tables/fish/FishDataEntry';
+import NavigateWarningModal from '@src/common/modals/NavigateWarningModal';
 
 import '../../../data-summaries/data-summary.scss';
 import '../../dataentry.scss';
 
 const MissouriRiverOverview = connect(
+  'doModalOpen',
   'doUpdateCurrentTab',
   'selectDataEntryData',
   'selectDataEntryFishTotalCount',
   'selectCurrentTab',
   'selectRouteParams',
   'selectIsEditForm',
-  ({ doUpdateCurrentTab, dataEntryData, dataEntryFishTotalCount, currentTab, routeParams, isEditForm }) => {
+  ({ doModalOpen, doUpdateCurrentTab, dataEntryData, dataEntryFishTotalCount, currentTab, routeParams, isEditForm }) => {
     const siteId = routeParams?.siteId;
     const mrId = routeParams.mrId;
+    const [isFishDirty, setIsFishDirty] = useState(false);
     const isOnline = navigator.onLine;
     const moriverDraftKey = `currentMissouriRiverDraft:${siteId}`;
     const savedMoriverDraft = sessionStorage.getItem(moriverDraftKey);
@@ -73,13 +77,22 @@ const MissouriRiverOverview = connect(
                   ? [
                       {
                         title: `Fish (${dataEntryFishTotalCount})`,
-                        content: <FishDataEntry />,
+                        content: <FishDataEntry onDirtyChange={setIsFishDirty} />,
                       },
                     ]
                   : []),
               ]}
               onTabChange={(_str, ind) => {
                 if (ind === 1 && !moriverSaved) return;
+                if (currentTab === 1 && ind !== 1 && isFishDirty) {
+                  doModalOpen(NavigateWarningModal, {
+                    onNavigate: () => {
+                      setIsFishDirty(false);
+                      doUpdateCurrentTab(ind);
+                    },
+                  });
+                  return false;
+                }
                 doUpdateCurrentTab(ind);
               }}
               defaultTab={moriverSaved ? currentTab : 0}

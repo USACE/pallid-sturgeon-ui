@@ -48,10 +48,9 @@ const TagnumberTableCell = connect(({ getValue, row, column, table, cell }) => {
   useEffect(() => {
     const hasDecimal = String(value)?.includes('.');
     if (hasDecimal) {
-      const parseVal = String(value)?.replace('.', '');
       setShowWarning(
-        (parseVal?.length < 14 || parseVal?.length > 14) && parseVal !== ''
-          ? 'Value cannot be less than or greater than 14 digits'
+        (String(value)?.length < 14 || String(value)?.length > 14) && value !== ''
+          ? 'Value cannot be less than or greater than 14 characters'
           : null
       );
     } else {
@@ -78,7 +77,7 @@ const TagnumberTableCell = connect(({ getValue, row, column, table, cell }) => {
         }}
         type='text'
         value={value ?? ''}
-        maxLength={String(value)?.includes('.') ? 15 : 10}
+        maxLength={String(value)?.includes('.') ? 14 : 10}
         minLength={10}
       />
       {showWarning && (
