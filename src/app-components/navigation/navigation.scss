@@ -86,6 +86,11 @@
   border-bottom: 1px solid $color-gray-light;
 }
 
+.navbar-hamburger-toggle-btn {
+  background-color: var(--background-color);
+  color: var(--color-navbar-item);
+}
+
 @media screen and (max-width: $medium-screen-width) {
   .navbar-brand {
     text-overflow: ellipsis;
@@ -101,7 +106,7 @@
   }
 
   .navbar-collapse {
-    background: $color-white !important;
+    background: var(--background-color) !important;
     border: 1px solid $color-primary-light;
     margin-top: 5px;
     padding-top: 3px;

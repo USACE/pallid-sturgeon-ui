@@ -361,7 +361,7 @@ const MicroBuilder = connect(
     }, [isOnline]);
 
     return (
-      <Grid tablet={{ col: 8 }}>
+      <Grid desktop={{ col: 8 }} tablet={{ col: 12 }}>
         <Grid row gap='md'>
           <Grid tablet={{ col: 3 }}>
             <TextInput
