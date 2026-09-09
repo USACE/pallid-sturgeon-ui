@@ -637,8 +637,8 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
           </Grid>
 
-          <Grid row gap='md' className='padding-bottom-3'>
-            <Grid desktop={{ col: 2 }}>
+          <Grid row gap='md'>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput
                 name='setdate'
                 label='Set Date'
@@ -648,13 +648,13 @@ const MissouriRiverDataEntryForm = connect(
                 required
               />
             </Grid>
-            <Grid desktop={{ col: 1 }}>
+            <Grid desktop={{ col: 1 }} tablet={{ col: 2 }}>
               <TextInput name='subsample' label='Subsample' type='number' onChange={handleChange} required />
             </Grid>
-            <Grid desktop={{ col: 1 }}>
+            <Grid desktop={{ col: 1 }} tablet={{ col: 2 }}>
               <TextInput name='subsamplepass' label='Pass' type='number' onChange={handleChange} required />
             </Grid>
-            <Grid desktop={{ col: 1 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <SelectInput name='subsamplen' label='Subsample R/N' onChange={handleChange} required>
                 {createDropdownOptions(lookups?.bendSelections).map((item, index) => (
                   <option key={index + 1} value={item.value}>
@@ -663,7 +663,7 @@ const MissouriRiverDataEntryForm = connect(
                 ))}
               </SelectInput>
             </Grid>
-            <Grid desktop={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <SelectInput name='subsampleType' label='Subsample Type' onChange={handleChange} required>
                 {createDropdownOptions(lookups?.subsampleTypes).map((item, index) => (
                   <option key={index + 1} value={item.value}>
@@ -672,25 +672,7 @@ const MissouriRiverDataEntryForm = connect(
                 ))}
               </SelectInput>
             </Grid>
-            <Grid desktop={{ col: 2 }}>
-              <SelectInput name='gearType' label='Gear Type' onChange={handleChange} required>
-                {createDropdownOptions(lookups?.gearTypes).map((item, index) => (
-                  <option key={index + 1} value={item.value}>
-                    {item.text}
-                  </option>
-                ))}
-              </SelectInput>
-            </Grid>
-            <Grid desktop={{ col: 2 }}>
-              <SelectInput name='gear' label='Gear Code' onChange={handleChange} required>
-                {createDropdownOptions(gearCodeOptions).map((item, index) => (
-                  <option key={index + 1} value={item.value}>
-                    {item.value}
-                  </option>
-                ))}
-              </SelectInput>
-            </Grid>
-            <Grid desktop={{ col: 1 }}>
+            <Grid desktop={{ col: 1 }} tablet={{ col: 2 }}>
               <TextInput
                 name='recorder'
                 label='Recorder'
@@ -699,6 +681,26 @@ const MissouriRiverDataEntryForm = connect(
                 style={{ textTransform: 'uppercase' }}
                 required
               />
+            </Grid>
+          </Grid>
+          <Grid row gap='md' className='padding-bottom-3'>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
+              <SelectInput name='gearType' label='Gear Type' onChange={handleChange} required>
+                {createDropdownOptions(lookups?.gearTypes).map((item, index) => (
+                  <option key={index + 1} value={item.value}>
+                    {item.text}
+                  </option>
+                ))}
+              </SelectInput>
+            </Grid>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
+              <SelectInput name='gear' label='Gear Code' onChange={handleChange} required>
+                {createDropdownOptions(gearCodeOptions).map((item, index) => (
+                  <option key={index + 1} value={item.value}>
+                    {item.value}
+                  </option>
+                ))}
+              </SelectInput>
             </Grid>
           </Grid>
 
@@ -880,10 +882,10 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
             <Grid desktop={{ col: 7 }}>
               <Grid row gap='md'>
-                <Grid desktop={{ col: 1 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput name='u1' label='U1' required={Number(projectId) === 3} onChange={handleChange} />
                 </Grid>
-                <Grid desktop={{ col: 1 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput
                     name='u2'
                     label='U2'
@@ -892,16 +894,16 @@ const MissouriRiverDataEntryForm = connect(
                     type={gearCode.startsWith('TL') ? 'number' : 'text'}
                   />
                 </Grid>
-                <Grid desktop={{ col: 1 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput name='u3' label='U3' onChange={handleChange} />
                 </Grid>
-                <Grid desktop={{ col: 1 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput name='u4' label='U4' onChange={handleChange} />
                 </Grid>
-                <Grid desktop={{ col: 2 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput name='u5' label='U5' onChange={handleChange} />
                 </Grid>
-                <Grid desktop={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <SelectInput name='u6' label='U6' onChange={handleChange}>
                     {lookups?.u6Options?.map((item, index) => (
                       <option key={index + 1} value={item.code}>
@@ -910,7 +912,7 @@ const MissouriRiverDataEntryForm = connect(
                     ))}
                   </SelectInput>
                 </Grid>
-                <Grid desktop={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <SelectInput name='u7' label='U7' onChange={handleChange}>
                     {createDropdownOptions(lookups?.u7Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
