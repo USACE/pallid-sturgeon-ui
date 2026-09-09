@@ -24,3 +24,8 @@ yarn-debug.log*
 yarn-error.log*
 yarn.lock
 /nbproject/private/
+envvars.list
+
+scratch.txt
+
+rollup-analyze.json
