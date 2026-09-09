@@ -1,4 +1,18 @@
+@use '@styles/_variables' as *;
+@use '@styles/_mixins' as mixin;
+@use '@styles/_theme' as theme;
+
 .pagination-select {
   display: inline;
   max-width: 70px;
+}
+
+.page-link {
+  background-color: var(--background-color);
+}
+
+.page-item.active .page-link {
+  color: #fff;
+  background-color: var(--color-breadcrumbs-link);
+  border-color: var(--color-breadcrumbs-link);
 }
