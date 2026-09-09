@@ -2,9 +2,13 @@ import { connect } from 'redux-bundler-react';
 import ModalContent from '@src/app-components/modal/primary-modal/PrimaryModal.content';
 import ModalFooter from '@src/app-components/modal/primary-modal/PrimaryModal.footer';
 
-const NavigateWarningModal = connect('doUpdateUrl', 'doModalClose', ({ doUpdateUrl, doModalClose, url }) => {
+const NavigateWarningModal = connect('doUpdateUrl', 'doModalClose', ({ doUpdateUrl, doModalClose, onNavigate, url }) => {
   const handleNavigation = () => {
     doModalClose();
+    if (onNavigate) {
+      onNavigate();
+      return;
+    }
     doUpdateUrl(url);
   };
 

@@ -106,6 +106,7 @@ const FishDataEntry = connect(
     dataEntryFishData,
     baseData,
     lookupData,
+    onDirtyChange,
     routeParams,
   }) => {
     const { items } = dataEntryFishData;
@@ -571,6 +572,14 @@ const FishDataEntry = connect(
       const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
       setData(ensureFishTrailingBlankRow(rowData, gear));
     }, [baseData?.bendRiverMile, gear, items]);
+
+    useEffect(() => {
+      onDirtyChange?.(
+        (data ?? []).some(
+          (row) => !isUntouchedPlaceholderRow(row) && [OfflineStatuses.New, OfflineStatuses.Edited].includes(row._status)
+        )
+      );
+    }, [data, onDirtyChange]);
 
     // Load offline lookups
     useEffect(() => {
