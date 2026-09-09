@@ -392,6 +392,8 @@ const MissouriRiverDataEntryForm = connect(
         if (!isOnline) {
           await db.moriver.put(payload);
           sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
+          // Need to populate dataEntryData store
+          doFetchMoRiverDataEntry({ tableId: finalMrFid }, false, false, false);
         }
       }
     };
