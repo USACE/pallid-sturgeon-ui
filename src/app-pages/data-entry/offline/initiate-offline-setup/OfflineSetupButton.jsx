@@ -39,7 +39,7 @@ const OfflineSetupButton = connect(
       setLookupDownloadStatus(null);
 
       // Connect ublox satellite GPS
-      await ubloxGps?.connect();
+      ubloxGps?.connect();
 
       // Download Offline lookups
       try {
