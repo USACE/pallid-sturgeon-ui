@@ -8,8 +8,7 @@ import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
-import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { Button } from '@trussworks/react-uswds';
+import { Button, Grid } from '@trussworks/react-uswds';
 import { useEffect, useState } from 'react';
 
 const fishCellStyle = (params) => {
@@ -99,22 +98,26 @@ const MissouriDsTable = connect(
 
     return (
       <>
-        <Row>
-          <div className='col-md-12 col-xs-12' style={{ justifyContent: 'space-between' }}>
+        <Grid row gap='md'>
+          <Grid desktop={{ col: 4 }} tablet={{ col: 12 }}>
             <Button onClick={handleAddButtonClick} className='add-btn' title='Add Missouri River Datasheet'>
               <span>
                 <Icon path={mdiPlus} />
               </span>
               Add Missouri River Datasheet
             </Button>
+          </Grid>
+          {/* @TODO: Enable when CSV feature is in progress */}
+          {/* <Grid desktop={{ col: 4 }} tablet={{ col: 12 }}>
             <Button onClick={() => {}} className='clear-btn' title='Export as CSV' disabled>
               <span>
                 <Icon path={mdiDownload} />
               </span>
               Export as CSV
             </Button>
-          </div>
-        </Row>
+          </Grid> */}
+        </Grid>
+
         <div
           className={`mt-2 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
           style={{ width: '100%', height: '600px' }}

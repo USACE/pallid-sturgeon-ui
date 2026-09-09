@@ -5,9 +5,7 @@ import { mdiDownload, mdiPlus } from '@mdi/js';
 import Icon from '@components/icon/icon';
 
 import SearchIdCellRenderer from '@common/gridCellRenderers/searchIdCellRenderer';
-
-import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { Button } from '@trussworks/react-uswds';
+import { Button, Grid } from '@trussworks/react-uswds';
 import { useEffect, useState } from 'react';
 
 const telemetryCellStyle = (params) => {
@@ -71,22 +69,25 @@ const SearchDsTable = connect(
 
     return (
       <>
-        <Row>
-          <div className='col-md-12 col-xs-12' style={{ justifyContent: 'space-between' }}>
+        <Grid row gap='md'>
+          <Grid desktop={{ col: 4 }} tablet={{ col: 12 }}>
             <Button onClick={handleAddButtonClick} className='add-btn' title='Add Search Effort Datasheet'>
               <span>
                 <Icon path={mdiPlus} />
               </span>
               Add Search Effort Datasheet
             </Button>
+          </Grid>
+          {/* @TODO: Enable when CSV feature is in progress */}
+          {/* <Grid desktop={{ col: 4 }} tablet={{ col: 12 }}>
             <Button onClick={() => {}} className='clear-btn' title='Export as CSV' disabled>
               <span>
                 <Icon path={mdiDownload} />
               </span>
               Export as CSV
             </Button>
-          </div>
-        </Row>
+          </Grid> */}
+        </Grid>
         <div
           className={`mt-2 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
           style={{ width: '100%', height: '600px' }}
