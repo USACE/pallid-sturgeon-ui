@@ -83,7 +83,7 @@ export const getFishColumns = ({
       meta: {
         type: 'combobox',
         required: true,
-        options: CreateComboboxOptions(speciesOptions),
+        options: (row) => CreateComboboxOptions(speciesOptions(row)),
       },
     }),
     columnHelper.accessor('length', {

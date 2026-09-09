@@ -29,23 +29,34 @@ const getSelectOptionValue = (option) => {
 
 export const TableCell = ({ getValue, row, column, table, cell, cellError }) => {
   const columnMeta = column.columnDef.meta;
+  const options = typeof columnMeta?.options === 'function' ? columnMeta.options(row) : columnMeta?.options;
   const isPlaceholderRow = row.original?._isPlaceholderRow === true && row.original?._isTouched !== true;
   const isRequired = columnMeta?.required === true && !isPlaceholderRow;
   const type = columnMeta?.type ?? 'text';
   const tableMeta = table.options.meta;
   const initialValue = getValue();
   const [value, setValue] = useState(
-    type === 'combobox' ? formatSelectValue(initialValue, columnMeta?.options) : initialValue
+    type === 'combobox' ? formatSelectValue(initialValue, options) : initialValue
   );
   const previousValueRef = useRef(
-    type === 'combobox' ? formatSelectValue(initialValue, columnMeta?.options) : initialValue
+    type === 'combobox' ? formatSelectValue(initialValue, options) : initialValue
   );
 
   useEffect(() => {
-    const nextValue = type === 'combobox' ? formatSelectValue(initialValue, columnMeta?.options) : initialValue;
-    setValue(nextValue);
+    const nextValue = type === 'combobox' ? formatSelectValue(initialValue, options) : initialValue;
+    setValue((currentValue) => {
+      if (
+        type === 'combobox' &&
+        currentValue?.value === nextValue?.value &&
+        currentValue?.label === nextValue?.label
+      ) {
+        return currentValue;
+      }
+
+      return currentValue === nextValue ? currentValue : nextValue;
+    });
     previousValueRef.current = nextValue;
-  }, [initialValue, type, columnMeta?.options]);
+  }, [initialValue, type, options]);
 
   const debouncedUpdateRef = useRef();
 
@@ -138,7 +149,7 @@ export const TableCell = ({ getValue, row, column, table, cell, cellError }) => 
       className={`width-full ${cellError ? 'cell-error' : ''}`}
       onChange={handleComboboxChange}
       onBlur={handleComboboxBlur}
-      options={columnMeta?.options}
+      options={options}
       menuPortalTarget={document.body}
       menuPosition='fixed'
       menuPlacement='auto'

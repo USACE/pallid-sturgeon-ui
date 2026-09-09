@@ -22,6 +22,24 @@ import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
 
 const lookupTableNames = ['fishCodes', 'fishStructures', 'floyTagPrefixes', 'lengthTypes', 'markRecaptureOptions'];
+const noFishSpecies = ['NFSH', 'CNFH', 'CNA', 'NDNF'];
+const gearAllowingTwoNfsh = ['LDN500', 'LDN750', 'LDN1000'];
+
+const ensureFishTrailingBlankRow = (rows, gear) => {
+  const normalizedRows = rows ?? [];
+  const realRows = normalizedRows.filter((row) => !isUntouchedPlaceholderRow(row));
+  const firstSpecies = realRows[0]?.species;
+  const nfshCount = realRows.filter((row) => row?.species === 'NFSH').length;
+  const canAddRow =
+    !noFishSpecies.includes(firstSpecies) ||
+    (firstSpecies === 'NFSH' && gearAllowingTwoNfsh.includes(gear) && nfshCount < 2);
+
+  if (!canAddRow) {
+    return realRows;
+  }
+
+  return ensureTrailingBlankRow(normalizedRows);
+};
 
 const normalizeFishRow = (row = {}) => ({
   ...row,
@@ -112,7 +130,7 @@ const FishDataEntry = connect(
 
     const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
     const [tableKey, setTableKey] = useState(0);
-    const [data, setData] = useState(ensureTrailingBlankRow(rowData));
+    const [data, setData] = useState(ensureFishTrailingBlankRow(rowData, gear));
     const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
     const [validationErrorRows, setValidationErrorRows] = useState([]);
     const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
@@ -129,11 +147,28 @@ const FishDataEntry = connect(
       },
     };
 
-    const speciesOptions =
+    const allSpeciesOptions =
       lookups?.fishCodes?.map((item) => ({
         code: item.alphaCode,
         description: item.commonName,
       })) ?? [];
+
+    const speciesOptions = (tableRow) => {
+      const realRows = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
+      const firstSpecies = realRows[0]?.species;
+      const isFirstRow = tableRow?.index === 0;
+      const canSelectNoFishInFirstRow = isFirstRow && realRows.length <= 1;
+      const isSecondNfshRow =
+        tableRow?.index === 1 && firstSpecies === 'NFSH' && gearAllowingTwoNfsh.includes(gear);
+
+      return allSpeciesOptions.filter(({ code }) => {
+        if (isSecondNfshRow) return code === 'NFSH';
+        if (noFishSpecies.includes(code) && !canSelectNoFishInFirstRow) {
+          return false;
+        }
+        return true;
+      });
+    };
 
     const methods = useForm({
       resolver: yupResolver(schema),
@@ -214,7 +249,7 @@ const FishDataEntry = connect(
     }, []);
 
     const handleAddRow = async () => {
-      setData((prev) => ensureTrailingBlankRow(prev));
+      setData((prev) => ensureFishTrailingBlankRow(prev, gear));
       scrollToBottom();
     };
 
@@ -272,7 +307,7 @@ const FishDataEntry = connect(
       };
       setData((prev) => {
         const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
-        return ensureTrailingBlankRow([...existingRows, newRowData]);
+        return ensureFishTrailingBlankRow([...existingRows, newRowData], gear);
       });
       scrollToBottom();
     };
@@ -281,7 +316,7 @@ const FishDataEntry = connect(
       // Handle any data mapping or formatting here
       setData((oldData) => {
         const existingRows = (oldData ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
-        return ensureTrailingBlankRow([...existingRows, ...rows]);
+        return ensureFishTrailingBlankRow([...existingRows, ...rows], gear);
       });
       scrollToBottom();
     };
@@ -289,10 +324,10 @@ const FishDataEntry = connect(
     const handleRemoveMultipleRows = useCallback((indicesToRemove) => {
       setData((oldData) => {
         const remainingRows = oldData.filter((_, index) => !indicesToRemove.includes(index));
-        return ensureTrailingBlankRow(remainingRows);
+        return ensureFishTrailingBlankRow(remainingRows, gear);
       });
       setTableKey((old) => old + 1);
-    }, []);
+    }, [gear]);
 
     const handleUpdateData = useCallback(
       (rowIndex, columnId, updatedValue) => {
@@ -347,7 +382,7 @@ const FishDataEntry = connect(
               newData[rowIndex]._status = OfflineStatuses.Edited;
             }
 
-            return ensureTrailingBlankRow(newData);
+            return ensureFishTrailingBlankRow(newData, gear);
           }
           return oldData;
         });
@@ -356,7 +391,7 @@ const FishDataEntry = connect(
           scrollToBottom();
         }
       },
-      [baseData, data, dataEntryData, parentMrFid, parentMrId, scrollToBottom]
+      [baseData, data, dataEntryData, gear, parentMrFid, parentMrId, scrollToBottom]
     );
 
     const handleSubmitAll = async () => {
@@ -479,7 +514,7 @@ const FishDataEntry = connect(
                     _isTouched: true,
                   };
                 });
-                return ensureTrailingBlankRow(updatedRows);
+                return ensureFishTrailingBlankRow(updatedRows, gear);
               });
               continue;
             }
@@ -508,7 +543,7 @@ const FishDataEntry = connect(
               _status: OfflineStatuses.Queued,
             };
           });
-          return ensureTrailingBlankRow(updatedRows);
+          return ensureFishTrailingBlankRow(updatedRows, gear);
         });
 
         toast.success('Datasheet successfully updated!');
@@ -534,8 +569,8 @@ const FishDataEntry = connect(
 
     useEffect(() => {
       const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
-      setData(ensureTrailingBlankRow(rowData));
-    }, [baseData?.bendRiverMile, items]);
+      setData(ensureFishTrailingBlankRow(rowData, gear));
+    }, [baseData?.bendRiverMile, gear, items]);
 
     // Load offline lookups
     useEffect(() => {
