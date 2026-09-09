@@ -64,6 +64,53 @@ export const isOfflineAuthSessionValid = (session: OfflineAuthSession | null | u
   return Date.now() < new Date(session.expiresAt).getTime();
 };
 
+export const updateOfflineAuthToken = async ({
+  accessToken,
+  refreshToken,
+}: {
+  accessToken?: string;
+  refreshToken?: string;
+}) => {
+  const session = await getOfflineAuthSession();
+  if (!session) {
+    return null;
+  }
+
+  const updatedSession: OfflineAuthSession = {
+    ...session,
+    accessToken: accessToken ?? session.accessToken,
+    refreshToken: refreshToken ?? session.refreshToken,
+  };
+
+  await db.meta.put({
+    key: OFFLINE_AUTH_KEY,
+    value: JSON.stringify(updatedSession),
+  });
+
+  return updatedSession;
+};
+
+export const renewOfflineAuthSession = async () => {
+  const session = await getOfflineAuthSession();
+  if (!session) {
+    return null;
+  }
+
+  const createdAt = new Date();
+  const expiresAt = new Date(createdAt.getTime() + OFFLINE_AUTH_DAYS * 24 * 60 * 60 * 1000);
+  const renewedSession: OfflineAuthSession = {
+    ...session,
+    createdAt: createdAt.toISOString(),
+    expiresAt: expiresAt.toISOString(),
+  };
+
+  await db.meta.put({
+    key: OFFLINE_AUTH_KEY,
+    value: JSON.stringify(renewedSession),
+  });
+  return renewedSession;
+};
+
 export const clearOfflineAuthSession = async () => {
   await db.meta.delete(OFFLINE_AUTH_KEY);
 };

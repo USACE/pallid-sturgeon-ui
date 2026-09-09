@@ -23,7 +23,7 @@ export const suppProcValidationSchema = ({ projectId, species }) =>
         .test('tagNumber-length', 'Invalid tag number length', (value) => {
           if (!value) return true;
           const hasDecimal = value.includes('.');
-          const charCount = hasDecimal ? value.replace('.', '').length : value.length;
+          const charCount = value.length;
           const maxLength = hasDecimal ? 14 : 10;
           return charCount === maxLength;
         }),

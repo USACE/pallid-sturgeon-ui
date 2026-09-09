@@ -12,11 +12,7 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .string()
         .when('species', {
           is: (species) =>
-            species !== null &&
-            species !== '' &&
-            species !== undefined &&
-            (gear?.startsWith('TL') || gear?.startsWith('LDN')) &&
-            !notRequiredSpeciesArr.includes(species),
+            (gear?.startsWith('TL') || gear?.startsWith('LDN')) || !notRequiredSpeciesArr.includes(species),
           then: (schema) => schema.required(ValidationMessages.FieldRequired),
           otherwise: (schema) => schema.nullable().notRequired(),
         })
@@ -98,11 +94,6 @@ export const FishDataEntrySchema = ({ gear, data }) =>
             "Gear = LDN500, LDN750, or LDN1000, NFSH can be entered twice, one for each panel/hook value of 'M' or 'B'",
         })
         .required(ValidationMessages.FieldRequired),
-      lengthType: yup.string().when('length', {
-        is: (length) => length !== null && length !== undefined && length !== '' && Number(length) !== 0,
-        then: (schema) => schema.required(ValidationMessages.FieldRequired),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
       length: yup
         .number()
         .transform((value, originalValue) => (originalValue === '' ? undefined : value))
@@ -111,8 +102,25 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .max(9999, 'Value cannot exceed 9999')
         .when(['species', 'countF'], {
           is: (species, count) => ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1,
-          then: (schema) => schema.required('Length is required for PDSG, SNSG, SNPD'),
+          then: (schema) => schema.required('Value is required for PDSG, SNSG, SNPD when Count is 1'),
           otherwise: (schema) => schema.nullable().notRequired(),
+        }),
+      lengthType: yup
+        .string()
+        .nullable()
+        .notRequired()
+        .when(['species', 'countF'], {
+          is: (species, count) => ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1,
+          then: (schema) => schema.required('Value is required for PDSG, SNSG, SNPD when Count is 1'),
+        })
+        .when(['length', 'species', 'countF'], {
+          is: (length, species, count) => {
+            const isRequiredBySpeciesAndCount = ['PDSG', 'SNSG', 'SNPD'].includes(species) && Number(count) === 1;
+            const hasLength = length !== null && length !== undefined && length !== '' && Number(length) !== 0;
+
+            return !isRequiredBySpeciesAndCount && hasLength;
+          },
+          then: (schema) => schema.required('Value is required when Length is entered'),
         }),
       weight: yup
         .number()
@@ -180,16 +188,11 @@ export const FishDataEntrySchema = ({ gear, data }) =>
         .test('tagNumber-length', 'Invalid tag number length', (value) => {
           if (!value) return true;
           const hasDecimal = value.includes('.');
-          const charCount = hasDecimal ? value.replace('.', '').length : value.length;
+          const charCount = value.length;
           const maxLength = hasDecimal ? 14 : 10;
           return charCount === maxLength;
         }),
-      finCurl: yup.string().when(['length', 'segment', 'species'], {
-        is: (length, segment, species) =>
-          species === 'PDSG' && ((length < 425 && segment < 7) || (length < 250 && segment >= 7)),
-        then: (schema) => schema.required(ValidationMessages.FieldRequired),
-        otherwise: (schema) => schema.nullable().notRequired(),
-      }),
+      finCurl: yup.string().nullable().notRequired(),
       otolith: yup.string().nullable().notRequired(),
     })
     .test('at-least-one-or-both', 'Both Floy Tag Prefix and Floy Tag are required if one is filled', function (values) {
