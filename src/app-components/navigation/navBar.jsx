@@ -29,13 +29,7 @@ const NavBar = connect(
     const isHome = pathname === '/';
     const user = userRole ? usersData.find((user) => userRole.id === user.id) : {};
 
-    const navClasses = classArray([
-      'navbar',
-      'navbar-expand-xl',
-      'navbar-light',
-      'fixed-top-banner',
-      !isHome && 'seperator',
-    ]);
+    const navClasses = classArray(['navbar', 'navbar-expand-xl', 'fixed-top-banner', !isHome && 'seperator']);
 
     const navCollapseClasses = classArray(['collapse', 'navbar-collapse', show && 'show']);
 
@@ -47,7 +41,7 @@ const NavBar = connect(
           <a href='/'>Pallid Sturgeon Population Assessment</a>
         </div>
         <button
-          className='navbar-hamburger-toggle-btn'
+          className='navbar-toggler navbar-hamburger-toggle-btn'
           type='button'
           aria-expanded='false'
           aria-label='Toggle navigation'
