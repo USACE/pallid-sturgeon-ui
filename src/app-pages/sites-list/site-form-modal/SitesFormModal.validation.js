@@ -17,7 +17,12 @@ export const sitesValidationSchema = yup.object().shape({
   bend: yup
     .object()
     .nullable()
-    .test('has-value', ValidationMessages.FieldRequired, (option) => !!option?.value),
+    .test('has-value', ValidationMessages.FieldRequired, (option) => {
+      if (option?.value || option?.value === 0) {
+        return true;
+      }
+      return false;
+    }),
   bendrn: yup.string().required(ValidationMessages.FieldRequired),
 });
 

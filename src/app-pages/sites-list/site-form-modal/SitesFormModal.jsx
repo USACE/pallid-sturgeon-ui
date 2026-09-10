@@ -57,6 +57,7 @@ const SitesFormModal = connect(
     );
     const [bendOptions, setBendOptions] = useState([]);
     const [segmentOptions, setSegmentOptions] = useState([]);
+    const [seasonsOptions, setSeasonsOptions] = useState([]);
 
     const bendDataMapping = {
       B: lookups?.bendRiverMile,
@@ -102,6 +103,12 @@ const SitesFormModal = connect(
 
     const segmentValue = segment?.value;
     const bendValue = bend?.value;
+
+    const buildSeasonOptions = (project) => {
+      const isProject1 = [1, 3, 4, 5, 6].includes(Number(project));
+      if (isProject1) return lookups?.seasons?.filter((item) => Number(item.projectCode) === 1);
+      return lookups?.seasons?.filter((item) => Number(item.projectCode) === 2);
+    };
 
     const buildBendOptions = (type) => {
       if (!type) return;
@@ -275,6 +282,11 @@ const SitesFormModal = connect(
       segmentValue && sampleUnitType && setBendOptions(buildBendOptions(sampleUnitType));
     }, [segmentValue, sampleUnitType]);
 
+    // Update Season options if Project values change
+    useEffect(() => {
+      project && setSeasonsOptions(buildSeasonOptions(project));
+    }, [project]);
+
     // Update Segment options if Field Office and/or Project values change
     useEffect(() => {
       office && project && setSegmentOptions(buildSegmentsOptions());
@@ -404,7 +416,7 @@ const SitesFormModal = connect(
                 required
               />
               <SelectInput name='season' label='Season' onChange={handleChange} readOnly={!project} required>
-                {createDropdownOptions(lookups?.seasons).map((item, index) => (
+                {createDropdownOptions(seasonsOptions).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
                   </option>
