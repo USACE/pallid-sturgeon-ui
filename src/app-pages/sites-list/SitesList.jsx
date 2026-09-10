@@ -41,6 +41,7 @@ const SitesList = connect(
   }) => {
     const pwaMode = usePwaMode();
     const fieldStudyYear = getCurrentFieldStudyYear();
+    const isOnline = navigator.onLine;
 
     // Load data
     useEffect(() => {
@@ -69,7 +70,7 @@ const SitesList = connect(
           <Card.Header text='Sites List' />
           <Card.Body>
             <SitesListTable />
-            {!pwaMode && (
+            {!pwaMode && isOnline && (
               <Pagination
                 className='margin-top-2'
                 itemCount={sitesTotalResults}

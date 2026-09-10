@@ -1,15 +1,15 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { connect } from 'redux-bundler-react';
-import { Button, Grid } from '@trussworks/react-uswds';
+import { Grid } from '@trussworks/react-uswds';
 
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import { useForm, FormProvider } from 'react-hook-form';
 
 import SelectInput from '@components/new-inputs/select-input/SelectInput';
-// import ComboBox from '@components/new-inputs/combo-box/ComboBox';
 import Card from '@src/app-components/card';
 
+import { getLookupOptions } from '../data-entry/offline/lookup-cache';
 import { createDropdownOptions } from '../data-entry/helpers';
 import { dropdownYearsToNow } from '@src/utils';
 
@@ -17,46 +17,34 @@ import './sitesList.scss';
 
 const schema = yup.object().shape({});
 
+const lookupTableNames = ['fieldOffices', 'fieldOfficeSegments', 'projects', 'seasons', 'segments'];
+
 const SitesListFilter = connect(
-  'doDomainBendsFetch',
-  'doDataEntryLoadData',
-  'doDomainSeasonsFetch',
-  'doDomainSegmentsFetch',
-  'doDomainFieldOfficesFetch',
   'doUpdateSiteParams',
-  'selectDomains',
+  'selectLookupData',
   'selectUserRole',
-  'selectUsersData',
-  ({
-    doDomainBendsFetch,
-    doDataEntryLoadData,
-    doDomainSeasonsFetch,
-    doDomainSegmentsFetch,
-    doDomainFieldOfficesFetch,
-    doUpdateSiteParams,
-    domains,
-    userRole,
-    usersData,
-  }) => {
-    const { projects, seasons, bends, fieldOffices, segments } = domains;
+  ({ doUpdateSiteParams, lookupData, userRole }) => {
+    const userProject = Number(userRole?.projectCode);
+    const isUserAdmin = userRole?.role === 'ADMINISTRATOR';
 
-    const user = usersData.find((user) => userRole.id === user.id);
+    const isOnline = navigator.onLine;
+    const [lookups, setLookups] = useState(
+      lookupTableNames.reduce((accumulator, currentKey) => {
+        accumulator[currentKey] = lookupData?.[currentKey] ?? [];
+        return accumulator;
+      }, {})
+    );
+    const [segmentOptions, setSegmentOptions] = useState(lookups?.segments ?? []);
 
-    // const bendComboOptions = useMemo(
-    //   () =>
-    //     bends
-    //       ? bends.map((item) => ({
-    //           value: item.sampleUnit,
-    //           label: item.description,
-    //         }))
-    //       : [],
-    //   []
-    // );
+    const fieldOfficeOptions = lookups?.fieldOffices?.filter((item) => item.code !== 'ZZ');
+    const project1Options = lookups?.projects?.filter((item) => Number(item.code) !== 2);
+    const project2Options = lookups?.projects?.filter((item) => Number(item.code) === 2);
+    const projectOptions = userProject === 1 ? project1Options : project2Options;
 
     const defaultValues = {
       year: new Date().getFullYear(),
-      project: Number(userRole?.projectCode) ?? '',
-      fieldoffice: '',
+      project: userProject ?? '',
+      fieldoffice: !isUserAdmin ? userRole?.officeCode : '',
       seasonCode: '',
       bend: '',
       segmentCode: '',
@@ -68,41 +56,60 @@ const SitesListFilter = connect(
       mode: 'onBlur',
       stateOptions: [],
     });
-    const { watch, getValues, setValue } = methods;
+    const { watch, getValues } = methods;
 
     const year = watch('year');
     const seasonCode = watch('seasonCode');
-    const bend = watch('bend');
     const segmentCode = watch('segmentCode');
     const project = watch('project');
     const office = watch('fieldoffice');
 
-    const clearFilters = () => {
-      setValue('year', '');
-      setValue('seasonCode', '');
-      setValue('bend', '');
-      setValue('segmentCode', '');
-      setValue('fieldoffice', '');
+    const buildSegmentsOptions = () => {
+      // Filter by office
+      const fieldOfficeFilteredOptions = lookups?.fieldOfficeSegments?.filter(
+        (item) => item.fieldOfficeCode === office
+      );
+
+      // Filter by PSPA vs HAMP projects
+      const projectFilteredOptions =
+        Number(project) !== 2
+          ? fieldOfficeFilteredOptions?.filter(
+              (item) => item.fieldOfficeCode === office && Number(item.projectCode) !== 2
+            )
+          : fieldOfficeFilteredOptions?.filter(
+              (item) => item.fieldOfficeCode === office && Number(item.projectCode) === 2
+            );
+
+      const filteredOptions = projectFilteredOptions?.map(
+        (item) => lookups?.segments?.filter((segment) => Number(segment.code) === Number(item.segmentCode))?.[0]
+      );
+      const formattedOptions = filteredOptions?.map((item) => ({
+        code: item.code,
+        description: `${item.code} - ${item.description}`,
+      }));
+      return formattedOptions;
     };
 
     // Update data based on filters
     useEffect(() => {
-      if (!navigator.onLine) return;
-
+      if (!isOnline) return;
       const searchParams = getValues();
       doUpdateSiteParams(searchParams);
-    }, [year, bend, seasonCode, segmentCode, office]);
+    }, [year, seasonCode, segmentCode, office]);
 
-    // Load data
+    // Update Segment options if Field Office and/or Project values change
     useEffect(() => {
-      if (!navigator.onLine) return;
+      office && project && setSegmentOptions(buildSegmentsOptions());
+    }, [office, project]);
 
-      doDataEntryLoadData();
-      doDomainFieldOfficesFetch();
-      doDomainSegmentsFetch({ office, project });
-      doDomainSeasonsFetch();
-      doDomainBendsFetch();
-    }, []);
+    // Load offline lookups
+    useEffect(() => {
+      const loadOfflineLookups = async () => {
+        const options = await Promise.all(lookupTableNames.map(async (name) => [name, await getLookupOptions(name)]));
+        setLookups(Object.fromEntries(options));
+      };
+      !isOnline && loadOfflineLookups();
+    }, [isOnline]);
 
     return (
       <Card className='margin-bottom-1'>
@@ -110,8 +117,8 @@ const SitesListFilter = connect(
         <Card.Body>
           <FormProvider {...methods}>
             <Grid row gap='md'>
-              <Grid tablet={{ col: 1 }}>
-                <SelectInput label='Year' name='year' showOptionalText={false}>
+              <Grid desktop={{ col: 1 }} tablet={{ col: 3 }}>
+                <SelectInput label='Year' name='year' showOptionalText={false} disabled={true}>
                   {dropdownYearsToNow(2011).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.value}
@@ -119,62 +126,43 @@ const SitesListFilter = connect(
                   ))}
                 </SelectInput>
               </Grid>
-              <Grid tablet={{ col: 3 }}>
-                <SelectInput
-                  name='project'
-                  label='Project'
-                  readOnly={userRole?.projectCode === '2'}
-                  showOptionalText={false}
-                >
-                  {createDropdownOptions(projects).map((item, index) => (
+              <Grid desktop={{ col: 3 }} tablet={{ col: 4 }}>
+                <SelectInput name='project' label='Project' readOnly={userProject === 2} showOptionalText={false}>
+                  {createDropdownOptions(projectOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
                     </option>
                   ))}
                 </SelectInput>
-                {user?.role === 'ADMINISTRATOR' && (
+              </Grid>
+              {userRole?.role === 'ADMINISTRATOR' && (
+                <Grid desktop={{ col: 2 }} tablet={{ col: 5 }}>
                   <SelectInput name='fieldoffice' label='Field Office' showOptionalText={false}>
-                    {createDropdownOptions(fieldOffices).map((item, index) => (
+                    {createDropdownOptions(fieldOfficeOptions).map((item, index) => (
                       <option key={index + 1} value={item.value}>
                         {item.text}
                       </option>
                     ))}
                   </SelectInput>
-                )}
-              </Grid>
-              <Grid tablet={{ col: 4 }}>
+                </Grid>
+              )}
+              <Grid desktop={{ col: 4 }} tablet={{ col: 5 }}>
                 <SelectInput name='segmentCode' label='Segment' showOptionalText={false}>
-                  {createDropdownOptions(segments).map((item, index) => (
+                  {createDropdownOptions(segmentOptions).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
                     </option>
                   ))}
                 </SelectInput>
               </Grid>
-              <Grid tablet={{ col: 2 }}>
-                <SelectInput name='seasonCode' label='Season' readOnly={!year} showOptionalText={false}>
-                  {createDropdownOptions(seasons).map((item, index) => (
+              <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
+                <SelectInput name='seasonCode' label='Season' showOptionalText={false}>
+                  {createDropdownOptions(lookups?.seasons).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.text}
                     </option>
                   ))}
                 </SelectInput>
-              </Grid>
-              {/* <Grid tablet={{ col: 4 }}>
-                <ComboBox
-                  label='Select Sample Unit'
-                  name='bend'
-                  options={bendComboOptions}
-                  readOnly
-                  showOptionalText={false}
-                />
-              </Grid> */}
-              <Grid tablet={{ col: 2 }} className='filter-btn-container'>
-                <div>
-                  <Button onClick={clearFilters} className='clear-btn' outline title='Clear Filters'>
-                    Clear All Filters
-                  </Button>
-                </div>
               </Grid>
             </Grid>
           </FormProvider>

@@ -9,10 +9,14 @@
 
 .page-link {
   background-color: var(--background-color);
+  &:hover {
+    background-color: var(--color-table-pagination-link);
+    color: var(--background-color) !important;
+  }
 }
 
 .page-item.active .page-link {
   color: #fff;
-  background-color: var(--color-breadcrumbs-link);
-  border-color: var(--color-breadcrumbs-link);
+  background-color: var(--color-table-pagination-link);
+  border-color: var(--color-table-pagination-link);
 }

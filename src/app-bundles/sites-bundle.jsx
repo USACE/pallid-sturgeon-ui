@@ -246,11 +246,12 @@ export default {
   doSetSitesPagination:
     ({ pageSize, pageNumber }) =>
     ({ dispatch, store }) => {
+      const isOnline = navigator.onLine;
       dispatch({
         type: 'SET_SITES_PAGINATION',
         payload: { pageSize, pageNumber },
       });
-      if (navigator.onLine) {
+      if (isOnline) {
         store.doFetchSites();
       }
     },
@@ -258,6 +259,7 @@ export default {
   doUpdateSiteParams:
     (searchParams) =>
     ({ dispatch, store }) => {
+      const isOnline = navigator.onLine;
       const paramObj = {
         id: store.selectUserRole()?.id,
         project: store.selectUserRole()?.projectCode,
@@ -266,7 +268,7 @@ export default {
         type: 'UPDATE_SITE_PARAMS',
         payload: { ...searchParams, ...paramObj },
       });
-      if (!navigator.onLine) return;
+      if (!isOnline) return;
       store.doDomainSeasonsFetch(searchParams?.year);
       store.doFetchSites();
       store.doFetchExportsSites({ ...searchParams, ...paramObj });
