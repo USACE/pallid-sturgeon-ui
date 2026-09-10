@@ -109,10 +109,12 @@ export async function downloadLookupsForOffline(token?: string) {
   return { ok: true, count: rowsToSave.length };
 }
 
-export async function downloadSitesForOffline(token?: string, userRoleId?: number | string) {
-  if (!userRoleId) {
-    throw new Error('Cannot download offline Sites because the user role ID is missing');
+export async function downloadSitesForOffline(token?: string, userRole?: any) {
+  if (!userRole) {
+    throw new Error('Cannot download offline Sites because the user role data is missing');
   }
+
+  const { id: userRoleId, officeCode: userFieldOffice, projectCode: userProject } = userRole;
   const fieldStudyYear = getCurrentFieldStudyYear();
   const pageSize = 500;
 
@@ -141,6 +143,8 @@ export async function downloadSitesForOffline(token?: string, userRoleId?: numbe
       year: String(fieldStudyYear),
       size: String(pageSize),
       page: String(page),
+      project: String(userProject),
+      fieldoffice: userFieldOffice,
     });
 
     const res = await fetch(`${API_BASE}/psapi/Sites/getSites?${query.toString()}`, {
