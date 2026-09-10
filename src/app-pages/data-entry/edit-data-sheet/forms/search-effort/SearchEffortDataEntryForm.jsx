@@ -615,19 +615,19 @@ const SearchEffortDataEntryForm = connect(
         )}
         <>
           <Grid row gap='md'>
-            <Grid tablet={{ col: 1 }}>
+            <Grid desktop={{ col: 1 }} tablet={{ col: 4 }}>
               <p>
                 SE ID:<br></br>
                 <span className='text-bold'>{seId !== '' ? seId : '--'}</span>
               </p>
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <p>
                 SE Field ID (Date-Time-SE#):<br></br>
                 <span className='text-bold'>{seFid !== '' ? seFid : '--'}</span>
               </p>
             </Grid>
-            <Grid tablet={{ col: 8 }}>
+            <Grid desktop={{ col: 8 }}>
               {!hasTelemetry ? (
                 <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
@@ -656,12 +656,12 @@ const SearchEffortDataEntryForm = connect(
               </Button>
             </Grid>
           </Grid>
-          <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 2 }}>
+          <Grid row gap='md'>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput name='searchDate' label='Search Date' type='date' required />
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput
                 name='recorder'
                 label='Recorder Initials'
@@ -672,7 +672,7 @@ const SearchEffortDataEntryForm = connect(
               />
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <SelectInput name='searchTypeCode' label='Search Type' onChange={handleChange} required>
                 {searchTypeCodes.map((opt, idx) => (
                   <option key={idx + 1} value={opt.code}>
@@ -682,23 +682,21 @@ const SearchEffortDataEntryForm = connect(
               </SelectInput>
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
-              <Grid tablet={{ col: 12 }}>
-                <TextInput name='searchDay' label='Search Day' type='number' required={searchTypeCode === 'RS'} />
-              </Grid>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
+              <TextInput name='searchDay' label='Search Day' type='number' required={searchTypeCode === 'RS'} />
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput name='temp' label='Temp (C)' type='number' />
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput name='conductivity' label='Conductivity' type='number' />
             </Grid>
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput name='startTime' label='Start Time (hh:mm:ss)' required />
               <Button
                 onClick={handleCaptureStart}
@@ -713,15 +711,15 @@ const SearchEffortDataEntryForm = connect(
               </Button>
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput name='startLatitude' type='number' label='Start Latitude' required />
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput name='startLongitude' type='number' label='Start Longitude' required />
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput
                 name='stopTime'
                 label='Stop Time (hh:mm:ss)'
@@ -737,7 +735,7 @@ const SearchEffortDataEntryForm = connect(
               )}
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput
                 name='stopLatitude'
                 type='number'
@@ -748,7 +746,7 @@ const SearchEffortDataEntryForm = connect(
               />
             </Grid>
 
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput
                 name='stopLongitude'
                 type='number'

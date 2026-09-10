@@ -4,7 +4,6 @@
 .breadcrumb-list {
   padding-left: 10px;
   font-style: italic;
-  padding-top: 10px;
   margin-bottom: 0px;
   padding-bottom: 0px;
 
@@ -35,4 +34,11 @@
 
 .usa-breadcrumb__link:visited {
   color: var(--color-breadcrumbs-link-visited) !important;
+}
+
+@media (min-width: 30em) {
+  .usa-breadcrumb {
+    padding-bottom: 0rem !important;
+    padding-top: 0rem !important;
+  }
 }
