@@ -89,7 +89,6 @@ const createAuthBundle = (options) => ({
       refreshInterval: 120,
       sessionEndWarning: 120,
       onAuthenticate: (token) => {
-        console.log('[Auth Debug] onAuthenticate recieved token:', Boolean(token));
         store.doFetchAuthRoles(token);
       },
       onTokenUpdate: async ({ accessToken, refreshToken }) => {
@@ -98,9 +97,7 @@ const createAuthBundle = (options) => ({
       onLogin: async () => {
         try {
           await renewOfflineAuthSession();
-        } catch (err) {
-          console.warn('Unable to renew offline field session:', err);
-        }
+        } catch (err) {}
       },
       onRedirect: (sessionState) => {
         // store.doSessionStateUpdate(sessionState);
@@ -144,6 +141,13 @@ const createAuthBundle = (options) => ({
           offlineSession,
         },
       });
+
+      if (Array.isArray(offlineSession.roles)) {
+        dispatch({
+          type: 'UPDATE_USERS',
+          payload: offlineSession.roles,
+        });
+      }
       return true;
     },
 
@@ -250,17 +254,11 @@ const createAuthBundle = (options) => ({
   doFetchAuthRoles:
     (accessToken) =>
     ({ dispatch, apiGetWithToken, store }) => {
-      console.log('[Auth Debug] doFetchAuthRoles started:', Boolean(accessToken));
       const authInfo = accessToken ? JSON.parse(atob(accessToken.split('.')[1])) : null;
 
       if (authInfo) {
         const url = `/psapi/userRoleOffices/${authInfo.email}`;
         apiGetWithToken(url, accessToken, (_err, body) => {
-          console.log('[Auth Debug] role API callback:', {
-            hasError: Boolean(_err),
-            bodyIsArray: Array.isArray(body),
-            bodyCount: Array.isArray(body) ? body.length : null,
-          });
           dispatch({
             type: 'UPDATE_AUTH',
             payload: {
