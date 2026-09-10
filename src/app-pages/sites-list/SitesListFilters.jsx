@@ -118,7 +118,7 @@ const SitesListFilter = connect(
           <FormProvider {...methods}>
             <Grid row gap='md'>
               <Grid desktop={{ col: 1 }} tablet={{ col: 3 }}>
-                <SelectInput label='Year' name='year' showOptionalText={false} disabled={true}>
+                <SelectInput label='Year' name='year' showOptionalText={false}>
                   {dropdownYearsToNow(2011).map((item, index) => (
                     <option key={index + 1} value={item.value}>
                       {item.value}
