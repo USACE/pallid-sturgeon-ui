@@ -4,7 +4,6 @@ import { db } from '@src/app-pages/data-entry/offline/db';
 import { toast } from 'react-toastify';
 import { tSuccess, tError } from '@common/toast/toastHelper';
 import { ApiStatuses } from '@src/utils/enums';
-import { getCurrentFieldStudyYear } from '@src/app-pages/data-entry/offline/lookup-cache';
 
 const rootUrl = '/psapi/Sites/';
 
@@ -58,6 +57,7 @@ export default {
       dispatch({ type: 'LOADING_SITES_INIT_DATA' });
 
       const project = Number(store.selectUserRole()?.projectCode);
+      const fieldOffice = store.selectUserRole()?.officeCode;
 
       if (isOnline) {
         // if network status is online, run API call
@@ -66,10 +66,10 @@ export default {
       }
 
       // If network status is offline...
-      const fieldStudyYear = getCurrentFieldStudyYear();
-      // Filter local sites appropriately by user's project ID
+      // Filter local sites appropriately by user's project ID and field office
+      // Edge Case: User switches roles when online and doesn't download latest offline data
       const localSites = await db.sites
-        .filter((site) => Number(site.year) === fieldStudyYear && project === site.projectId)
+        .filter((site) => Number(project) === Number(site.projectId) && fieldOffice === site.fieldoffice)
         .toArray();
       const moriverData = await db.moriver.toArray();
       const searchData = await db.search.toArray();
@@ -246,11 +246,12 @@ export default {
   doSetSitesPagination:
     ({ pageSize, pageNumber }) =>
     ({ dispatch, store }) => {
+      const isOnline = navigator.onLine;
       dispatch({
         type: 'SET_SITES_PAGINATION',
         payload: { pageSize, pageNumber },
       });
-      if (navigator.onLine) {
+      if (isOnline) {
         store.doFetchSites();
       }
     },
@@ -258,6 +259,7 @@ export default {
   doUpdateSiteParams:
     (searchParams) =>
     ({ dispatch, store }) => {
+      const isOnline = navigator.onLine;
       const paramObj = {
         id: store.selectUserRole()?.id,
         project: store.selectUserRole()?.projectCode,
@@ -266,7 +268,7 @@ export default {
         type: 'UPDATE_SITE_PARAMS',
         payload: { ...searchParams, ...paramObj },
       });
-      if (!navigator.onLine) return;
+      if (!isOnline) return;
       store.doDomainSeasonsFetch(searchParams?.year);
       store.doFetchSites();
       store.doFetchExportsSites({ ...searchParams, ...paramObj });

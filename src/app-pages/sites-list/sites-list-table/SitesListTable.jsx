@@ -26,6 +26,7 @@ const SitesListTable = connect(
   'selectSitesData',
   'selectExportData',
   ({ doModalOpen, doDomainBendRnFetch, sitesData, exportData }) => {
+    const isOnline = navigator.onLine;
     const [isDarkMode, setIsDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     const pendingRecoveryCount = useLiveQuery(() => db.outbox.count(), [], 0);
     const [exportingRecovery, setExportingRecovery] = useState(false);
@@ -108,6 +109,9 @@ const SitesListTable = connect(
             frameworkComponents={{
               siteIdCellRenderer: SiteIdCellRenderer,
             }}
+            pagination={!isOnline}
+            paginationPageSizeSelector={!isOnline}
+            paginationPageSize={50}
           >
             <AgGridColumn
               field='siteDisplayId'

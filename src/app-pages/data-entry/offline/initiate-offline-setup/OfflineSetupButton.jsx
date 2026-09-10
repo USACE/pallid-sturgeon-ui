@@ -44,7 +44,8 @@ const OfflineSetupButton = connect(
       // Download Offline lookups
       try {
         const lookupResult = await downloadLookupsForOffline(auth?.token);
-        const siteResult = await downloadSitesForOffline(auth?.token, userRole?.id);
+        const siteResult = await downloadSitesForOffline(auth?.token, userRole);
+        // Draft Datasheets Data
         const datasheetResult = await downloadDatasheetsForOffline(auth?.token, userRole?.id);
         await doEnableOfflineAuth();
 
