@@ -68,9 +68,12 @@ export default {
       // If network status is offline...
       // Filter local sites appropriately by user's project ID and field office
       // Edge Case: User switches roles when online and doesn't download latest offline data
-      const localSites = await db.sites
-        .filter((site) => Number(project) === Number(site.projectId) && fieldOffice === site.fieldoffice)
-        .toArray();
+      const localSites =
+        fieldOffice === 'ZZ'
+          ? await db.sites.filter((site) => Number(project) === Number(site.projectId)).toArray()
+          : await db.sites
+              .filter((site) => Number(project) === Number(site.projectId) && fieldOffice === site.fieldoffice)
+              .toArray();
       const moriverData = await db.moriver.toArray();
       const searchData = await db.search.toArray();
       const siteHasForms = (site) => {
