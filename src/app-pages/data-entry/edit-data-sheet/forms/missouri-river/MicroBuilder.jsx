@@ -361,14 +361,14 @@ const MicroBuilder = connect(
     }, [isOnline]);
 
     return (
-      <Grid tablet={{ col: 8 }}>
+      <Grid desktop={{ col: 8 }} tablet={{ col: 12 }}>
         <Grid row gap='md'>
           <Grid tablet={{ col: 3 }}>
             <TextInput
               name='micro'
               label='Micro'
               onChange={handleMicroChange}
-              required={Number(projectId) === 1 && microSegmentRequired.includes(segmentId)}
+              required={Number(projectId) === 1 && microSegmentRequired.includes(Number(segmentId))}
               warning={microWarning ? 'Invalid Micro Code' : null}
               maxLength={6}
             />

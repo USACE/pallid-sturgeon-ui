@@ -7,7 +7,10 @@ export const GPS_OPTIONS = {
 export const USE_UBLOX_POC = import.meta.env.VITE_USE_UBLOX_POC === 'true';
 
 export const captureGpsBest = async ({ browserGps, ubloxGps }) => {
-  if (USE_UBLOX_POC && ubloxGps?.isConnected && ubloxGps?.latestFix) {
+  if (USE_UBLOX_POC && ubloxGps?.isConnected) {
+    if (!ubloxGps?.latestFix) {
+      throw new Error('u-blox GPS is connected but a satellite fix is not available yet.');
+    }
     console.log('[GPS SOURCE] using u-blox satellite serial GPS');
     return {
       best: ubloxGps?.latestFix,

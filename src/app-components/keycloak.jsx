@@ -8,6 +8,8 @@ class Keycloak {
     this.config = config;
     this.redirectCallback = config.onRedirect;
     this.authCallback = config.onAuthenticate;
+    this.tokenUpdateCallback = config.onTokenUpdate;
+    this.loginCallback = config.onLogin;
     this.errCallback = config.onError;
     this.sessionEndWarning = config.sessionEndWarning || 60;
     this.sessionEndingCallback = config.onSessionEnding;
@@ -50,7 +52,7 @@ class Keycloak {
     }
   }
 
-  fetchToken(formData) {
+  fetchToken(formData, isAuthenticated = false) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', `${this.keycloakUrl}/token`, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -58,30 +60,60 @@ class Keycloak {
     let resp = null;
     xhr.onload = function () {
       console.log('Keycloak token response status:', xhr.status);
-      switch (xhr.status) {
-        case 400:
+      if (xhr.status !== 200) {
+        if (xhr.status === 400) {
           self.accessToken = null;
           self.refreshToken = null;
+        }
+
+        try {
           resp = JSON.parse(xhr.responseText);
+        } catch {
+          resp = {
+            error: `Keycloak token request failed with status ${xhr.status}`,
+          };
+        }
+
+        if (self.errCallback) {
           self.errCallback(resp);
-          break;
-        case xhr.status !== 200:
-          resp = JSON.parse(xhr.responseText);
-          self.errCallback(resp);
-          break;
-        default:
-          const keycloakResp = JSON.parse(xhr.responseText);
-          self.accessToken = keycloakResp.access_token;
-          self.refreshToken = keycloakResp.refresh_token;
-          self.identityToken = keycloakResp.identity_token;
-          const remainingTime = keycloakResp.refresh_expires_in;
-          if (remainingTime <= self.sessionEndWarning) {
-            if (self.sessionEndingCallback) self.sessionEndingCallback(remainingTime);
-          }
-          setTimeout(function () {
-            self.refresh(keycloakResp.refresh_token);
-          }, self.refreshInterval(keycloakResp.expires_in));
-          self.authCallback(keycloakResp.access_token);
+        }
+        return;
+      }
+      const keycloakResp = JSON.parse(xhr.responseText);
+      self.accessToken = keycloakResp.access_token;
+      if (keycloakResp.refresh_token) {
+        self.refreshToken = keycloakResp.refresh_token;
+      }
+      self.identityToken = keycloakResp.id_token ?? keycloakResp.identity_token ?? null;
+      if (self.tokenUpdateCallback) {
+        Promise.resolve(
+          self.tokenUpdateCallback({
+            accessToken: self.accessToken,
+            refreshToken: self.refreshToken,
+            identityToken: self.identityToken,
+          })
+        ).catch((err) => {
+          console.warn('Unable to persist refreshed Keycloak tokens:', err);
+        });
+      }
+      const remainingTime = keycloakResp.refresh_expires_in;
+      if (typeof remainingTime === 'number' && remainingTime <= self.sessionEndWarning) {
+        if (self.sessionEndingCallback) {
+          self.sessionEndingCallback(remainingTime);
+        }
+      }
+      setTimeout(function () {
+        if (self.refreshToken) {
+          self.refresh(self.refreshToken);
+        }
+      }, self.refreshInterval(keycloakResp.expires_in));
+      if (self.authCallback) {
+        console.log('[Auth Debug] calling authCallback', Boolean(self.authCallback), Boolean(self.accessToken));
+        self.authCallback(self.accessToken);
+      }
+      if (isAuthenticated && self.loginCallback) {
+        console.log('[Auth Debug] calling loginCallback');
+        self.loginCallback();
       }
     };
     xhr.onerror = function () {
@@ -101,7 +133,7 @@ class Keycloak {
     data.append('grant_type', 'authorization_code');
     data.append('client_id', this.config.client);
     data.append('redirect_uri', this.config.redirectUrl);
-    this.fetchToken(data);
+    this.fetchToken(data, true);
   }
 
   refresh(refreshToken) {
@@ -110,7 +142,7 @@ class Keycloak {
     data.append('refresh_token', refreshToken);
     data.append('grant_type', 'refresh_token');
     data.append('client_id', this.config.client);
-    this.fetchToken(data);
+    this.fetchToken(data, false);
   }
 
   getAccessToken() {

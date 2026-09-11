@@ -37,48 +37,48 @@ const DataHeader = connect(
         <Card.Body>
           {(firstIdValue || secondIdValue) && (
             <Grid row gap='md' className='padding-bottom-1 border-bottom'>
-              <Grid tablet={{ col: 2 }}>
+              <Grid desktop={{ col: 2 }} tablet={{ col: 6 }}>
                 <span className='text-bold'>{firstIdLabel}</span> {firstIdValue || '--'}
               </Grid>
-              <Grid tablet={{ col: 10 }}>
+              <Grid desktop={{ col: 10 }} tablet={{ col: 6 }}>
                 <span className='text-bold'>{secondIdLabel}</span> {secondIdValue || '--'}
               </Grid>
             </Grid>
           )}
           <Grid row gap='md' className={`padding-bottom-1 border-bottom ${!isEmpty ? 'padding-top-1' : ''}`}>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Site ID:</span> {baseData?.siteId || '--'}
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Site Field ID:</span> {baseData?.siteFid || '--'}
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Year:</span> {baseData?.year || '--'}
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Field Office:</span> {baseData?.fieldoffice || '--'}
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Project:</span> {baseData?.projectId || '--'}
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Segment:</span> {baseData?.segmentId || '--'}
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Season:</span> {baseData?.season || '--'}
             </Grid>
           </Grid>
           <Grid row gap='md' className='padding-top-1 padding-bottom-1'>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Sample Unit Type:</span> {baseData?.sampleUnitType || '--'}
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Sample Unit:</span> {baseData?.bend || '--'}
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>R/N:</span> {baseData?.bendrn || '--'}
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <span className='text-bold'>Bend River Mile:</span> {baseData?.bendRiverMile || '--'}
             </Grid>
           </Grid>

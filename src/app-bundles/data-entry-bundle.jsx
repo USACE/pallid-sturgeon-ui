@@ -790,7 +790,7 @@ export default {
 
   doUpdateMoRiverDataEntry:
     (formData) =>
-    ({ dispatch, apiPut }) => {
+    ({ dispatch, apiPut, store }) => {
       const toastId = toast.loading('Saving datasheet...');
 
       const url = `${rootUrl}updateMoriverDataEntry`;
@@ -798,6 +798,7 @@ export default {
       apiPut(url, formData, (err, body) => {
         if (!err && body?.status === ApiStatuses.Success) {
           tSuccess(toastId, 'Datasheet successfully updated!');
+          store.doFetchMoRiverDataEntry({ tableId: formData?.mrId }, false, false, false);
         } else {
           dispatch({ type: 'MO_RIVER_DATA_ENTRY_UPDATE_ERROR', payload: err });
           tError(toastId, 'Error saving datasheet. Check your field entries and please try again.');

@@ -17,10 +17,14 @@ export const telemetryDataEntrySchema = ({ isSearchTypeRs }) =>
     seFid: yup.string().nullable(),
     tFid: yup.string().nullable(),
     bend: yup.number().test({
-      test: () => isSearchTypeRs === false,
+      test: (bend) => {
+        if (isSearchTypeRs === false) return true;
+        if (bend === undefined && isSearchTypeRs === true) return false;
+        return true;
+      },
       message: 'Value is required when Search Type = "River Sweep (RS)"',
     }),
-    bendRiverMile: optionalField(),
+    bendRiverMile: yup.string().nullable(),
     radioTagNum: yup.number().required(ValidationMessages.FieldRequired),
     frequencyIdCode: yup.string().required(ValidationMessages.SelectRequired),
     captureTime: yup.string().required(ValidationMessages.FieldRequired),

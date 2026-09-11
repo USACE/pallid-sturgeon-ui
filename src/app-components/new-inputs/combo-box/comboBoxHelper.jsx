@@ -10,6 +10,10 @@ export const baseStyle = {
       borderColor: state.isFocused ? '#ccc' : '#000000',
     },
   }),
+  option: (provided, state) => ({
+    ...provided,
+    color: state.isSelected ? '#ffffff' : '#333333',
+  }),
 };
 
 export const customSelectStyles = {
@@ -28,6 +32,11 @@ export const customSelectStyles = {
     '&:hover': {
       borderColor: state.isFocused ? '#ccc' : '#e74c3c',
     },
+    color: '#000000',
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    color: state.isSelected ? '#ffffff' : '#333333',
   }),
 };
 

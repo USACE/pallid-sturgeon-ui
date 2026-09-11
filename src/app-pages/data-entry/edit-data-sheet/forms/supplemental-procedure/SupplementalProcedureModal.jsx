@@ -23,6 +23,7 @@ import { createDropdownOptions, isEmpty } from '@pages/data-entry/dataEntryHelpe
 import { OfflineStatuses } from '@src/utils/enums';
 import { isOnline } from '@src/app-pages/data-entry/offline/sync';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
+import { refreshSiteDatasheet } from '@src/app-pages/data-entry/offline/datasheet-refresh';
 
 const geneticNeedsCheckboxes = [
   {
@@ -537,6 +538,7 @@ const SupplementalProcedureModal = connect(
             }
             sessionStorage.setItem(procDraftKey, JSON.stringify(procPayload));
           }
+          refreshSiteDatasheet();
           return;
         }
 
@@ -575,6 +577,7 @@ const SupplementalProcedureModal = connect(
 
         // Reset the form while keeping current values - clears dirty state on Save
         reset(getValues(), { keepValues: true });
+        refreshSiteDatasheet();
       } catch (error) {
         console.error('Procedure submit failed, queueing offline:', error);
         window.alert(`Supplemental/Procedure save failed: ${error?.message ?? error}`);
@@ -619,7 +622,7 @@ const SupplementalProcedureModal = connect(
       const hasDecimal = String(tagnumber)?.includes('.');
       
       if (hasDecimal) {
-        const charCount = String(tagnumber)?.replace('.', '').length;
+        const charCount = String(tagnumber)?.length;
         return charCount !== 14
           ? 'Tag number must be exactly 14 characters when a decimal is present'
           : null;
@@ -633,7 +636,7 @@ const SupplementalProcedureModal = connect(
     const tagNumberMaxLength = () => {
       const hasDecimal = String(tagnumber)?.includes('.');
       if (hasDecimal) {
-        return 15;
+        return 14;
       } else {
         return 10;
       }

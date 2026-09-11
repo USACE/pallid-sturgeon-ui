@@ -4,22 +4,42 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import _isEqual from 'lodash/isEqual';
 import { Alert, Button } from '@trussworks/react-uswds';
+import { mdiContentCopy } from '@mdi/js';
+import { toast } from 'react-toastify';
 
 import DataEntryTable from '@src/app-components/table/data-entry-table/DataEntryTable';
+import Icon from '@src/app-components/icon/icon';
 
 import { FishDataEntrySchema, getBaseDefaultValues, getFishRiverDefaultValues } from './FishDataEntry.validation';
 import { yesNoOptions } from '@src/app-pages/data-entry/edit-data-sheet/forms/_shared/selectHelper';
-
-import { OfflineStatuses } from '@src/utils/enums';
-import { isOnline } from '@src/app-pages/data-entry/offline/sync';
+import { DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
 import { getFishColumns } from './helpers.fish';
+import { ensureTrailingBlankRow, isUntouchedPlaceholderRow } from '@src/app-pages/data-entry/dataEntryHelper';
+import { getLookupOptions } from '@src/app-pages/data-entry/offline/lookup-cache';
 
 import '@pages/data-summaries/data-summary.scss';
 import '@pages/data-entry/dataentry.scss';
-import Icon from '@src/app-components/icon/icon';
-import { mdiContentCopy } from '@mdi/js';
-import { ensureTrailingBlankRow, isUntouchedPlaceholderRow } from '@src/app-pages/data-entry/dataEntryHelper';
+
+const lookupTableNames = ['fishCodes', 'fishStructures', 'floyTagPrefixes', 'lengthTypes', 'markRecaptureOptions'];
+const noFishSpecies = ['NFSH', 'CNFH', 'CNA', 'NDNF'];
+const gearAllowingTwoNfsh = ['LDN500', 'LDN750', 'LDN1000'];
+
+const ensureFishTrailingBlankRow = (rows, gear) => {
+  const normalizedRows = rows ?? [];
+  const realRows = normalizedRows.filter((row) => !isUntouchedPlaceholderRow(row));
+  const firstSpecies = realRows[0]?.species;
+  const nfshCount = realRows.filter((row) => row?.species === 'NFSH').length;
+  const canAddRow =
+    !noFishSpecies.includes(firstSpecies) ||
+    (firstSpecies === 'NFSH' && gearAllowingTwoNfsh.includes(gear) && nfshCount < 2);
+
+  if (!canAddRow) {
+    return realRows;
+  }
+
+  return ensureTrailingBlankRow(normalizedRows);
+};
 
 const normalizeFishRow = (row = {}) => ({
   ...row,
@@ -42,27 +62,14 @@ const normalizeFishRow = (row = {}) => ({
   uploadedBy: row?.uploadedBy ?? row?.uploaded_by ?? '',
 });
 
-// Calculate the next sequence number for a new fish row based on the parent mrFid and existing rows in the data array.
-// localRows never seems to return anything(?) - feel free to change if there is an issue.
-// const localRows = await db.fish.where('mrFid').equals(parentMrFid).toArray();
-// const dbRows = data?.filter((row) => row.mrFid === parentMrFid) ?? [];
-// const sequence = localRows.length + dbRows.length + 1;
+// Calculate next Fish Field ID suffix from the current Fish table rows.
+// Suffix always advances as max(existing suffix) + 1 for non-placeholder rows.
 const getNextFishId = (data, parentMrId, parentMrFid) => {
   const existing = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
-  const parentRows = existing.filter((row) => {
-    if (parentMrFid) {
-      const rowMrFid = row?.mrFid ?? row?.mr_fid;
-
-      return rowMrFid && String(rowMrFid) === String(parentMrFid);
-    }
-    const rowMrId = row?.mrId ?? row?.mr_id;
-
-    return parentMrId != null && rowMrId != null && String(rowMrId) === String(parentMrId);
-  });
 
   let maxSequence = 0;
 
-  parentRows.forEach((row) => {
+  existing.forEach((row) => {
     const id = row?.fFid ?? row?.f_fid ?? row?.localDisplayId ?? '';
     const sequencePart = String(id).split('-').pop();
     const sequenceNumber = Number(sequencePart);
@@ -99,31 +106,20 @@ const FishDataEntry = connect(
     dataEntryFishData,
     baseData,
     lookupData,
+    onDirtyChange,
     routeParams,
   }) => {
     const { items } = dataEntryFishData;
     const siteRouteKey = routeParams?.siteId;
     const { gear } = dataEntryData;
-    const {
-      fishCodes: onlineFishCodes,
-      fishStructures: onlineFishStructures,
-      floyTagPrefixes: onlineFloyTagPrefixes,
-      lengthTypes: onlineLengthTypes,
-      markRecaptureOptions: onlineMarkRecaptureOptions,
-    } = lookupData;
-    const [offlineLookups, setOfflineLookups] = useState({
-      fishCodes: [],
-      fishStructures: [],
-      floyTagPrefixes: [],
-      lengthTypes: [],
-      markRecaptureOptions: [],
-    });
-    const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
-    const [tableKey, setTableKey] = useState(0);
-    const [data, setData] = useState(ensureTrailingBlankRow(rowData));
-    const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
-    const [validationErrorRows, setValidationErrorRows] = useState([]);
-    const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
+
+    // Default lookups to online data, otherwise will be overwritten by offline cached lookup data if network status = offline
+    const [lookups, setLookups] = useState(
+      lookupTableNames.reduce((accumulator, currentKey) => {
+        accumulator[currentKey] = lookupData?.[currentKey] ?? [];
+        return accumulator;
+      }, {})
+    );
 
     // Get Missouri River Draft Data
     const moriverDraftKey = `currentMissouriRiverDraft:${siteRouteKey}`;
@@ -131,14 +127,14 @@ const FishDataEntry = connect(
     const moriverDraft = savedDraft ? JSON.parse(savedDraft) : null;
     const parentMrFid = dataEntryData?.mrFid ?? dataEntryData?.mr_fid ?? moriverDraft?.mrFid ?? moriverDraft?.mr_fid;
     const parentMrId = dataEntryData?.mrId ?? dataEntryData?.mr_id ?? moriverDraft?.mrId ?? moriverDraft?.mr_id;
-    const online = !!isOnline();
+    const isOnline = navigator.onLine;
 
-    const fishCodes = onlineFishCodes?.length > 0 ? onlineFishCodes : offlineLookups.fishCodes;
-    const fishStructures = onlineFishStructures?.length > 0 ? onlineFishStructures : offlineLookups.fishStructures;
-    const floyTagPrefixes = onlineFloyTagPrefixes?.length > 0 ? onlineFloyTagPrefixes : offlineLookups.floyTagPrefixes;
-    const lengthTypes = onlineLengthTypes?.length > 0 ? onlineLengthTypes : offlineLookups.lengthTypes;
-    const markRecaptureOptions =
-      onlineMarkRecaptureOptions?.length > 0 ? onlineMarkRecaptureOptions : offlineLookups.markRecaptureOptions;
+    const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
+    const [tableKey, setTableKey] = useState(0);
+    const [data, setData] = useState(ensureFishTrailingBlankRow(rowData, gear));
+    const [validationErrorRowCount, setValidationErrorRowCount] = useState(0);
+    const [validationErrorRows, setValidationErrorRows] = useState([]);
+    const [isSubmitAttempted, setIsSubmitAttempted] = useState(false);
 
     const dataForValidation = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
     const schema = useMemo(() => FishDataEntrySchema({ gear, data: dataForValidation }), [gear, dataForValidation]);
@@ -152,11 +148,28 @@ const FishDataEntry = connect(
       },
     };
 
-    const speciesOptions =
-      fishCodes?.map((item) => ({
+    const allSpeciesOptions =
+      lookups?.fishCodes?.map((item) => ({
         code: item.alphaCode,
         description: item.commonName,
       })) ?? [];
+
+    const speciesOptions = (tableRow) => {
+      const realRows = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
+      const firstSpecies = realRows[0]?.species;
+      const isFirstRow = tableRow?.index === 0;
+      const canSelectNoFishInFirstRow = isFirstRow && realRows.length <= 1;
+      const isSecondNfshRow =
+        tableRow?.index === 1 && firstSpecies === 'NFSH' && gearAllowingTwoNfsh.includes(gear);
+
+      return allSpeciesOptions.filter(({ code }) => {
+        if (isSecondNfshRow) return code === 'NFSH';
+        if (noFishSpecies.includes(code) && !canSelectNoFishInFirstRow) {
+          return false;
+        }
+        return true;
+      });
+    };
 
     const methods = useForm({
       resolver: yupResolver(schema),
@@ -169,8 +182,21 @@ const FishDataEntry = connect(
           return false;
         }
 
+        const species = row?.species;
+        const count = Number(row?.countF);
+        const hasLength = row?.length !== null && row?.length !== undefined && row?.length !== '' && Number(row?.length) !== 0;
+
         const hasFloyTagPrefix = row?.ftPrefix != null && String(row.ftPrefix).trim() !== '';
         const hasFloyTag = row?.floyTag != null && String(row.floyTag).trim() !== '';
+
+        if (columnId === 'length') {
+          return ['PDSG', 'SNSG', 'SNPD'].includes(species) && count === 1;
+        }
+
+        if (columnId === 'lengthType') {
+          const isRequiredBySpeciesAndCount = ['PDSG', 'SNSG', 'SNPD'].includes(species) && count === 1;
+          return isRequiredBySpeciesAndCount || hasLength;
+        }
 
         if (columnId === 'ftPrefix' || columnId === 'floyTag') {
           return hasFloyTagPrefix || hasFloyTag;
@@ -191,12 +217,12 @@ const FishDataEntry = connect(
     const tableColumns = getFishColumns({
       gear,
       speciesOptions,
-      lengthTypes,
-      floyTagPrefixes,
-      markRecaptureOptions,
+      lengthTypes: lookups?.lengthTypes,
+      floyTagPrefixes: lookups?.floyTagPrefixes,
+      markRecaptureOptions: lookups?.markRecaptureOptions,
       yesNoOptions,
-      fishStructures,
-      online,
+      fishStructures: lookups?.fishStructures,
+      isOnline,
     });
 
     const columnHeaderById = useMemo(() => {
@@ -224,7 +250,7 @@ const FishDataEntry = connect(
     }, []);
 
     const handleAddRow = async () => {
-      setData((prev) => ensureTrailingBlankRow(prev));
+      setData((prev) => ensureFishTrailingBlankRow(prev, gear));
       scrollToBottom();
     };
 
@@ -282,7 +308,7 @@ const FishDataEntry = connect(
       };
       setData((prev) => {
         const existingRows = (prev ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
-        return ensureTrailingBlankRow([...existingRows, newRowData]);
+        return ensureFishTrailingBlankRow([...existingRows, newRowData], gear);
       });
       scrollToBottom();
     };
@@ -291,7 +317,7 @@ const FishDataEntry = connect(
       // Handle any data mapping or formatting here
       setData((oldData) => {
         const existingRows = (oldData ?? []).filter((row) => !isUntouchedPlaceholderRow(row));
-        return ensureTrailingBlankRow([...existingRows, ...rows]);
+        return ensureFishTrailingBlankRow([...existingRows, ...rows], gear);
       });
       scrollToBottom();
     };
@@ -299,10 +325,10 @@ const FishDataEntry = connect(
     const handleRemoveMultipleRows = useCallback((indicesToRemove) => {
       setData((oldData) => {
         const remainingRows = oldData.filter((_, index) => !indicesToRemove.includes(index));
-        return ensureTrailingBlankRow(remainingRows);
+        return ensureFishTrailingBlankRow(remainingRows, gear);
       });
       setTableKey((old) => old + 1);
-    }, []);
+    }, [gear]);
 
     const handleUpdateData = useCallback(
       (rowIndex, columnId, updatedValue) => {
@@ -357,7 +383,7 @@ const FishDataEntry = connect(
               newData[rowIndex]._status = OfflineStatuses.Edited;
             }
 
-            return ensureTrailingBlankRow(newData);
+            return ensureFishTrailingBlankRow(newData, gear);
           }
           return oldData;
         });
@@ -366,7 +392,7 @@ const FishDataEntry = connect(
           scrollToBottom();
         }
       },
-      [baseData, data, dataEntryData, parentMrFid, parentMrId, scrollToBottom]
+      [baseData, data, dataEntryData, gear, parentMrFid, parentMrId, scrollToBottom]
     );
 
     const handleSubmitAll = async () => {
@@ -469,19 +495,38 @@ const FishDataEntry = connect(
           return;
         }
 
-        for (const { item, payload, isNew, clientId } of rowPayloads) {
+        for (const { payload, isNew, clientId } of rowPayloads) {
           try {
-            if (online) {
-              if (isNew) {
-                await doSaveFishDataEntry(payload);
-              } else if (item.fid && item._status === OfflineStatuses.Edited) {
-                await doUpdateFishDataEntry(payload);
-              }
+            // Sync Recovery Logic
+            if (payload?._syncRecoveryError && payload?.clientId) {
+              await updateData('telemetry', payload.clientId, payload);
+              setData((currentRows) => {
+                const updatedRows = (currentRows ?? []).map((currentRow) => {
+                  if (String(currentRow?.clientId) !== String(payload.clientId)) {
+                    return currentRow;
+                  }
+                  return {
+                    ...currentRow,
+                    ...payload,
+                    _syncRecoveryError: false,
+                    _syncRecoveryMessage: undefined,
+                    _status: DataEntryStatuses.Queued,
+                    _isPlaceholderRow: false,
+                    _isTouched: true,
+                  };
+                });
+                return ensureFishTrailingBlankRow(updatedRows, gear);
+              });
+              continue;
+            }
+            // Execute Submit
+            if (isOnline) {
+              isNew ? await doSaveFishDataEntry(payload) : await doUpdateFishDataEntry(payload);
             } else {
               isNew ? await createData('fish', payload) : await updateData('fish', clientId, payload);
             }
           } catch (error) {
-            console.error('Fish API failed, queuing offline:', error);
+            console.error('Fish save failed, queuing offline:', error);
             isNew ? await createData('fish', payload) : await updateData('fish', clientId, payload);
           }
         }
@@ -499,13 +544,18 @@ const FishDataEntry = connect(
               _status: OfflineStatuses.Queued,
             };
           });
-          return ensureTrailingBlankRow(updatedRows);
+          return ensureFishTrailingBlankRow(updatedRows, gear);
         });
+
+        toast.success('Datasheet successfully updated!');
 
         const draft = savedDraft ? JSON.parse(savedDraft) : {};
         const fishCount = (data ?? []).filter((row) => !isUntouchedPlaceholderRow(row)).length;
         sessionStorage.setItem(moriverDraftKey, JSON.stringify({ ...draft, fishCount: fishCount }));
-        await doMoRiverDatasheetLoadData(parentMrId ?? parentMrFid);
+        const hasRecoveryRow = rowsToProcess.some((row) => row._syncRecoveryError && row.clientId);
+        if (!hasRecoveryRow) {
+          await doMoRiverDatasheetLoadData(parentMrId ?? parentMrFid);
+        }
       } catch (err) {
         console.error('Submit failed:', err);
       }
@@ -520,8 +570,26 @@ const FishDataEntry = connect(
 
     useEffect(() => {
       const rowData = items?.map((item) => ({ ...normalizeFishRow(item), bendRiverMile: baseData?.bendRiverMile }));
-      setData(ensureTrailingBlankRow(rowData));
-    }, [baseData?.bendRiverMile, items]);
+      setData(ensureFishTrailingBlankRow(rowData, gear));
+    }, [baseData?.bendRiverMile, gear, items]);
+
+    useEffect(() => {
+      onDirtyChange?.(
+        (data ?? []).some(
+          (row) => !isUntouchedPlaceholderRow(row) && [OfflineStatuses.New, OfflineStatuses.Edited].includes(row._status)
+        )
+      );
+    }, [data, onDirtyChange]);
+
+    // Load offline lookups
+    useEffect(() => {
+      const loadOfflineLookups = async () => {
+        const entries = await Promise.all(lookupTableNames.map(async (name) => [name, await getLookupOptions(name)]));
+        setLookups(Object.fromEntries(entries));
+      };
+
+      !isOnline && loadOfflineLookups();
+    }, [isOnline]);
 
     return (
       <FormProvider {...methods}>
@@ -530,7 +598,17 @@ const FishDataEntry = connect(
           columns={tableColumns}
           data={data}
           enablePagination={false}
-          initialTableState={{}}
+          initialTableState={{
+            columnVisibility: {
+              fid: false,
+              otolith: false,
+              raySpine: false,
+              KN: false,
+              RSD: false,
+              editInitials: false,
+              uploadedBy: false,
+            },
+          }}
           isCellRequired={isFishCellRequired}
           key={tableKey}
           placeholderClick={handleAddRow}

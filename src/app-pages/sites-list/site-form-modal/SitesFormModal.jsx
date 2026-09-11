@@ -57,6 +57,7 @@ const SitesFormModal = connect(
     );
     const [bendOptions, setBendOptions] = useState([]);
     const [segmentOptions, setSegmentOptions] = useState([]);
+    const [seasonsOptions, setSeasonsOptions] = useState([]);
 
     const bendDataMapping = {
       B: lookups?.bendRiverMile,
@@ -81,7 +82,7 @@ const SitesFormModal = connect(
       stateOptions: [],
     });
     const {
-      formState: { errors, isValid },
+      formState: { errors, isValid, isDirty },
       setFocus,
       watch,
       getValues,
@@ -102,6 +103,12 @@ const SitesFormModal = connect(
 
     const segmentValue = segment?.value;
     const bendValue = bend?.value;
+
+    const buildSeasonOptions = (project) => {
+      const isProject1 = [1, 3, 4, 5, 6].includes(Number(project));
+      if (isProject1) return lookups?.seasons?.filter((item) => Number(item.projectCode) === 1);
+      return lookups?.seasons?.filter((item) => Number(item.projectCode) === 2);
+    };
 
     const buildBendOptions = (type) => {
       if (!type) return;
@@ -259,10 +266,26 @@ const SitesFormModal = connect(
       doModalClose();
     };
 
+    const handleClose = () => {
+      if (isDirty) {
+        const confirmed = confirm('Any changes will not be saved. Is this okay?');
+        if (confirmed) {
+          doModalClose();
+        }
+      } else {
+        doModalClose();
+      }
+    };
+
     // Update Bend options if Segment values change
     useEffect(() => {
       segmentValue && sampleUnitType && setBendOptions(buildBendOptions(sampleUnitType));
     }, [segmentValue, sampleUnitType]);
+
+    // Update Season options if Project values change
+    useEffect(() => {
+      project && setSeasonsOptions(buildSeasonOptions(project));
+    }, [project]);
 
     // Update Segment options if Field Office and/or Project values change
     useEffect(() => {
@@ -282,7 +305,7 @@ const SitesFormModal = connect(
           label: buildSegmentDescription(),
         });
       }
-      if (data?.bend) {
+      if (data?.bend || data?.bend === 0) {
         setValue('bend', {
           value: data?.bend,
           label: buildBendDescription(),
@@ -393,7 +416,7 @@ const SitesFormModal = connect(
                 required
               />
               <SelectInput name='season' label='Season' onChange={handleChange} readOnly={!project} required>
-                {createDropdownOptions(lookups?.seasons).map((item, index) => (
+                {createDropdownOptions(seasonsOptions).map((item, index) => (
                   <option key={index + 1} value={item.value}>
                     {item.text}
                   </option>
@@ -440,6 +463,7 @@ const SitesFormModal = connect(
             saveIsDisabled={!isValid}
             saveText={edit ? 'Apply Changes' : 'Save'}
             onSave={() => handleSave()}
+            onCancel={() => handleClose()}
           />
         </FormProvider>
       </ModalContent>

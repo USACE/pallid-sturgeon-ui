@@ -3,6 +3,8 @@ import {
   getOfflineAuthSession,
   isOfflineAuthSessionValid,
   saveOfflineAuthSession,
+  updateOfflineAuthToken,
+  renewOfflineAuthSession,
   clearOfflineAuthSession,
 } from '@src/app-pages/data-entry/offline/offline-auth';
 
@@ -89,6 +91,14 @@ const createAuthBundle = (options) => ({
       onAuthenticate: (token) => {
         store.doFetchAuthRoles(token);
       },
+      onTokenUpdate: async ({ accessToken, refreshToken }) => {
+        await updateOfflineAuthToken({ accessToken, refreshToken });
+      },
+      onLogin: async () => {
+        try {
+          await renewOfflineAuthSession();
+        } catch (err) {}
+      },
       onRedirect: (sessionState) => {
         // store.doSessionStateUpdate(sessionState);
       },
@@ -103,7 +113,6 @@ const createAuthBundle = (options) => ({
     });
 
     keycloak.checkForSession();
-
     if (!navigator.onLine) {
       store.doRestoreOfflineAuth();
     }
@@ -132,6 +141,13 @@ const createAuthBundle = (options) => ({
           offlineSession,
         },
       });
+
+      if (Array.isArray(offlineSession.roles)) {
+        dispatch({
+          type: 'UPDATE_USERS',
+          payload: offlineSession.roles,
+        });
+      }
       return true;
     },
 

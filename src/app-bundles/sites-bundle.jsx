@@ -4,7 +4,6 @@ import { db } from '@src/app-pages/data-entry/offline/db';
 import { toast } from 'react-toastify';
 import { tSuccess, tError } from '@common/toast/toastHelper';
 import { ApiStatuses } from '@src/utils/enums';
-import { getCurrentFieldStudyYear } from '@src/app-pages/data-entry/offline/lookup-cache';
 
 const rootUrl = '/psapi/Sites/';
 
@@ -54,15 +53,27 @@ export default {
   doSitesLoadData:
     () =>
     async ({ dispatch, store }) => {
+      const isOnline = navigator.onLine;
       dispatch({ type: 'LOADING_SITES_INIT_DATA' });
 
-      if (navigator.onLine) {
+      const project = Number(store.selectUserRole()?.projectCode);
+      const fieldOffice = store.selectUserRole()?.officeCode;
+
+      if (isOnline) {
+        // if network status is online, run API call
         store.doFetchSites();
         return;
       }
 
-      const fieldStudyYear = getCurrentFieldStudyYear();
-      const localSites = await db.sites.filter((site) => Number(site.year) === fieldStudyYear).toArray();
+      // If network status is offline...
+      // Filter local sites appropriately by user's project ID and field office
+      // Edge Case: User switches roles when online and doesn't download latest offline data
+      const localSites =
+        fieldOffice === 'ZZ'
+          ? await db.sites.filter((site) => Number(project) === Number(site.projectId)).toArray()
+          : await db.sites
+              .filter((site) => Number(project) === Number(site.projectId) && fieldOffice === site.fieldoffice)
+              .toArray();
       const moriverData = await db.moriver.toArray();
       const searchData = await db.search.toArray();
       const siteHasForms = (site) => {
@@ -103,11 +114,22 @@ export default {
           bkgColor: siteHasForms(site) ? '#daf2ea' : (site?.bkgColor ?? null),
         };
       });
+      // Filter Cached vs Existing Sites normalized data
+      const cachedNewSites = normalizedSites.filter((item) => Number(item.siteId) === 0);
+      const existingSites = normalizedSites.filter(
+        (item) => item.siteId !== undefined && item.siteId !== null && Number(item.siteId) > 0
+      );
+      // Descending (Newest to Oldest)
+      const sortedCachedNewSites = [...cachedNewSites]?.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+      const sortedExistingSites = [...existingSites]?.sort((a, b) => Number(b.siteId) - Number(a.siteId));
+
+      const sortedSites =
+        cachedNewSites?.length > 0 ? [...sortedCachedNewSites, ...sortedExistingSites] : sortedExistingSites;
 
       dispatch({
         type: 'SITES_UPDATED_ITEMS',
         payload: {
-          items: normalizedSites,
+          items: sortedSites,
           totalCount: normalizedSites.length,
         },
       });
@@ -227,11 +249,12 @@ export default {
   doSetSitesPagination:
     ({ pageSize, pageNumber }) =>
     ({ dispatch, store }) => {
+      const isOnline = navigator.onLine;
       dispatch({
         type: 'SET_SITES_PAGINATION',
         payload: { pageSize, pageNumber },
       });
-      if (navigator.onLine) {
+      if (isOnline) {
         store.doFetchSites();
       }
     },
@@ -239,6 +262,7 @@ export default {
   doUpdateSiteParams:
     (searchParams) =>
     ({ dispatch, store }) => {
+      const isOnline = navigator.onLine;
       const paramObj = {
         id: store.selectUserRole()?.id,
         project: store.selectUserRole()?.projectCode,
@@ -247,7 +271,7 @@ export default {
         type: 'UPDATE_SITE_PARAMS',
         payload: { ...searchParams, ...paramObj },
       });
-      if (!navigator.onLine) return;
+      if (!isOnline) return;
       store.doDomainSeasonsFetch(searchParams?.year);
       store.doFetchSites();
       store.doFetchExportsSites({ ...searchParams, ...paramObj });

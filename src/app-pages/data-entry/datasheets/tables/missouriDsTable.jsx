@@ -8,21 +8,47 @@ import EditCellRenderer from '@common/gridCellRenderers/editCellRenderer';
 import MrIdCellRenderer from '@common/gridCellRenderers/mrIdCellRenderer';
 
 import { dateFormatter } from '@common/gridHelpers/ag-grid-helper';
-import { Row } from '@pages/data-entry/edit-data-sheet/forms/_shared/helper';
-import { Button } from '@trussworks/react-uswds';
+import { Button, Grid } from '@trussworks/react-uswds';
 import { useEffect, useState } from 'react';
 
-const fishCellStyle = (params) => ({
-  backgroundColor: params.data.bkgColor,
-});
+const fishCellStyle = (params) => {
+  const isOnline = navigator.onLine;
+  var offlineBkgColor = '';
+  if (!isOnline) {
+    if (params?.data?.fishCount > 0) {
+      offlineBkgColor = '#daf2ea';
+    }
+  }
+  return {
+    backgroundColor: isOnline ? params.data.bkgColor : offlineBkgColor,
+  };
+};
 
-const suppCellStyle = (params) => ({
-  backgroundColor: params.data.suppBkgColor,
-});
+const suppCellStyle = (params) => {
+  const isOnline = navigator.onLine;
+  var offlineBkgColor = '';
+  if (!isOnline) {
+    if (params?.data?.suppCount > 0) {
+      offlineBkgColor = '#daf2ea';
+    }
+  }
+  return {
+    backgroundColor: isOnline ? params.data.suppBkgColor : offlineBkgColor,
+  };
+};
 
-const procCellStyle = (params) => ({
-  backgroundColor: params.data.procBkgColor,
-});
+const procCellStyle = (params) => {
+  const isOnline = navigator.onLine;
+  var offlineBkgColor = '';
+  if (!isOnline) {
+    if (params?.data?.procCount > 0) {
+      offlineBkgColor = '#daf2ea';
+    }
+  }
+  return {
+    backgroundColor: isOnline ? params.data.procBkgColor : offlineBkgColor,
+  };
+};
 
 const MissouriDsTable = connect(
   'doResetFormData',
@@ -72,22 +98,26 @@ const MissouriDsTable = connect(
 
     return (
       <>
-        <Row>
-          <div className='col-md-12 col-xs-12' style={{ justifyContent: 'space-between' }}>
+        <Grid row gap='md'>
+          <Grid desktop={{ col: 4 }} tablet={{ col: 12 }}>
             <Button onClick={handleAddButtonClick} className='add-btn' title='Add Missouri River Datasheet'>
               <span>
                 <Icon path={mdiPlus} />
               </span>
               Add Missouri River Datasheet
             </Button>
+          </Grid>
+          {/* @TODO: Enable when CSV feature is in progress */}
+          {/* <Grid desktop={{ col: 4 }} tablet={{ col: 12 }}>
             <Button onClick={() => {}} className='clear-btn' title='Export as CSV' disabled>
               <span>
                 <Icon path={mdiDownload} />
               </span>
               Export as CSV
             </Button>
-          </div>
-        </Row>
+          </Grid> */}
+        </Grid>
+
         <div
           className={`mt-2 ${isDarkMode ? 'ag-theme-balham-dark' : 'ag-theme-balham'}`}
           style={{ width: '100%', height: '600px' }}
@@ -106,7 +136,7 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='mrId'
               headerName='MR ID'
-              width={100}
+              width={85}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
                 type: 'missouriRiver',
@@ -118,7 +148,7 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='fishCount'
               headerName='Fish'
-              width={130}
+              width={70}
               cellStyle={fishCellStyle}
               cellRenderer='mrIdCellRenderer'
               cellRendererParams={{
@@ -131,26 +161,16 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='suppCount'
               headerName='Supplemental'
-              width={130}
               cellStyle={suppCellStyle}
-              cellRenderer='mrIdCellRenderer'
-              cellRendererParams={{
-                type: 'supplemental',
-                tab: 1,
-              }}
+              width={125}
               sortable
               unSortIcon
             />
             <AgGridColumn
               field='procCount'
               headerName='Procedure'
-              width={130}
               cellStyle={procCellStyle}
-              cellRenderer='mrIdCellRenderer'
-              cellRendererParams={{
-                type: 'procedure',
-                tab: 1,
-              }}
+              width={105}
               sortable
               unSortIcon
             />
@@ -158,16 +178,14 @@ const MissouriDsTable = connect(
             <AgGridColumn
               field='setdate'
               headerName='Date'
+              width={90}
               valueGetter={(params) => dateFormatter(params.data.setdate)}
               sortable
               unSortIcon
             />
-            <AgGridColumn field='subsample' sortable unSortIcon />
-            <AgGridColumn field='gear' headerName='Gear Code' sortable unSortIcon />
-            <AgGridColumn field='recorder' headerName='Recorder' sortable unSortIcon />
-            <AgGridColumn field='checkby' headerName='Checked?' sortable unSortIcon />
-            {/* @TODO: Check with Tisha on approved field. */}
-            <AgGridColumn headerName='Approved?' sortable unSortIcon />
+            <AgGridColumn field='subsample' width={110} sortable unSortIcon />
+            <AgGridColumn field='gearCode' headerName='Gear Code' width={110} sortable unSortIcon />
+            <AgGridColumn field='recorder' headerName='Recorder' width={100} sortable unSortIcon />
           </AgGridReact>
         </div>
       </>

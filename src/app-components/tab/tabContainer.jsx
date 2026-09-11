@@ -29,7 +29,9 @@ const TabContainer = ({
   const [isDisabled, setIsDisabled] = useState(false);
 
   const changeTab = (title, index) => {
-    onTabChange(title, index);
+    if (onTabChange(title, index) === false) {
+      return;
+    }
     setTabIndex(index);
     changeTabDelay && setIsDisabled(true);
   };

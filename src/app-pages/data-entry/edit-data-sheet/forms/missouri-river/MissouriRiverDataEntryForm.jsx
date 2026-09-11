@@ -4,6 +4,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Button, Grid } from '@trussworks/react-uswds';
 import { mdiCrosshairsGps } from '@mdi/js';
+import { toast } from 'react-toastify';
 
 import ErrorSummary from '@src/app-components/error-summary/ErrorSummary';
 import SelectInput from '@src/app-components/new-inputs/select-input/SelectInput';
@@ -28,7 +29,7 @@ import {
   formatGpsCoordinate,
   isEmpty,
 } from '@src/app-pages/data-entry/dataEntryHelper';
-import { useUbloxSerialGps } from '@src/customHooks/useUbloxSerialGps';
+import { useSharedUbloxGps } from '@src/app-pages/data-entry/offline/UbloxGpsContent';
 import { captureGpsBest, GPS_OPTIONS } from '@src/app-pages/data-entry/offline/offlineHelper';
 import { ApiStatuses, DataEntryStatuses, OfflineStatuses } from '@src/utils/enums';
 import { createData, updateData } from '@src/app-pages/data-entry/offline/api';
@@ -112,7 +113,7 @@ const MissouriRiverDataEntryForm = connect(
   }) => {
     // Initialize GPS
     const browserGps = useGpsCapture(GPS_OPTIONS);
-    const ubloxGps = useUbloxSerialGps();
+    const ubloxGps = useSharedUbloxGps();
     const { bend, fieldoffice, season, projectId, segmentId } = baseData;
     const siteRouteKey = routeParams?.siteId;
     const isOfflineSite = String(siteRouteKey).startsWith('SITE-');
@@ -357,7 +358,7 @@ const MissouriRiverDataEntryForm = connect(
         site_fid: isOfflineSite ? siteRouteKey : dataObj?.site_fid,
         siteRouteKey,
         status: DataEntryStatuses.Draft,
-        _status: 'draft',
+        _status: DataEntryStatuses.Draft,
         version: dataObj.version ?? 0,
         updatedAt: new Date().toISOString(),
       });
@@ -375,6 +376,7 @@ const MissouriRiverDataEntryForm = connect(
           newForm() ? doAddMoRiverDataEntry(payload) : doUpdateMoRiverDataEntry(payload);
         } else {
           await db.moriver.put(payload);
+          toast.success('Datasheet successfully updated!');
           // Need to populate dataEntryData store
           doFetchMoRiverDataEntry({ tableId: finalMrFid }, false, false, false);
         }
@@ -390,6 +392,8 @@ const MissouriRiverDataEntryForm = connect(
         if (!isOnline) {
           await db.moriver.put(payload);
           sessionStorage.setItem(moriverDraftKey, JSON.stringify(payload));
+          // Need to populate dataEntryData store
+          doFetchMoRiverDataEntry({ tableId: finalMrFid }, false, false, false);
         }
       }
     };
@@ -435,8 +439,10 @@ const MissouriRiverDataEntryForm = connect(
 
         try {
           newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
+          toast.success('Datasheet successfully updated!');
         } catch (error) {
           console.error('Submit failed, queueing offline:', error);
+          toast.error('Submit failed, queueing offline!');
           newForm() ? await createData('moriver', payload) : await updateData('moriver', clientId, payload);
         }
         setValue('clientId', clientId);
@@ -591,19 +597,19 @@ const MissouriRiverDataEntryForm = connect(
         )}
         <div className='container-fluid test-moriver margin-top-1'>
           <Grid row gap='md'>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }}>
               <p>
                 MR Field ID (Date-Time-SE#):<br></br>
                 <span className='text-bold'>{mrFid}</span>
               </p>
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }}>
               <p>
                 SE Field ID (Date-Time-SE#):<br></br>
                 <span className='text-bold'>{seFid !== '' ? seFid : '--'}</span>
               </p>
             </Grid>
-            <Grid tablet={{ col: 8 }}>
+            <Grid desktop={{ col: 8 }}>
               {!hasFishRecords ? (
                 <Button className='add-btn save-btn' onClick={handleSubmit(doSaveDraft)} type='button'>
                   Save as Draft
@@ -633,8 +639,8 @@ const MissouriRiverDataEntryForm = connect(
             </Grid>
           </Grid>
 
-          <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 2 }}>
+          <Grid row gap='md'>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <TextInput
                 name='setdate'
                 label='Set Date'
@@ -644,13 +650,13 @@ const MissouriRiverDataEntryForm = connect(
                 required
               />
             </Grid>
-            <Grid tablet={{ col: 1 }}>
+            <Grid desktop={{ col: 1 }} tablet={{ col: 2 }}>
               <TextInput name='subsample' label='Subsample' type='number' onChange={handleChange} required />
             </Grid>
-            <Grid tablet={{ col: 1 }}>
+            <Grid desktop={{ col: 1 }} tablet={{ col: 2 }}>
               <TextInput name='subsamplepass' label='Pass' type='number' onChange={handleChange} required />
             </Grid>
-            <Grid tablet={{ col: 1 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <SelectInput name='subsamplen' label='Subsample R/N' onChange={handleChange} required>
                 {createDropdownOptions(lookups?.bendSelections).map((item, index) => (
                   <option key={index + 1} value={item.value}>
@@ -659,7 +665,7 @@ const MissouriRiverDataEntryForm = connect(
                 ))}
               </SelectInput>
             </Grid>
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
               <SelectInput name='subsampleType' label='Subsample Type' onChange={handleChange} required>
                 {createDropdownOptions(lookups?.subsampleTypes).map((item, index) => (
                   <option key={index + 1} value={item.value}>
@@ -668,25 +674,7 @@ const MissouriRiverDataEntryForm = connect(
                 ))}
               </SelectInput>
             </Grid>
-            <Grid tablet={{ col: 2 }}>
-              <SelectInput name='gearType' label='Gear Type' onChange={handleChange} required>
-                {createDropdownOptions(lookups?.gearTypes).map((item, index) => (
-                  <option key={index + 1} value={item.value}>
-                    {item.text}
-                  </option>
-                ))}
-              </SelectInput>
-            </Grid>
-            <Grid tablet={{ col: 2 }}>
-              <SelectInput name='gear' label='Gear Code' onChange={handleChange} required>
-                {createDropdownOptions(gearCodeOptions).map((item, index) => (
-                  <option key={index + 1} value={item.value}>
-                    {item.value}
-                  </option>
-                ))}
-              </SelectInput>
-            </Grid>
-            <Grid tablet={{ col: 1 }}>
+            <Grid desktop={{ col: 1 }} tablet={{ col: 2 }}>
               <TextInput
                 name='recorder'
                 label='Recorder'
@@ -697,11 +685,31 @@ const MissouriRiverDataEntryForm = connect(
               />
             </Grid>
           </Grid>
+          <Grid row gap='md' className='padding-bottom-3'>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
+              <SelectInput name='gearType' label='Gear Type' onChange={handleChange} required>
+                {createDropdownOptions(lookups?.gearTypes).map((item, index) => (
+                  <option key={index + 1} value={item.value}>
+                    {item.text}
+                  </option>
+                ))}
+              </SelectInput>
+            </Grid>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 4 }}>
+              <SelectInput name='gear' label='Gear Code' onChange={handleChange} required>
+                {createDropdownOptions(gearCodeOptions).map((item, index) => (
+                  <option key={index + 1} value={item.value}>
+                    {item.value}
+                  </option>
+                ))}
+              </SelectInput>
+            </Grid>
+          </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 4 }} className='border-right'>
+            <Grid desktop={{ col: 4 }} tablet={{ col: 12 }} className='border-right'>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 6 }}>
+                <Grid desktop={{ col: 6 }} tablet={{ col: 6 }}>
                   <SelectInput name='macro' label='Macro' onChange={handleChange} required>
                     {createDropdownOptions(lookups?.macros).map((item, index) => (
                       <option key={index + 1} value={item.value}>
@@ -710,7 +718,7 @@ const MissouriRiverDataEntryForm = connect(
                     ))}
                   </SelectInput>
                 </Grid>
-                <Grid tablet={{ col: 6 }}>
+                <Grid desktop={{ col: 6 }} tablet={{ col: 6 }}>
                   <SelectInput name='meso' label='Meso' onChange={handleChange} required>
                     {createDropdownOptions(mesoOptions).map((item, index) => (
                       <option key={index + 1} value={item.value}>
@@ -721,7 +729,7 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
               </Grid>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 6 }}>
+                <Grid desktop={{ col: 6 }} tablet={{ col: 6 }}>
                   <TextInput
                     name='temp'
                     label='Temp (c)'
@@ -731,7 +739,7 @@ const MissouriRiverDataEntryForm = connect(
                     warning={getTempWarning(temp, gearCode)}
                   />
                 </Grid>
-                <Grid tablet={{ col: 6 }}>
+                <Grid desktop={{ col: 6 }} tablet={{ col: 6 }}>
                   <TextInput
                     name='width'
                     label='Width'
@@ -747,9 +755,9 @@ const MissouriRiverDataEntryForm = connect(
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 5 }} className='border-right'>
+            <Grid desktop={{ col: 5 }} tablet={{ col: 12 }} className='border-right'>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='startTime'
                     label='Start Time'
@@ -758,7 +766,7 @@ const MissouriRiverDataEntryForm = connect(
                     readOnly={isStartTimeDisabled}
                   />
                 </Grid>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='startLatitude'
                     label='Start Latitude'
@@ -767,7 +775,7 @@ const MissouriRiverDataEntryForm = connect(
                     required
                   />
                 </Grid>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='startLongitude'
                     label='Start Longitude'
@@ -776,7 +784,7 @@ const MissouriRiverDataEntryForm = connect(
                     required
                   />
                 </Grid>
-                <Grid row gap='md' table={{ col: 3 }}>
+                <Grid row gap='md' tablet={{ col: 3 }}>
                   <Button
                     onClick={() => handleCapture('start')}
                     type='button'
@@ -788,7 +796,7 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
               </Grid>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <TextInput
                     name='distance'
                     label='Distance'
@@ -798,7 +806,7 @@ const MissouriRiverDataEntryForm = connect(
                     isMuted={gearType === 'S' && gearReqFields.distance.includes(gearCode) ? false : true}
                   />
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <TextInput
                     name='depth1'
                     label='1-Depth'
@@ -809,7 +817,7 @@ const MissouriRiverDataEntryForm = connect(
                     warning={getDepthWarning(depth1)}
                   />
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <TextInput
                     name='depth2'
                     label='2-Depth'
@@ -820,7 +828,7 @@ const MissouriRiverDataEntryForm = connect(
                     warning={getDepthWarning(depth2)}
                   />
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <TextInput
                     name='depth3'
                     label='3-Depth'
@@ -833,7 +841,7 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
               </Grid>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='stopTime'
                     label='Stop Time'
@@ -846,7 +854,7 @@ const MissouriRiverDataEntryForm = connect(
                     required={deploymentType === 'p' && hasFishRecords}
                   />
                 </Grid>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='stopLatitude'
                     label='Stop Latitude'
@@ -854,7 +862,7 @@ const MissouriRiverDataEntryForm = connect(
                     required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
                   />
                 </Grid>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='stopLongitude'
                     label='Stop Longitude'
@@ -862,7 +870,7 @@ const MissouriRiverDataEntryForm = connect(
                     required={deploymentType === 'a' && !gearCode.startsWith('LDN')}
                   />
                 </Grid>
-                <Grid row gap='md' table={{ col: 3 }}>
+                <Grid row gap='md' tablet={{ col: 3 }}>
                   <Button
                     onClick={() => handleCapture('stop')}
                     type='button'
@@ -874,12 +882,12 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
               </Grid>
             </Grid>
-            <Grid tablet={{ col: 7 }}>
+            <Grid desktop={{ col: 7 }}>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 1 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput name='u1' label='U1' required={Number(projectId) === 3} onChange={handleChange} />
                 </Grid>
-                <Grid tablet={{ col: 1 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput
                     name='u2'
                     label='U2'
@@ -888,16 +896,16 @@ const MissouriRiverDataEntryForm = connect(
                     type={gearCode.startsWith('TL') ? 'number' : 'text'}
                   />
                 </Grid>
-                <Grid tablet={{ col: 1 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput name='u3' label='U3' onChange={handleChange} />
                 </Grid>
-                <Grid tablet={{ col: 1 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput name='u4' label='U4' onChange={handleChange} />
                 </Grid>
-                <Grid tablet={{ col: 2 }}>
+                <Grid desktop={{ col: 2 }} tablet={{ col: 2 }}>
                   <TextInput name='u5' label='U5' onChange={handleChange} />
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <SelectInput name='u6' label='U6' onChange={handleChange}>
                     {lookups?.u6Options?.map((item, index) => (
                       <option key={index + 1} value={item.code}>
@@ -906,7 +914,7 @@ const MissouriRiverDataEntryForm = connect(
                     ))}
                   </SelectInput>
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <SelectInput name='u7' label='U7' onChange={handleChange}>
                     {createDropdownOptions(lookups?.u7Options).map((item, index) => (
                       <option key={index + 1} value={item.value}>
@@ -917,7 +925,7 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
               </Grid>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <TextInput
                     name='structurenumber'
                     label='Structure Number'
@@ -925,28 +933,28 @@ const MissouriRiverDataEntryForm = connect(
                     required={Number(projectId) === 2 && season === 'HS'}
                   />
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <TextInput name='netrivermile' label='Net River Mile' onChange={handleChange} />
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <TextInput name='conductivity' label='Conductivity' onChange={handleChange} />
                 </Grid>
-                <Grid tablet={{ col: 3 }}>
+                <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                   <TextInput name='dissolvedOxygen' label='Dissolved Oxygen (D.O.)' onChange={handleChange} />
                 </Grid>
               </Grid>
               {isOnline && (
                 <Grid row gap='md'>
-                  <Grid tablet={{ col: 3 }}>
+                  <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                     <TextInput name='usgs' label='USGS' isMuted />
                   </Grid>
-                  <Grid tablet={{ col: 3 }}>
+                  <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                     <TextInput name='riverstage' label='River Stage' isMuted />
                   </Grid>
-                  <Grid tablet={{ col: 3 }}>
+                  <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                     <TextInput name='discharge' label='Discharge' isMuted />
                   </Grid>
-                  <Grid tablet={{ col: 3 }}>
+                  <Grid desktop={{ col: 3 }} tablet={{ col: 3 }}>
                     <TextInput name='habitatrn' label='Habitat R/N' isMuted />
                   </Grid>
                 </Grid>
@@ -955,9 +963,9 @@ const MissouriRiverDataEntryForm = connect(
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 4 }} className='border-right'>
+            <Grid desktop={{ col: 4 }} tablet={{ col: 12 }} className='border-right'>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='velocitybot1'
                     label='1-Velocity (bot)'
@@ -971,7 +979,7 @@ const MissouriRiverDataEntryForm = connect(
                     type='number'
                   />
                 </Grid>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='velocity081'
                     label='1-Velocity (0.8 or 0.5)'
@@ -995,7 +1003,7 @@ const MissouriRiverDataEntryForm = connect(
                     type='number'
                   />
                 </Grid>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='velocity02or061'
                     label='1-Velocity (0.2 or 0.6)'
@@ -1006,7 +1014,7 @@ const MissouriRiverDataEntryForm = connect(
                 </Grid>
               </Grid>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='velocitybot2'
                     label='2-Velocity (bot)'
@@ -1020,7 +1028,7 @@ const MissouriRiverDataEntryForm = connect(
                     type='number'
                   />
                 </Grid>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='velocity082'
                     label='2-Velocity (0.8 or 0.5)'
@@ -1044,7 +1052,7 @@ const MissouriRiverDataEntryForm = connect(
                     type='number'
                   />
                 </Grid>
-                <Grid tablet={{ col: 4 }}>
+                <Grid desktop={{ col: 4 }} tablet={{ col: 4 }}>
                   <TextInput
                     name='velocity02or062'
                     label='2-Velocity (0.2 or 0.6)'
@@ -1061,44 +1069,44 @@ const MissouriRiverDataEntryForm = connect(
               </Grid>
             </Grid>
             {isOnline && (
-              <Grid tablet={{ col: 4 }}>
+              <Grid desktop={{ col: 4 }} tablet={{ col: 6 }}>
                 <Grid row gap='md'>
-                  <Grid tablet={{ col: 5 }}>
+                  <Grid desktop={{ col: 5 }} tablet={{ col: 6 }}>
                     <TextInput name='cobble' label='Cobble' isMuted />
                   </Grid>
-                  <Grid tablet={{ col: 5 }}>
+                  <Grid desktop={{ col: 5 }} tablet={{ col: 6 }}>
                     <TextInput name='silt' label='Silt' isMuted />
                   </Grid>
                 </Grid>
                 <Grid row gap='md'>
-                  <Grid tablet={{ col: 5 }}>
+                  <Grid desktop={{ col: 5 }} tablet={{ col: 6 }}>
                     <TextInput name='organic' label='Organic' isMuted />
                   </Grid>
-                  <Grid tablet={{ col: 5 }}>
+                  <Grid desktop={{ col: 5 }} tablet={{ col: 6 }}>
                     <TextInput name='sand' label='Sand' isMuted />
                   </Grid>
                 </Grid>
                 <Grid row gap='md'>
-                  <Grid tablet={{ col: 5 }}>
+                  <Grid desktop={{ col: 5 }} tablet={{ col: 6 }}>
                     <TextInput name='gravel' label='Gravel' isMuted />
                   </Grid>
                 </Grid>
               </Grid>
             )}
-            <Grid tablet={{ col: 2 }}>
+            <Grid desktop={{ col: 2 }} tablet={{ col: 6 }}>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 6 }}>
+                <Grid desktop={{ col: 6 }} tablet={{ col: 6 }}>
                   <TextInput name='turbidity' label='Turbidity' type='number' onChange={handleChange} />
                 </Grid>
               </Grid>
               {/* @TODO: Hide No Turbidity and No Velocity fields in Offline Mode */}
               <Grid row gap='md' className='margin-top-2'>
-                <Grid tablet={{ col: 12 }}>
+                <Grid desktop={{ col: 12 }} tablet={{ col: 6 }}>
                   <Checkbox disabled id='no-turbidity' label='No Turbidity' name='noTurbidity' tile value='Y' />
                 </Grid>
               </Grid>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 12 }}>
+                <Grid desktop={{ col: 12 }} tablet={{ col: 6 }}>
                   <Checkbox disabled id='no-velocity' label='No Velocity' name='noVelocity' tile value='Y' />
                 </Grid>
               </Grid>
@@ -1106,16 +1114,16 @@ const MissouriRiverDataEntryForm = connect(
           </Grid>
 
           <Grid row gap='md' className='padding-bottom-3'>
-            <Grid tablet={{ col: 4 }} offset={6}>
+            <Grid desktop={{ col: 6 }} tablet={{ col: 12 }}>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 12 }}>
+                <Grid desktop={{ col: 12 }}>
                   <TextArea name='comments' label='Comments' onChange={handleChange} />
                 </Grid>
               </Grid>
             </Grid>
-            <Grid tablet={{ col: 1 }}>
+            <Grid desktop={{ col: 1 }} tablet={{ col: 2 }}>
               <Grid row gap='md'>
-                <Grid tablet={{ col: 12 }}>
+                <Grid desktop={{ col: 12 }}>
                   <TextInput name='editInitials' label='Edit Initials' maxLength={3} onChange={handleChange} />
                 </Grid>
               </Grid>

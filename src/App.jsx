@@ -32,15 +32,17 @@ export default connect(
   'selectLoadingMessage',
   ({ doGetAllLookupData, doModalOpen, route: Route, auth, loadingState, loadingMessage }) => {
     const isAuthenticated = !!auth?.token;
+    const offlineAuthenticated = !!auth?.offlineAuthenticated;
     const userHasRole = !!auth?.authData?.role;
     const pwaMode = usePwaMode();
+    const openApp = isAuthenticated || (pwaMode && !navigator.onLine && offlineAuthenticated);
 
     useEffect(() => {
       const cleanupOnlineListener = initOnlineListener();
 
       if (isAuthenticated && userHasRole && navigator.onLine) {
         doGetAllLookupData();
-      } else {
+      } else if (!openApp) {
         const landingModalSeen = sessionStorage.getItem('landingModalSeen');
         if (!landingModalSeen || landingModalSeen === 'false') {
           doModalOpen(LandingModal);
@@ -48,19 +50,19 @@ export default connect(
       }
 
       return cleanupOnlineListener;
-    }, [doGetAllLookupData, isAuthenticated, userHasRole, doModalOpen]);
+    }, [doGetAllLookupData, isAuthenticated, userHasRole, doModalOpen, openApp]);
 
     return (
-      <>
+      <div className='page'>
         {loadingState && <LoadingModal text={loadingMessage} />}
         <ToastContainer autoClose={3500} hideProgressBar={false} />
-        {(!pwaMode || !isAuthenticated) && <NavBar />}
-        {auth.token && <SyncBanner />}
-        <PageContent>{auth.token ? <Route /> : <Hero />}</PageContent>
+        {(!pwaMode || !openApp) && <NavBar />}
+        {openApp && <SyncBanner />}
+        <PageContent className='main'>{openApp ? <Route /> : <Hero />}</PageContent>
         <Modal closeWithEscape />
         <SecondaryModal closeWithEscape />
         <Footer />
-      </>
+      </div>
     );
   }
 );

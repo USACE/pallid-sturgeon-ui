@@ -5,25 +5,64 @@ import { Button } from '@trussworks/react-uswds';
 import Icon from '@components/icon/icon';
 import SupplementalProcedureModal from '@src/app-pages/data-entry/edit-data-sheet/forms/supplemental-procedure/SupplementalProcedureModal';
 import { OfflineStatuses } from '@src/utils/enums';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { siteDatasheetUpdated } from '@src/app-pages/data-entry/offline/datasheet-refresh';
+
+const noFishSpecies = ['NFSH', 'CNFH', 'CNA', 'NDNF'];
 
 const FishLinkTableCell = connect('doModalOpen', ({ doModalOpen, getValue, row }) => {
   const value = getValue();
   const isPlaceholderRow = row?.original?._isPlaceholderRow === true;
+  const isNoFishRow = noFishSpecies.includes(row?.original?.species);
+  const [refreshCounter, setRefreshCounter] = useState(0);
 
-  const rowFid = useMemo(() => row.getValue('fid') || row.getValue('fId') || row.getValue('f_id'), [row]);
-  const rowFfid = useMemo(() => row.getValue('fFid') || row.getValue('f_fid'), [row]);
+  useEffect(() => {
+    const handleDatasheetRefresh = () => {
+      setRefreshCounter((current) => current + 1);
+    };
+
+    window.addEventListener(siteDatasheetUpdated, handleDatasheetRefresh);
+    return () => {
+      window.removeEventListener(siteDatasheetUpdated, handleDatasheetRefresh);
+    };
+  }, []);
+
+  const rowFid = useMemo(() => row?.original?.fid ?? row?.original?.fId ?? row?.original?.f_id, [row]);
+  const rowFfid = useMemo(() => row?.original?.fFid ?? row?.original?.f_fid, [row]);
   const hasFishId =
     (rowFid !== null && rowFid !== undefined && String(rowFid) !== '') ||
     (rowFfid !== null && rowFfid !== undefined && String(rowFfid) !== '');
-  const isUnsavedNewFish = row?.original?._status === OfflineStatuses.New || !hasFishId;
+  const isLocallyPersisted = [OfflineStatuses.Queued, OfflineStatuses.Edited, OfflineStatuses.Conflict, 'synced'].includes(
+    row?.original?._status
+  );
+  const isUnsavedNewFish = row?.original?._status === OfflineStatuses.New || (!hasFishId && !isLocallyPersisted);
+  const hasOfflineSupplementalDraft = useMemo(() => {
+    if (!rowFfid) {
+      return false;
+    }
 
-  if (isPlaceholderRow) {
+    const draftKey = `currentSupplementalDraft:${rowFfid}`;
+    const draftJson = sessionStorage.getItem(draftKey);
+    if (!draftJson) {
+      return false;
+    }
+
+    try {
+      const draft = JSON.parse(draftJson);
+      const draftFfid = draft?.fFid ?? draft?.f_fid;
+
+      return draftFfid != null && String(draftFfid) === String(rowFfid);
+    } catch {
+      return false;
+    }
+  }, [rowFfid, refreshCounter]);
+
+  if (isPlaceholderRow || isNoFishRow) {
     return null;
   }
 
   // Check if supplemental data exists for Fish using current render value.
-  const hasSupplemental = Number(value ?? 0) > 0;
+  const hasSupplemental = Number(value ?? 0) > 0 || hasOfflineSupplementalDraft;
   const isEdit = !!hasSupplemental;
   const disabledMessage = 'Please submit Fish data first to add Supplemental & Procedure Data for this fish';
   const buttonTitle = isUnsavedNewFish ? disabledMessage : 'Add Supplemental & Procedure Data';
